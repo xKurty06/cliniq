@@ -1,0 +1,21 @@
+# Laravel (cliniq-backend)
+cliniq-backend/vendor/
+cliniq-backend/.env
+cliniq-backend/storage/*.key
+cliniq-backend/storage/logs/*
+cliniq-backend/storage/framework/cache/*
+cliniq-backend/storage/framework/sessions/*
+cliniq-backend/storage/framework/views/*
+cliniq-backend/bootstrap/cache/*
+!cliniq-backend/storage/logs/.gitkeep
+
+# Node / Vite (cliniq-frontend)
+cliniq-frontend/node_modules/
+cliniq-frontend/dist/
+cliniq-frontend/.env
+cliniq-frontend/*.local
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

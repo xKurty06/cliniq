@@ -1,0 +1,7 @@
+# Development Methodology
+
+**Base framework (Project Plan, Section 4.1):** iterative-incremental, Agile-inspired, with formal phase gates — Planning → Design → Iterative Development → Integration Testing → UAT → Deployment/Training → Maintenance Handoff. Chosen because a single, often-unavailable client contact and a three-person team make a heavyweight, all-up-front waterfall approach risky.
+
+**Refinement added this session — Interface Construction first.** Within each development iteration, the **frontend is built first** (against the planned API contract, with mock/stub data where the backend isn't ready yet) and shown to the client for feedback **before** full backend logic is finalized for that feature. This is a prototyping-style refinement of the existing iterative framework, not a different methodology — it front-loads the part the client can actually evaluate (what they see and interact with) so feedback arrives before backend work is sunk into a design the client might want changed. The Frontend Context Brief and Frontend Design Reference documents exist specifically to make this possible without the backend being built first.
+
+**Why this fits the existing risk-mitigation reasoning:** Section 4.2 of the Project Plan already argues for short, module-sized iterations specifically because client feedback is expensive to get and easy to act on late — interface-construction-first is a direct extension of that same logic, not a new risk being introduced.

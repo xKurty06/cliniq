@@ -1,0 +1,133 @@
+# Skills Setup — Local Agent Skills for CLINIQ
+
+Two kinds of skills for this project: **bespoke** (written specifically for CLINIQ, already in `.claude/skills/`, nothing to install) and **external** (general-purpose, researched across the whole project lifecycle — accessibility, frontend, backend, security, testing — installed via the `skills` CLI once the repo has real `package.json`/`composer.json` files to install into).
+
+This is a substantially expanded pass over the first one — that version only covered design/UI and basic Laravel patterns. This one covers everything found worth considering, organized by category, with reasoning for what's in and what's deliberately left out.
+
+## Bespoke skills (already in the repo, install nothing)
+
+| Skill | Location | Purpose |
+|---|---|---|
+| `cliniq-display-privacy` | `.claude/skills/cliniq-display-privacy/` | Enforces the Student Number vs full name rule on every new screen |
+| `cliniq-audit-trail` | `.claude/skills/cliniq-audit-trail/` | Ensures every mutating action gets logged per RA 10173 |
+
+Write more of these as new CLINIQ-specific rules get established — they encode decisions unique to this project that no public skill will ever have.
+
+---
+
+## Accessibility
+
+CLINIQ's own requirements already demand this (non-technical, possibly older users; the contrast work already done in ADR-007) — this category matters more than usual for this specific project.
+
+```
+npx skills add jakubkrehel/skills --skill better-accessibility
+npx skills add neha/check-fix-accessibility --skill review-fix-a11y
+npx skills add airowe/claude-a11y-skill
+```
+- `better-accessibility` — native-elements-first philosophy, focus ring recipes, ARIA discipline (from the original design/UI pack).
+- `review-fix-a11y` — broader WCAG 2.2 A/AA workflow with a full reference doc (ARIA patterns, screen-reader testing, native mobile pointers) — a genuine audit-and-fix skill, not just a style guide.
+- `claude-a11y-skill` — automated testing integration via **axe-core + jsx-a11y**, which pairs directly with the Vitest testing stack already confirmed (ADR-007). Worth combining with `vitest-axe` patterns (see Testing section) so accessibility checks run in CI, not just get remembered manually.
+
+**Why this matters more than a generic checklist here specifically:** the Student Profile, New Visit, and Incident Entry screens are used by one nurse, repeatedly, under time pressure — keyboard-only operability and correct focus management aren't nice-to-haves for this user.
+
+---
+
+## Frontend — React, TypeScript, Tailwind, Forms, State
+
+```
+npx skills add Pythoughts-labs/react-frontend-skills -s typescript,tailwind,ui-design,web-design-guidelines,react-hook-form,zod,vitest,msw,tdd
+```
+This one pack covers nearly everything needed for the actual React build: TypeScript compiler config and async patterns, Tailwind v4 utility/theming patterns, UI/UX and broader web-design-guideline rule sets (100+ rules), React Hook Form + Zod for CLINIQ's many forms (student intake, visit entry, incident entry), and Vitest/MSW/TDD for the testing side. Each listed skill has 40+ individual rules — genuinely substantial, not a thin wrapper.
+
+**Deliberately left out of that install command:**
+- `shadcn` / `nuqs` — shadcn/ui and nuqs are both real options but nothing in the Frontend Context Brief commits to either; installing them now would push a component-library and URL-state-management decision that hasn't actually been made. Add later if/when chosen.
+- `tanstack-query` — same reasoning: the Frontend Context Brief explicitly leaves the data-fetching library open ("React Query/TanStack Query, SWR, or plain fetch+context"). Install this specific skill only once that decision is made, not before — otherwise it's optimizing for an assumption.
+
+```
+npx skills add questfortech-investments/claude-code-skills --skill react-vite-expert
+```
+Complements the above with Vite-specific config, bundle analysis, and component-scaffolding scripts the Pythoughts pack doesn't cover.
+
+---
+
+## Design & UI Quality
+
+Carried over from the first pass — still the right fit:
+```
+npx skills add jakubkrehel/skills --skill better-colors
+npx skills add jakubkrehel/skills --skill better-typography
+npx skills add jakubkrehel/skills --skill better-layout
+npx skills add jakubkrehel/skills --skill better-ui
+npx skills add jakubkrehel/skills --skill interface-review
+```
+`interface-review` is worth running against every new screen before calling it done — the same instinct behind `03-Design/Design-Audit-Reference-Mockup.md`, automated per-screen instead of a one-time pass.
+
+---
+
+## Backend — Laravel, PHP, Database
+
+This category grew the most on the second pass. Three real options, not fully overlapping:
+
+### Option A — `edulazaro/laraclaude` (recommended as the primary pick)
+```
+/plugin marketplace add edulazaro/laraclaude
+/plugin install laraclaude@laraclaude-marketplace
+```
+30+ Laravel-specific slash commands, actively maintained. The two most relevant to CLINIQ specifically:
+- **`/lc:security-audit`** — scans for SQL injection, XSS, mass-assignment, and exposed secrets, with a `--dry-run` fix preview. Given CLINIQ handles minors' health records under RA 10173, running this before every deploy is cheap insurance, not overkill.
+- **`/lc:consolidate-migrations`** and **`/lc:unused-columns`** — useful once the ERD/migrations exist (currently blocked on the SRS upload — see `02-Architecture/Database/`), for keeping schema history clean rather than accumulating cruft.
+
+### Option B — `Foysal50x/skills` (from the first pass, still solid)
+```
+npx skills add Foysal50x/skills --skill laravel-patterns
+npx skills add Foysal50x/skills --skill laravel-eloquent
+npx skills add Foysal50x/skills --skill laravel-rest-api
+npx skills add Foysal50x/skills --skill laravel-async
+npx skills add Foysal50x/skills --skill laravel-testing
+```
+More traditional "reference rules" format (60+45+35+33+20 rules) versus laraclaude's command-based workflow. Not mutually exclusive with Option A — laraclaude's commands are things you *run*, Foysal50x's skills are things Claude *reads* before writing code. Reasonable to install both.
+
+### Role-based access control — worth flagging specifically
+A Laravel skill built around **Spatie's `laravel-permission` package** (RBAC: roles, permissions, scoped route model binding) showed up in research and is worth calling out on its own — CLINIQ's whole access model (Staff full / Admin read-only / PE Instructor scoped read-only) is exactly this kind of role-based permission structure. Search `npx skills find laravel rbac` once the backend scaffold exists to find the current best-maintained version, since this is a strong structural fit worth getting right rather than improvising CLINIQ's RBAC from scratch.
+
+---
+
+## Security & Privacy — new category this pass
+
+Not in the first pass at all, and it should have been, given what CLINIQ actually stores.
+
+```
+npx skills add gosprinto/compliance-skills/pii-detector
+```
+This one's GDPR-branded (`gdpr-compliance-checker` is the sibling skill), and CLINIQ answers to RA 10173, not GDPR — **don't install the GDPR-checker itself**, its rule set is the wrong jurisdiction. But `pii-detector` is more general-purpose: scanning code, logs, and error messages for personal-data leakage is a useful check regardless of which specific law applies, and directly supports the audit-trail/data-retention work already built into the project (Project Plan Section 5.3, ADR references in the vault).
+
+Laravel's own **Security Auditor** pattern (OWASP Top 10, auth/authz review, CSRF/XSS, secure file uploads — found bundled in a couple of the Laravel agent packs above) covers the backend half of the same concern. Between `/lc:security-audit` (Option A above) and a PII scanner, CLINIQ gets reasonable coverage on both "is the code secure" and "is student data leaking somewhere it shouldn't."
+
+---
+
+## Testing — consolidated view
+
+Testing skills are scattered across several packs above rather than one dedicated source — consolidating what's already included:
+
+| Layer | Already covered by |
+|---|---|
+| Backend (Pest) | `Foysal50x/skills --skill laravel-testing`, or laraclaude's Pest-related commands |
+| Frontend unit/component (Vitest) | `Pythoughts-labs/react-frontend-skills -s vitest` |
+| API mocking (MSW) | `Pythoughts-labs/react-frontend-skills -s msw` |
+| TDD workflow | `Pythoughts-labs/react-frontend-skills -s tdd` |
+| Accessibility testing | `airowe/claude-a11y-skill` (axe-core + jsx-a11y, pairs with Vitest) |
+
+No separate install needed here — this table exists so it's clear the testing side isn't a gap, just spread across the categories above rather than its own line item.
+
+---
+
+## Deliberately not recommended
+
+- **Anything Vue/Nuxt/Inertia-based** — several bundled Laravel packs default to this frontend pairing. CLINIQ is React, not Vue; skip those specific skills even when installing the rest of a bundled pack.
+- **A third-party git/commit-convention skill** — CLINIQ already has its own Conventional Commits + trunk-based branching rules in `AGENTS.md`/`CLAUDE.md`. A generic one risks conflicting instructions rather than adding value.
+- **`tanstack-query`, `shadcn`, `nuqs`** — see the Frontend section above; each corresponds to a library decision that hasn't actually been made yet. Installing the skill before the decision is backwards.
+- **Dedicated print/PDF-report skills** — the ones found (funding-proposal generators, newsletter/report designers via headless Chromium) are built for a different use case than CLINIQ's actual need (in-browser `@page` print CSS for excuse letters, reports, and QR stickers rendered directly from the React app). No strong fit found — follow the print-layout guidance already in the Frontend Context Brief instead of forcing in a skill that doesn't quite match.
+- **GDPR-specific compliance checkers** — wrong jurisdiction (CLINIQ answers to RA 10173, a different legal framework); the general-purpose `pii-detector` is the useful half of that pack, not the GDPR-rule-specific half.
+
+## When to revisit this list
+Skill ecosystems move fast — re-check maintenance status the same way ADR-007 did for the tech stack (last real release, current adoption) before installing, rather than assuming this list stays accurate indefinitely. Revisit specifically once: the data-fetching library gets chosen (add the matching skill), the SRS/ERD arrives (unblocks the migration-focused Laravel skills), and the backend scaffold exists (unblocks actually running any of this).

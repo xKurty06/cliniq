@@ -1,0 +1,122 @@
+/*
+ * Shades of Purple for Obsidian
+ *
+ * A dark-only adaptation of Obsidian's default theme using Ahmad Awais's
+ * official Shades of Purple palette. Layout, typography, and component
+ * styling intentionally remain inherited from Obsidian.
+ */
+
+.theme-dark {
+	color-scheme: dark;
+
+	/* Obsidian's neutral ramp, tinted with Shades of Purple. */
+	--color-base-00: #1e1e3f;
+	--color-base-05: #222145;
+	--color-base-10: #262650;
+	--color-base-20: #302f60;
+	--color-base-25: #3b3971;
+	--color-base-30: #464482;
+	--color-base-35: #514f93;
+	--color-base-40: #5d5aa4;
+	--color-base-50: #6e69b5;
+	--color-base-60: #8179c7;
+	--color-base-70: #9389d8;
+	--color-base-100: #a599e9;
+
+	/* Official palette mapped to Obsidian's extended colors. */
+	--color-red: #ff628c;
+	--color-orange: #ff9d00;
+	--color-yellow: #fad000;
+	--color-green: #3ad900;
+	--color-cyan: #9effff;
+	--color-blue: #9effff;
+	--color-purple: #b362ff;
+	--color-pink: #fb94ff;
+
+	/* Yellow is the palette's contrast and interaction color. */
+	--accent-h: 50;
+	--accent-s: 100%;
+	--accent-l: 49%;
+
+	/* Surfaces retain the hierarchy of Obsidian's default dark theme. */
+	--background-primary: #1e1e3f;
+	--background-primary-alt: #222145;
+	--background-secondary: #191830;
+	--background-secondary-alt: #15152b;
+	--background-modifier-hover: color-mix(in oklch, #a599e9 12%, transparent);
+	--background-modifier-active-hover: color-mix(in oklch, #a599e9 18%, transparent);
+	--background-modifier-border: color-mix(in oklch, #a599e9 22%, transparent);
+	--background-modifier-border-hover: color-mix(in oklch, #a599e9 35%, transparent);
+	--background-modifier-border-focus: #fad000;
+	--background-modifier-error: color-mix(in oklch, #ff628c 22%, #1e1e3f);
+	--background-modifier-error-hover: color-mix(in oklch, #ff628c 30%, #1e1e3f);
+	--background-modifier-success: color-mix(in oklch, #3ad900 22%, #1e1e3f);
+	--background-modifier-message: #222145;
+	--background-modifier-form-field: #191830;
+
+	/* Text and selection. */
+	--text-normal: #a599e9;
+	--text-muted: color-mix(in oklch, #a599e9 78%, #1e1e3f);
+	--text-faint: color-mix(in oklch, #a599e9 58%, #1e1e3f);
+	--text-on-accent: #1e1e3f;
+	--text-on-accent-inverted: #1e1e3f;
+	--text-success: #3ad900;
+	--text-warning: #ff9d00;
+	--text-error: #ff628c;
+	--text-accent: #fad000;
+	--text-accent-hover: #ffee80;
+	--text-selection: color-mix(in oklch, #b362ff 38%, transparent);
+	--text-highlight-bg: #fad000;
+	--caret-color: #fad000;
+	--bold-color: #a599e9;
+	--italic-color: #a599e9;
+
+	/* Controls continue to use Obsidian's standard shapes and spacing. */
+	--interactive-normal: #222145;
+	--interactive-hover: #302f60;
+	--interactive-accent: #fad000;
+	--interactive-accent-hover: #ffee80;
+
+	/* Match the palette's original syntax roles in fenced code blocks. */
+	--code-background: #191830;
+	--code-normal: #a599e9;
+	--code-comment: #b362ff;
+	--code-function: #fb94ff;
+	--code-important: #ff628c;
+	--code-keyword: #ff9d00;
+	--code-operator: #ffee80;
+	--code-property: #9effff;
+	--code-punctuation: #ffee80;
+	--code-string: #a5ff90;
+	--code-tag: #9effff;
+	--code-value: #ff628c;
+
+	/* Native Obsidian graph and Canvas elements use these extended colors. */
+	--graph-line: color-mix(in oklch, #a599e9 28%, transparent);
+	--graph-node: #a599e9;
+	--graph-node-focused: #fad000;
+	--graph-node-tag: #b362ff;
+	--graph-node-attachment: #9effff;
+	--graph-node-unresolved: #ff7200;
+
+	/* Scrollbars stay quiet until interaction. */
+	--scrollbar-bg: transparent;
+	--scrollbar-thumb-bg: color-mix(in oklch, #a599e9 28%, transparent);
+	--scrollbar-active-thumb-bg: #fad000;
+}
+
+/* White paragraph copy; headings and other title elements keep their defaults. */
+.theme-dark .markdown-rendered p,
+.theme-dark .markdown-rendered li,
+.theme-dark .markdown-source-view.mod-cm6 .cm-line:not([class*="HyperMD-"]),
+.theme-dark .markdown-source-view.mod-cm6 .cm-line[class~="HyperMD-list-line"] {
+	color: #fff;
+}
+
+/* Override Obsidian's token colors inside the solid contrast highlight. */
+.theme-dark .markdown-rendered mark,
+.theme-dark .markdown-rendered mark *,
+.theme-dark .markdown-source-view.mod-cm6 .cm-line span.cm-highlight,
+.theme-dark .markdown-source-view.mod-cm6 .cm-line span.cm-highlight * {
+	color: #1e1e3f;
+}

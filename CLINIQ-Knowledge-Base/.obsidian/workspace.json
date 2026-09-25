@@ -1,0 +1,230 @@
+{
+  "main": {
+    "id": "5828b9ab1ba573a6",
+    "type": "split",
+    "children": [
+      {
+        "id": "740f4729d19dc9a2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "86556129b006cf79",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "08-Logs/Changelog.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Changelog"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "87ebef6a1ae09734",
+    "type": "split",
+    "children": [
+      {
+        "id": "d166d749a1b4c276",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a83dbf2f7b145dd2",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "12b7f71eea5c3645",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "b0bd1aca4c6eedaa",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 236.5
+  },
+  "right": {
+    "id": "cfd9de5260c239ef",
+    "type": "split",
+    "children": [
+      {
+        "id": "f9e54a86df97dfe4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4776b60599531c03",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "baea1ff46801aba9",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "c16df1a0a4da684e",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "ee6428ced787e9c6",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "ca86582b682d3871",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Untitled.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "audio-recorder:Start/stop recording": false,
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "a83dbf2f7b145dd2",
+  "lastOpenFiles": [
+    "README.md",
+    "09-References/External-References.md",
+    "09-References/Canonical-Documents.md",
+    "09-References/Canonical-Documents/CLINIQ_Review_of_Related_Systems.md",
+    "09-References/Canonical-Documents/CLINIQ_Project_Plan.md",
+    "09-References/Canonical-Documents/CLINIQ_Modules_and_Features.md",
+    "09-References/Canonical-Documents/CLINIQ_Frontend_Design_Reference.md",
+    "09-References/Canonical-Documents/CLINIQ_Frontend_Context_Brief.md",
+    "09-References/Canonical-Documents",
+    "09-References",
+    "08-Logs/Issues-and-TODOs.md",
+    "08-Logs/Changelog.md",
+    "08-Logs/Agent-Sessions/2026-09-25-vault-full-detail-expansion.md",
+    "08-Logs/Agent-Sessions/2026-09-25-stack-finalization.md",
+    "08-Logs/Agent-Sessions/2026-09-25-skills-expansion.md",
+    "08-Logs/Agent-Sessions/2026-09-25-monorepo-structure.md",
+    "08-Logs/Agent-Sessions/2026-09-25-claude-md-skills-design-audit.md",
+    "08-Logs/Agent-Sessions/2026-09-24-vault-setup.md",
+    "08-Logs/Agent-Sessions",
+    "08-Logs",
+    "07-AI-Agents/Source-of-Truth-Hierarchy.md",
+    "07-AI-Agents/Agent-Workflow.md",
+    "07-AI-Agents",
+    "06-Decisions/ADR-Template.md",
+    "06-Decisions/ADR-008-Frontend-Folder-Structure.md",
+    "06-Decisions/ADR-007-Stack-Finalization.md",
+    "06-Decisions/ADR-006-Interface-Construction-Approach.md",
+    "06-Decisions/ADR-005-Student-Number-Scheme.md",
+    "06-Decisions/ADR-004-Display-Privacy-Rule.md",
+    "06-Decisions/ADR-003-PE-Instructor-Access-Undeferred.md",
+    "06-Decisions/ADR-002-QR-Staff-Only-Redesign.md",
+    "06-Decisions",
+    "05-Testing",
+    "04-Development",
+    "03-Design",
+    "02-Architecture/Database",
+    "Untitled.canvas"
+  ]
+}
