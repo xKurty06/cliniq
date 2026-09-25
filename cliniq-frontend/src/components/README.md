@@ -1,0 +1,1 @@
+Shared, generic UI components only — Button, Card, Badge, etc. at the design-system level (CLINIQ-Knowledge-Base/03-Design/Design-System.md). If it's specific to one feature, it belongs in that feature's folder instead, not here.

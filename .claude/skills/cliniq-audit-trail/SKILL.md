@@ -1,0 +1,30 @@
+---
+name: cliniq-audit-trail
+description: Apply whenever implementing any action that creates, modifies, deletes, or views sensitive data — logins, QR scans, form submissions, approvals, or any create/update/delete/archive operation. Ensures the action gets logged for RA 10173 accountability.
+---
+
+# CLINIQ Audit Trail Requirement
+
+Every one of the following action types must write an audit log entry, across every module, not just the ones where it feels obviously sensitive (Modules & Features, "Audit Trail" cross-cutting section):
+
+- **Login and logout** (Module 1)
+- **Every QR scan** — Staff or PE/Sports Instructor, and which student was viewed
+- **Every form submission** — new visit, new incident, inventory dispense/restock, follow-up creation, etc.
+- **Every approval** — excuse letter sign-off, incident report sign-off
+- **Every create/update/delete/archive** action on any record
+
+## What a log entry needs
+
+Per the `AuditLogEntry` shape already defined (Frontend Context Brief, Section 5): **who** (the authenticated user), **what action type**, **what target record**, **when** (timestamp). This is what makes PE/Sports Instructor's read-only access accountable under RA 10173 — every profile they open is attributable and timestamped, which is the actual justification for giving that role access at all.
+
+## When you're implementing a new endpoint or mutation
+
+If it touches student data, visit/incident records, inventory, or any account — write the audit log entry in the same change, not as a follow-up task. This isn't a "nice to have" logging layer; it's a named functional requirement (Project Plan, Section 5.1: "Audit logging of every login, scan, submission, and approval across all modules, not just QR").
+
+## Don't confuse this with the two-stage incident flow
+
+Emergency Response's Stage 1 → Stage 2 incident lifecycle uses the word "complete/incomplete" for a *different* concept (whether the record itself has all its fields filled in). Audit logging still applies at both stages — log the Stage 1 save and the Stage 2 completion as separate events, don't skip logging Stage 1 just because the record isn't "done" yet.
+
+## Timestamps
+
+Every audit log entry's timestamp must be a real one, captured at write time — this is the same standing rule as `AGENTS.md`'s general "Timestamps" section, just applied to data the system itself is producing rather than to documentation.

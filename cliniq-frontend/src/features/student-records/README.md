@@ -1,0 +1,1 @@
+Student Records — encoding, medical history, allergies, contact info, Student Number generation, duplicate detection, archive/deactivate. See CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md.
