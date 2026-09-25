@@ -189,6 +189,8 @@
   },
   "active": "a83dbf2f7b145dd2",
   "lastOpenFiles": [
+    "08-Logs/Agent-Sessions/2026-09-25-development-phases.md",
+    "04-Development/Development-Phases.md",
     "README.md",
     "09-References/External-References.md",
     "09-References/Canonical-Documents.md",
@@ -218,8 +220,6 @@
     "06-Decisions/ADR-006-Interface-Construction-Approach.md",
     "06-Decisions/ADR-005-Student-Number-Scheme.md",
     "06-Decisions/ADR-004-Display-Privacy-Rule.md",
-    "06-Decisions/ADR-003-PE-Instructor-Access-Undeferred.md",
-    "06-Decisions/ADR-002-QR-Staff-Only-Redesign.md",
     "06-Decisions",
     "05-Testing",
     "04-Development",
