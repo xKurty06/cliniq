@@ -41,8 +41,8 @@ export function DashboardHeader({
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
           {isStaff
-            ? 'Clinic Overview: here’s what’s happening at the clinic.'
-            : 'Summary of clinic activity and student health records.'}
+            ? "Today's clinic activity and student health updates."
+            : 'Today’s clinic activity and student health updates.'}
         </p>
         <p className="mt-0.5 text-xs text-text-secondary" aria-live="polite">
           <time dateTime={today}>{formatLongDate(today)}</time>

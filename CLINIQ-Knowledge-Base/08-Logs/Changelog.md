@@ -6,6 +6,7 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Sunday, September 27, 2026 — 06:13 | Simplified the dashboard subtitle copy to a direct, easy-to-understand description without page-name wording | `cliniq-frontend/src/features/dashboard/components/DashboardHeader.tsx`, `cliniq-frontend/src/features/dashboard/DashboardPage.test.tsx`; see `08-Logs/Agent-Sessions/2026-09-27-dashboard-subtitle-copy-refactor.md` |
 | Sunday, September 27, 2026 — 05:43 | Collapsed-sidebar logo → hamburger hover swap is now a smooth crossfade (opacity + scale) instead of an instant show/hide | `cliniq-frontend/src/layouts/Sidebar.tsx`; see `08-Logs/Agent-Sessions/2026-09-27-hamburger-crossfade.md` |
 | Sunday, September 27, 2026 — 05:39 | Custom date range now uses an explicit Apply (and Cancel in the header popover); editing the dates only changes a draft until Apply/Enter | `cliniq-frontend/src/components/ui/DateRangePicker.tsx`, `DashboardPage.test.tsx`; see `08-Logs/Agent-Sessions/2026-09-27-custom-range-panel-sizing.md` |
 | Sunday, September 27, 2026 — 05:22 | Dashboard "Custom range" From/To panel now floats as a dropdown-style popover under the trigger instead of sitting in the header flow, so choosing it no longer shifts the header or cards | `cliniq-frontend/src/components/ui/DateRangePicker.tsx`; see `08-Logs/Agent-Sessions/2026-09-27-custom-range-panel-sizing.md` |

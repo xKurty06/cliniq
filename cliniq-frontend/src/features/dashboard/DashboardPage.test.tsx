@@ -30,7 +30,9 @@ describe('Clinic Overview Dashboard', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: /, Ms\. Jenne Baas!$/ }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/^Clinic Overview:/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/today's clinic activity and student health updates\.?/i),
+    ).toBeInTheDocument()
     expect(screen.getByLabelText('Date range')).toBeInTheDocument()
     for (const label of [
       'Clinic visits',
