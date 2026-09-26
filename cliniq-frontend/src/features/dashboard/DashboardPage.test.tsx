@@ -27,7 +27,9 @@ describe('Clinic Overview Dashboard', () => {
   it('renders every section Reference 1 requires', async () => {
     await renderLoaded()
     // Staff (default mock session) get the reference's greeting; "Clinic Overview" still names the page.
-    expect(screen.getByRole('heading', { level: 1, name: /, Nurse Jane!$/ })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 1, name: /, Ms\. Jenne Baas!$/ }),
+    ).toBeInTheDocument()
     expect(screen.getByText(/^Clinic Overview:/)).toBeInTheDocument()
     expect(screen.getByLabelText('Date range')).toBeInTheDocument()
     for (const label of [
@@ -73,7 +75,9 @@ describe('Clinic Overview Dashboard', () => {
     await renderLoaded()
     const labels = screen.getAllByRole('button').map((b) => b.textContent?.trim())
     for (const label of labels) {
-      expect(label).toMatch(/^(Print \/ Save as PDF|Previous.*|Today|Next.*)$/)
+      expect(label).toMatch(
+        /^(Today|Last 7 days|Last 30 days|This month|Custom range|Print \/ Save as PDF|Previous.*|Next.*)$/,
+      )
     }
   })
 
@@ -86,10 +90,13 @@ describe('Clinic Overview Dashboard', () => {
 
   it('applies the design-system interactive and accent treatments', async () => {
     await renderLoaded()
-    const dateRange = screen.getByLabelText('Date range')
-    expect(dateRange).toHaveClass('appearance-none')
+    const dateRange = screen.getByRole('button', { name: 'Date range' })
     expect(dateRange).toHaveClass('cursor-pointer')
+    expect(dateRange).toHaveClass('border-border')
     expect(dateRange).toHaveClass('hover:bg-surface')
+    await userEvent.click(dateRange)
+    expect(screen.getByRole('listbox', { name: 'Date range presets' })).toHaveClass('border-border')
+    expect(screen.getByRole('option', { name: 'Last 30 days' })).toHaveClass('bg-surface')
 
     expect(screen.getByRole('button', { name: /print \/ save as pdf/i })).toHaveClass(
       'cursor-pointer',
@@ -134,13 +141,30 @@ describe('Clinic Overview Dashboard', () => {
 
   it('explains an invalid custom date range instead of applying it', async () => {
     const user = await renderLoaded()
-    await user.selectOptions(screen.getByLabelText('Date range'), 'custom')
+    await user.click(screen.getByRole('button', { name: 'Date range' }))
+    await user.click(screen.getByRole('option', { name: 'Custom range' }))
     const from = screen.getByLabelText('From')
     await user.clear(from)
     await user.type(from, '2099-01-01')
+    await user.click(screen.getByRole('button', { name: 'Apply' }))
     expect(
       await screen.findByText(/start date must be on or before the end date/i),
     ).toBeInTheDocument()
+  })
+
+  it('applies a custom date range only after Apply is pressed', async () => {
+    const user = await renderLoaded()
+    const trigger = screen.getByRole('button', { name: 'Date range' })
+    const before = trigger.textContent
+    await user.click(trigger)
+    await user.click(screen.getByRole('option', { name: 'Custom range' }))
+    const from = screen.getByLabelText('From')
+    await user.clear(from)
+    await user.type(from, '2020-01-01')
+    expect(trigger).toHaveTextContent(before ?? '')
+    await user.click(screen.getByRole('button', { name: 'Apply' }))
+    expect(trigger).toHaveTextContent('Custom range')
+    expect(screen.queryByRole('form', { name: 'Custom date range' })).not.toBeInTheDocument()
   })
 
   it('shows the plain "Clinic Overview" title for Admin/Principal, with the same sections', async () => {

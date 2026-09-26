@@ -43,12 +43,19 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
             aria-label="Expand sidebar"
             aria-expanded="false"
             onClick={() => onCollapsedChange(false)}
-            className="group flex size-10 cursor-pointer items-center justify-center rounded-md bg-brand-green-dark text-white shadow-raised transition-colors duration-150 hover:bg-brand-green focus-visible:outline-brand-green-dark motion-reduce:transition-none"
+            className="group relative flex size-10 cursor-pointer items-center justify-center rounded-md text-brand-green-dark transition-colors duration-150 hover:text-text-primary focus-visible:outline-brand-green-dark motion-reduce:transition-none"
           >
-            <span className="flex group-hover:hidden group-focus-visible:hidden">
+            {/* Logo and hamburger are stacked and crossfaded, so hover never snaps between them. */}
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 flex items-center justify-center rounded-md bg-brand-green-dark text-white shadow-raised transition-[opacity,transform] duration-200 ease-out group-hover:scale-75 group-hover:opacity-0 group-focus-visible:scale-75 group-focus-visible:opacity-0 motion-reduce:transition-none"
+            >
               <Icon name="shieldPlus" size={20} />
             </span>
-            <span className="hidden group-hover:flex group-focus-visible:flex">
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 flex scale-75 items-center justify-center opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+            >
               <Icon name="menu" size={20} />
             </span>
           </button>
