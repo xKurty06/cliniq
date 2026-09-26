@@ -64,8 +64,8 @@ Some backend work can't wait for frontend to finish (auth, schema, audit trail) 
 ### Phase B0 — Environment & Scaffold
 Run the actual Laravel scaffold into `cliniq-backend/` (commands in `Environment-Setup.md`). Install Sanctum. Confirm the target XAMPP install's PHP version before picking a Laravel version (Laravel 11+ needs PHP 8.2+ — a check, not an assumption).
 
-### Phase B1 — Database Schema — BLOCKED
-**Do not guess a schema.** The ERD/DFD/Use-Case/Activity Diagram placeholders in `02-Architecture/Database/` are empty because the SRS hasn't been uploaded yet. Once it arrives, build migrations consistent with the frontend-facing entity shapes already fixed in `CLINIQ_Frontend_Context_Brief.md` §5 (Student, User, Visit, Incident, FollowUp, InventoryItem, Report, BackupLog, AuditLogEntry) — those shapes are real commitments already made; the schema should match them, not reinvent them.
+### Phase B1 — Database Schema — No Longer Blocked
+The ERD/DFD/Use-Case/Activity Diagram in `02-Architecture/Database/` are now built (first draft, derived directly from already-documented requirements — not an external SRS upload). Build migrations directly from `02-Architecture/Database/ERD.md`, which already translates the frontend-facing entity shapes (`CLINIQ_Frontend_Context_Brief.md` §5) into a normalized schema. Two things in that ERD are flagged as first-draft design decisions rather than settled fact — the table-splitting for `ParentNotification`/`InventoryTransaction`, and the column-type defaults — worth a quick review before treating the migrations as final, but not a reason to redo the ERD from scratch.
 
 ### Phase B2 — Auth & RBAC
 Sanctum SPA authentication. Three roles (Staff, Admin/Principal, PE/Sports Instructor) with the specific per-module permission matrix already fully documented in `01-Requirements/Features/Module-Overview.md`'s Access Summary table — this is a direct implementation target, not a design task. Consider a Spatie `laravel-permission`-based approach (flagged in `Skills-Setup.md`) given how closely CLINIQ's access model matches that package's shape.

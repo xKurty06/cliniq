@@ -1,3 +1,105 @@
-# Activity Diagram(s)
+# Activity Diagrams
 
-**Status: not yet created.** Waiting on the SRS upload. Priority candidates once started: the QR scan → quick-action flow, the two-stage emergency incident flow (fast-capture → complete-later), and the Follow-Up Handling flow (inline prompt → due/upcoming surfacing → status resolution) — these three have the most non-obvious branching logic already documented in prose and are the ones most worth diagramming first.
+**Status: first draft, built from already-documented requirements.** These three flows were identified (in this same file, before this draft existed) as the highest-priority candidates — the ones with the most non-obvious branching logic already written out in prose across the Frontend Context Brief, Frontend Design Reference, and Modules & Features. Built directly from that prose, not invented.
+
+## 1. QR Scan → Action Flow
+
+Covers both Staff (full access, computer or mobile) and PE/Sports Instructor (mobile, read-only) — the branch point is the role, checked immediately after identification.
+
+```mermaid
+flowchart TD
+    START([Start]) --> IDENTIFY{Identify student}
+    IDENTIFY -->|Scan QR code| SCAN[Camera scans code]
+    IDENTIFY -->|Manual entry| MANUAL[Type Student Number]
+    SCAN --> FOUND{Student found?}
+    MANUAL --> FOUND
+    FOUND -->|No| NOTFOUND[Show not-found,<br/>offer manual entry] --> IDENTIFY
+    FOUND -->|Yes| LOGSCAN[/Log scan to Audit Trail/]
+    LOGSCAN --> ROLECHECK{Who is scanning?}
+
+    ROLECHECK -->|PE/Sports Instructor| READONLY[Show full profile +<br/>injury/visit history,<br/>READ-ONLY, full name shown]
+    READONLY --> LOGVIEW[/Log profile view to Audit Trail/]
+    LOGVIEW --> END1([End])
+
+    ROLECHECK -->|Staff| QUICKACTIONS[Show Quick-Actions:<br/>full name shown]
+    QUICKACTIONS --> ACTIONCHOICE{Staff picks an action}
+    ACTIONCHOICE -->|Record Visit| VISITFLOW[Open New Visit Entry,<br/>pre-filled]
+    ACTIONCHOICE -->|Log Emergency| EMERGENCYFLOW[Open Incident Entry<br/>Stage 1, pre-filled]
+    ACTIONCHOICE -->|View Full Profile| PROFILEFLOW[Open Student Profile]
+    ACTIONCHOICE -->|Dispense Medicine| DISPENSEFLOW[Open Dispense/Log Usage,<br/>pre-linkable to visit]
+
+    VISITFLOW --> END2([End])
+    EMERGENCYFLOW --> END2
+    PROFILEFLOW --> END2
+    DISPENSEFLOW --> END2
+```
+
+**Separately, the mobile Emergency button** (Staff only) bypasses this whole flow when speed matters most — it jumps directly to Incident Entry Stage 1 if a scan already happened, rather than routing through the Quick-Actions menu.
+
+## 2. Two-Stage Emergency Response Flow
+
+The clearest case of a genuine state machine in the whole system — modeled as one, not a linear flowchart.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Stage1_InProgress: Staff opens Incident Entry
+
+    Stage1_InProgress --> Stage1_Saved: Save (complaint +<br/>immediate vitals only —<br/>nothing else required)
+
+    Stage1_Saved --> NeedsCompletion: Status badge shows<br/>"Needs Completion"
+
+    NeedsCompletion --> Stage2_InProgress: Staff reopens the record<br/>once the immediate<br/>situation is handled
+
+    Stage2_InProgress --> Stage2_InProgress: Add full vitals,<br/>treatment notes,<br/>hospital referral,<br/>parent notification attempts
+
+    Stage2_InProgress --> Complete: All required fields<br/>present, save
+
+    NeedsCompletion --> [*]: (record remains open<br/>indefinitely until completed —<br/>no forced deadline)
+    Complete --> [*]
+
+    note right of Stage1_Saved
+        Every save at every stage
+        writes to the Audit Trail
+        (login/scan/submit/approve —
+        Stage 1 save counts as a
+        submit event, logged
+        independently of Stage 2)
+    end note
+```
+
+**Why this matters as its own diagram:** the entire design rationale for the two-stage flow is "speed over completeness in the first moment" — a flowchart that treated this as one linear "fill out the incident form" process would misrepresent the actual requirement. The state diagram makes explicit that `NeedsCompletion` is a real, potentially long-lived state, not a transient step.
+
+## 3. Follow-Up Handling Flow
+
+Shared between Clinic Visit Monitoring and Emergency Response — same feature, two entry points, converging on one flow.
+
+```mermaid
+flowchart TD
+    VISITEND([Staff finishes<br/>Record Visit]) --> PROMPT
+    INCIDENTEND([Staff finishes<br/>Log Emergency]) --> PROMPT
+
+    PROMPT{"Does this student<br/>need a follow-up?"}
+    PROMPT -->|No| SAVENORMAL[Save visit/incident<br/>as normal] --> DONE1([End])
+
+    PROMPT -->|Yes| CAPTURE[Capture inline:<br/>follow-up date,<br/>reason/instruction,<br/>optional notes]
+    CAPTURE --> SAVEBOTH[Save visit/incident<br/>AND Follow-Up together —<br/>one flow, not two separate steps]
+    SAVEBOTH --> PENDING[Follow-Up status: Pending]
+
+    PENDING --> DASHBOARD[/Surfaces on Clinic Overview<br/>Dashboard's due/upcoming list —<br/>computed fresh on page load,<br/>NOT a push notification/]
+
+    DASHBOARD --> STAFFCHECK{Staff reviews<br/>due follow-ups}
+    STAFFCHECK -->|Student returned,<br/>monitored| COMPLETED[Mark: Completed]
+    STAFFCHECK -->|Student never<br/>returned| MISSED[Mark: Missed]
+    STAFFCHECK -->|No longer<br/>needed| CANCELLED[Mark: Cancelled]
+
+    COMPLETED --> DONE2([End])
+    MISSED --> DONE2
+    CANCELLED --> DONE2
+```
+
+**The one design constraint this diagram exists to make visible:** the "surfaces on Dashboard" step is explicitly a *pull* mechanism (Staff has to look), not a *push* one — there's no background job or notification service anywhere in this architecture (Project Plan §1.4, SMS/push explicitly out of scope). Any implementation that tries to add a scheduled reminder job would be solving a problem this flow was deliberately designed not to need.
+
+## Notes
+
+- These three aren't the *only* flows in the system — they're the three worth diagramming first because they're the ones with real branching/state logic. Most other flows (a standard CRUD form, a report generation) are straightforward enough that a diagram would just restate the obvious.
+- If a new flow gets added later with comparable complexity (the barcode-scanner proposal, if it's ever approved, likely qualifies), add it here rather than leaving it undiagrammed.

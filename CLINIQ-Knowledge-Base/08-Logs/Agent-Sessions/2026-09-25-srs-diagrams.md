@@ -1,0 +1,16 @@
+Date/Day/Time: Friday, September 25, 2026 — actual time not available (no system clock access in this environment)
+Agent: Claude (chat session)
+Task: Build the four SRS diagrams (ERD, DFD, Use-Case, Activity Diagram) directly, rather than waiting for an uploaded SRS document
+Status: Completed
+Prompt/Request: "Wait for the diagrams, what I mean is for you to make it or the AI agent that will code" — a correction of the earlier assumption that the user would upload a pre-made SRS containing these diagrams.
+Files Modified: CLINIQ-Knowledge-Base/02-Architecture/Database/{ERD,Data-Flow-Diagram,Use-Case-Diagram,Activity-Diagram}.md — all four rewritten from empty placeholders to full Mermaid diagrams.
+Changes Made:
+- ERD: built from the already-documented "Data Entities" list (Frontend Context Brief §5) verbatim, normalized into a relational schema. Two genuine design decisions flagged explicitly as new (not previously specified): splitting ParentNotification and InventoryTransaction into their own tables rather than arrays/logs on the parent record, and reasonable-default column types.
+- DFD: Level 0 context diagram using the exact External Interfaces already listed in the Project Plan (§2.1) — including representing the parent phone call and IT hardware maintenance as flows that happen outside the system boundary, matching the already-decided out-of-scope status of parent portals/automated notifications. Level 1 broken into the 10 already-documented modules and their data stores.
+- Use-Case Diagram: a visual Mermaid overview plus a full detailed table per role, built directly from the Access Summary table already established in Modules & Features — no access level invented or changed.
+- Activity Diagrams: the three flows already flagged (in the placeholder these files replaced) as highest-priority — QR scan-to-action, the two-stage emergency flow (modeled as a state diagram specifically because it's a genuine state machine, not a linear process), and Follow-Up Handling (explicitly diagrammed to make the pull-not-push reminder mechanism visible, since that's the exact constraint a careless implementation could violate).
+- Validated all 7 individual diagram blocks against Mermaid's actual parser (installed mermaid + jsdom, parsed each headlessly) rather than just visually inspecting the markdown — caught nothing broken, but this is a real check, not an assumption. PNG rendering via mermaid-cli was attempted first but blocked by a missing Chromium binary in this sandbox; the direct parser check gave equivalent syntax confidence without needing that.
+Reason: User corrected the assumption that these diagrams required an external upload — they're derivable from what's already been decided, so building them now removes a documented blocker rather than leaving it open.
+Testing Performed: Mermaid parser validation (see above) — all 7 diagrams pass.
+Known Issues: The two schema-level decisions flagged in the ERD (table-splitting for logs, column type defaults) are first-draft choices, not independently reviewed — worth a second look once real backend work starts.
+Next Steps: Phase B1 (database schema, Development-Phases.md) is no longer blocked on an external SRS — it can proceed directly from this ERD.

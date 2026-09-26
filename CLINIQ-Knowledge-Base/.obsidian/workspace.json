@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "08-Logs/Changelog.md",
+                "file": "01-Requirements/Features/Module-Overview.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Changelog"
+              "title": "Module-Overview"
             }
           }
         ]
@@ -187,11 +187,22 @@
       "bases:Create new base": false
     }
   },
-  "active": "a83dbf2f7b145dd2",
+  "active": "86556129b006cf79",
   "lastOpenFiles": [
+    "08-Logs/Agent-Sessions/2026-09-25-srs-diagrams.md",
+    "08-Logs/Agent-Sessions/2026-09-25-readme.md",
+    "02-Architecture/Tech-Stack.md",
+    "02-Architecture/System-Architecture.md",
+    "02-Architecture/Development-Methodology.md",
+    "02-Architecture/Database/Use-Case-Diagram.md",
+    "02-Architecture/Database/ERD.md",
+    "02-Architecture/Database/Data-Retention-Policy.md",
+    "02-Architecture/Database/Data-Flow-Diagram.md",
+    "02-Architecture/Database/Activity-Diagram.md",
+    "README.md",
+    "08-Logs/Changelog.md",
     "08-Logs/Agent-Sessions/2026-09-25-development-phases.md",
     "04-Development/Development-Phases.md",
-    "README.md",
     "09-References/External-References.md",
     "09-References/Canonical-Documents.md",
     "09-References/Canonical-Documents/CLINIQ_Review_of_Related_Systems.md",
@@ -202,24 +213,13 @@
     "09-References/Canonical-Documents",
     "09-References",
     "08-Logs/Issues-and-TODOs.md",
-    "08-Logs/Changelog.md",
     "08-Logs/Agent-Sessions/2026-09-25-vault-full-detail-expansion.md",
     "08-Logs/Agent-Sessions/2026-09-25-stack-finalization.md",
     "08-Logs/Agent-Sessions/2026-09-25-skills-expansion.md",
     "08-Logs/Agent-Sessions/2026-09-25-monorepo-structure.md",
-    "08-Logs/Agent-Sessions/2026-09-25-claude-md-skills-design-audit.md",
-    "08-Logs/Agent-Sessions/2026-09-24-vault-setup.md",
     "08-Logs/Agent-Sessions",
     "08-Logs",
-    "07-AI-Agents/Source-of-Truth-Hierarchy.md",
-    "07-AI-Agents/Agent-Workflow.md",
     "07-AI-Agents",
-    "06-Decisions/ADR-Template.md",
-    "06-Decisions/ADR-008-Frontend-Folder-Structure.md",
-    "06-Decisions/ADR-007-Stack-Finalization.md",
-    "06-Decisions/ADR-006-Interface-Construction-Approach.md",
-    "06-Decisions/ADR-005-Student-Number-Scheme.md",
-    "06-Decisions/ADR-004-Display-Privacy-Rule.md",
     "06-Decisions",
     "05-Testing",
     "04-Development",
