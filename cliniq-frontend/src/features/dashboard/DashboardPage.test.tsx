@@ -6,9 +6,12 @@ import { getMockDataset } from '../../lib/mocks/dataset'
 import { DashboardPage } from './DashboardPage'
 
 // jsdom has no canvas. Replace the chart with a stub that keeps its accessible label.
-vi.mock('react-chartjs-2', () => ({
-  Bar: (props: { 'aria-label'?: string }) => <div role="img" aria-label={props['aria-label']} />,
-}))
+vi.mock('react-chartjs-2', () => {
+  const Stub = (props: { 'aria-label'?: string }) => (
+    <div role="img" aria-label={props['aria-label']} />
+  )
+  return { Bar: Stub, Line: Stub }
+})
 
 async function renderLoaded() {
   const user = userEvent.setup()
@@ -23,7 +26,9 @@ describe('Clinic Overview Dashboard', () => {
 
   it('renders every section Reference 1 requires', async () => {
     await renderLoaded()
-    expect(screen.getByRole('heading', { level: 1, name: 'Clinic Overview' })).toBeInTheDocument()
+    // Staff (default mock session) get the reference's greeting; "Clinic Overview" still names the page.
+    expect(screen.getByRole('heading', { level: 1, name: /, Nurse Jane!$/ })).toBeInTheDocument()
+    expect(screen.getByText(/^Clinic Overview:/)).toBeInTheDocument()
     expect(screen.getByLabelText('Date range')).toBeInTheDocument()
     for (const label of [
       'Clinic visits',
@@ -40,6 +45,7 @@ describe('Clinic Overview Dashboard', () => {
       /due & upcoming follow-ups/i,
       /frequent-visitor warnings/i,
       /low-stock & expiring items/i,
+      /visits trend/i,
       /common complaints/i,
       /^calendar$/i,
     ]) {
@@ -78,6 +84,29 @@ describe('Clinic Overview Dashboard', () => {
     expect(print).toHaveBeenCalledOnce()
   })
 
+  it('applies the design-system interactive and accent treatments', async () => {
+    await renderLoaded()
+    const dateRange = screen.getByLabelText('Date range')
+    expect(dateRange).toHaveClass('appearance-none')
+    expect(dateRange).toHaveClass('cursor-pointer')
+    expect(dateRange).toHaveClass('hover:bg-surface')
+
+    expect(screen.getByRole('button', { name: /print \/ save as pdf/i })).toHaveClass(
+      'cursor-pointer',
+    )
+    expect(
+      within(screen.getByRole('radiogroup', { name: 'Calendar period' })).getByRole('radio', {
+        name: 'Monthly',
+      }),
+    ).toHaveClass('cursor-pointer')
+
+    const followUpList = screen.getByRole('region', {
+      name: /due & upcoming follow-ups \(scrollable list\)/i,
+    })
+    expect(within(followUpList).getAllByRole('listitem')[0]).not.toHaveClass('cursor-pointer')
+    expect(screen.getByText('MCA Dance Program')).toHaveClass('bg-brand-yellow')
+  })
+
   it('switches calendar views with the keyboard (radiogroup arrow keys)', async () => {
     const user = await renderLoaded()
     const group = screen.getByRole('radiogroup', { name: 'Calendar period' })
@@ -96,7 +125,7 @@ describe('Clinic Overview Dashboard', () => {
   it('offers a table fallback for the complaint chart', async () => {
     const user = await renderLoaded()
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Show complaints as' })).getByRole('radio', {
+      within(screen.getByRole('radiogroup', { name: 'Show trend as' })).getByRole('radio', {
         name: /table/i,
       }),
     )
@@ -112,6 +141,13 @@ describe('Clinic Overview Dashboard', () => {
     expect(
       await screen.findByText(/start date must be on or before the end date/i),
     ).toBeInTheDocument()
+  })
+
+  it('shows the plain "Clinic Overview" title for Admin/Principal, with the same sections', async () => {
+    render(<DashboardPage viewer={{ id: 'a', name: 'Principal', role: 'admin' }} />)
+    await screen.findByRole('heading', { name: /due & upcoming follow-ups/i })
+    expect(screen.getByRole('heading', { level: 1, name: 'Clinic Overview' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /visits trend/i })).toBeInTheDocument()
   })
 
   it('shows an error state with a retry action when loading fails', async () => {

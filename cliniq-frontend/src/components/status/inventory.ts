@@ -8,7 +8,12 @@ import type { StatusMap } from '../ui/StatusBadge'
 export type InventoryFlag = 'low_stock' | 'nearing_expiration' | 'expired'
 
 export const inventoryFlagMap: StatusMap<InventoryFlag> = {
-  low_stock: { label: 'Low stock', tone: 'warning', icon: 'package' },
-  nearing_expiration: { label: 'Nearing expiration', tone: 'warning', icon: 'clock' },
-  expired: { label: 'Expired', tone: 'error', icon: 'alertOctagon' },
+  low_stock: { label: 'Low stock', tone: 'warning', icon: 'package', variant: 'soft' },
+  nearing_expiration: {
+    label: 'Nearing expiration',
+    tone: 'warning',
+    icon: 'clock',
+    variant: 'soft',
+  },
+  expired: { label: 'Expired', tone: 'error', icon: 'alertOctagon', variant: 'soft' },
 }

@@ -29,8 +29,6 @@ Only the Instructor's read-only mobile lookup is shown. The Staff mobile experie
 
 ## Worth deciding now — a real display-privacy question this mockup surfaces
 
-> **Resolved Saturday, September 26, 2026: Option A.** Reasons/descriptions stay visible in list rows; only the name is withheld. See `06-Decisions/ADR-010-Reason-Visibility-in-List-Rows.md`. The discussion below is kept for context.
-
 Our existing display-privacy rule (ADR-004) only covers **names**: multi-student list views show Student Number, not the name. The mockup follows that correctly everywhere checked — Recent Visits, the Visits List, and the Incident Log all show Student Number, not a name, in list rows.
 
 But the mockup also puts the **complaint/reason directly in those same list rows** — "Headache," "Stomachache," "Arm injury," and, more pointedly, incident descriptions like "Allergic reaction" and "Fainted during assembly" sitting right in a glanceable table. Our rule never actually addressed this, because it wasn't the question at the time — but the underlying concern (a bystander glancing at a screen and inferring something about a specific, identifiable student) applies just as much to "2024-0067 — Fainted during assembly" as it does to a name. A Student Number is still a specific individual to anyone who can connect it to a person — a classmate, a sibling, someone who saw it on a printed ID.

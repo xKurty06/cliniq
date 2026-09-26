@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { DateRangePicker, ErrorState } from '../../components'
+import { ErrorState } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
-import { formatDateRange, todayISO } from '../../lib/dates'
+import { todayISO } from '../../lib/dates'
+import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
 import { rangeForPreset, type DateRange } from '../../lib/dateRange'
 import { fetchDashboardSummary } from './api/dashboardApi'
 import {
@@ -25,7 +26,7 @@ import type { TrendGranularity } from './types'
  */
 function DashboardSkeleton() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <StatCardRowSkeleton />
       <AlertListsSkeleton />
       <ComplaintTrendsSkeleton />
@@ -35,14 +36,14 @@ function DashboardSkeleton() {
 
 /**
  * Clinic Overview Dashboard (Screen Inventory #31, Reference 1, Module 9).
- * Staff and Admin/Principal see the same layout. It's view-only for both: no create, update,
+ * Staff and Admin/Principal see the same layout (only the header greeting differs). It's view-only for both: no create, update,
  * or delete happens here, so there are no audit-log writes (ADR-011).
  *
  * Top to bottom: header → date-range filter → stat cards → three alert groups → complaint trends →
  * calendar. The export/print button sits in the header. Every data section shows a skeleton shaped
  * like itself on first load; later refetches keep the previous render dimmed instead.
  */
-export function DashboardPage() {
+export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
   const today = todayISO()
   const [range, setRange] = useState<DateRange>(() => rangeForPreset('last30', today))
   const [granularity, setGranularity] = useState<TrendGranularity>('week')
@@ -53,17 +54,15 @@ export function DashboardPage() {
   )
 
   return (
-    <main className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-5 sm:px-6">
-      <DashboardHeader today={today} onPrint={() => window.print()} />
-
-      <div className="flex flex-wrap items-end justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
-        <div className="print:hidden">
-          <DateRangePicker value={range} onChange={setRange} today={today} />
-        </div>
-        <p className="text-xs text-text-secondary" aria-live="polite">
-          {isRefetching ? 'Updating…' : `Showing ${formatDateRange(range.from, range.to)}`}
-        </p>
-      </div>
+    <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 pt-2 pb-8 sm:px-8">
+      <DashboardHeader
+        viewer={viewer}
+        today={today}
+        range={range}
+        onRangeChange={setRange}
+        isRefetching={isRefetching}
+        onPrint={() => window.print()}
+      />
 
       {status === 'error' ? (
         <ErrorState title="Unable to load the clinic overview." onRetry={reload} />
@@ -78,7 +77,7 @@ export function DashboardPage() {
         <div
           aria-busy={isRefetching}
           className={cn(
-            'flex flex-col gap-4 transition-opacity motion-reduce:transition-none',
+            'flex flex-col gap-6 transition-opacity motion-reduce:transition-none',
             isRefetching && 'opacity-60',
           )}
         >
@@ -100,6 +99,6 @@ export function DashboardPage() {
 
       {/* Separate data source: loads in parallel with its own skeleton, and fails/retries on its own. */}
       <VisitCalendar today={today} initialAnchor={range.to} />
-    </main>
+    </div>
   )
 }

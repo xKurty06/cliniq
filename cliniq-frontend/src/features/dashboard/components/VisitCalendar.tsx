@@ -66,9 +66,13 @@ function Legend({ scale }: { scale: HeatScale }) {
 function EventTags({ tags, className }: { tags: string[]; className?: string }) {
   if (!tags.length) return null
   return (
-    <ul className={cn('flex flex-col gap-0.5', className)}>
+    <ul className={cn('flex flex-wrap gap-1', className)}>
       {tags.map((tag) => (
-        <li key={tag} className="truncate text-[0.6875rem] leading-tight font-semibold" title={tag}>
+        <li
+          key={tag}
+          className="max-w-full truncate rounded-sm border border-brand-yellow-dark bg-brand-yellow px-1.5 py-0.5 text-[0.6875rem] leading-tight font-semibold text-text-primary"
+          title={tag}
+        >
           <span className="sr-only">Event: </span>
           {tag}
         </li>
@@ -96,7 +100,7 @@ function WeekView({
           <li
             key={day.date}
             className={cn(
-              'flex min-h-28 flex-col gap-1 rounded-md border p-2',
+              'flex min-h-28 flex-col gap-1 rounded-md p-2.5',
               future ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
               'border-border',
               day.date === today && 'outline-2 outline-offset-1 outline-text-primary',
@@ -141,7 +145,7 @@ function MonthView({
 }) {
   return (
     <div className="relative overflow-x-auto">
-      <table className="w-full min-w-[36rem] table-fixed border-separate border-spacing-1">
+      <table className="w-full min-w-[36rem] table-fixed border-separate border-spacing-1.5">
         <caption className="sr-only">Visits and incidents per day, {label}</caption>
         <thead>
           <tr>
@@ -167,7 +171,7 @@ function MonthView({
                     key={date}
                     title={day && !future ? describeDay(day) : undefined}
                     className={cn(
-                      'h-20 rounded-md border p-1.5 align-top',
+                      'h-16 rounded-md p-2 align-top',
                       future || !day ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
                       'border-border',
                       date === today && 'outline-2 outline-offset-1 outline-text-primary',
@@ -363,10 +367,7 @@ function CalendarSkeleton({ view, periodFrom }: { view: CalendarView; periodFrom
             const d = parseISODate(start)
             d.setDate(d.getDate() + i)
             return (
-              <li
-                key={i}
-                className="flex min-h-28 flex-col gap-2 rounded-md border border-border p-2"
-              >
+              <li key={i} className="flex min-h-28 flex-col gap-2 rounded-md bg-surface p-2.5">
                 <span className="text-xs font-semibold text-text-secondary">
                   {WEEKDAYS_LONG[d.getDay()]},{' '}
                   {d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
@@ -416,7 +417,7 @@ function CalendarSkeleton({ view, periodFrom }: { view: CalendarView; periodFrom
   return (
     <div aria-hidden="true" data-skeleton="calendar-month" className="flex flex-col gap-3">
       <div className="relative overflow-x-auto">
-        <table className="w-full min-w-[36rem] table-fixed border-separate border-spacing-1">
+        <table className="w-full min-w-[36rem] table-fixed border-separate border-spacing-1.5">
           <thead>
             <tr>
               {WEEKDAYS.map((w) => (
@@ -431,7 +432,7 @@ function CalendarSkeleton({ view, periodFrom }: { view: CalendarView; periodFrom
               <tr key={wi}>
                 {week.map((date, di) =>
                   date ? (
-                    <td key={date} className="h-20 rounded-md border border-border p-1.5 align-top">
+                    <td key={date} className="h-16 rounded-md bg-surface p-2 align-top">
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-xs text-text-secondary">
                           {parseISODate(date).getDate()}

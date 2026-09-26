@@ -1,9 +1,10 @@
 import '../../../components/charts/chartSetup'
-import type { Chart, ChartOptions, Plugin } from 'chart.js'
+import type { Chart, ChartOptions, Plugin, ScriptableContext } from 'chart.js'
 import { useId, useMemo, useState } from 'react'
-import { Bar } from 'react-chartjs-2'
+import { Line } from 'react-chartjs-2'
 import {
   Card,
+  CARD_SURFACE,
   CardBody,
   CardHeader,
   DataTable,
@@ -13,6 +14,7 @@ import {
   Skeleton,
   type DataTableColumn,
 } from '../../../components'
+import { cn } from '../../../lib/cn'
 import { formatDate } from '../../../lib/dates'
 import { colorToken } from '../../../lib/tokens'
 import type {
@@ -22,6 +24,17 @@ import type {
   TrendGranularity,
 } from '../types'
 
+/*
+ * Trends row (Reference 1, item 4), laid out like the reference mockup's "Visits Trend" +
+ * "Top Visit Reasons" pair:
+ * - Left (2/3): visits + incidents over time, grouped by week or month (line with a light area
+ *   wash). A possible symptom cluster is drawn ON the chart as a warning-colored point with a ⚠
+ *   marker (spec: "a simple highlighted marker on the chart, not a separate widget").
+ * - Right (1/3): the most common complaints in the range as labeled horizontal bars. A complaint
+ *   with a possible cluster gets a warning bar plus a ⚠ icon and text, never color alone.
+ * The table view (left card) keeps the full complaint × period breakdown as the chart fallback.
+ */
+
 type ViewMode = 'chart' | 'table'
 
 function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
@@ -30,92 +43,117 @@ function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string 
     : formatDate(bucket.from, { month: 'long', year: 'numeric' })
 }
 
-/**
- * The symptom-cluster marker: a small warning triangle with "!" drawn above each flagged bar. The
- * bar's warning color is never the only signal. There's the marker shape, the text callout above
- * the charts, and the table view.
- */
-const clusterMarker: Plugin<'bar'> = {
+interface ClusterNote {
+  complaint: string
+  bucketIndex: number
+  count: number
+}
+
+function findClusters(trends: Trends): ClusterNote[] {
+  return [...trends.series, ...trends.otherComplaints].flatMap((s) =>
+    s.clusterBuckets.map((i) => ({ complaint: s.complaint, bucketIndex: i, count: s.counts[i] })),
+  )
+}
+
+/** Adds an alpha channel to a token hex, for the 10% area wash under the line (dataviz spec). */
+function withAlpha(hex: string, alpha: number): string {
+  const a = Math.round(alpha * 255)
+    .toString(16)
+    .padStart(2, '0')
+  return /^#[0-9a-f]{6}$/i.test(hex) ? `${hex}${a}` : hex
+}
+
+/** Warning triangle with "!" drawn above each flagged point. */
+const clusterMarker: Plugin<'line'> = {
   id: 'clusterMarker',
-  afterDatasetsDraw(chart: Chart<'bar'>) {
-    const clusters = (chart.options.plugins as { clusterMarker?: { indexes: number[] } })
+  afterDatasetsDraw(chart: Chart<'line'>) {
+    const indexes = (chart.options.plugins as { clusterMarker?: { indexes: number[] } })
       .clusterMarker?.indexes
-    if (!clusters?.length) return
+    if (!indexes?.length) return
     const { ctx } = chart
     const meta = chart.getDatasetMeta(0)
-    const fill = colorToken('warning')
     ctx.save()
-    for (const index of clusters) {
-      const bar = meta.data[index]
-      if (!bar) continue
-      const { x, y } = bar.getProps(['x', 'y'], true) as { x: number; y: number }
-      const top = y - 16
+    for (const index of indexes) {
+      const point = meta.data[index]
+      if (!point) continue
+      const { x, y } = point.getProps(['x', 'y'], true) as { x: number; y: number }
+      const top = y - 24
       ctx.beginPath()
       ctx.moveTo(x, top)
-      ctx.lineTo(x + 7, top + 12)
-      ctx.lineTo(x - 7, top + 12)
+      ctx.lineTo(x + 8, top + 13)
+      ctx.lineTo(x - 8, top + 13)
       ctx.closePath()
-      ctx.fillStyle = fill
+      ctx.fillStyle = colorToken('warning')
       ctx.fill()
       ctx.fillStyle = colorToken('white')
-      ctx.font = 'bold 9px system-ui'
+      ctx.font = 'bold 10px system-ui'
       ctx.textAlign = 'center'
-      ctx.fillText('!', x, top + 10.5)
+      ctx.fillText('!', x, top + 11.5)
     }
     ctx.restore()
   },
 }
 
-function MiniChart({
-  series,
-  buckets,
-  granularity,
-  yMax,
-}: {
-  series: ComplaintSeries
-  buckets: TrendBucket[]
-  granularity: TrendGranularity
-  yMax: number
-}) {
+function bucketTotals(trends: Trends): number[] {
+  const all = [...trends.series, ...trends.otherComplaints]
+  return trends.buckets.map((_, i) => all.reduce((sum, s) => sum + s.counts[i], 0))
+}
+
+function TrendLineChart({ trends, clusters }: { trends: Trends; clusters: ClusterNote[] }) {
+  const totals = bucketTotals(trends)
+  const clusterIdx = [...new Set(clusters.map((c) => c.bucketIndex))]
   const green = colorToken('brand-green')
   const warning = colorToken('warning')
+  const surface = colorToken('background')
   const grid = colorToken('border')
   const tick = colorToken('text-secondary')
-  const clusterSet = new Set(series.clusterBuckets)
+  const isCluster = (i: number) => clusterIdx.includes(i)
 
   const data = {
-    labels: buckets.map((b) => b.label),
+    labels: trends.buckets.map((b) => b.label),
     datasets: [
       {
-        label: series.complaint,
-        data: series.counts,
-        backgroundColor: series.counts.map((_, i) => (clusterSet.has(i) ? warning : green)),
-        hoverBackgroundColor: series.counts.map((_, i) => (clusterSet.has(i) ? warning : green)),
-        borderRadius: { topLeft: 4, topRight: 4 },
-        borderSkipped: 'bottom' as const,
-        maxBarThickness: 24,
-        categoryPercentage: 0.8,
-        barPercentage: 0.9,
+        label: 'Visits and incidents',
+        data: totals,
+        borderColor: green,
+        borderWidth: 2,
+        // Vertical gradient wash (reference style): 22% at the top fading to 0 at the baseline.
+        backgroundColor: (ctx: ScriptableContext<'line'>) => {
+          const { chartArea, ctx: c } = ctx.chart
+          if (!chartArea) return withAlpha(green, 0.1)
+          const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
+          g.addColorStop(0, withAlpha(green, 0.22))
+          g.addColorStop(1, withAlpha(green, 0))
+          return g
+        },
+        fill: 'origin' as const,
+        tension: 0.3,
+        pointRadius: totals.map((_, i) => (isCluster(i) ? 6 : 3.5)),
+        pointHoverRadius: 7,
+        pointHitRadius: 14,
+        pointBackgroundColor: totals.map((_, i) => (isCluster(i) ? warning : green)),
+        pointBorderColor: surface,
+        pointBorderWidth: 2,
       },
     ],
   }
 
-  const options: ChartOptions<'bar'> & { plugins: { clusterMarker: { indexes: number[] } } } = {
+  const options: ChartOptions<'line'> & { plugins: { clusterMarker: { indexes: number[] } } } = {
     responsive: true,
     maintainAspectRatio: false,
-    layout: { padding: { top: 18 } },
+    layout: { padding: { top: 28, right: 8 } },
+    interaction: { mode: 'index', intersect: false },
     scales: {
       x: {
         grid: { display: false },
         border: { color: grid },
-        ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
+        ticks: { color: tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 },
       },
       y: {
         beginAtZero: true,
-        max: yMax,
         grid: { color: grid },
         border: { display: false },
-        ticks: { color: tick, precision: 0, maxTicksLimit: 3 },
+        ticks: { color: tick, precision: 0, maxTicksLimit: 5 },
       },
     },
     plugins: {
@@ -123,43 +161,48 @@ function MiniChart({
       tooltip: {
         displayColors: false,
         callbacks: {
-          title: (items) => bucketName(buckets[items[0].dataIndex], granularity),
-          label: (item) => `${item.parsed.y} cases`,
-          afterLabel: (item) => (clusterSet.has(item.dataIndex) ? 'Possible symptom cluster' : ''),
+          title: (items) => bucketName(trends.buckets[items[0].dataIndex], trends.granularity),
+          label: (item) => `${item.parsed.y} visits and incidents`,
+          afterLabel: (item) =>
+            clusters
+              .filter((c) => c.bucketIndex === item.dataIndex)
+              .map((c) => `Possible cluster: ${c.complaint} (${c.count})`)
+              .join('\n'),
         },
       },
-      clusterMarker: { indexes: series.clusterBuckets },
+      clusterMarker: { indexes: clusterIdx },
     },
   }
 
-  const summary = `${series.complaint}, ${series.total} total. ${buckets
+  const summary = `Visits and incidents by ${trends.granularity}: ${trends.buckets
     .map(
       (b, i) =>
-        `${bucketName(b, granularity)}: ${series.counts[i]}${clusterSet.has(i) ? ' (possible cluster)' : ''}`,
+        `${bucketName(b, trends.granularity)} ${totals[i]}${isCluster(i) ? ' (possible symptom cluster)' : ''}`,
     )
     .join('; ')}.`
 
   return (
-    <figure className="flex min-w-0 flex-col gap-1 rounded-md border border-border p-3 print:break-inside-avoid">
-      <figcaption className="flex items-baseline justify-between gap-2">
-        <span className="truncate text-sm font-semibold text-text-primary">{series.complaint}</span>
-        <span className="shrink-0 text-xs text-text-secondary">{series.total} total</span>
-      </figcaption>
-      <div className="relative h-36">
-        <Bar
-          data={data}
-          options={options}
-          plugins={[clusterMarker]}
-          role="img"
-          aria-label={summary}
-        />
-      </div>
-    </figure>
+    <div className="relative h-72">
+      <Line
+        data={data}
+        options={options}
+        plugins={[clusterMarker]}
+        role="img"
+        aria-label={summary}
+      />
+    </div>
   )
 }
 
 function TrendTable({ trends }: { trends: Trends }) {
-  const rows = [...trends.series, ...trends.otherComplaints]
+  const totals = bucketTotals(trends)
+  const totalRow: ComplaintSeries = {
+    complaint: 'All visits & incidents',
+    counts: totals,
+    total: totals.reduce((a, b) => a + b, 0),
+    clusterBuckets: [],
+  }
+  const rows = [totalRow, ...trends.series, ...trends.otherComplaints]
   const columns: Array<DataTableColumn<ComplaintSeries>> = [
     { key: 'complaint', header: 'Complaint', cell: (r) => r.complaint, rowHeader: true },
     ...trends.buckets.map((b, i) => ({
@@ -189,45 +232,34 @@ function TrendTable({ trends }: { trends: Trends }) {
   )
 }
 
-export interface ComplaintTrendsProps {
-  trends: Trends
-  granularity: TrendGranularity
-  onGranularityChange: (g: TrendGranularity) => void
-}
-
-export function ComplaintTrends({
+function VisitsTrendCard({
   trends,
+  clusters,
   granularity,
   onGranularityChange,
-}: ComplaintTrendsProps) {
+}: {
+  trends: Trends
+  clusters: ClusterNote[]
+  granularity: TrendGranularity
+  onGranularityChange: (g: TrendGranularity) => void
+}) {
   const headingId = useId()
   const [view, setView] = useState<ViewMode>('chart')
-  const yMax = useMemo(
-    () => Math.max(1, ...trends.series.flatMap((s) => s.counts)),
-    [trends.series],
-  )
-  const clusters = trends.series.flatMap((s) =>
-    s.clusterBuckets.map((i) => ({
-      complaint: s.complaint,
-      bucket: trends.buckets[i],
-      count: s.counts[i],
-    })),
-  )
   const hasData = trends.series.length > 0
   const tooFewBuckets = trends.buckets.length < 2
   const showTable = view === 'table' || tooFewBuckets
 
   return (
-    <Card aria-labelledby={headingId}>
+    <Card aria-labelledby={headingId} className="lg:col-span-2">
       <CardHeader
         titleId={headingId}
-        icon={<Icon name="barChart" />}
-        title="Common complaints"
-        description={`The ${trends.series.length || 'top'} most common complaints, visits and incidents combined, grouped by ${granularity}. Charts share one scale.`}
+        icon={<Icon name="activity" />}
+        title="Visits trend"
+        description={`Visits and incidents per ${granularity}.`}
         actions={
           <>
             <SegmentedControl
-              label="Group complaints by"
+              label="Group trend by"
               value={granularity}
               onChange={onGranularityChange}
               options={[
@@ -236,7 +268,7 @@ export function ComplaintTrends({
               ]}
             />
             <SegmentedControl
-              label="Show complaints as"
+              label="Show trend as"
               value={view}
               onChange={setView}
               options={[
@@ -250,58 +282,104 @@ export function ComplaintTrends({
       <CardBody className="flex flex-col gap-3">
         {!hasData ? (
           <EmptyState
-            icon="barChart"
-            title="No complaints recorded in this date range"
-            description="Choose a different date range to see complaint trends."
+            icon="activity"
+            title="No visits or incidents in this date range"
+            description="Choose a different period to see the trend."
           />
         ) : (
           <>
-            {clusters.length > 0 && (
-              <div
-                role="note"
-                className="flex gap-2 rounded-md border border-warning bg-background px-3 py-2"
-              >
-                <Icon name="alertTriangle" className="mt-0.5 shrink-0 text-warning" />
-                <div className="text-sm text-text-primary">
-                  <p className="font-semibold">Possible symptom cluster</p>
-                  <ul className="text-xs text-text-secondary">
-                    {clusters.map((c) => (
-                      <li key={`${c.complaint}-${c.bucket.key}`}>
-                        {c.complaint}: {c.count} cases, {bucketName(c.bucket, trends.granularity)}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-1 text-xs text-text-secondary">
-                    An early-warning signal to review, not a confirmed outbreak.
-                  </p>
-                </div>
-              </div>
-            )}
             {tooFewBuckets && (
               <p className="text-xs text-text-secondary">
-                This date range fits in a single {granularity}, so there's nothing to compare over
-                time. Showing totals as a table. Choose a longer range to see trends.
+                This period fits in a single {granularity}, so there’s nothing to compare over time.
+                Showing totals as a table. Choose a longer period to see a trend.
               </p>
             )}
             {showTable ? (
               <TrendTable trends={trends} />
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                {trends.series.map((s) => (
-                  <MiniChart
-                    key={s.complaint}
-                    series={s}
-                    buckets={trends.buckets}
-                    granularity={trends.granularity}
-                    yMax={yMax}
-                  />
-                ))}
+              <TrendLineChart trends={trends} clusters={clusters} />
+            )}
+            {clusters.length > 0 && (
+              <div role="note" className="flex items-start gap-2 text-xs text-text-primary">
+                <Icon name="alertTriangle" size={14} className="mt-0.5 shrink-0 text-warning" />
+                <p>
+                  <span className="font-semibold">Possible symptom cluster: </span>
+                  {clusters
+                    .map(
+                      (c) =>
+                        `${c.complaint}, ${c.count} cases (${bucketName(trends.buckets[c.bucketIndex], trends.granularity)})`,
+                    )
+                    .join('; ')}
+                  .{' '}
+                  <span className="text-text-secondary">
+                    An early-warning signal to review, not a confirmed outbreak.
+                  </span>
+                </p>
               </div>
             )}
-            {!showTable && trends.otherComplaints.length > 0 && (
-              <p className="text-xs text-text-secondary print:hidden">
-                {trends.otherComplaints.length} less common complaint types aren't charted. Switch
-                to Table to see them all.
+          </>
+        )}
+      </CardBody>
+    </Card>
+  )
+}
+
+function CommonComplaintsCard({ trends, clusters }: { trends: Trends; clusters: ClusterNote[] }) {
+  const headingId = useId()
+  const max = Math.max(1, ...trends.series.map((s) => s.total))
+  const otherTotal = trends.otherComplaints.reduce((sum, s) => sum + s.total, 0)
+  return (
+    <Card aria-labelledby={headingId}>
+      <CardHeader
+        titleId={headingId}
+        icon={<Icon name="barChart" />}
+        title="Common complaints"
+        description="Top complaints in this period."
+      />
+      <CardBody>
+        {trends.series.length === 0 ? (
+          <EmptyState icon="barChart" title="No complaints recorded in this date range" />
+        ) : (
+          <>
+            <ol className="flex flex-col gap-4" aria-labelledby={headingId}>
+              {trends.series.map((s) => {
+                const cluster = clusters.find((c) => c.complaint === s.complaint)
+                return (
+                  <li key={s.complaint} className="flex flex-col gap-1">
+                    <div className="grid grid-cols-[minmax(0,8rem)_1fr_2.5rem] items-center gap-3 text-sm">
+                      <span className="flex min-w-0 items-center gap-1.5 text-text-primary">
+                        <span className="truncate">{s.complaint}</span>
+                        {cluster && (
+                          <Icon name="alertTriangle" size={14} className="shrink-0 text-warning" />
+                        )}
+                      </span>
+                      <span aria-hidden="true" className="h-3 rounded-full bg-surface">
+                        <span
+                          className={cn(
+                            'block h-3 rounded-full',
+                            cluster ? 'bg-warning' : 'bg-brand-green-dark',
+                          )}
+                          style={{ width: `${Math.max(4, (s.total / max) * 100)}%` }}
+                        />
+                      </span>
+                      <span className="text-right font-semibold text-text-primary tabular-nums">
+                        {s.total}
+                      </span>
+                    </div>
+                    {cluster && (
+                      <p className="text-xs text-text-secondary">
+                        Possible cluster:{' '}
+                        {bucketName(trends.buckets[cluster.bucketIndex], trends.granularity)}
+                      </p>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
+            {trends.otherComplaints.length > 0 && (
+              <p className="mt-3 border-t border-border pt-2 text-xs text-text-secondary">
+                {trends.otherComplaints.length} other complaint types, {otherTotal} cases (see the
+                trend’s Table view)
               </p>
             )}
           </>
@@ -311,59 +389,98 @@ export function ComplaintTrends({
   )
 }
 
-// Fixed bar heights (percent of the plot) so the placeholder reads as a bar chart, not a grey block.
-const SKELETON_BARS = [35, 60, 45, 80, 50]
+export interface ComplaintTrendsProps {
+  trends: Trends
+  granularity: TrendGranularity
+  onGranularityChange: (g: TrendGranularity) => void
+}
+
+export function ComplaintTrends({
+  trends,
+  granularity,
+  onGranularityChange,
+}: ComplaintTrendsProps) {
+  const clusters = useMemo(() => findClusters(trends), [trends])
+  return (
+    <section aria-label="Trends" className={TRENDS_GRID}>
+      <VisitsTrendCard
+        trends={trends}
+        clusters={clusters}
+        granularity={granularity}
+        onGranularityChange={onGranularityChange}
+      />
+      <CommonComplaintsCard trends={trends} clusters={clusters} />
+    </section>
+  )
+}
+
+const TRENDS_GRID = 'grid grid-cols-1 gap-4 lg:grid-cols-3'
 
 /**
- * Loading placeholder with the trends card's exact shape: the real title + icon, bars for the
- * description and the two toggles, and five small-multiple figures (the same grid as the loaded
- * charts) with baseline-anchored placeholder bars.
+ * Loading placeholder shaped like the trends row: the line-chart card (real title, toggle bars, a
+ * chart frame with gridlines and a flat placeholder line) and the complaints card (real title,
+ * five label + bar rows).
  */
 export function ComplaintTrendsSkeleton() {
   return (
-    <div
-      aria-hidden="true"
-      data-skeleton="complaint-trends"
-      className="rounded-lg border border-border bg-background"
-    >
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-border px-4 py-3">
-        <div className="flex min-w-0 items-start gap-2">
-          <span className="mt-0.5 shrink-0 text-text-secondary">
+    <div aria-hidden="true" data-skeleton="complaint-trends" className={TRENDS_GRID}>
+      <div data-skeleton="trend-chart" className={cn(CARD_SURFACE, 'lg:col-span-2')}>
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-5 pt-5 pb-3">
+          <div className="flex items-start gap-2">
+            <span className="mt-0.5 text-brand-green-dark">
+              <Icon name="activity" />
+            </span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-base font-semibold text-text-primary">Visits trend</span>
+              <Skeleton className="h-3 w-40" />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-8 w-32" />
+          </div>
+        </div>
+        <div className="px-5 pb-5">
+          <div className="flex h-72 flex-col justify-between border-b border-border pt-7">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Skeleton className="h-2.5 w-5" />
+                <div className="h-px flex-1 bg-border" />
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex justify-around">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-2.5 w-10" />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div data-skeleton="complaints-list" className={CARD_SURFACE}>
+        <div className="flex items-start gap-2.5 px-5 pt-5 pb-3">
+          <span className="mt-0.5 text-brand-green-dark">
             <Icon name="barChart" />
           </span>
           <div className="flex flex-col gap-1.5">
             <span className="text-base font-semibold text-text-primary">Common complaints</span>
-            <Skeleton className="h-3 w-72 max-w-full" />
+            <Skeleton className="h-3 w-44" />
           </div>
         </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-8 w-36" />
-          <Skeleton className="h-8 w-36" />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 xl:grid-cols-5">
-        {SKELETON_BARS.map((_, i) => (
-          <div
-            key={i}
-            data-skeleton="mini-chart"
-            className="flex flex-col gap-1 rounded-md border border-border p-3"
-          >
-            <div className="flex justify-between gap-2">
-              <Skeleton className="h-3.5 w-24" />
-              <Skeleton className="h-3 w-12" />
-            </div>
-            <div className="flex h-36 items-end justify-around gap-2 border-b border-border px-2">
-              {SKELETON_BARS.map((h, j) => (
-                <Skeleton
-                  key={j}
-                  className="w-4 rounded-b-none"
-                  // Rotate heights per chart so the five don't look identical.
-                  style={{ height: `${SKELETON_BARS[(i + j) % SKELETON_BARS.length] ?? h}%` }}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+        <ol className="flex flex-col gap-5 px-5 pb-5">
+          {[90, 72, 55, 40, 28].map((w) => (
+            <li
+              key={w}
+              data-skeleton="complaint-row"
+              className="grid grid-cols-[minmax(0,8rem)_1fr_2.5rem] items-center gap-3"
+            >
+              <Skeleton className="h-3 w-24" />
+              <span className="h-3 rounded-full bg-surface">
+                <Skeleton className="h-3 rounded-full" style={{ width: `${w}%` }} />
+              </span>
+              <Skeleton className="ml-auto h-3 w-6" />
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   )

@@ -7,6 +7,7 @@ import {
   type DateRangePreset,
 } from '../../lib/dateRange'
 import type { ISODate } from '../../types/entities'
+import { Icon } from '../icons/Icon'
 import { Input } from './Input'
 
 export interface DateRangePickerProps {
@@ -14,6 +15,8 @@ export interface DateRangePickerProps {
   onChange: (range: DateRange) => void
   /** Today's date; custom ranges can't go past it. */
   today: ISODate
+  /** Inline label + select, for a page header's top-right slot (the reference's period dropdown). */
+  compact?: boolean
   className?: string
 }
 
@@ -24,7 +27,13 @@ const presetOrder: DateRangePreset[] = ['today', 'last7', 'last30', 'thisMonth',
  * for free), with a custom From/To pair behind "Custom range". An invalid custom range is explained
  * inline and never applied, so the rest of the page keeps showing the last valid range.
  */
-export function DateRangePicker({ value, onChange, today, className }: DateRangePickerProps) {
+export function DateRangePicker({
+  value,
+  onChange,
+  today,
+  compact = false,
+  className,
+}: DateRangePickerProps) {
   const selectId = useId()
   const [draft, setDraft] = useState({ from: value.from, to: value.to })
   const [error, setError] = useState<string | undefined>()
@@ -55,23 +64,40 @@ export function DateRangePicker({ value, onChange, today, className }: DateRange
   }
 
   return (
-    <div className={cn('flex flex-wrap items-end gap-3', className)}>
-      <div className="flex flex-col gap-1">
-        <label htmlFor={selectId} className="text-xs font-semibold text-text-primary">
+    <div className={cn('flex flex-wrap items-end gap-3', compact && 'justify-end', className)}>
+      <div className={cn('flex', compact ? 'items-center gap-2' : 'flex-col gap-1')}>
+        <label
+          htmlFor={selectId}
+          className={cn(
+            'text-xs font-semibold',
+            compact ? 'text-text-secondary' : 'text-text-primary',
+          )}
+        >
           Date range
         </label>
-        <select
-          id={selectId}
-          value={value.preset}
-          onChange={(e) => onPresetChange(e.target.value as DateRangePreset)}
-          className="h-8 rounded-md border border-text-secondary bg-background px-2 text-sm text-text-primary"
-        >
-          {presetOrder.map((p) => (
-            <option key={p} value={p}>
-              {PRESET_LABELS[p]}
-            </option>
-          ))}
-        </select>
+        <span className="relative inline-flex">
+          <select
+            id={selectId}
+            value={value.preset}
+            onChange={(e) => onPresetChange(e.target.value as DateRangePreset)}
+            className={cn(
+              'appearance-none rounded-md border border-text-secondary bg-background text-sm text-text-primary',
+              'cursor-pointer transition-colors duration-150 hover:bg-surface motion-reduce:transition-none',
+              compact ? 'h-10 pr-9 pl-3 font-semibold shadow-card' : 'h-8 pr-8 pl-2',
+            )}
+          >
+            {presetOrder.map((p) => (
+              <option key={p} value={p}>
+                {PRESET_LABELS[p]}
+              </option>
+            ))}
+          </select>
+          <Icon
+            name="chevronDown"
+            size={14}
+            className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-text-secondary"
+          />
+        </span>
       </div>
       {value.preset === 'custom' && (
         <>

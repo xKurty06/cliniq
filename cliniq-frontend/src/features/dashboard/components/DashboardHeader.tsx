@@ -1,21 +1,63 @@
-import { Button } from '../../../components'
-import { formatLongDate } from '../../../lib/dates'
+import { Button, DateRangePicker } from '../../../components'
+import { formatDateRange, formatLongDate } from '../../../lib/dates'
+import type { DateRange } from '../../../lib/dateRange'
+import type { SessionUser } from '../../../lib/mocks/session'
 import type { ISODate } from '../../../types/entities'
 
-export function DashboardHeader({ today, onPrint }: { today: ISODate; onPrint: () => void }) {
+function greeting(now: Date): string {
+  const h = now.getHours()
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
+}
+
+export interface DashboardHeaderProps {
+  viewer: SessionUser
+  today: ISODate
+  range: DateRange
+  onRangeChange: (range: DateRange) => void
+  isRefetching: boolean
+  onPrint: () => void
+}
+
+/**
+ * Page header, following the reference: title/greeting on the left, and the period selector plus
+ * the one page action (Print) on the right. Staff get a greeting (Staff Dashboard mockup); Admin
+ * gets the plain title (Admin Dashboard mockup). Both still say "Clinic Overview", so "Where am I?"
+ * is always answered. No "New Visit" button until #11 exists.
+ */
+export function DashboardHeader({
+  viewer,
+  today,
+  range,
+  onRangeChange,
+  isRefetching,
+  onPrint,
+}: DashboardHeaderProps) {
+  const isStaff = viewer.role === 'staff'
   return (
-    <header className="flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <h1 className="text-xl font-semibold text-text-primary">Clinic Overview</h1>
-        <p className="text-sm text-text-secondary">
+    <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+      <div className="min-w-0">
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+          {isStaff ? `${greeting(new Date())}, ${viewer.name}!` : 'Clinic Overview'}
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          {isStaff
+            ? 'Clinic Overview: here’s what’s happening at the clinic.'
+            : 'Summary of clinic activity and student health records.'}
+        </p>
+        <p className="mt-0.5 text-xs text-text-secondary" aria-live="polite">
           <time dateTime={today}>{formatLongDate(today)}</time>
           <span aria-hidden="true"> · </span>
-          Clinic activity, alerts, and trends. View only.
+          {isRefetching ? 'Updating…' : `Showing ${formatDateRange(range.from, range.to)}`}
+          <span aria-hidden="true"> · </span>
+          View only
         </p>
       </div>
-      <Button variant="secondary" icon="printer" onClick={onPrint} className="print:hidden">
-        Print / Save as PDF
-      </Button>
+      <div className="flex flex-wrap items-center justify-end gap-2 print:hidden">
+        <DateRangePicker value={range} onChange={onRangeChange} today={today} compact />
+        <Button variant="secondary" icon="printer" onClick={onPrint}>
+          Print / Save as PDF
+        </Button>
+      </div>
     </header>
   )
 }

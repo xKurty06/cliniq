@@ -8,12 +8,15 @@ import { Icon, type IconName } from '../icons/Icon'
  * Tone → token mapping (every combination is contrast-checked; see src/index.css):
  * - solid info/success/warning/error: semantic fill + white text (4.60–5.73:1, all pass for
  *   small text). Use when the state needs to be noticed at a glance.
- * - outline: white fill, semantic border + icon, text-primary label. The quieter version.
+ * - soft (default for statuses): a 10% tint of the semantic color, icon in the semantic color, and a
+ *   text-primary label (≥ 12:1). This is the reference mockup's pale-pill look. The tone's own color is
+ *   never used for the small label, because tinted-on-tint text drops below 4.5:1.
+ * - outline: white fill, semantic border + icon, text-primary label.
  * - neutral: surface fill, text-secondary (5.68:1).
  * - accent: brand-yellow fill + text-primary (13.49:1). Brand highlight, not a status.
  */
 export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'accent'
-export type BadgeVariant = 'solid' | 'outline'
+export type BadgeVariant = 'solid' | 'soft' | 'outline'
 
 const defaultIcons: Partial<Record<BadgeTone, IconName>> = {
   info: 'info',
@@ -29,6 +32,15 @@ const solidClasses: Record<BadgeTone, string> = {
   warning: 'bg-warning text-white border-warning',
   error: 'bg-error text-white border-error',
   accent: 'bg-brand-yellow text-text-primary border-brand-yellow-dark',
+}
+
+const softClasses: Record<BadgeTone, string> = {
+  neutral: 'bg-surface text-text-secondary',
+  info: 'bg-info/10 text-text-primary',
+  success: 'bg-success/10 text-text-primary',
+  warning: 'bg-warning/10 text-text-primary',
+  error: 'bg-error/10 text-text-primary',
+  accent: 'bg-brand-yellow/40 text-text-primary',
 }
 
 const outlineIconClasses: Record<BadgeTone, string> = {
@@ -67,13 +79,16 @@ export function Badge({
 }: BadgeProps) {
   const iconName = icon === null ? undefined : (icon ?? defaultIcons[tone])
   const isOutline = variant === 'outline'
+  const isSoft = variant === 'soft'
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-xs font-semibold whitespace-nowrap',
+        'inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-xs font-semibold whitespace-nowrap',
         isOutline
           ? cn('bg-background text-text-primary', outlineBorderClasses[tone])
-          : solidClasses[tone],
+          : isSoft
+            ? cn('border-transparent', softClasses[tone])
+            : solidClasses[tone],
         // Forced-colors / print: keep a visible outline so the badge still reads as a badge.
         'forced-colors:border-[CanvasText] print:border-current',
         className,
@@ -83,7 +98,7 @@ export function Badge({
         <Icon
           name={iconName}
           size={12}
-          className={cn('shrink-0', isOutline && outlineIconClasses[tone])}
+          className={cn('shrink-0', (isOutline || isSoft) && outlineIconClasses[tone])}
         />
       )}
       {children}

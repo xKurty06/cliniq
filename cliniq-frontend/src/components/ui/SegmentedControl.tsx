@@ -58,7 +58,7 @@ export function SegmentedControl<V extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className={cn('inline-flex rounded-md border border-border bg-surface p-0.5', className)}
+      className={cn('inline-flex gap-0.5 rounded-md bg-surface p-1', className)}
     >
       {options.map((option, index) => {
         const selected = option.value === value
@@ -75,11 +75,13 @@ export function SegmentedControl<V extends string>({
             onClick={() => onChange(option.value)}
             onKeyDown={(e) => onKeyDown(e, index)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-sm border px-2.5 transition-colors duration-150 motion-reduce:transition-none',
+              'inline-flex cursor-pointer items-center gap-1.5 rounded-sm px-2.5 transition-colors duration-150 motion-reduce:transition-none',
               size === 'sm' ? 'h-7 text-xs' : 'h-8 text-sm',
               selected
-                ? 'border-brand-green-dark bg-brand-green-dark font-semibold text-white'
-                : 'border-transparent font-medium text-text-secondary hover:text-text-primary',
+                ? // Raised white chip. The brand-green ring (3.43:1 on surface) is the non-color-alone
+                  // state indicator, backed by weight and the dark-green label.
+                  'bg-background font-semibold text-brand-green-dark shadow-card ring-1 ring-brand-green hover:bg-surface'
+                : 'font-medium text-text-secondary hover:bg-background hover:text-text-primary',
             )}
           >
             {option.icon && <Icon name={option.icon} size={14} />}

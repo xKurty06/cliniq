@@ -7,5 +7,10 @@ import type { StatusMap } from '../ui/StatusBadge'
 export type FrequentVisitorFlag = 'frequent_visits'
 
 export const frequentVisitorMap: StatusMap<FrequentVisitorFlag> = {
-  frequent_visits: { label: 'Frequent-visit warning', tone: 'warning', icon: 'alertTriangle' },
+  frequent_visits: {
+    label: 'Frequent-visit warning',
+    tone: 'warning',
+    icon: 'alertTriangle',
+    variant: 'soft',
+  },
 }

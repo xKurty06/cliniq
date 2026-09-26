@@ -1,6 +1,6 @@
 # Environment Setup
 
-**Frontend: partially executed (Saturday, September 26, 2026 — 20:14).** The Vite react-ts scaffold, Tailwind, chart.js + react-chartjs-2, Vitest + RTL, and ESLint + Prettier are installed in `cliniq-frontend/` (run `npm install`, then `npm run dev` / `npm test` / `npm run lint`). Still pending: `qr-scanner` (install with the QR screens). Built and tested on Node v26.5.0 / npm 11.17.0; pinning a Node LTS across machines is still open. **Backend: not yet executed.** The Laravel/Sanctum/MySQL rows below are still the plan.
+**Not yet executed — confirmed plan, pending your go-ahead to actually run it.**
 
 | Step | Command (illustrative) | Purpose |
 |---|---|---|

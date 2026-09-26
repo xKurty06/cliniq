@@ -7,7 +7,7 @@ vi.mock('./api/dashboardApi', () => ({
   fetchDashboardSummary: () => new Promise(() => {}),
   fetchCalendarDays: () => new Promise(() => {}),
 }))
-vi.mock('react-chartjs-2', () => ({ Bar: () => null }))
+vi.mock('react-chartjs-2', () => ({ Bar: () => null, Line: () => null }))
 
 /**
  * Design-System.md, Feedback & System States: every section that fetches on load shows a skeleton
@@ -41,9 +41,11 @@ describe('Clinic Overview Dashboard: first-load skeletons', () => {
       expect(list.querySelectorAll('[data-skeleton="list-row"]').length).toBeGreaterThan(0)
     }
 
-    // Trends chart: five small-multiple placeholders.
+    // Trends row: a line-chart frame plus the common-complaints list with five bar rows.
     expect(q('complaint-trends')).toHaveLength(1)
-    expect(q('mini-chart')).toHaveLength(5)
+    expect(q('trend-chart')).toHaveLength(1)
+    expect(q('complaints-list')).toHaveLength(1)
+    expect(q('complaint-row')).toHaveLength(5)
 
     // Calendar: renders independently with a month-grid placeholder (default view).
     expect(screen.getByRole('heading', { name: 'Calendar' })).toBeInTheDocument()

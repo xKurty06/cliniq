@@ -43,6 +43,7 @@ const paths = {
       <path d="m8.5 12 2.5 2.5 4.5-5" />
     </>
   ),
+  chevronDown: <path d="m6 9 6 6 6-6" />,
   chevronLeft: <path d="m15 18-6-6 6-6" />,
   chevronRight: <path d="m9 18 6-6-6-6" />,
   clipboardList: (
@@ -56,6 +57,41 @@ const paths = {
     <>
       <circle cx="12" cy="12" r="10" />
       <path d="M12 6v6l4 2" />
+    </>
+  ),
+  fileText: (
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+    </>
+  ),
+  layoutGrid: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+    </>
+  ),
+  shieldPlus: (
+    <>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="M12 8v6M9 11h6" />
+    </>
+  ),
+  stethoscope: (
+    <>
+      <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+      <path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4" />
+      <circle cx="20" cy="10" r="2" />
+    </>
+  ),
+  userCog: (
+    <>
+      <circle cx="9" cy="7" r="4" />
+      <path d="M2 21v-2a4 4 0 0 1 4-4h6" />
+      <circle cx="18" cy="18" r="3" />
+      <path d="M18 14v1M18 21v1M21.5 16l-.9.5M15.4 19.5l-.9.5M21.5 20l-.9-.5M15.4 16.5l-.9-.5" />
     </>
   ),
   inbox: (

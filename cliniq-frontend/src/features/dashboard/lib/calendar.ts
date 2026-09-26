@@ -54,10 +54,12 @@ export function monthGrid(monthStart: ISODate): Array<Array<ISODate | null>> {
 }
 
 /**
- * Heatmap intensity: four steps of one hue (sequential, light → dark), each a documented token:
- * 0 = no activity (white), 1 = brand-green-light, 2 = brand-green, 3 = brand-green-dark.
- * Thresholds split the busiest day in the visible period into thirds, and the legend always prints
- * the numeric range for each step, so no reading depends on shade alone.
+ * Heatmap intensity: four steps of one hue (sequential, light → mid), all from documented tokens:
+ * 0 = no activity (white), 1 = brand-green-light at 40%, 2 = brand-green-light, 3 = brand-green.
+ * Every step keeps dark text (≥ 4.65:1). The ramp stops at brand-green instead of brand-green-dark
+ * so busy weeks don't paint the page in large saturated blocks. Thresholds split the busiest day in
+ * the visible period into thirds, and the legend always prints each step's numeric range, so no
+ * reading depends on shade alone.
  */
 export type HeatLevel = 0 | 1 | 2 | 3
 
@@ -81,10 +83,10 @@ export function heatLevel(total: number, scale: HeatScale): HeatLevel {
 
 /** Background + contrast-checked text color per level (see src/index.css contrast notes). */
 export const heatClasses: Record<HeatLevel, string> = {
-  0: 'bg-background text-text-secondary',
-  1: 'bg-brand-green-light text-text-primary', // 9.16:1
-  2: 'bg-brand-green text-text-primary', // 4.65:1
-  3: 'bg-brand-green-dark text-white', // 9.19:1
+  0: 'bg-surface text-text-secondary', // 5.68:1
+  1: 'bg-brand-green-light/40 text-text-primary', // ≥ 13:1
+  2: 'bg-brand-green-light text-text-primary', // 9.16:1
+  3: 'bg-brand-green text-text-primary', // 4.65:1
 }
 
 export function legendSteps(scale: HeatScale): Array<{ level: HeatLevel; label: string }> {

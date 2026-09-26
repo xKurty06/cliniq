@@ -2,7 +2,7 @@ import { useId, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Icon, type IconName } from '../icons/Icon'
 import { Badge } from './Badge'
-import { Card, CardHeader } from './Card'
+import { Card, CARD_SURFACE, CardHeader } from './Card'
 import { EmptyState } from './EmptyState'
 import { RowList } from './ListRow'
 import { Skeleton } from './Skeleton'
@@ -44,7 +44,7 @@ export function ListCard({
         title={
           <span className="flex items-center gap-2">
             {title}
-            <Badge tone="neutral" icon={null}>
+            <Badge tone="neutral" variant="soft" icon={null}>
               <span className="sr-only">Count: </span>
               {count}
             </Badge>
@@ -97,10 +97,10 @@ export function ListCardSkeleton({
     <div
       aria-hidden="true"
       data-skeleton="list-card"
-      className={cn('flex flex-col rounded-lg border border-border bg-background', className)}
+      className={cn(CARD_SURFACE, 'flex flex-col', className)}
     >
-      <div className="flex items-start gap-2 border-b border-border px-4 py-3">
-        <span className="mt-0.5 shrink-0 text-text-secondary">
+      <div className="flex items-start gap-2.5 px-5 pt-5 pb-3">
+        <span className="mt-0.5 shrink-0 text-brand-green-dark">
           <Icon name={icon} />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -112,20 +112,25 @@ export function ListCardSkeleton({
           <Skeleton className="h-3 w-2/3" />
         </div>
       </div>
-      <ul className={cn('divide-y divide-border overflow-hidden', maxHeightClass)}>
+      <ul
+        className={cn(
+          'divide-y divide-border overflow-hidden border-t border-border',
+          maxHeightClass,
+        )}
+      >
         {Array.from({ length: rows }, (_, i) => (
           <li
             key={i}
             data-skeleton="list-row"
-            className="flex items-center justify-between gap-3 px-4 py-2.5"
+            className="flex items-start justify-between gap-3 px-5 py-3"
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <Skeleton className="h-3.5 w-24" />
               {withSecondary && <Skeleton className="h-3 w-40 max-w-full" />}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <Skeleton className="h-3 w-16" />
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
               <Skeleton className="h-5 w-20 rounded-sm" />
+              <Skeleton className="h-3 w-16" />
             </div>
           </li>
         ))}

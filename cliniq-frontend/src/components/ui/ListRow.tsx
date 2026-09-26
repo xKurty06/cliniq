@@ -17,25 +17,36 @@ export interface ListRowProps {
   meta?: ReactNode
   /** Status badge(s). */
   trailing?: ReactNode
+  /** True only for rows/cards that navigate or otherwise respond to click. Static rows stay static. */
+  interactive?: boolean
   className?: string
 }
 
-export function ListRow({ primary, secondary, meta, trailing, className }: ListRowProps) {
+export function ListRow({
+  primary,
+  secondary,
+  meta,
+  trailing,
+  interactive = false,
+  className,
+}: ListRowProps) {
   return (
     <li
       className={cn(
-        'flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2.5',
+        'flex items-start justify-between gap-3 px-5 py-3',
+        interactive &&
+          'cursor-pointer transition-colors hover:bg-surface motion-reduce:transition-none',
         className,
       )}
     >
-      <div className="min-w-0 flex-1 basis-40">
-        <div className="text-sm font-semibold text-text-primary tabular-nums">{primary}</div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold text-text-primary">{primary}</div>
         {secondary && <div className="truncate text-xs text-text-secondary">{secondary}</div>}
       </div>
       {(meta || trailing) && (
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+        <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+          {trailing && <div className="flex flex-wrap justify-end gap-1">{trailing}</div>}
           {meta && <span className="text-xs text-text-secondary tabular-nums">{meta}</span>}
-          {trailing}
         </div>
       )}
     </li>
@@ -51,7 +62,10 @@ export interface RowListProps {
 
 export function RowList({ children, labelledBy, className }: RowListProps) {
   return (
-    <ul aria-labelledby={labelledBy} className={cn('divide-y divide-border', className)}>
+    <ul
+      aria-labelledby={labelledBy}
+      className={cn('divide-y divide-border border-t border-border', className)}
+    >
       {children}
     </ul>
   )

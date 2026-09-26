@@ -2,19 +2,15 @@ import type { HTMLAttributes, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 /**
- * Card: the standard white container on the page. The border and radius are shared by every panel,
- * so sections separate by outline, not by heavy shadow.
+ * The shared panel surface: white, rounded-lg, soft shadow, no outline (reference-mockup style).
+ * Print and forced-colors modes get a real border back, since shadows don't survive either.
+ * Use this class for any custom container (skeletons included) so every panel matches.
  */
+export const CARD_SURFACE =
+  'rounded-lg bg-background shadow-card forced-colors:border print:border print:border-border print:shadow-none'
+
 export function Card({ className, ...rest }: HTMLAttributes<HTMLElement>) {
-  return (
-    <section
-      className={cn(
-        'rounded-lg border border-border bg-background print:break-inside-avoid',
-        className,
-      )}
-      {...rest}
-    />
-  )
+  return <section className={cn(CARD_SURFACE, 'print:break-inside-avoid', className)} {...rest} />
 }
 
 export interface CardHeaderProps {
@@ -43,17 +39,17 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        'flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-border px-4 py-3',
+        'flex flex-wrap items-start justify-between gap-x-4 gap-y-3 px-5 pt-5 pb-3',
         className,
       )}
     >
-      <div className="flex min-w-0 items-start gap-2">
-        {icon && <span className="mt-0.5 shrink-0 text-text-secondary">{icon}</span>}
+      <div className="flex min-w-0 items-start gap-2.5">
+        {icon && <span className="mt-0.5 shrink-0 text-brand-green-dark">{icon}</span>}
         <div className="min-w-0">
           <Heading id={titleId} className="text-base font-semibold text-text-primary">
             {title}
           </Heading>
-          {description && <p className="text-xs text-text-secondary">{description}</p>}
+          {description && <p className="mt-0.5 text-xs text-text-secondary">{description}</p>}
         </div>
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2 print:hidden">{actions}</div>}
@@ -62,5 +58,5 @@ export function CardHeader({
 }
 
 export function CardBody({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('p-4', className)} {...rest} />
+  return <div className={cn('px-5 pb-5', className)} {...rest} />
 }

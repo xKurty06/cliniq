@@ -3,10 +3,10 @@ import type { StatusMap } from '../ui/StatusBadge'
 
 /** FollowUp.status lifecycle (Module 3): Pending → Completed / Missed / Cancelled. */
 export const followUpStatusMap: StatusMap<FollowUpStatus> = {
-  pending: { label: 'Pending', tone: 'info', icon: 'clock', variant: 'outline' },
-  completed: { label: 'Completed', tone: 'success', icon: 'checkCircle' },
-  missed: { label: 'Missed', tone: 'error', icon: 'xCircle' },
-  cancelled: { label: 'Cancelled', tone: 'neutral', icon: 'xCircle' },
+  pending: { label: 'Pending', tone: 'info', icon: 'clock', variant: 'soft' },
+  completed: { label: 'Completed', tone: 'success', icon: 'checkCircle', variant: 'soft' },
+  missed: { label: 'Missed', tone: 'error', icon: 'xCircle', variant: 'soft' },
+  cancelled: { label: 'Cancelled', tone: 'neutral', icon: 'xCircle', variant: 'soft' },
 }
 
 /**
@@ -17,7 +17,7 @@ export const followUpStatusMap: StatusMap<FollowUpStatus> = {
 export type FollowUpDueState = 'overdue' | 'due_today' | 'upcoming'
 
 export const followUpDueMap: StatusMap<FollowUpDueState> = {
-  overdue: { label: 'Overdue', tone: 'error', icon: 'alertOctagon' },
-  due_today: { label: 'Due today', tone: 'warning', icon: 'clock' },
-  upcoming: { label: 'Upcoming', tone: 'info', icon: 'calendarClock', variant: 'outline' },
+  overdue: { label: 'Overdue', tone: 'error', icon: 'alertOctagon', variant: 'soft' },
+  due_today: { label: 'Due today', tone: 'warning', icon: 'clock', variant: 'soft' },
+  upcoming: { label: 'Upcoming', tone: 'info', icon: 'calendarClock', variant: 'soft' },
 }

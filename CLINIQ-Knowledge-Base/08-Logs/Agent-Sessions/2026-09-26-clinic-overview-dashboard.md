@@ -80,3 +80,49 @@ Changes: `Skeleton` fill moved from `surface` (1.09:1 on white cards, barely vis
 Testing: new `DashboardLoading.test.tsx` holds both requests open and asserts 5 stat-card, 3 list-card (each with its real title and row placeholders), 1 trends skeleton with 5 mini-charts, a month-grid calendar skeleton, 2 screen-reader loading announcements, and no `.animate-spin`. The error-state test was updated for the independent calendar (page and calendar each show their own retry). 4 files / 24 tests pass; tsc, ESLint, Prettier, and build are clean. Visually verified mid-load in Chrome (`?mock=slow`, 1440px): every section shows its own shape.
 
 Confirm: PASS after fix.
+
+---
+
+## Addendum 2: layout redesign to match the reference mockup (Saturday, September 26, 2026 — 22:08)
+
+Prompt/Request: "The design and layouts doesn't look like the reference", with a crop of the reference mockup's Staff Dashboard and Admin Dashboard.
+
+Asked first (owner's answers):
+1. The reference's look depends on the App Shell (#3), which the original brief excluded and which depends on the open routing decision → **"Visual shell, Dashboard only"**: sidebar + top bar as a layout, no router, only Dashboard live, other nav items shown as "Soon" and not clickable, no search box (search doesn't exist yet).
+2. Header → **"Greeting, no button yet"**: Staff see "Good morning/afternoon/evening, Nurse Jane!", Admin see "Clinic Overview"; no New Visit button until #11 exists.
+
+Changes:
+- **New `src/layouts/AppShell.tsx` + `layouts/navigation.ts`:** white sidebar with the CLINIQ shield wordmark and role-aware nav (Staff: Dashboard, Students, Visits, Incidents, Inventory, Reports, Accounts, in the mockup's order; Admin: Dashboard, Reports). Active item is filled `brand-green-dark` with white text (9.19:1; the mockup's `brand-green` would fail for small text). Top bar has a user chip (initials, name, role). Includes a skip link. Hidden when printing. `src/lib/mocks/session.ts`: mock user; `?role=admin` previews the Admin view.
+- **Page:** light `surface` background with white cards (like the reference). The grey filter bar was removed; the period selector now sits top-right in the header next to Print (new `compact` variant of `DateRangePicker`, still with a visible label).
+- **Stat cards:** reference layout (small label with icon → large number → one caption line). The low-stock count uses `warning` when above 0 (large text, 4.88:1; the label still carries the meaning).
+- **Trends row, now as in the reference:** "Visits trend" line chart with a 10% area wash (2/3 width, weekly/monthly toggle, chart/table toggle) + "Common complaints" labeled horizontal bars (1/3 width). The symptom-cluster marker is drawn on the line (warning point + ⚠ triangle), and the flagged complaint bars are warning-colored with ⚠ + text. The table view keeps the full complaint × period breakdown plus a totals row. This still satisfies Reference 1 item 4: by week/month, bar/line, marker on the chart.
+- **Alert lists:** rows restyled to two lines in narrow columns (badge above date on the right); frequent-visitor count moved under the Student Number; descriptions shortened, keeping "a warning only, not a diagnosis".
+- **Calendar:** the heatmap ramp was calmed (light tint → `brand-green-light` → `brand-green`, all with dark text ≥ 4.65:1) and cells shortened, so busy weeks no longer paint large saturated blocks.
+- **Skeletons** updated to the new shapes (stat card, trend chart frame, complaint rows, list rows).
+
+Kept on purpose, unlike the reference: the Staff mockup's "Recent Visits" table (that belongs to the Staff Dashboard #4, not #31), the search box and bell (not features yet), and the New Visit button (see answer 2). Section order still follows Reference 1 (stats → alerts → trends → calendar).
+
+Testing: 25 tests pass (a new Admin-title test; tests updated for the new layout); tsc/ESLint/Prettier/build clean; axe 0 violations for Staff, Admin, empty, and error; no page-level horizontal scroll at 400px; Staff, Admin, and loading states reviewed in Chrome at 1440px.
+
+Known issues / next: the real App Shell (#3) still needs the routing decision, plus placement of Follow-Ups, QR lookup, and Backup in the nav. The mobile nav below the `lg` breakpoint is a logo-only top bar for now.
+
+---
+
+## Addendum 3: visual modernization to match the reference (Saturday, September 26, 2026 — 22:22)
+
+Prompt/Request: "It still not look like the reference, it's not modern looking not close to the reference, etc."
+
+Method: rendered 3× zoomed crops of the reference's Staff and Admin dashboards and matched specific traits rather than guessing. The gaps were outlined cards (the reference uses soft shadows and no borders), the system font (the reference uses an Inter-style face), stat cards without colored label/figure, solid heavy badges (the reference uses pale pills), a cramped sidebar with "SOON" tags, thin bars (the reference uses thick rounded bars on one row), a flat trend fill (the reference uses a gradient), and tight spacing.
+
+Changes:
+- **Tokens (`src/index.css`):** Inter font self-hosted via `@fontsource-variable/inter` (bundled into the build, works offline on the LAN; **new dependency, flagged**); new `--shadow-card` / `--shadow-raised` (neutral near-black at low alpha, no new hue); radius set 6 / 8 / 12px (still one consistent set); `text-3xl` display size for stat figures.
+- **`Card` / new `CARD_SURFACE`:** white, rounded-lg, soft shadow, no outline. A border comes back in print and forced-colors modes. Header/body padding increased, and the header divider was removed.
+- **`StatCard`:** accent label → large bold figure → caption, with the required icon as a soft tinted chip. New `tone` (brand / error / warning / neutral): visits = brand-green-dark, incidents = error, incomplete records and low stock = warning, active students = neutral (contrast 9.19 / 4.98 / 4.88 at these sizes). Captions shortened; the trend direction word is kept for screen readers.
+- **`Badge`:** new `soft` variant (10% tint, icon in the semantic color, text-primary label, since tinted text on a tint would fall below 4.5:1). All status maps now use it.
+- **`SegmentedControl`:** selected option is a raised white chip with a brand-green ring (3.43:1 state indicator) and a dark-green label. **Buttons:** soft shadows, 40px height.
+- **Shell:** larger nav items (44px), raised active pill, logo tile, school name footer, top bar merged into the page background. The "Soon" tags were removed as visual noise; unbuilt items stay muted and non-clickable, with a "Coming soon" tooltip and a screen-reader "(not available yet)".
+- **Trends:** gradient area fill under the line; complaint bars as label | 12px rounded bar | value on one row (brand-green-dark, cluster = warning + ⚠ + text).
+- **Calendar:** borderless tiles (empty days = surface tile), wider gaps.
+- **Skeletons:** all moved to `CARD_SURFACE` and the new shapes.
+
+Testing: 25 tests pass; tsc/ESLint/Prettier/build clean; axe 0 violations (Staff, Admin, empty, error); no page-level horizontal scroll at 400px; Tab walk shows the skip link first and a visible focus ring on every stop; Staff, Admin, and loading views reviewed in Chrome at 1440px.

@@ -57,7 +57,7 @@ export function FollowUpsAlert({ summary }: { summary: DashboardSummary }) {
       title={LISTS.followUps.title}
       icon={LISTS.followUps.icon}
       count={rows.length}
-      description={`Pending follow-ups that are overdue, due today, or due in the next ${summary.upcomingWindowDays} days. Always counted from today, not from the date range.`}
+      description={`Overdue, due today, or due in the next ${summary.upcomingWindowDays} days. Counted from today.`}
       empty={{
         title: 'No follow-ups due',
         description: `Nothing is overdue, due today, or due in the next ${summary.upcomingWindowDays} days.`,
@@ -90,7 +90,7 @@ export function FrequentVisitorsAlert({
       title={LISTS.frequent.title}
       icon={LISTS.frequent.icon}
       count={rows.length}
-      description={`Students with ${summary.frequentVisitorMinVisits} or more visits (${scope}). This is a warning only, not a diagnosis or a recommended action.`}
+      description={`${summary.frequentVisitorMinVisits}+ visits (${scope}). A warning only, not a diagnosis.`}
       empty={{
         title: 'No frequent-visitor warnings',
         description: `No student reached ${summary.frequentVisitorMinVisits} visits in this date range.`,
@@ -100,7 +100,7 @@ export function FrequentVisitorsAlert({
         <ListRow
           key={row.student.id}
           primary={row.student.studentNumber}
-          meta={`${row.visitCount} visits`}
+          secondary={`${row.visitCount} visits`}
           trailing={<StatusBadge status="frequent_visits" map={frequentVisitorMap} />}
         />
       ))}
@@ -124,7 +124,7 @@ export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
       title={LISTS.inventory.title}
       icon={LISTS.inventory.icon}
       count={rows.length}
-      description="Current inventory. Low stock and expiry are separate flags, and an item can have both."
+      description="Current stock. Low stock and expiry are separate flags."
       empty={{
         title: 'No inventory alerts',
         description: 'Every item is above its low-stock threshold and not close to expiring.',

@@ -57,6 +57,8 @@ Semantic colors, each contrast-checked rather than assumed:
 ### Buttons & Shape Language
 Small-to-medium, consistent, comfortable to tap/click. Slightly rounded corners — softened modern UI, not sharp squares, not pill-shaped. One consistent radius scale across buttons, inputs, cards, dialogs, containers.
 
+**Cursor + hover on every interactive element, no exceptions:** `cursor: pointer` on anything clickable (buttons, links, dropdown triggers, navigable rows), never on static elements. A real hover color too, not just the cursor — primary buttons to `brand-green-dark`, secondary to a light `surface` tint, list rows to a subtle `surface` tint. Dropdowns/selects get the same border/radius/focus treatment as text inputs, `appearance: none` plus a custom chevron — never left as native OS styling.
+
 **Hierarchy, using the tokens above:** primary = filled `brand-green`, white text (button-label text counts as large/UI text at this contrast level — see the contrast rules above for exactly where that line is). Secondary = outlined or `surface`-filled, `brand-green` text, no heavy fill. Cancel/neutral = plain text or quiet gray outline. Destructive = filled `error` red, reserved only for genuinely irreversible actions — never for routine "cancel" or "go back."
 
 ### Layout & Spacing
