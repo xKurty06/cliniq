@@ -75,7 +75,7 @@ This category grew the most on the second pass. Three real options, not fully ov
 ```
 30+ Laravel-specific slash commands, actively maintained. The two most relevant to CLINIQ specifically:
 - **`/lc:security-audit`** — scans for SQL injection, XSS, mass-assignment, and exposed secrets, with a `--dry-run` fix preview. Given CLINIQ handles minors' health records under RA 10173, running this before every deploy is cheap insurance, not overkill.
-- **`/lc:consolidate-migrations`** and **`/lc:unused-columns`** — now directly usable once the backend scaffold exists, against the ERD/migrations already built in `02-Architecture/Database/ERD.md`, for keeping schema history clean rather than accumulating cruft.
+- **`/lc:consolidate-migrations`** and **`/lc:unused-columns`** — useful once the database is actually designed and migrations exist (`02-Architecture/Database/ERD.md` is TBA), for keeping schema history clean rather than accumulating cruft.
 
 ### Option B — `Foysal50x/skills` (from the first pass, still solid)
 ```
@@ -130,4 +130,4 @@ No separate install needed here — this table exists so it's clear the testing 
 - **GDPR-specific compliance checkers** — wrong jurisdiction (CLINIQ answers to RA 10173, a different legal framework); the general-purpose `pii-detector` is the useful half of that pack, not the GDPR-rule-specific half.
 
 ## When to revisit this list
-Skill ecosystems move fast — re-check maintenance status the same way ADR-007 did for the tech stack (last real release, current adoption) before installing, rather than assuming this list stays accurate indefinitely. Revisit specifically once: the data-fetching library gets chosen (add the matching skill), and the backend scaffold exists (unblocks actually running any of this, including the migration-focused Laravel skills against the ERD that's already built).
+Skill ecosystems move fast — re-check maintenance status the same way ADR-007 did for the tech stack (last real release, current adoption) before installing, rather than assuming this list stays accurate indefinitely. Revisit specifically once: the data-fetching library gets chosen (add the matching skill), the database schema is actually designed (unblocks the migration-focused Laravel skills), and the backend scaffold exists (unblocks actually running any of this).

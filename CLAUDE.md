@@ -9,7 +9,7 @@ You are working on **CLINIQ: Intelligent Clinic Tracking and Monitoring System**
 1. Read `CLINIQ-Knowledge-Base/00-Project-Core/Overview.md` — what this system is and who it's for.
 2. Read `CLINIQ-Knowledge-Base/02-Architecture/Tech-Stack.md` and `CLINIQ-Knowledge-Base/02-Architecture/System-Architecture.md`.
 3. Read `CLINIQ-Knowledge-Base/01-Requirements/` for the requirement(s) relevant to your task.
-4. If your task is actual feature-building (not a one-off fix), check `CLINIQ-Knowledge-Base/04-Development/Development-Phases.md` for where it falls in the frontend/backend phase sequence — don't build ahead of a phase's prerequisites (e.g., don't wire real API calls into a Phase F1 screen still meant to run on mock data; the schema blocker has been resolved — see `02-Architecture/Database/ERD.md` — but check its two flagged first-draft decisions before treating migrations as final).
+4. If your task is actual feature-building (not a one-off fix), check `CLINIQ-Knowledge-Base/04-Development/Development-Phases.md` for where it falls in the frontend/backend phase sequence — don't build ahead of a phase's prerequisites (e.g., don't start backend schema work — the ERD is TBA, not yet designed; don't wire real API calls into a Phase F1 screen still meant to run on mock data).
 5. **Check `CLINIQ-Knowledge-Base/06-Decisions/` — do not contradict an existing decision.** If your task seems to require reversing one, stop and ask rather than silently overriding it.
 6. Check `CLINIQ-Knowledge-Base/08-Logs/Changelog.md` for recent changes that might affect your task.
 7. Check `CLINIQ-Knowledge-Base/08-Logs/Issues-and-TODOs.md` for known issues and open items relevant to your task.

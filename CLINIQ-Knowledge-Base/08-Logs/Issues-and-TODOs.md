@@ -13,10 +13,11 @@
 - ~~Laravel Sanctum, Vite, and QR libraries~~ — confirmed September 25, 2026, after researching current maintenance/compatibility status. See `06-Decisions/ADR-007-Stack-Finalization.md` and `02-Architecture/Tech-Stack.md`.
 - ~~XAMPP standardization~~ — confirmed.
 - ~~Chart.js vs. Recharts~~ — Chart.js chosen, for bundle size and Canvas rendering given the 4GB RAM target.
-- ~~No SRS diagrams (DFD, Use-Case, ERD, Activity Diagram)~~ — built directly from already-documented requirements rather than waiting on an external upload; see `02-Architecture/Database/`. Two schema-level decisions in the ERD are flagged as first-draft, not independently reviewed yet.
+- ~~No DFD, Use-Case Diagram, or Activity Diagram~~ — built directly from already-documented requirements rather than waiting on an external upload; see `02-Architecture/Database/`. The ERD is separate and remains TBA (see Known gaps below) — those three don't commit to a database schema the way an ERD does, so they weren't reverted with it.
 
 ## Known gaps
 
+- Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
 - No code exists yet — this vault was set up before implementation began, per the team's explicit request.
 
 ## Format for new entries
