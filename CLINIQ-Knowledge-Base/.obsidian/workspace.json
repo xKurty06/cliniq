@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "00-Project-Core/Team-and-Roles.md",
+                "file": "00-Project-Core/Objectives.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Team-and-Roles"
+              "title": "Objectives"
             }
           }
         ]
@@ -83,7 +83,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 236.5
+    "width": 393.5
   },
   "right": {
     "id": "cfd9de5260c239ef",
@@ -187,11 +187,16 @@
       "bases:Create new base": false
     }
   },
-  "active": "a83dbf2f7b145dd2",
+  "active": "86556129b006cf79",
   "lastOpenFiles": [
+    "03-Design/assets/reference-mockup.png",
+    "04-Development/Development-Phases.md",
+    "04-Development/Coding-Conventions.md",
+    "07-AI-Agents/Source-of-Truth-Hierarchy.md",
+    "07-AI-Agents/Agent-Workflow.md",
+    "00-Project-Core/Team-and-Roles.md",
     "08-Logs/Agent-Sessions/2026-09-26-frontend-loop-engineering.md",
     "04-Development/Frontend-Loop-Engineering.md",
-    "03-Design/assets/reference-mockup.png",
     "03-Design/assets",
     "08-Logs/Agent-Sessions/2026-09-25-erd-reverted-to-tba.md",
     "00-Project-Core/Overview.md",
@@ -209,14 +214,8 @@
     "README.md",
     "08-Logs/Changelog.md",
     "08-Logs/Agent-Sessions/2026-09-25-development-phases.md",
-    "04-Development/Development-Phases.md",
     "09-References/External-References.md",
     "09-References/Canonical-Documents.md",
-    "09-References/Canonical-Documents/CLINIQ_Review_of_Related_Systems.md",
-    "09-References/Canonical-Documents/CLINIQ_Project_Plan.md",
-    "09-References/Canonical-Documents/CLINIQ_Modules_and_Features.md",
-    "09-References/Canonical-Documents/CLINIQ_Frontend_Design_Reference.md",
-    "09-References/Canonical-Documents/CLINIQ_Frontend_Context_Brief.md",
     "09-References/Canonical-Documents",
     "09-References",
     "08-Logs/Agent-Sessions",
