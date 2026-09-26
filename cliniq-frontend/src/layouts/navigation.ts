@@ -6,11 +6,20 @@ import type { UserRole } from '../types/entities'
  * module; Admin/Principal sees Dashboard + Reports only; PE/Sports Instructor gets no shell at all.
  *
  * `available: false` marks screens not built yet. The shell shows them as "Soon" and not clickable,
- * so nothing looks like it works when it doesn't. Item list and order follow the reference mockup.
- * Where Follow-Ups, QR lookup, and Backup appear is still for #3 to decide.
+ * so nothing looks like it works when it doesn't. Groups organize destinations around the user's
+ * work: overview, care delivery, operations, and administration.
  */
 export type NavKey =
-  'dashboard' | 'students' | 'visits' | 'incidents' | 'inventory' | 'reports' | 'accounts'
+  | 'dashboard'
+  | 'students'
+  | 'visits'
+  | 'incidents'
+  | 'followUps'
+  | 'qrLookup'
+  | 'inventory'
+  | 'reports'
+  | 'accounts'
+  | 'backup'
 
 export interface NavItem {
   key: NavKey
@@ -24,13 +33,36 @@ const ALL: Record<NavKey, NavItem> = {
   students: { key: 'students', label: 'Students', icon: 'users', available: false },
   visits: { key: 'visits', label: 'Visits', icon: 'stethoscope', available: false },
   incidents: { key: 'incidents', label: 'Incidents', icon: 'alertTriangle', available: false },
+  followUps: { key: 'followUps', label: 'Follow-Ups', icon: 'calendarClock', available: false },
+  qrLookup: { key: 'qrLookup', label: 'QR Lookup', icon: 'qrCode', available: false },
   inventory: { key: 'inventory', label: 'Inventory', icon: 'package', available: false },
   reports: { key: 'reports', label: 'Reports', icon: 'fileText', available: false },
   accounts: { key: 'accounts', label: 'Accounts', icon: 'userCog', available: false },
+  backup: { key: 'backup', label: 'Backup', icon: 'refresh', available: false },
 }
 
-export function navItemsFor(role: UserRole): NavItem[] {
-  if (role === 'admin') return [ALL.dashboard, ALL.reports]
-  if (role === 'staff') return Object.values(ALL)
+export interface NavGroup {
+  label: string
+  items: NavItem[]
+}
+
+export function navGroupsFor(role: UserRole): NavGroup[] {
+  if (role === 'admin') {
+    return [
+      { label: 'Overview', items: [ALL.dashboard] },
+      { label: 'Reporting', items: [ALL.reports] },
+    ]
+  }
+  if (role === 'staff') {
+    return [
+      { label: 'Overview', items: [ALL.dashboard] },
+      {
+        label: 'Student Care',
+        items: [ALL.students, ALL.visits, ALL.incidents, ALL.followUps, ALL.qrLookup],
+      },
+      { label: 'Operations', items: [ALL.inventory, ALL.reports] },
+      { label: 'Administration', items: [ALL.accounts, ALL.backup] },
+    ]
+  }
   return []
 }

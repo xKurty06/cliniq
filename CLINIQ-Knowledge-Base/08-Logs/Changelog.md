@@ -6,6 +6,10 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Sunday, September 27, 2026 — 04:49 | Smoothed the collapsible sidebar animation by moving from grid-column swapping to sidebar-owned width and label transitions | `cliniq-frontend/src/layouts/`; see `08-Logs/Agent-Sessions/2026-09-27-sidebar-collapse-animation-smoothing.md` |
+| Sunday, September 27, 2026 — 04:46 | Adjusted the expanded sidebar collapse icon closer to the edge and removed its hover background | `cliniq-frontend/src/layouts/Sidebar.tsx`; see `08-Logs/Agent-Sessions/2026-09-27-sidebar-collapse-icon-adjustment.md` |
+| Sunday, September 27, 2026 — 04:44 | Refactored the app shell sidebar into a collapsible component with a reference-style collapse icon and logo-to-hamburger collapsed hover behavior | `cliniq-frontend/src/layouts/`; see `08-Logs/Agent-Sessions/2026-09-27-collapsible-sidebar-refactor.md` |
+| Sunday, September 27, 2026 — 04:36 | Organized the app shell sidebar into role-aware page categories and added disabled destinations for Follow-Ups, QR Lookup, and Backup | `cliniq-frontend/src/layouts/`; see `08-Logs/Agent-Sessions/2026-09-27-sidebar-page-categorization.md` |
 | Sunday, September 27, 2026 — 04:29 | Fixed the app shell navbar surface so it matches the sidebar instead of blending into the gray page surface | `cliniq-frontend/src/layouts/AppShell.tsx`; see `08-Logs/Agent-Sessions/2026-09-27-navbar-sidebar-color-fix.md` |
 | 2026-09-13 | Project Plan created; tech stack upgraded to React+Laravel; group roster corrected | Project Plan rev 1.0–1.2 |
 | 2026-09-13 | Review of Existing Alternatives rebuilt with 10 researched systems | Project Plan rev 1.3 |

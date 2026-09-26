@@ -79,6 +79,12 @@ const paths = {
       <path d="M12 8v6M9 11h6" />
     </>
   ),
+  sidebarCollapse: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="3" />
+      <path d="M9 4v16M14 9l-3 3 3 3" />
+    </>
+  ),
   stethoscope: (
     <>
       <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
@@ -107,6 +113,11 @@ const paths = {
     </>
   ),
   minus: <path d="M5 12h14" />,
+  menu: (
+    <>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </>
+  ),
   package: (
     <>
       <path d="m7.5 4.3 9 5.1" />
@@ -119,6 +130,14 @@ const paths = {
       <path d="M6 9V2h12v7" />
       <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
       <rect x="6" y="14" width="12" height="8" />
+    </>
+  ),
+  qrCode: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <path d="M14 14h2v2h-2zM19 14h2M14 19h2M19 19h2v2h-2zM16 16h3v3" />
     </>
   ),
   refresh: (
