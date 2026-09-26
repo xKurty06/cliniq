@@ -20,7 +20,7 @@ Built for **Mendez Christian Academy** — Asis III, Mendez, Cavite, Philippines
 
 ![Status](https://img.shields.io/badge/status-planning%20%26%20architecture%20complete-yellow?style=flat-square)
 ![Deployment](https://img.shields.io/badge/deployment-local%20LAN-blue?style=flat-square)
-![License](https://img.shields.io/badge/license-not%20yet%20decided-lightgrey?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
 </div>
 
@@ -201,7 +201,7 @@ This project takes documentation seriously — every real decision has a paper t
 
 ## 📄 License
 
-Not yet decided — this is a real, unresolved item, not an oversight. Flag it with the team before assuming any particular license applies.
+MIT — see [`LICENSE`](./LICENSE). This was decided directly in the repo (not through this chat/vault workflow) — caught and synced here after checking the live GitHub repo, per the standing rule that the vault must be verified against GitHub before edits, not assumed current.
 
 <br/>
 

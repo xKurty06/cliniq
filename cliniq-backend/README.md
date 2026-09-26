@@ -1,5 +1,7 @@
 # cliniq-backend
 
+> ⚠️ **If this folder is empty/skeleton-only, that's expected — this is what a chat-generated zip export produces before any real backend code exists.** If you're copying a zip export into your actual project folder, never let this folder overwrite a `cliniq-backend/` that already has real code in it — that would destroy working code. See `AGENTS.md`, "Before you start any task," Step 0a, for the full rule.
+
 Laravel API backend. Not yet scaffolded — `composer create-project laravel/laravel .` will generate the standard `app/`, `database/`, `routes/`, `config/` structure here once environment setup is approved and executed (CLINIQ-Knowledge-Base/04-Development/Environment-Setup.md).
 
 **Code organization is modular, mirroring the frontend directly** — see `CLINIQ-Knowledge-Base/06-Decisions/ADR-009-Modular-Backend-Architecture.md`. Once scaffolded, code doesn't go into Laravel's default flat `app/Models/`/`app/Http/Controllers/` — it goes into:

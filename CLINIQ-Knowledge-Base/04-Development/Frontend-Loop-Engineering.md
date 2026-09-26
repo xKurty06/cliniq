@@ -1,58 +1,94 @@
-# Frontend Loop Engineering — Build, Countercheck, Audit, Simulate, Confirm
+# Frontend Loop Engineering — Build Everything, Then Cross-Check & Audit Everything
 
-This is the **operating manual an agent keeps open while actually building**, not a one-time read. `Development-Phases.md` says *what* to build and in what order (F0→F3); this file says *how* to build each individual screen without drifting from what's already been decided, and gives a resumable checklist so a fresh agent can pick up exactly where a previous one stopped — including mid-token-limit, mid-screen.
+This is the **operating manual an agent keeps open while actually building**, not a one-time read. `Development-Phases.md` says *what* to build and in what order (F0→F3); this file says *how*, and gives a resumable checklist so a fresh agent can pick up exactly where a previous one stopped — including mid-token-limit, mid-screen.
 
 **Frontend only.** This covers F0–F3. There is no backend equivalent of this file yet.
 
+**Sequencing, revised from the original per-screen loop:** build every screen first, completely, before any cross-checking or auditing happens. Don't interleave build-then-check-then-build-then-check per screen — that was the original design, and it burns tokens/credits fast, since every single screen triggered a full Countercheck+Audit+Simulate cycle before the next one could start. Now: one full Build Phase across everything, then one full Cross-Check & Audit Phase across everything, screen by screen, afterward.
+
+**Known trade-off, accepted deliberately:** if an early screen gets a color token or a shared-component pattern wrong, every later screen that copies it inherits the mistake before anyone catches it — versus catching it on screen one under the old per-screen loop. That's a real cost. It's accepted here because the Simulate step (Phase 2) actually gets *better* under this sequencing, not worse: tracing a full cross-screen flow (QR scan → Record Visit → Follow-Up → Dashboard) only genuinely works once every screen in that chain actually exists, which wasn't true when screens were being audited one at a time as they were built.
+
 ---
 
-## The Loop
+## Phase 0 — Read What's Changed, Before Building Anything
 
-Run this cycle for **every screen or shared component**, no exceptions, before checking its box below.
+**Do this once, before Phase 1 starts building any screen at all — not per screen.** Building 30 screens against a stale understanding of the design system, then discovering the mistake during Phase 2, is exactly the expensive failure mode this restructuring is supposed to avoid.
+
+1. Read `08-Logs/Changelog.md` in full — not just skimmed, since this is the record of every rule, skill, and requirement change made since the source documents (`Design-System.md`, `Reference-Screens.md`, `Module-Overview.md`, `Screen-Inventory.md`) were last substantively rewritten.
+2. Read `06-Decisions/` — every ADR, especially any dated after your last understanding of the project. Don't contradict one; if a decision seems to require reversing, stop and ask rather than building around it silently.
+3. Read `08-Logs/Issues-and-TODOs.md` for open items that could affect multiple screens (e.g., the two blocking F0 decisions, the reason-visibility question flagged in the design audit).
+4. Read `.claude/skills/` in full — `cliniq-display-privacy`, `cliniq-audit-trail`, `cliniq-interactive-states` (check `04-Development/Skills-Setup.md` for the current complete list; don't trust a hardcoded name list anywhere, including in this file, since that's exactly the kind of thing that goes stale).
+5. Only after all four of the above: proceed to Phase 1.
+
+**Run this phase once per continuous session, not once per screen.** If you're building several screens back to back in one session, the context from this read-through is already loaded — re-reading it before every individual screen just burns credits for no new information. Only redo Phase 0 when starting a genuinely fresh session or after a real time gap.
+
+**Model tiering, if your environment supports switching:** the 5 reference screens (Phase 1, F1) and this Phase 0 reasoning benefit from a more capable model — they're foundational, and mistakes here propagate. Most of Phase 1's remaining F2 screens are pattern-following once F1 establishes the shared components, and don't need the same tier. See `AGENTS.md`'s "While you work" section for the full cost-conscious practices this project expects, including preferring deterministic tools (linters, test runners, accessibility CLIs) over an AI reasoning pass wherever one exists.
+
+This step exists because of a real incident, not a hypothetical one — the Dashboard was built before `cliniq-interactive-states` existed, and needed a retroactive audit once it was added. Reading the logs first, once, before building 30+ screens, is far cheaper than discovering the same gap after everything is already built.
+
+---
+
+## Phase 1 — Build (Every Screen)
+
+For each screen or shared component, in the order given in the Checklist below:
 
 ### 1. Read
 Pull the exact requirements for this specific item — not the whole project, just this one:
 - Its entry in `03-Design/Screen-Inventory.md` (or `Module-Overview.md` for the underlying feature logic)
-- `03-Design/Design-System.md` for anything general (colors, spacing, button hierarchy)
+- `03-Design/Design-System.md` for anything general (colors, spacing, button hierarchy, interactive states, skeleton loading)
 - If it's one of the 5 reference screens, or maps to one via the extrapolation table: `03-Design/Reference-Screens.md`
 - If a matching screen exists in the reference mockup image (see "Using the Reference Mockup Image" below): note what it shows, but don't build from the image alone
 
 ### 2. Build
 Write the screen/component.
 
-### 3. Countercheck
-Go back to the **Read** step's sources and verify, item by item, that every documented requirement for *this specific screen* is actually present — not "looks about right." If the source says a field is required, confirm the field exists and is marked required. If it says a button routes somewhere specific, confirm the route target. Treat this like grading against a rubric, not a vibe check.
+### 3. Log + Check Off (Build)
+- Check the screen's **Build** box in the Checklist below.
+- Fill in its **Build Resume Note** — one line: what's actually built, and what's next if you had to stop right now.
+- Add a brief `08-Logs/Agent-Sessions/` entry if this is a natural stopping point (a full entry per screen isn't required in this phase — batching several screens into one session log entry is fine, since the detailed verification happens in Phase 2 anyway).
 
-### 4. Audit
+**Do not Countercheck, Audit, Simulate, or Confirm in this phase.** That's Phase 2, deliberately deferred, for every screen, not just this one.
+
+**Order still matters within this phase.** Build the 5 reference screens first, in the specified order (see Checklist, Phase 1 — F1 section) — later screens reuse the shared components and patterns those five establish, and building them out of order means re-deriving patterns that already existed.
+
+---
+
+## Phase 2 — Cross-Check & Audit (Every Screen, Only After Phase 1 Is Entirely Done)
+
+**Do not start this phase until every screen's Build box is checked.** For each screen, in the same order it was built:
+
+### 1. Countercheck
+Go back to the same sources read in Phase 1 and verify, item by item, that every documented requirement for *this specific screen* actually made it into what got built — not "looks about right." If a source says a field is required, confirm it exists and is marked required. If it says a button routes somewhere specific, confirm the route target. Treat this like grading against a rubric.
+
+### 2. Audit
 - **Display-privacy rule** — check against `.claude/skills/cliniq-display-privacy/`: does this screen show a name where it should show a Student Number, or vice versa?
 - **Audit trail** — check against `.claude/skills/cliniq-audit-trail/`: if this screen creates/edits/deletes/approves anything, is the logging call wired in?
-- **Interactive states** — check against `.claude/skills/cliniq-interactive-states/`: does every button, link, dropdown, and navigable row have a cursor state and a real hover color, not just a cursor change? Are all dropdowns/selects custom-styled, not native OS chrome? This was missed entirely on the first Dashboard build — verify explicitly, don't assume it's handled.
-- **Skeleton loading state** — if this screen fetches data on load (nearly all of them do), does it show a skeleton matching its final layout, not a spinner or a blank screen? Per `Design-System.md`'s Feedback & System States — this applies universally, not just to the Dashboard where it was first specified.
-- **Accessibility** — run the accessibility skills (`better-accessibility`, `claude-a11y-skill` once installed) against the screen: contrast, focus states, labels, keyboard operability.
+- **Interactive states** — check against `.claude/skills/cliniq-interactive-states/`: does every button, link, dropdown, and navigable row have a cursor state and a real hover color, not just a cursor change? Are all dropdowns/selects custom-styled, not native OS chrome?
+- **Skeleton loading state** — if this screen fetches data on load (nearly all of them do), does it show a skeleton matching its final layout, not a spinner or a blank screen?
+- **Accessibility** — run the accessibility skills (`better-accessibility`, `claude-a11y-skill` once installed): contrast, focus states, labels, keyboard operability.
 - **Color tokens** — every color used traces back to `Design-System.md`'s actual token table, not a value picked by eye.
 - **Reference mockup cross-check, where applicable** — see below.
+- **Retroactive check** — was this screen built before a rule that now applies to it existed (check the Changelog dates)? If so, this Audit pass is exactly where that gets caught — don't assume Phase 0's read-through means everything built afterward automatically complies.
 
-### 5. Simulate
-Trace the **complete end-to-end flow** this screen participates in, as if the whole app were already finished — not just this screen in isolation. Use `02-Architecture/Database/Activity-Diagram.md`'s three diagrammed flows as the actual test script wherever this screen touches one of them:
-- Does a QR scan correctly land here with the right pre-filled data, and does the action taken here correctly hand off to the next screen in that flow?
-- If this is part of the two-stage incident flow: does the Stage-1→Stage-2 status transition actually work, or does the screen only make sense in isolation?
-- If this screen can trigger a Follow-Up: does the inline prompt actually appear, save correctly, and does the resulting Follow-Up actually show up on the Dashboard's due list later?
+### 3. Simulate
+Trace the **complete end-to-end flow** this screen participates in — this now works properly, since every screen actually exists by this phase. Use `02-Architecture/Database/Activity-Diagram.md`'s three diagrammed flows as the actual test script wherever this screen touches one:
+- Does a QR scan correctly land here with the right pre-filled data, and does the action taken here correctly hand off to the next real screen in that flow?
+- If this is part of the two-stage incident flow: does the Stage-1→Stage-2 status transition actually work end to end, not just in isolation?
+- If this screen can trigger a Follow-Up: does the inline prompt appear, save correctly, and does the resulting Follow-Up actually show up on the Dashboard's due list?
 
-This step exists specifically to catch integration bugs a single-screen check would miss — a screen can pass Countercheck and Audit perfectly and still break the moment it's used in the actual sequence a nurse would follow.
+### 4. Confirm
+Explicit pass/fail. If anything failed Countercheck, Audit, or Simulate, fix it and re-run this phase's steps for that screen before checking its box — never check a box with a known issue "to fix later."
 
-### 6. Confirm
-Explicit pass/fail. If anything failed Countercheck, Audit, or Simulate, fix it and re-run the loop from step 3 — don't check the box with known issues "to fix later."
-
-### 7. Log + Check Off
-- Add an `08-Logs/Agent-Sessions/` entry per the standard `AGENTS.md` format (with a real timestamp).
-- Check the box below.
-- **Fill in the Resume Note** — one line: what's actually done, and what the very next action would be if you had to stop right now. This is what makes handoff to a fresh agent possible.
+### 5. Log + Check Off (Audit)
+- Add a full `08-Logs/Agent-Sessions/` entry per the standard `AGENTS.md` format, with a real timestamp.
+- Check the screen's **Audit** box in the Checklist below.
+- Fill in its **Audit Resume Note.**
 
 ---
 
 ## Using the Reference Mockup Image
 
-`03-Design/assets/reference-mockup.png` — a 12-screen AI-generated reference, already fully audited in `03-Design/Design-Audit-Reference-Mockup.md`. **Use it for layout density, spacing rhythm, and general component arrangement only.** Do not use its colors (they don't match the actual sampled brand tokens) and do not replicate its known gaps — the audit file lists these explicitly. When a screen below has a matching mockup screen, this loop's Audit step includes cross-checking layout against it *with the corrections already applied*:
+`03-Design/assets/reference-mockup.png` — a 12-screen AI-generated reference, already fully audited in `03-Design/Design-Audit-Reference-Mockup.md`. **Use it during Phase 1 (Build) for layout density, spacing rhythm, and general component arrangement only.** Do not use its colors (they don't match the actual sampled brand tokens) and do not replicate its known gaps. When a screen below has a matching mockup screen, Phase 2's Audit step includes cross-checking layout against it *with the corrections already applied*:
 
 | Screen(s) below | Matching mockup screen | Known corrections required (from the audit) |
 |---|---|---|
@@ -71,117 +107,113 @@ Explicit pass/fail. If anything failed Countercheck, Audit, or Simulate, fix it 
 
 Everything else (#3, #8, #9, #12–14, #16–18, #18b–c, #22–25, #27, #29–30, #32–34) has **no matching mockup screen** — build these from `Screen-Inventory.md` and `Design-System.md` alone.
 
+Also see the actual first build for comparison/lessons: `03-Design/assets/dashboard-build-v1-2026-09-26.png` and its audit trail in `08-Logs/Agent-Sessions/`.
+
 ---
 
 ## Checklist
 
-Every box gets a **Resume Note** filled in when checked — that's what makes this handoff-safe. Leave unchecked boxes' notes blank until you actually start that item.
+Each screen now gets **two checkboxes** — Build and Audit — since the two phases happen at different times, potentially far apart. Every checked box gets its own **Resume Note**. Leave unchecked boxes' notes blank until you actually start that item.
 
-**A checked box is not permanently final.** If `08-Logs/Changelog.md` shows a design-system rule, skill, or requirement was added or changed *after* a screen's box was checked, that screen was built before the rule existed — it needs a re-audit against the new rule, not a pass on the assumption that "checked" means "still correct." This already happened once: the Dashboard was checked off before `cliniq-interactive-states` existed, and needed a retroactive Audit pass once that skill was added. Don't wait for a human to notice and prompt for it a second time — check the Changelog against every already-checked box's date before assuming past work is still compliant, per `AGENTS.md`'s "Before you start" step 6.
+**A checked box is not permanently final — for either phase.** If `08-Logs/Changelog.md` shows a design-system rule, skill, or requirement was added or changed *after* a screen's Build or Audit box was checked, that box needs re-verification, not a pass on the assumption that "checked" still means "compliant." This already happened once: the Dashboard was checked off before `cliniq-interactive-states` existed. Check the Changelog against every already-checked box's date before assuming past work still holds, per `AGENTS.md`'s "Before you start" step 6 and this file's own Phase 0.
 
 ### Phase F0 — Environment, Design Foundation, Shared Components
 
-- [ ] Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
-  Resume note:
-- [ ] Vite scaffold run into `cliniq-frontend/`
-  Resume note:
-- [ ] Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
-  Resume note:
-- [ ] Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
-  Resume note:
-- [ ] Shared component: Button (primary/secondary/cancel/destructive hierarchy)
-  Resume note:
-- [ ] Shared component: Card
-  Resume note:
-- [ ] Shared component: Badge (icon+color+label, never color alone)
-  Resume note:
-- [ ] Shared component: Input
-  Resume note:
-- [ ] Shared component: Modal
-  Resume note:
-- [ ] Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
-  Resume note:
-- [ ] Layout: mobile wrapper (for QR mobile flows)
-  Resume note:
-- [ ] **F0 exit check:** blank app shell renders, role-aware nav switches correctly on mock auth state, every shared component matches sampled color tokens
-  Resume note:
+- [ ] Build / [ ] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Vite scaffold run into `cliniq-frontend/`
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Button (primary/secondary/cancel/destructive hierarchy, cursor+hover states)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Card
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Badge (icon+color+label, never color alone)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Input
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Dropdown/Select (custom-styled, not native chrome)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Modal
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Skeleton (matching each other component's shape)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Layout: mobile wrapper (for QR mobile flows)
+  Build note: · Audit note:
+- [ ] **F0 exit check (Audit phase only):** blank app shell renders, role-aware nav switches correctly on mock auth state, every shared component matches sampled color tokens
+  Audit note:
 
-### Phase F1 — The 5 Reference Screens (Full Loop, In Order)
+### Phase F1 — The 5 Reference Screens (Build in This Order; Audit After)
 
-#### 1. Student Profile (`features/student-records/`)
-- [ ] Read → Build → Countercheck → Audit → Simulate → Confirm → Log (all 7 steps)
-  Resume note:
-
-#### 2. New Visit Entry (`features/clinic-visits/`)
-- [ ] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown**
-  Resume note:
-
-#### 3. Incident Entry, two-stage (`features/emergency-response/`)
-- [ ] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **Stage 1 and Stage 2 both built; status badge visible; Simulate step must trace the full Stage 1→2 transition using the Activity Diagram**
-  Resume note:
-
-#### 4. QR Scan/Lookup Hub + Quick-Actions, mobile (`features/qr-digital-health-id/mobile/` + `shared/`)
-- [ ] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated**
-  Resume note:
-
-#### 5. Clinic Overview Dashboard (`features/dashboard/`)
-- [ ] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup**
-  Resume note:
-
-- [ ] **F1 exit check:** all 5 screens work end-to-end against mock data; accessibility pass run against each; ready to show the client for feedback per ADR-006
-  Resume note:
+- [ ] Build / [ ] Audit — **1. Student Profile** (`features/student-records/`)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **4. QR Scan/Lookup Hub + Quick-Actions, mobile** (`features/qr-digital-health-id/mobile/` + `shared/`) — Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
+  Build note: · Audit note:
+- [ ] **F1 exit check (Audit phase only):** all 5 screens work end-to-end against mock data; accessibility pass run against each; Simulate step traced across all 5 together; ready to show the client for feedback per ADR-006
+  Audit note:
 
 ### Phase F2 — Remaining Screens, Module by Module
 
-*(Full loop applies to each; entries below are the tracking checklist, not a shortcut around the loop.)*
-
 **Student Records**
-- [ ] #3 App Shell/Nav — Resume note:
-- [ ] #6 Student List — Resume note:
-- [ ] #8 Add/Edit Student — Resume note:
-- [ ] #9 Incomplete Records Review Queue — Resume note:
+- [ ] Build / [ ] Audit — #3 App Shell/Nav — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #6 Student List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #8 Add/Edit Student — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: · Audit note:
 
 **Clinic Visit Monitoring**
-- [ ] #10 Visit Log List — Resume note:
-- [ ] #12 Visit Detail/Edit — Resume note:
-- [ ] #13 Excuse Letter Generator (+ print layout) — Resume note:
-- [ ] #14 PE/Sports Injury Referral Form — Resume note:
+- [ ] Build / [ ] Audit — #10 Visit Log List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: · Audit note:
 
 **QR Digital Health ID (remaining)**
-- [ ] #22 QR Code Print View — Resume note:
-- [ ] #23 Scan/Lookup Hub (desktop) — Resume note:
-- [ ] #24 Student Quick-Actions (desktop) — Resume note:
-- [ ] #25 Emergency Button (mobile) — Resume note:
+- [ ] Build / [ ] Audit — #22 QR Code Print View — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #24 Student Quick-Actions (desktop) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: · Audit note:
 
 **Emergency Response (remaining)**
-- [ ] #17 Parent Notification Outcome Logging — Resume note:
-- [ ] #18 Incident Report View/Print — Resume note:
+- [ ] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #18 Incident Report View/Print — Build note: · Audit note:
 
 **Follow-Up Handling**
-- [ ] #18b Follow-Up Prompt — Resume note:
-- [ ] #18c Follow-Up List View — Resume note:
+- [ ] Build / [ ] Audit — #18b Follow-Up Prompt — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #18c Follow-Up List View — Build note: · Audit note:
 
 **Medicine & Supply Inventory Tracker**
-- [ ] #28 Inventory List — Resume note:
-- [ ] #29 Add/Edit Inventory Item — Resume note:
-- [ ] #30 Dispense/Log Usage — Resume note:
+- [ ] Build / [ ] Audit — #28 Inventory List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #29 Add/Edit Inventory Item — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #30 Dispense/Log Usage — Build note: · Audit note:
 
 **Reports Generation**
-- [ ] #19 Monthly Report View/Generate (+ print) — Resume note:
-- [ ] #20 Incident Report Archive (+ print) — Resume note:
-- [ ] #21 Health Summaries View (+ print) — Resume note:
+- [ ] Build / [ ] Audit — #19 Monthly Report View/Generate (+ print) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #20 Incident Report Archive (+ print) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: · Audit note:
 
 **User Management**
-- [ ] #33 User List — Resume note:
-- [ ] #34 Add/Edit User & Role Assignment — Resume note:
+- [ ] Build / [ ] Audit — #33 User List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #34 Add/Edit User & Role Assignment — Build note: · Audit note:
 
 **Backup Verification Assistant**
-- [ ] #32 Backup Status Screen — Resume note:
+- [ ] Build / [ ] Audit — #32 Backup Status Screen — Build note: · Audit note:
 
-- [ ] **F2 exit check:** every screen above matches its reference pattern (Reference-Screens.md §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
-  Resume note:
+- [ ] **F2 exit check (Audit phase only):** every screen above matches its reference pattern (`Reference-Screens.md` §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
+  Audit note:
 
 ### Phase F3 — Polish & Client Demo Prep
+
+*(This phase has no separate Build/Audit split — it's inherently a post-build pass.)*
 
 - [ ] Keyboard shortcuts wired for highest-frequency actions (`04-Development/Keyboard-Shortcuts-and-Efficiency.md`)
   Resume note:
@@ -189,7 +221,7 @@ Every box gets a **Resume Note** filled in when checked — that's what makes th
   Resume note:
 - [ ] Responsive check on QR mobile flows specifically
   Resume note:
-- [ ] Final Simulate pass: walk all three Activity-Diagram flows start to finish across the finished app, not per-screen
+- [ ] Final Simulate pass: walk all three Activity-Diagram flows start to finish across the finished app
   Resume note:
 - [ ] **F3 exit check / demo-ready:** every box above checked, every Resume Note filled, no known issues left unresolved in any Agent-Session log
   Resume note:

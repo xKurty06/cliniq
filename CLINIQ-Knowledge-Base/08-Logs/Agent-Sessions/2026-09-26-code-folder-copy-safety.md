@@ -1,0 +1,14 @@
+Date/Day/Time: Saturday, September 26, 2026 — actual time not available (no system clock access in this environment)
+Agent: Claude (chat session)
+Task: Clarify and formalize that cliniq-frontend/ and cliniq-backend/ cannot be safely reconciled the same way as documentation
+Status: Completed
+Prompt/Request: "isnt it dangerous to also copy frontend folder or not?" — a direct follow-up question after the GitHub-check rule and LICENSE reconciliation from the previous session, checking whether the same reconcile-either-direction logic applied to the application-code folders too.
+Files Modified: AGENTS.md, CLAUDE.md (both kept identical), cliniq-backend/README.md, cliniq-frontend/README.md (new — this folder previously had no top-level README at all)
+Changes Made:
+- Confirmed the concern was valid and, in fact, more serious than the documentation drift found in the previous session: cliniq-frontend/ and cliniq-backend/ in this chat's local sandbox are organizational skeletons only (folder structure plus README stub files), created during the original monorepo setup session and never updated since, since this chat environment does not write application code. The actual GitHub repo's versions of these folders now presumably contain real, built code (the Dashboard, and whatever the loop-engineering process has produced since).
+- Extended AGENTS.md/CLAUDE.md's Step 0 with an explicit table-style breakdown: documentation/process files (CLINIQ-Knowledge-Base/, AGENTS.md, CLAUDE.md, README.md, LICENSE, .gitignore, .claude/skills/) reconcile in either direction depending on where the latest real edit happened; cliniq-frontend/ and cliniq-backend/ reconcile one-way only — GitHub is the sole source of truth once real code exists there, and a documentation-export copy must never overwrite it.
+- Added the same warning directly into the two folders most at risk of being copy-pasted carelessly: created a new top-level cliniq-frontend/README.md (this folder had no top-level README before — only per-feature READMEs nested inside src/features/) and added a matching warning banner to the existing cliniq-backend/README.md, so the warning is visible right where someone would actually look, not just buried in AGENTS.md's Step 0.
+Reason: A direct, well-founded safety question from the user, given that the previous session's recommendation to "sync your zip to GitHub" could have been read too broadly and applied destructively to the code folders if not clarified.
+Testing Performed: N/A — documentation only.
+Known Issues: None new. This closes the loop on the two-way GitHub reconciliation question opened last session.
+Next Steps: None — the boundary is now documented in three places (AGENTS.md/CLAUDE.md, and both folder-level READMEs), which should be redundant enough to catch this before it becomes a real incident.
