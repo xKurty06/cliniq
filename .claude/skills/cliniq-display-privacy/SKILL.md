@@ -25,9 +25,13 @@ Ask one question: **does this screen show one specific student the user has alre
 
 If you're building something that doesn't cleanly fit either case, don't guess — flag it and ask, the same way the open question about visit-reason visibility in list rows was flagged rather than resolved unilaterally (see `CLINIQ-Knowledge-Base/03-Design/Design-Audit-Reference-Mockup.md`).
 
-## Known open question — read before adding a "reason" or "description" column
+## Reasons and descriptions in list rows: resolved (ADR-010, Option A)
 
-The rule as written only covers **names**. It does not yet have a resolved answer for whether a visit's complaint or an incident's description should also be hidden/truncated in multi-student list views (a Student Number is still identifiable to anyone who can connect it to a person). If your task involves adding or exposing a reason/description field in a list view, **stop and ask** rather than assuming Option A, B, or C from the design audit — this is explicitly unresolved.
+This used to be an open question. It's now decided: in multi-student list views, a visit's complaint, an incident's description, and a follow-up's reason **stay visible** next to the Student Number. Only the name is withheld. See `CLINIQ-Knowledge-Base/06-Decisions/ADR-010-Reason-Visibility-in-List-Rows.md`.
+
+## Enforce it with types, not just care
+
+In code, a multi-student list receives `StudentListRef` (`id` + `studentNumber` only, in `cliniq-frontend/src/types/entities.ts`), never a full `Student`. A list component then can't render a name, because it never gets one. The Clinic Overview Dashboard is the reference implementation (`src/features/dashboard/`), and its tests assert that no student name reaches the rendered page.
 
 ## Where this has already been applied correctly
 

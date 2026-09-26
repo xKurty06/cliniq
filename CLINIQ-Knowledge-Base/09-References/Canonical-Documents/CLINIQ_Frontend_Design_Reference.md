@@ -74,6 +74,8 @@ Readable text, adequate contrast, clear labels, obviously-interactive elements, 
 ### Feedback & System States
 Every screen needs defined looks for: loading, saving, success, error, warning, empty data, disabled, hover, focus, completed action. Messages concise and actionable — "Unable to save changes. Please check the required fields," never a raw technical error.
 
+**Loading = skeleton screens, every page, not spinners, not blank.** Gray placeholder shapes matching the final layout, shown while data is in flight. Makes a load feel faster on the 4GB RAM target hardware, and reassures non-technical staff who'd otherwise read a blank screen as "did it freeze?" Applies to every list, table, card grid, and detail view — including a form pre-filling from a QR scan, which skeletons the fields being populated rather than sitting blank. A button's own save-in-progress spinner is separate and narrower — it doesn't need a full-page skeleton.
+
 ### Modals & Confirmation
 Only for real value — don't interrupt for harmless, reversible actions. For destructive/irreversible actions: explain what will happen, visually distinguish the destructive option, make cancellation obvious, never let destructive and safe actions look visually identical.
 

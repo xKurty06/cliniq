@@ -2,9 +2,29 @@
 
 Laravel API backend. Not yet scaffolded — `composer create-project laravel/laravel .` will generate the standard `app/`, `database/`, `routes/`, `config/` structure here once environment setup is approved and executed (CLINIQ-Knowledge-Base/04-Development/Environment-Setup.md).
 
-Expected shape once scaffolded, mapped to what's already designed:
-- `app/Models/` — Student, User, Visit, Incident, FollowUp, InventoryItem, AuditLogEntry, etc. (Frontend Context Brief, Section 5, has the authoritative data shapes to match)
-- `app/Http/Controllers/Api/` — one controller per feature, mirroring `cliniq-frontend/src/features/`
+**Code organization is modular, mirroring the frontend directly** — see `CLINIQ-Knowledge-Base/06-Decisions/ADR-009-Modular-Backend-Architecture.md`. Once scaffolded, code doesn't go into Laravel's default flat `app/Models/`/`app/Http/Controllers/` — it goes into:
+
+```
+app/
+├── Modules/
+│   ├── StudentRecords/{Controllers,Models,Requests,Services}/
+│   ├── ClinicVisits/
+│   ├── EmergencyResponse/
+│   ├── QrDigitalHealthId/
+│   ├── InventoryTracker/
+│   ├── Dashboard/
+│   ├── ReportsGeneration/
+│   ├── UserManagement/
+│   └── BackupVerification/
+└── Shared/
+    └── AuditLog/            ← cross-cutting, every module writes here
+```
+
+A plain PSR-4 mapping in `composer.json` (`"App\\Modules\\": "app/Modules/"`) is all this needs — no `nwidart/laravel-modules` package, deliberately (see the ADR for why).
+
+Mapped to what's already designed:
+- Entity shapes (Student, User, Visit, Incident, FollowUp, InventoryItem, AuditLogEntry, etc.) — Frontend Context Brief, Section 5, has the authoritative shapes to match; land the `Models/` for each in its owning module's folder
+- Controllers — one per feature, inside `app/Modules/<Module>/Controllers/`, mirroring `cliniq-frontend/src/features/`
 - `database/migrations/` — schema, once the database design is actually finalized (`CLINIQ-Knowledge-Base/02-Architecture/Database/ERD.md` is TBA — don't build against the entity list there directly, it's a frontend-facing reference, not a schema)
 - `routes/api.php` — all API routes, consumed by the frontend's `src/features/*/api/` folders
 - Auth via Sanctum (CLINIQ-Knowledge-Base/06-Decisions/ADR-007-Stack-Finalization.md)

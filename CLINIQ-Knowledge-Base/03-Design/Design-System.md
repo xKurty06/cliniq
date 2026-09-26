@@ -73,6 +73,12 @@ Treat as part of the normal design process, not an optional pass at the end. Ens
 ### Feedback & System States
 Clearly communicate what's happening: loading, saving, success, error, warning, empty data, disabled, hover, focus, and completed-action states all need a defined look. Messages should be concise and actionable — prefer "Unable to save changes. Please check the required fields." over surfacing a raw database/API error.
 
+**Loading state, specifically — skeleton screens, on every page, not spinners and not a blank screen.** This applies universally: every screen that fetches data on load (which is most of them) shows a skeleton — gray placeholder shapes matching the final layout's structure — while that data is in flight, rather than a spinner or a blank white screen. Two reasons this is a stated rule and not a style preference:
+1. **Perceived performance on the target hardware.** The Performance NFR already commits to running acceptably on a 4GB RAM machine — a skeleton makes a load that takes a beat *feel* faster than the same load behind a spinner, because the eye has structure to anticipate rather than nothing to look at.
+2. **Reassurance for non-technical users.** The Usability NFR requires the system be learnable in a single training session by clinic staff who are not technical. A blank screen or a lone spinner reads as "did it freeze?" to that user in a way a skeleton — which visibly resembles the page about to appear — doesn't.
+
+Apply this to every list, table, card grid, and detail view — not just the Dashboard (where it was first specified in `Reference-Screens.md`). A form that pre-fills from a QR scan or search result should skeleton the fields being populated, not just appear blank until the fetch resolves. The one exception: a *save/submit* action's in-progress state (a button showing a spinner while a POST is in flight) is a different state than *page load* and doesn't need a full-page skeleton — that's still just a loading button, per the existing pattern in `Reference-Screens.md`.
+
 ### Modals & Confirmation
 Use only when they add real value — don't interrupt users with confirmations for harmless, reversible actions. For destructive or irreversible actions: clearly explain what will happen, visually distinguish the destructive action from the cancel option, and never make a destructive and a safe action look visually identical.
 

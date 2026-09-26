@@ -26,6 +26,7 @@ Go back to the **Read** step's sources and verify, item by item, that every docu
 ### 4. Audit
 - **Display-privacy rule** — check against `.claude/skills/cliniq-display-privacy/`: does this screen show a name where it should show a Student Number, or vice versa?
 - **Audit trail** — check against `.claude/skills/cliniq-audit-trail/`: if this screen creates/edits/deletes/approves anything, is the logging call wired in?
+- **Skeleton loading state** — if this screen fetches data on load (nearly all of them do), does it show a skeleton matching its final layout, not a spinner or a blank screen? Per `Design-System.md`'s Feedback & System States — this applies universally, not just to the Dashboard where it was first specified.
 - **Accessibility** — run the accessibility skills (`better-accessibility`, `claude-a11y-skill` once installed) against the screen: contrast, focus states, labels, keyboard operability.
 - **Color tokens** — every color used traces back to `Design-System.md`'s actual token table, not a value picked by eye.
 - **Reference mockup cross-check, where applicable** — see below.
@@ -60,9 +61,9 @@ Explicit pass/fail. If anything failed Countercheck, Audit, or Simulate, fix it 
 | #5 Admin Dashboard | Admin Dashboard | Same as above |
 | #6 Student List | Student List | None — correctly shows full names (masterlist) |
 | #7 Student Profile | Student Profile | None — correctly shows full name (deliberate lookup) |
-| #10 Visit Log List | Visits List | Resolve the reason-visibility open question before finalizing (see audit) |
+| #10 Visit Log List | Visits List | None; the reason-visibility question is resolved as Option A (reasons stay visible, ADR-010) |
 | #11 New Visit Entry | New Visit | **Do not use the "Type" dropdown pattern** — Visit and Incident must stay separate entry points, not a type selector on one form. **Add the Follow-Up prompt** (absent in the mockup) |
-| #15 Incident Log List | Incident Log | **Add a Stage-1/Complete status badge** (absent in the mockup); resolve the reason-visibility open question |
+| #15 Incident Log List | Incident Log | **Add a Stage-1/Complete status badge** (absent in the mockup). Reason visibility: resolved as Option A (ADR-010) |
 | #28 Inventory List | Inventory List | None significant |
 | #19/20/21 Reports | Reports | None significant |
 | #26 Instructor Scan/Lookup | Mobile Lookup (Instructor) | None — concept is well-aligned |
@@ -78,23 +79,23 @@ Every box gets a **Resume Note** filled in when checked — that's what makes th
 ### Phase F0 — Environment, Design Foundation, Shared Components
 
 - [ ] Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
-  Resume note:
-- [ ] Vite scaffold run into `cliniq-frontend/`
-  Resume note:
+  Resume note: STILL OPEN, deliberately deferred with the owner's approval on 2026-09-26 20:14. The Dashboard avoids both: there's no router (App.tsx renders the page directly) and data loads through `src/hooks/useAsyncData.ts`, a placeholder with no library, so swapping later only touches that hook and the feature `api/` modules. Must be decided before #3 App Shell/Nav.
+- [x] Vite scaffold run into `cliniq-frontend/`
+  Resume note: Done 2026-09-26 (Vite 8, React 19, TS 6, react-ts template). The template's oxlint was replaced with ESLint + Prettier to match Coding-Conventions.md. Scripts: dev, build, lint, format, test, typecheck.
 - [ ] Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
-  Resume note:
-- [ ] Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
-  Resume note:
-- [ ] Shared component: Button (primary/secondary/cancel/destructive hierarchy)
-  Resume note:
-- [ ] Shared component: Card
-  Resume note:
-- [ ] Shared component: Badge (icon+color+label, never color alone)
-  Resume note:
-- [ ] Shared component: Input
-  Resume note:
+  Resume note: Partial. Installed: Tailwind 4 (@tailwindcss/vite), chart.js + react-chartjs-2, Vitest + RTL + jsdom, ESLint + Prettier. NOT yet installed: `qr-scanner`, left for the QR screen (`npm install qr-scanner` in cliniq-frontend/).
+- [x] Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
+  Resume note: `src/index.css` `@theme static`. Tailwind's default palette is removed, so only documented tokens compile. Contrast deviations are logged in Issues-and-TODOs (2026-09-26).
+- [x] Shared component: Button (primary/secondary/cancel/destructive hierarchy)
+  Resume note: `src/components/ui/Button.tsx`. Primary uses brand-green-dark (not brand-green) for small white text; see Issues-and-TODOs.
+- [x] Shared component: Card
+  Resume note: `src/components/ui/Card.tsx` (Card/CardHeader/CardBody) plus `ListCard.tsx`.
+- [x] Shared component: Badge (icon+color+label, never color alone)
+  Resume note: `ui/Badge.tsx` + `ui/StatusBadge.tsx` + domain maps in `components/status/`.
+- [x] Shared component: Input
+  Resume note: `ui/Input.tsx` (label, hint, required, inline error). Exercised only as date inputs so far; the first real form (New Visit) should confirm it covers text/select/textarea needs or extend it.
 - [ ] Shared component: Modal
-  Resume note:
+  Resume note: Not built; the Dashboard needed none. Build with the first screen that needs confirmation (duplicate-detection modal, #8).
 - [ ] Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
   Resume note:
 - [ ] Layout: mobile wrapper (for QR mobile flows)
@@ -121,8 +122,8 @@ Every box gets a **Resume Note** filled in when checked — that's what makes th
   Resume note:
 
 #### 5. Clinic Overview Dashboard (`features/dashboard/`)
-- [ ] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup**
-  Resume note:
+- [x] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup**
+  Resume note: DONE 2026-09-26 20:43 on mock data, built FIRST (ahead of F1 items 1–4) at the owner's explicit request so later screens reuse its components. Every Reference 1 section is present, including the calendar and follow-ups; 24 Vitest tests pass; axe shows 0 violations. Skeleton checkpoint re-audited at 20:59: the first pass FAILED (generic blocks, calendar missing), fixed with per-section shaped skeletons (`StatCardSkeleton`/`ListCardSkeleton` shared). Log: `08-Logs/Agent-Sessions/2026-09-26-clinic-overview-dashboard.md`. Next action: start F1 #1 Student Profile, reusing `src/components/` (see its README catalog). Open follow-ups: B9 must define the MOCK_RULES thresholds; decide whether printing the dashboard gets an audit entry.
 
 - [ ] **F1 exit check:** all 5 screens work end-to-end against mock data; accessibility pass run against each; ready to show the client for feedback per ADR-006
   Resume note:

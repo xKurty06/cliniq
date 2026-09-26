@@ -1,0 +1,149 @@
+/**
+ * Shared data entities, following CLINIQ_Frontend_Context_Brief.md §5 ("Data Entities the Frontend
+ * Should Expect"). These are the frontend's contract with the future Laravel API. The ERD is still
+ * TBA (see 02-Architecture/Database/ERD.md), so where §5 names a field without giving it a shape,
+ * that field is marked PROVISIONAL below. Don't treat a PROVISIONAL field as a schema decision.
+ */
+
+/** Calendar date, `YYYY-MM-DD`. */
+export type ISODate = string
+/** Full timestamp, ISO 8601. */
+export type ISODateTime = string
+/** `YYYY-NNNNN` (enrollment year + zero-padded sequence). System-generated; see ADR-005. */
+export type StudentNumber = string
+
+export interface EmergencyContact {
+  name: string
+  /** PROVISIONAL: §5 only says "emergency contact". */
+  relationship: string
+  phone: string
+  /** Module 2: a contact number can be marked verified/unverified. */
+  verified: boolean
+}
+
+export interface Student {
+  id: string
+  studentNumber: StudentNumber
+  fullName: string
+  gradeLevel: string
+  contactInfo: string
+  allergies: string[]
+  medicalConditions: string[]
+  emergencyContact: EmergencyContact | null
+  /** False when a required field is missing. This feeds the Incomplete Records Review Queue (#9). */
+  recordComplete: boolean
+  /** Archived students stay in the database but are excluded from active lists by default. */
+  archived: boolean
+}
+
+/**
+ * The only student fields a multi-student, glanceable list may carry (display-privacy rule,
+ * ADR-004). There's no `fullName` here on purpose, so a list row can't render a name by accident.
+ */
+export type StudentListRef = Pick<Student, 'id' | 'studentNumber'>
+
+export type UserRole = 'staff' | 'admin' | 'instructor'
+
+export interface User {
+  id: string
+  name: string
+  username: string
+  role: UserRole
+  lastLogin: ISODateTime | null
+}
+
+export type Disposition = 'returned_to_class' | 'sent_home' | 'referred_to_hospital'
+
+export interface Visit {
+  id: string
+  studentId: string
+  dateTime: ISODateTime
+  complaint: string
+  treatment: string
+  disposition: Disposition
+  loggedByUserId: string
+  /** Optional free text, e.g. "MCA Dance Program". This isn't a managed entity. */
+  eventTag: string | null
+}
+
+export type ParentNotificationOutcome = 'reached' | 'not_reached' | 'voicemail' | 'left_message'
+
+export interface ParentNotificationAttempt {
+  outcome: ParentNotificationOutcome
+  timestamp: ISODateTime
+}
+
+export interface HospitalReferral {
+  destination: string
+  transportMode: string
+  departureTime: ISODateTime
+}
+
+export interface Incident {
+  id: string
+  studentId: string
+  time: ISODateTime
+  complaint: string
+  /** PROVISIONAL: §5 says "vitals" without listing fields. Pending the ERD. */
+  vitals: Record<string, string | number>
+  hospitalReferral: HospitalReferral | null
+  parentNotifications: ParentNotificationAttempt[]
+  /** 1 = fast-capture (incomplete), 2 = complete. */
+  stage: 1 | 2
+  eventTag: string | null
+}
+
+export type FollowUpStatus = 'pending' | 'completed' | 'missed' | 'cancelled'
+
+export interface FollowUp {
+  id: string
+  studentId: string
+  relatedRecord: { type: 'visit' | 'incident'; id: string }
+  followUpDate: ISODate
+  reason: string
+  status: FollowUpStatus
+  notes: string | null
+  createdByUserId: string
+}
+
+export type InventoryCategory = 'medicine' | 'supply'
+
+export interface InventoryItem {
+  id: string
+  name: string
+  category: InventoryCategory
+  currentStock: number
+  unit: string
+  /**
+   * Module 8: one expiration date per item, not per batch. It's nullable because some supplies
+   * may not expire. PROVISIONAL, pending the ERD.
+   */
+  expirationDate: ISODate | null
+  lowStockThreshold: number
+}
+
+export type ReportType = 'monthly' | 'incident' | 'health_summary'
+
+export interface Report {
+  type: ReportType
+  dateRange: { from: ISODate; to: ISODate }
+  /** PROVISIONAL: §5 says "generated file/data". */
+  data: unknown
+}
+
+export interface BackupLog {
+  lastRun: ISODateTime
+  fileSizeBytes: number
+  status: 'ok' | 'failed'
+  verifiedByUserId: string | null
+}
+
+export type AuditActionType =
+  'login' | 'logout' | 'scan' | 'submit' | 'approve' | 'create' | 'update' | 'delete' | 'archive'
+
+export interface AuditLogEntry {
+  userId: string
+  actionType: AuditActionType
+  targetRecord: { type: string; id: string } | null
+  timestamp: ISODateTime
+}

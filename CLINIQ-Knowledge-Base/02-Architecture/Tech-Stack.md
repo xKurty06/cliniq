@@ -19,4 +19,4 @@ All items below are **confirmed**, as of September 25, 2026 — the previously "
 | Deployment (current) | Local LAN | |
 | Deployment (future) | Remote Server / Cloud | Documented future phase, not current work |
 
-**Nothing here has been installed or executed yet** — this is the confirmed plan, not a completed setup. See `04-Development/Environment-Setup.md` for the (still not-yet-run) setup steps.
+**Frontend installed (Saturday, September 26, 2026):** React 19 + TypeScript 6 via Vite 8, Tailwind CSS 4 (`@tailwindcss/vite`), Chart.js 4 + react-chartjs-2 5, Vitest 5 + React Testing Library, ESLint 10 (flat config) + Prettier 3. The current Vite template ships oxlint; it was replaced to keep the confirmed ESLint + Prettier. No icon, date, or class-name library was added (small in-repo equivalents live in `src/components/icons/` and `src/lib/`). `qr-scanner` isn't installed yet. **Backend: nothing installed yet.** See `04-Development/Environment-Setup.md` for the (still not-yet-run) setup steps.

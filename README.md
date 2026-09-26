@@ -110,6 +110,7 @@ CLINIQ/
 │           └── shared/          → the one camera-scanning implementation, used by both
 │
 ├── ⚙️ cliniq-backend/           → Laravel API
+│   └── app/Modules/             → one folder per module, mirroring the frontend directly
 │
 ├── 🧠 .claude/skills/           → bespoke, CLINIQ-specific agent skills
 │   ├── cliniq-display-privacy/

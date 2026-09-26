@@ -197,6 +197,8 @@ Treat as part of the normal design process, not an optional pass at the end. Ens
 ### Feedback & System States
 Clearly communicate what's happening: loading, saving, success, error, warning, empty data, disabled, hover, focus, and completed-action states all need a defined look. Messages should be concise and actionable — prefer "Unable to save changes. Please check the required fields." over surfacing a raw database/API error.
 
+**Loading state, specifically — skeleton screens, on every page, not spinners and not a blank screen.** Every screen that fetches data on load shows a skeleton (gray placeholder shapes matching the final layout) while that data is in flight. This is a stated rule, not a preference: it makes a load *feel* faster on the 4GB RAM target hardware (the eye has structure to anticipate rather than nothing), and reassures non-technical staff who could otherwise read a blank screen or lone spinner as "did it freeze?" Apply to every list, table, card grid, and detail view — a form pre-filled from a QR scan or search result skeletons the fields being populated, not just appears blank. A save/submit button's own in-progress spinner is a separate, narrower state and doesn't need a full-page skeleton.
+
 ### Modals & Confirmation
 Use only when they add real value — don't interrupt users with confirmations for harmless, reversible actions. For destructive or irreversible actions: clearly explain what will happen, visually distinguish the destructive action from the cancel option, and never make a destructive and a safe action look visually identical.
 

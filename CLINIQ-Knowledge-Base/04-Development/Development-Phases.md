@@ -62,7 +62,7 @@ Keyboard shortcuts (`04-Development/Keyboard-Shortcuts-and-Efficiency.md`) wired
 Some backend work can't wait for frontend to finish (auth, schema, audit trail) — these start early and run alongside the frontend phases, not strictly after them. See "How These Interleave" below.
 
 ### Phase B0 — Environment & Scaffold
-Run the actual Laravel scaffold into `cliniq-backend/` (commands in `Environment-Setup.md`). Install Sanctum. Confirm the target XAMPP install's PHP version before picking a Laravel version (Laravel 11+ needs PHP 8.2+ — a check, not an assumption).
+Run the actual Laravel scaffold into `cliniq-backend/` (commands in `Environment-Setup.md`). Install Sanctum. Confirm the target XAMPP install's PHP version before picking a Laravel version (Laravel 11+ needs PHP 8.2+ — a check, not an assumption). Set up the modular folder structure (`app/Modules/<Module>/`, `app/Shared/`) and its PSR-4 mapping in `composer.json` before any module code gets written — see `06-Decisions/ADR-009-Modular-Backend-Architecture.md`. Retrofitting this after B4+ have already scattered code into Laravel's default flat structure is real, avoidable rework.
 
 ### Phase B1 — Database Schema — TBA
 **Don't guess a schema.** `02-Architecture/Database/ERD.md` is TBA — database design hasn't been finalized yet, and inferring one from the frontend-facing entity shapes isn't a substitute for the team actually designing it. Once the schema is decided, build migrations from it directly, consistent with the entity shapes already fixed in `CLINIQ_Frontend_Context_Brief.md` §5 (Student, User, Visit, Incident, FollowUp, InventoryItem, Report, BackupLog, AuditLogEntry) — those shapes are real commitments already made; the schema should match them, not reinvent them.

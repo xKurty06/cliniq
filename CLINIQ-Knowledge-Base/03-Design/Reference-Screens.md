@@ -26,7 +26,7 @@ Design these five in full detail first. Everything else in the system should be 
 
 **Components this exercises:** stat card, list row with status badge, warning badge (with icon, not color alone), bar/line chart, segmented toggle control, calendar grid, date-range picker, icon+text button.
 
-**States:** loading (skeleton cards, not a blank screen), empty (no data in the selected range — a clear empty-state message, not a blank chart), error (failed to load, with a retry action).
+**States:** loading (skeleton cards — this is the universal pattern, see Design-System.md's Feedback & System States, not a Dashboard-specific choice), empty (no data in the selected range — a clear empty-state message, not a blank chart), error (failed to load, with a retry action).
 
 ---
 
@@ -62,7 +62,7 @@ Design these five in full detail first. Everything else in the system should be 
 
 **Components this exercises:** tag/chip, tabbed or sectioned content, list rows (reused from Reference 1's pattern), status badge, role-conditional action bar.
 
-**States:** loading, a genuinely empty section (e.g., no incident history yet — a calm empty state, not an error), print-preview.
+**States:** loading (skeleton — see Design-System.md's Feedback & System States), a genuinely empty section (e.g., no incident history yet — a calm empty state, not an error), print-preview.
 
 ---
 
@@ -105,7 +105,7 @@ Design these five in full detail first. Everything else in the system should be 
 
 **Components this exercises:** urgency-styled primary button, stage/status badge (three states: Needs completion → In progress → Complete), multi-attempt log list, timestamped entries, hospital-referral field group.
 
-**States:** Stage 1 saved/incomplete, Stage 2 in progress, fully complete — these three states should be visually distinguishable at a glance in list views (Reference 1's alert list and any incident log list use this same badge).
+**States:** Stage 1 saved/incomplete, Stage 2 in progress, fully complete — these three states should be visually distinguishable at a glance in list views (Reference 1's alert list and any incident log list use this same badge). Reopening a record for Stage 2 skeletons the existing Stage 1 data while it loads, per the universal loading rule in Design-System.md.
 
 ---
 
