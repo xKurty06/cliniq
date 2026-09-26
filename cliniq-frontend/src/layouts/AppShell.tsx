@@ -101,7 +101,7 @@ export function AppShell({ user, active, children }: AppShellProps) {
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 bg-surface/90 px-4 backdrop-blur-sm sm:px-8 print:hidden">
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-border bg-background px-4 sm:px-8 print:hidden">
           <div className="lg:hidden">
             <Logo />
           </div>

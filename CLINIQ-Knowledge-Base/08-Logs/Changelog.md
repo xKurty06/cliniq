@@ -6,6 +6,7 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Sunday, September 27, 2026 — 04:29 | Fixed the app shell navbar surface so it matches the sidebar instead of blending into the gray page surface | `cliniq-frontend/src/layouts/AppShell.tsx`; see `08-Logs/Agent-Sessions/2026-09-27-navbar-sidebar-color-fix.md` |
 | 2026-09-13 | Project Plan created; tech stack upgraded to React+Laravel; group roster corrected | Project Plan rev 1.0–1.2 |
 | 2026-09-13 | Review of Existing Alternatives rebuilt with 10 researched systems | Project Plan rev 1.3 |
 | 2026-09-17 | QR Digital Health ID redesigned as Staff-only hub; Student Number scheme added | `06-Decisions/ADR-002`, `ADR-005`; Project Plan rev 1.7 |
