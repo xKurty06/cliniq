@@ -62,9 +62,9 @@ Explicit pass/fail. If anything failed Countercheck, Audit, or Simulate, fix it 
 | #5 Admin Dashboard | Admin Dashboard | Same as above |
 | #6 Student List | Student List | None — correctly shows full names (masterlist) |
 | #7 Student Profile | Student Profile | None — correctly shows full name (deliberate lookup) |
-| #10 Visit Log List | Visits List | Reason visibility is resolved by ADR-010 Option A: complaint/reason text stays visible next to the Student Number |
+| #10 Visit Log List | Visits List | Resolve the reason-visibility open question before finalizing (see audit) |
 | #11 New Visit Entry | New Visit | **Do not use the "Type" dropdown pattern** — Visit and Incident must stay separate entry points, not a type selector on one form. **Add the Follow-Up prompt** (absent in the mockup) |
-| #15 Incident Log List | Incident Log | **Add a Stage-1/Complete status badge** (absent in the mockup); ADR-010 Option A keeps description/reason text visible next to the Student Number |
+| #15 Incident Log List | Incident Log | **Add a Stage-1/Complete status badge** (absent in the mockup); resolve the reason-visibility open question |
 | #28 Inventory List | Inventory List | None significant |
 | #19/20/21 Reports | Reports | None significant |
 | #26 Instructor Scan/Lookup | Mobile Lookup (Instructor) | None — concept is well-aligned |
@@ -76,6 +76,8 @@ Everything else (#3, #8, #9, #12–14, #16–18, #18b–c, #22–25, #27, #29–
 ## Checklist
 
 Every box gets a **Resume Note** filled in when checked — that's what makes this handoff-safe. Leave unchecked boxes' notes blank until you actually start that item.
+
+**A checked box is not permanently final.** If `08-Logs/Changelog.md` shows a design-system rule, skill, or requirement was added or changed *after* a screen's box was checked, that screen was built before the rule existed — it needs a re-audit against the new rule, not a pass on the assumption that "checked" means "still correct." This already happened once: the Dashboard was checked off before `cliniq-interactive-states` existed, and needed a retroactive Audit pass once that skill was added. Don't wait for a human to notice and prompt for it a second time — check the Changelog against every already-checked box's date before assuming past work is still compliant, per `AGENTS.md`'s "Before you start" step 6.
 
 ### Phase F0 — Environment, Design Foundation, Shared Components
 
@@ -123,8 +125,8 @@ Every box gets a **Resume Note** filled in when checked — that's what makes th
   Resume note:
 
 #### 5. Clinic Overview Dashboard (`features/dashboard/`)
-- [x] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup**
-  Resume note: DONE and fix-pass rechecked Sunday, September 27, 2026 — 02:51. Dashboard has every Reference 1 section, including calendar and due/upcoming follow-ups; fix pass aligned shared button/segment/select interactions, removed static-row hover affordance, restyled the Date range select, applied brand-yellow to calendar event-tag badges, and preserved shaped skeleton loading. Tests/lint/build pass. Log: `08-Logs/Agent-Sessions/2026-09-27-dashboard-fix-refactor-pass.md`. Next action: start F1 #1 Student Profile and reuse the corrected shared controls.
+- [ ] Read → Build → Countercheck → Audit → Simulate → Confirm → Log — **including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup**
+  Resume note:
 
 - [ ] **F1 exit check:** all 5 screens work end-to-end against mock data; accessibility pass run against each; ready to show the client for feedback per ADR-006
   Resume note:

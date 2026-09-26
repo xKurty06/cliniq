@@ -11,14 +11,14 @@ You are working on **CLINIQ: Intelligent Clinic Tracking and Monitoring System**
 3. Read `CLINIQ-Knowledge-Base/01-Requirements/` for the requirement(s) relevant to your task.
 4. If your task is actual feature-building (not a one-off fix), check `CLINIQ-Knowledge-Base/04-Development/Development-Phases.md` for where it falls in the frontend/backend phase sequence — don't build ahead of a phase's prerequisites (e.g., don't start backend schema work — the ERD is TBA, not yet designed; don't wire real API calls into a Phase F1 screen still meant to run on mock data). **For any frontend screen or component specifically, follow `CLINIQ-Knowledge-Base/04-Development/Frontend-Loop-Engineering.md`'s build→countercheck→audit→simulate→confirm loop and its per-screen checklist** — don't mark a screen done without running the full loop.
 5. **Check `CLINIQ-Knowledge-Base/06-Decisions/` — do not contradict an existing decision.** If your task seems to require reversing one, stop and ask rather than silently overriding it.
-6. Check `CLINIQ-Knowledge-Base/08-Logs/Changelog.md` for recent changes that might affect your task.
+6. **Check `CLINIQ-Knowledge-Base/08-Logs/Changelog.md` for recent changes — and treat this as a two-way check, not just a forward-looking one.** Ask both: (a) does this affect what I'm about to build, and (b) does this mean something already marked *done* — a checked-off screen in `Frontend-Loop-Engineering.md`, a completed phase in `Development-Phases.md` — was built before a rule it should comply with existed, and now needs re-auditing rather than being treated as settled. A checked box is not permanently final if a later Changelog entry could invalidate it. (This is exactly what happened with the Dashboard build and the `cliniq-interactive-states` skill — built before that skill existed, so it needed a retroactive audit, not just future compliance going forward.)
 7. Check `CLINIQ-Knowledge-Base/08-Logs/Issues-and-TODOs.md` for known issues and open items relevant to your task.
 8. If anything is missing, ambiguous, or conflicting, ask for clarification rather than guessing.
 
 ## While you work
 
 - Follow the architecture in `CLINIQ-Knowledge-Base/02-Architecture/` and the conventions in `CLINIQ-Knowledge-Base/04-Development/Coding-Conventions.md`.
-- Check `.claude/skills/` for bespoke CLINIQ skills (display-privacy, audit-trail) before building a new screen or mutation — see `CLINIQ-Knowledge-Base/04-Development/Skills-Setup.md` for these plus recommended external skills.
+- **Check `CLINIQ-Knowledge-Base/04-Development/Skills-Setup.md` for the current, full list of bespoke CLINIQ skills before building a new screen or mutation** — don't rely on any specific skill being named here, since this list is exactly the kind of thing that goes stale the moment a new skill is added and this file isn't updated in the same breath. As of this writing there are three: `cliniq-display-privacy`, `cliniq-audit-trail`, `cliniq-interactive-states` — but check the actual file, not this sentence, since this sentence is a snapshot, not a live source.
 - Don't change technology choices without approval (see `CLINIQ-Knowledge-Base/06-Decisions/`).
 - Don't modify features or files unrelated to your task.
 - Write tests where applicable (`CLINIQ-Knowledge-Base/05-Testing/Test-Strategy.md`).
