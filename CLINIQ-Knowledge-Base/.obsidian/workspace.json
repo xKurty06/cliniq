@@ -189,6 +189,10 @@
   },
   "active": "a83dbf2f7b145dd2",
   "lastOpenFiles": [
+    "08-Logs/Agent-Sessions/2026-09-26-frontend-loop-engineering.md",
+    "04-Development/Frontend-Loop-Engineering.md",
+    "03-Design/assets/reference-mockup.png",
+    "03-Design/assets",
     "08-Logs/Agent-Sessions/2026-09-25-erd-reverted-to-tba.md",
     "00-Project-Core/Overview.md",
     "01-Requirements/Features/Module-Overview.md",
@@ -215,8 +219,6 @@
     "09-References/Canonical-Documents/CLINIQ_Frontend_Context_Brief.md",
     "09-References/Canonical-Documents",
     "09-References",
-    "08-Logs/Issues-and-TODOs.md",
-    "08-Logs/Agent-Sessions/2026-09-25-vault-full-detail-expansion.md",
     "08-Logs/Agent-Sessions",
     "08-Logs",
     "07-AI-Agents",
@@ -224,7 +226,6 @@
     "05-Testing",
     "04-Development",
     "03-Design",
-    "02-Architecture/Database",
     "Untitled.canvas"
   ]
 }

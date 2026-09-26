@@ -4,6 +4,8 @@ An honest audit of the 12-screen reference image against everything already deci
 
 **Status:** the image is a *reference*, explicitly changeable per the request that produced it. Nothing here is final — this is the audit that should inform the revision.
 
+**Image asset:** `03-Design/assets/reference-mockup.png` — the actual file, saved so any agent can view it directly rather than working from this description alone. **How to use it while building:** `04-Development/Frontend-Loop-Engineering.md` — layout/density reference only, filtered through the corrections below, never colors or the gaps identified here.
+
 ---
 
 ## Critical — contradicts or omits a confirmed requirement
