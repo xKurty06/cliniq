@@ -17,6 +17,7 @@ describe('App Shell / Navigation', () => {
     expect(screen.getByText('Operations')).toBeInTheDocument()
     expect(screen.getByText('Administration')).toBeInTheDocument()
     expect(screen.getByText('Students')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Inventory' })).toHaveAttribute('href', '/inventory')
     expect(screen.getByText('Backup')).toBeInTheDocument()
   })
 
