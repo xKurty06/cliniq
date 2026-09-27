@@ -119,32 +119,32 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 
 ### Phase F0 — Environment, Design Foundation, Shared Components
 
-- [ ] Build / [ ] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Vite scaffold run into `cliniq-frontend/`
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Shared component: Button (primary/secondary/cancel/destructive hierarchy, cursor+hover states)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Shared component: Card
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Shared component: Badge (icon+color+label, never color alone)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Shared component: Input
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Shared component: Dropdown/Select (custom-styled, not native chrome)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Shared component: Modal
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Shared component: Skeleton (matching each other component's shape)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — Layout: mobile wrapper (for QR mobile flows)
-  Build note: · Audit note:
+- [x] Build / [ ] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
+  Build note: Existing implementation uses the plain async hook and React Router path-based routes. · Audit note:
+- [x] Build / [ ] Audit — Vite scaffold run into `cliniq-frontend/`
+  Build note: Vite React TypeScript scaffold is present and builds. · Audit note:
+- [x] Build / [ ] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
+  Build note: Dependencies are present in `cliniq-frontend/package.json`. · Audit note:
+- [x] Build / [ ] Audit — Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
+  Build note: Tokens are encoded in `src/index.css` and `src/lib/tokens.ts`. · Audit note:
+- [x] Build / [ ] Audit — Shared component: Button (primary/secondary/cancel/destructive hierarchy, cursor+hover states)
+  Build note: Implemented in `src/components/ui/Button.tsx`. · Audit note:
+- [x] Build / [ ] Audit — Shared component: Card
+  Build note: Implemented in `src/components/ui/Card.tsx`. · Audit note:
+- [x] Build / [ ] Audit — Shared component: Badge (icon+color+label, never color alone)
+  Build note: Implemented in `src/components/ui/Badge.tsx`. · Audit note:
+- [x] Build / [ ] Audit — Shared component: Input
+  Build note: Implemented in `src/components/ui/Input.tsx`. · Audit note:
+- [x] Build / [ ] Audit — Shared component: Dropdown/Select (custom-styled, not native chrome)
+  Build note: Implemented in `src/components/ui/Select.tsx`. · Audit note:
+- [x] Build / [ ] Audit — Shared component: Modal
+  Build note: Implemented in `src/components/ui/Modal.tsx` with Escape/backdrop close behavior. · Audit note:
+- [x] Build / [ ] Audit — Shared component: Skeleton (matching each other component's shape)
+  Build note: Implemented in `src/components/ui/Skeleton.tsx`. · Audit note:
+- [x] Build / [ ] Audit — Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
+  Build note: Implemented in `src/layouts/` and route guards. · Audit note:
+- [x] Build / [ ] Audit — Layout: mobile wrapper (for QR mobile flows)
+  Build note: Mobile QR and emergency routes render without the desktop shell. · Audit note:
 - [ ] **F0 exit check (Audit phase only):** blank app shell renders, role-aware nav switches correctly on mock auth state, every shared component matches sampled color tokens
   Audit note:
 
@@ -184,11 +184,11 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: Standalone mobile emergency entry point routes directly to Stage 1 incident capture with an urgent, touch-sized action. · Audit note:
 
 **Emergency Response (remaining)**
-- [ ] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #18 Incident Report View/Print — Build note: · Audit note:
+- [x] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: `ParentNotificationPage` records repeatable timestamped outcomes and audit events. · Audit note:
+- [x] Build / [ ] Audit — #18 Incident Report View/Print — Build note: `IncidentReportPage` provides a deliberate incident summary, approval action, and print-safe layout. · Audit note:
 
 **Follow-Up Handling**
-- [ ] Build / [ ] Audit — #18b Follow-Up Prompt — Build note: · Audit note:
+- [x] Build / [ ] Audit — #18b Follow-Up Prompt — Build note: Inline follow-up capture is implemented in New Visit and Incident Entry with date, reason, and optional notes. · Audit note:
 - [x] Build / [ ] Audit — #18c Follow-Up List View — Build note: Staff-only status-filtered follow-up list with privacy-safe Student Number rows, visible reasons/due dates/status badges, loading skeleton, empty state, and real navigation. Focused typecheck and tests pass. · Audit note:
 
 **Medicine & Supply Inventory Tracker**
@@ -202,11 +202,11 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: Staff/Admin complaint summary with privacy-safe aggregate table, reporting period selector, and print/export layout. · Audit note:
 
 **User Management**
-- [ ] Build / [ ] Audit — #33 User List — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #34 Add/Edit User & Role Assignment — Build note: · Audit note:
+- [x] Build / [ ] Audit — #33 User List — Build note: Staff user list shows accounts, role badges, last login, and edit navigation. · Audit note:
+- [x] Build / [ ] Audit — #34 Add/Edit User & Role Assignment — Build note: Staff-only validated account form supports all three role assignments and audit logging. · Audit note:
 
 **Backup Verification Assistant**
-- [ ] Build / [ ] Audit — #32 Backup Status Screen — Build note: · Audit note:
+- [x] Build / [ ] Audit — #32 Backup Status Screen — Build note: Staff backup status and guided recovery checklist with verification audit action are implemented. · Audit note:
 
 - [ ] **F2 exit check (Audit phase only):** every screen above matches its reference pattern (`Reference-Screens.md` §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
   Audit note:

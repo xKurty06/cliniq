@@ -36,4 +36,10 @@ export const paths = {
   qrDesktop: '/qr/desktop',
   emergencyMobile: '/emergency/mobile',
   reports: '/reports',
+  incidentNotifications: (incidentId?: string) => incidentId ? `/incidents/${encodeURIComponent(incidentId)}/notifications` : '/incidents/notifications',
+  incidentReport: (incidentId?: string) => incidentId ? `/incidents/${encodeURIComponent(incidentId)}/report` : '/incidents/report',
+  users: '/users',
+  userNew: '/users/new',
+  userEdit: (userId: string) => `/users/${encodeURIComponent(userId)}/edit`,
+  backup: '/backup',
 } as const

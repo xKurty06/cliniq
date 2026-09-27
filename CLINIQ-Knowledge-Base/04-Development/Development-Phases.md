@@ -6,12 +6,12 @@ The execution roadmap agents should actually follow, one phase at a time. This i
 
 ---
 
-## 0. Two Blocking Decisions — Resolve Before Frontend Phase 1
+## 0. Two Blocking Decisions — Resolved for Frontend Builds
 
-Neither of these has been decided anywhere in planning. Don't guess either one — ask, the same way every other open item in this project has been handled rather than assumed.
+Both choices are now recorded in ADR-012 and ADR-013. They were implemented during the frontend build sequence and should not be silently replaced by a different library later.
 
-- **Data-fetching library.** The Frontend Context Brief explicitly leaves this open: React Query/TanStack Query, SWR, or plain fetch+context. This affects how every single API-consuming screen is written, so it needs to be picked before Phase 2 (the first screen that actually fetches data), not discovered mid-build. If TanStack Query gets picked, the matching skill (`Pythoughts-labs/react-frontend-skills -s tanstack-query`, deliberately excluded from `Skills-Setup.md` until this decision exists) should be installed then.
-- **Routing library.** URL shape is now decided: **path-based routes** (`/{screen}`, e.g. `/students`, `/qr/scan`), not query-param routes (`?screen=X`). Reasoning: it maps 1:1 onto the modular feature-folder structure already committed to (`ADR-008`); it enables per-screen code-splitting, which matters given the 4GB RAM Performance NFR (a nurse opening the Dashboard shouldn't pay the bundle cost of screens she hasn't visited); it makes role-based route guards declarative and auditable (attach the guard to the route definition, not a manually-written screen-switcher); and it handles nested/dynamic segments naturally (`/students/2026-00001/history`). Query params still belong for filters/view-state *within* a screen (`/visits?dateRange=last30days`) — path = which screen, query = what state that screen is in. **The library itself is still open** — React Router is the natural fit for a Vite+React app now that path-based routing is confirmed (ecosystem default, handles nested routes/lazy-loading/guards cleanly), but that's a proposal, not a confirmed decision — pick it deliberately before Phase 0 builds the App Shell/Nav, don't just default to it silently.
+- **Data-fetching library:** plain promise-based `useAsyncData` with feature-local `api/` modules; see ADR-013.
+- **Routing library:** React Router v7 with path-based routes and lazy-loaded guarded route entries; see ADR-012.
 
 ---
 

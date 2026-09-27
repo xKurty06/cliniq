@@ -41,8 +41,8 @@ const ALL: Record<NavKey, NavItem> = {
   qrLookup: { key: 'qrLookup', label: 'QR Lookup', icon: 'qrCode', available: true, to: paths.qrScan },
   inventory: { key: 'inventory', label: 'Inventory', icon: 'package', available: true, to: paths.inventory },
   reports: { key: 'reports', label: 'Reports', icon: 'fileText', available: true, to: paths.reports },
-  accounts: { key: 'accounts', label: 'Accounts', icon: 'userCog', available: false },
-  backup: { key: 'backup', label: 'Backup', icon: 'refresh', available: false },
+  accounts: { key: 'accounts', label: 'Accounts', icon: 'userCog', available: true, to: paths.users },
+  backup: { key: 'backup', label: 'Backup', icon: 'refresh', available: true, to: paths.backup },
 }
 
 export interface NavGroup {

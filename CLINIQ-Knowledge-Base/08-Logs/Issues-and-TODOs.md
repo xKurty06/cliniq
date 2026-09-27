@@ -36,7 +36,7 @@
 ## Known gaps
 
 - Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
-- No code exists yet — this vault was set up before implementation began, per the team's explicit request.
+- Frontend mock implementation is now substantially built through the F2 screen set; Laravel API integration, database schema, and production authentication remain future backend work.
 
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.

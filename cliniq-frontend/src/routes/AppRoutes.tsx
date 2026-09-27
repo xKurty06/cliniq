@@ -80,6 +80,11 @@ const QrDesktopHubPage = page(() => import('../features/qr-digital-health-id/des
 const QrPrintPage = page(() => import('../features/qr-digital-health-id/desktop/QrPrintPage'), 'QrPrintPage')
 const EmergencyMobilePage = page(() => import('../features/emergency-response/EmergencyMobilePage'), 'EmergencyMobilePage')
 const ReportsPage = page(() => import('../features/reports/ReportsPage'), 'ReportsPage')
+const ParentNotificationPage = page(() => import('../features/emergency-response/ParentNotificationPage'), 'ParentNotificationPage')
+const IncidentReportPage = page(() => import('../features/emergency-response/IncidentReportPage'), 'IncidentReportPage')
+const UserListPage = page(() => import('../features/user-management/UserListPage'), 'UserListPage')
+const UserFormPage = page(() => import('../features/user-management/UserFormPage'), 'UserFormPage')
+const BackupStatusPage = page(() => import('../features/backup/BackupStatusPage'), 'BackupStatusPage')
 
 type Viewer = { viewer: SessionUser }
 
@@ -112,6 +117,9 @@ function ExcuseLetterRoute({ viewer }: Viewer) {
   const { visitId } = useParams()
   return <ExcuseLetterPage viewer={viewer} visitId={visitId} />
 }
+function IncidentNotificationRoute({ viewer }: Viewer) { const { incidentId } = useParams(); return <ParentNotificationPage viewer={viewer} incidentId={incidentId} /> }
+function IncidentReportRoute({ viewer }: Viewer) { const { incidentId } = useParams(); return <IncidentReportPage viewer={viewer} incidentId={incidentId} /> }
+function UserFormRoute() { const { userId } = useParams(); return <UserFormPage userId={userId} /> }
 
 interface AppRoute {
   path: string
@@ -208,6 +216,10 @@ const APP_ROUTES: AppRoute[] = [
     shell: true,
     render: (viewer) => <IncidentEntryRoute viewer={viewer} />,
   },
+  { path: '/incidents/notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
+  { path: '/incidents/:incidentId/notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
+  { path: '/incidents/report', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentReportRoute viewer={viewer} /> },
+  { path: '/incidents/:incidentId/report', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentReportRoute viewer={viewer} /> },
   {
     path: paths.inventory,
     roles: ['staff'],
@@ -247,6 +259,10 @@ const APP_ROUTES: AppRoute[] = [
   { path: paths.qrPrint, roles: ['staff'], nav: 'qrLookup', shell: true, render: () => <QrPrintPage /> },
   { path: paths.emergencyMobile, roles: ['staff'], nav: 'incidents', shell: false, render: () => <EmergencyMobilePage /> },
   { path: paths.reports, roles: ['staff', 'admin'], nav: 'reports', shell: true, render: (viewer) => <ReportsPage viewer={viewer} /> },
+  { path: paths.users, roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserListPage /> },
+  { path: paths.userNew, roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormPage /> },
+  { path: '/users/:userId/edit', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormRoute /> },
+  { path: paths.backup, roles: ['staff'], nav: 'backup', shell: true, render: () => <BackupStatusPage /> },
 ]
 
 /** Where a role lands on `/` or when it opens a screen it can't use. */
