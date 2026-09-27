@@ -8,6 +8,13 @@
 - **Additional backup layer beyond local + external drive** — team is still evaluating what this should be (possibly off-site/cloud). Not yet decided.
 - **Who manages the system when the nurse is absent** — pending a reply from Ms. Jenne Baas.
 
+## Phase 2 (Cross-Check & Audit) findings logged during Phase 1 — Sunday, September 27, 2026 — 09:48
+
+- **#10 Visit Log List omits the complaint column** because it was built while `cliniq-display-privacy` still (incorrectly) described reason visibility as open. ADR-010 (Option A) says the reason stays visible next to the Student Number. Fix during #10's Audit; the skill text is now corrected.
+- **#16 Incident Entry: follow-up prompt sits in Stage 2**, but Screen Inventory #18b says it appears at the end of Stage 1. Resolve during the F1 Incident Entry audit (move it, or confirm with the owner that Stage 2 is acceptable).
+- **Shared `Select`/`Textarea`/`FollowUpPrompt` now exist** (`components/ui/`, `components/forms/`) but New Visit, Incident Entry, Student List, Student Form, and PE Referral still inline their own copies. Consolidate during Phase 2 (#18b's build = swapping `FollowUpPrompt` into #11 and #16).
+- **Login (#1) and Force Password Change (#2) aren't in any F-phase or the loop checklist.** Decide whether they belong in F2 or wait for B2 (Sanctum) before building.
+
 ## Resolved since last update
 
 - **Sunday, September 27, 2026 — 07:39:** ~~No code exists yet~~ — resolved. `cliniq-frontend/` now contains the Vite/React scaffold, shared UI components, App Shell/Nav, mock data utilities, and the built/audited Clinic Overview Dashboard. Remaining frontend work should continue from `04-Development/Frontend-Loop-Engineering.md`, not from the old empty-skeleton assumption.

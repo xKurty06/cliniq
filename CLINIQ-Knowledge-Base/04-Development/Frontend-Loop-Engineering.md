@@ -175,14 +175,16 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #10 Visit Log List — Build note: Sunday, September 27, 2026 — 08:16: built the Staff Visit Log List with date-range filters, Student Number/grade/event search, disposition segmented filter, privacy-safe table rows that omit full names and complaint/treatment details pending the unresolved reason-visibility decision, shaped skeleton loading, focused tests, and temporary `?screen=visit-log` preview routing. · Audit note:
 - [x] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: Sunday, September 27, 2026 — 08:19: built the Staff-only deliberate visit detail/edit screen with full student name and clinical details visible, read-mode context card, edit-mode complaint/treatment/disposition/event-tag controls, inline validation, mock update audit logging, shaped skeleton loading, focused tests, and temporary `?screen=visit-detail` preview routing. · Audit note:
 - [x] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: Sunday, September 27, 2026 — 08:23: built the Staff-only Excuse Letter Generator with visit-backed draft text, explicit not-a-medical-certificate boundary, nurse check/approval gate, mock approve audit logging, printable letter preview with print-only controls hidden, shaped skeleton loading, focused tests, and temporary `?screen=excuse-letter` preview routing. · Audit note:
-- [ ] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: · Audit note:
+- [x] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: Sunday, September 27, 2026 — 09:48: finished the previous agent's unlogged build (removed an unused import that failed `tsc -b`); Staff-only form with referral source/activity, injury summary, clinical assessment, treatment, disposition segmented control, hospital-referral escalation notice, mock submit + escalation audit entries, shaped skeleton, validation, focused tests, and temporary `?screen=pe-referral` preview routing. · Audit note:
 
 **QR Digital Health ID (remaining)**
-67- [ ] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #22 QR Code Print View — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #24 Student Quick-Actions (desktop) — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: · Audit note:
 
 **Emergency Response (remaining)**
+- [ ] Build / [ ] Audit — #15 Incident Log List — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #18 Incident Report View/Print — Build note: · Audit note:
 

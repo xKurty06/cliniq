@@ -1,4 +1,4 @@
-import type { ISODate } from '../types/entities'
+import type { ISODate, ISODateTime } from '../types/entities'
 
 /**
  * Timezone-safe calendar-date helpers. Every function works on local calendar days, never UTC
@@ -104,4 +104,12 @@ export function formatDateRange(from: ISODate, to: ISODate): string {
   const sameYear = from.slice(0, 4) === to.slice(0, 4)
   const start = formatDate(from, sameYear ? { month: 'short', day: 'numeric' } : undefined)
   return `${start} – ${formatDate(to)}`
+}
+
+/** Date + time for a full timestamp, e.g. "Sep 27, 2026 · 9:05 AM", in the viewer's local time. */
+export function formatDateTime(value: ISODateTime): string {
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return value
+  const time = d.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })
+  return `${formatDate(toISODate(d))} · ${time}`
 }

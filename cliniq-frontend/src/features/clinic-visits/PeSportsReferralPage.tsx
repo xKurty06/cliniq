@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import {
-  Badge,
   Button,
   Card,
   CardBody,
