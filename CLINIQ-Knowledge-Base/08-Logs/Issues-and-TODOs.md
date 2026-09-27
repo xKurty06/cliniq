@@ -8,25 +8,26 @@
 - **Additional backup layer beyond local + external drive** — team is still evaluating what this should be (possibly off-site/cloud). Not yet decided.
 - **Who manages the system when the nurse is absent** — pending a reply from Ms. Jenne Baas.
 
-## Phase 2 (Cross-Check & Audit) findings logged during Phase 1 — Sunday, September 27, 2026 — 09:48
+## Open design questions — school year handling & grade promotion
 
-- **#10 Visit Log List omits the complaint column** because it was built while `cliniq-display-privacy` still (incorrectly) described reason visibility as open. ADR-010 (Option A) says the reason stays visible next to the Student Number. Fix during #10's Audit; the skill text is now corrected.
-- **#16 Incident Entry: follow-up prompt sits in Stage 2**, but Screen Inventory #18b says it appears at the end of Stage 1. Resolve during the F1 Incident Entry audit (move it, or confirm with the owner that Stage 2 is acceptable).
-- **Shared `Select`/`Textarea`/`FollowUpPrompt` now exist** (`components/ui/`, `components/forms/`) but New Visit, Incident Entry, Student List, Student Form, and PE Referral still inline their own copies. Consolidate during Phase 2 (#18b's build = swapping `FollowUpPrompt` into #11 and #16).
-- **Login (#1) and Force Password Change (#2) aren't in any F-phase or the loop checklist.** Decide whether they belong in F2 or wait for B2 (Sanctum) before building.
+**This was a real gap: this whole discussion happened in chat and was never actually written down here — caught late, when it should have been captured the same session it came up, like everything else in this file.** Nothing below has been decided; these are the open questions as originally raised, not resolved answers.
 
-## Routing follow-ups — Sunday, September 27, 2026 — 10:01
+**What's already in place, relevant to this:**
+- Student Number stays fixed for life at the school (`YYYY-NNNNN`, tied to enrollment year, not current grade) — deliberately designed so promotion doesn't force a new ID.
+- Archive, not delete, for students who leave — hidden from active lists, kept for up to 5 years post-archive, then deleted (data retention policy).
+- Registrar's Office is documented as the source of student data, but only for the *initial* import — nothing describes an ongoing yearly process.
 
-- **Production server needs an SPA history fallback.** Vite dev/preview already serve `index.html` for any path, but whatever serves the built frontend on the LAN (Laravel/Apache under XAMPP) must also rewrite unknown non-API, non-asset paths to `index.html`, or refreshing `/students/2026-00001` will 404. Handle when deployment is set up.
-- **Student List rows don't link to Student Profile yet.** The masterlist had no row action before routing existed; `paths.studentProfile(n)` is ready for it. Decide the row interaction (whole-row link vs. a "View" action, per `cliniq-interactive-states`) during #6's Audit.
-- **`?mock=error|slow` preview params are dropped on in-app navigation** (links don't carry the query string). They're per-URL debugging switches, so this is expected; add them to the URL of the screen being tested. `?role=` is kept for the tab via sessionStorage.
-- **Screens built with fixed mock records now take the record from the URL** (Student Profile, Student Edit, Visit Detail, Excuse Letter, New Visit/Incident `?student=`). An unknown Student Number or visit ID shows the screen's error state rather than silently showing a different record. Re-check this during each screen's Audit.
+**What's actually undecided:**
+1. **Grade-level promotion at year rollover.** Does the system bulk-promote every active student one grade level at the start of a new school year? Who triggers it — Staff clicks a button, or does it happen automatically on a date? What about a student repeating a grade — how does Staff exclude them from the bulk promotion?
+2. **Section reassignment.** Sections often get reshuffled each year independent of grade level. Same question: bulk operation, manual per-student, or does this just come from a Registrar re-import?
+3. **A repeatable Registrar sync, not just a one-time import.** At the start of each year: some students are new (need a Student Number generated), some are continuing (need grade/section updated), some have left (need archiving). Is that one combined yearly process, or three separate manual actions?
+4. **Historical grade-level accuracy — a real data-integrity consequence, not just a preference.** If a Visit or Incident record reads grade level live off the Student record rather than snapshotting it at the time of the visit, an old visit from when a student was in Grade 7 will show "Grade 8" once they're promoted — because nothing captures what grade they were in *at the time*. Matters if historical reporting by grade level matters ("how many Grade 7 students visited last year"); if it doesn't, current behavior is fine as-is. This is a real choice, not a default to assume either way.
+5. **Re-enrollment mechanics.** The 5-year retention window was partly justified by "a transferred student might come back" — but nothing decides what happens then. Does a returning student get their *original* archived Student Number un-archived and reused, or a brand-new `YYYY-NNNNN` (since the format is literally "enrollment year")? If the latter, is the old archived record ever linked to the new one?
+6. **Does the reason a student left matter?** "Archived" currently covers graduated, transferred, and dropped out identically. Worth distinguishing for reporting, or is a generic archived flag enough?
+7. **Timing of archival.** Does Staff archive a student the moment the Registrar reports them gone, or is this batched into one end-of-year operation alongside the promotion/section work above?
 
 ## Resolved since last update
 
-- **Sunday, September 27, 2026 — 10:01:** ~~Routing library undecided~~ — resolved: path-based URLs + React Router (ADR-012), wired into every built screen and the sidebar.
-
-- **Sunday, September 27, 2026 — 07:39:** ~~No code exists yet~~ — resolved. `cliniq-frontend/` now contains the Vite/React scaffold, shared UI components, App Shell/Nav, mock data utilities, and the built/audited Clinic Overview Dashboard. Remaining frontend work should continue from `04-Development/Frontend-Loop-Engineering.md`, not from the old empty-skeleton assumption.
 - ~~Laravel Sanctum, Vite, and QR libraries~~ — confirmed September 25, 2026, after researching current maintenance/compatibility status. See `06-Decisions/ADR-007-Stack-Finalization.md` and `02-Architecture/Tech-Stack.md`.
 - ~~XAMPP standardization~~ — confirmed.
 - ~~Chart.js vs. Recharts~~ — Chart.js chosen, for bundle size and Canvas rendering given the 4GB RAM target.
@@ -35,6 +36,7 @@
 ## Known gaps
 
 - Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
+- No code exists yet — this vault was set up before implementation began, per the team's explicit request.
 
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.
