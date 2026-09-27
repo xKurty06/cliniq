@@ -1,4 +1,4 @@
-import { useId, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import {
   Badge,
   Button,
@@ -244,6 +244,17 @@ export function NewVisitEntryPage({
   const [errors, setErrors] = useState<Errors>({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  const saveAndNewRef = useRef(false)
+
+  useEffect(() => {
+    function saveAndNew() {
+      saveAndNewRef.current = true
+      formRef.current?.requestSubmit()
+    }
+    window.addEventListener('cliniq:save-and-new', saveAndNew)
+    return () => window.removeEventListener('cliniq:save-and-new', saveAndNew)
+  }, [])
 
   function updateComplaint(value: Complaint | '') {
     setComplaint(value)
@@ -293,7 +304,20 @@ export function NewVisitEntryPage({
         },
         viewer,
       )
-      setSaved(true)
+      if (saveAndNewRef.current) {
+        setComplaint('')
+        setTreatment('')
+        setDisposition('returned_to_class')
+        setTriageSteps([])
+        setNeedsFollowUp(false)
+        setFollowUpReason('')
+        setFollowUpNotes('')
+        setErrors({})
+        saveAndNewRef.current = false
+        setSaved(true)
+      } else {
+        setSaved(true)
+      }
     } finally {
       setSaving(false)
     }
@@ -343,7 +367,7 @@ export function NewVisitEntryPage({
         </div>
       )}
 
-      <form onSubmit={onSubmit} noValidate>
+      <form ref={formRef} onSubmit={onSubmit} noValidate>
         <Card aria-labelledby="visit-form-title">
           <CardHeader
             titleId="visit-form-title"

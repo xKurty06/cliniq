@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes } from 'react'
+import { forwardRef, useId, type InputHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
@@ -12,7 +12,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   inputClassName?: string
 }
 
-export function Input({
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input({
   label,
   hint,
   error,
@@ -21,7 +21,7 @@ export function Input({
   className,
   inputClassName,
   ...rest
-}: InputProps) {
+}: InputProps, ref) {
   const autoId = useId()
   const inputId = id ?? autoId
   const hintId = hint ? `${inputId}-hint` : undefined
@@ -40,6 +40,7 @@ export function Input({
       </label>
       <input
         id={inputId}
+        ref={ref}
         required={required}
         aria-invalid={error ? true : undefined}
         aria-describedby={cn(hintId, errorId) || undefined}
@@ -62,4 +63,4 @@ export function Input({
       )}
     </div>
   )
-}
+})

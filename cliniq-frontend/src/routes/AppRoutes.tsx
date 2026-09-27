@@ -6,6 +6,7 @@ import type { SessionUser } from '../lib/mocks/session'
 import type { UserRole } from '../types/entities'
 import { NotFoundPage } from './NotFoundPage'
 import { paths } from './paths'
+import { Card, Skeleton } from '../components'
 
 /**
  * The route table (Development-Phases.md §0: path-based routes, React Router).
@@ -272,9 +273,11 @@ function homePathFor(role: UserRole): string {
 
 function RouteLoading() {
   return (
-    <p className="sr-only" role="status">
-      Loading screen…
-    </p>
+    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8" aria-busy="true">
+      <p className="sr-only" role="status">Loading screen…</p>
+      <Card className="p-5"><Skeleton className="h-7 w-56 max-w-full" /><Skeleton className="mt-2 h-4 w-96 max-w-full" /></Card>
+      <Card className="p-5"><Skeleton className="h-10 w-full" /><Skeleton className="mt-4 h-40 w-full" /></Card>
+    </div>
   )
 }
 

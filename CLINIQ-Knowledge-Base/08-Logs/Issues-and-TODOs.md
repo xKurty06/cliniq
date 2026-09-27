@@ -35,6 +35,7 @@
 
 ## Known gaps
 
+- **Sunday, September 27, 2026 — 16:10 — F2 audit blocker: Screen #15 Incident Log List is missing.** `Screen-Inventory.md` and `Development-Phases.md` both require a Staff multi-student incident list showing Student Number, the ADR-010-approved reason/description, and a Needs Completion/Complete badge. No `IncidentLogListPage`, `/incidents` route, or navigation destination exists; the current Incidents navigation opens `/incidents/new` instead. Build and audit this screen before marking F2 or F3 demo-ready.
 - Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
 - Frontend mock implementation is now substantially built through the F2 screen set; Laravel API integration, database schema, and production authentication remain future backend work.
 

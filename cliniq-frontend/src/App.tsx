@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router'
 import { getMockSessionUser } from './lib/mocks/session'
 import { AppRoutes } from './routes/AppRoutes'
+import { KeyboardShortcuts } from './components/KeyboardShortcuts'
 
 /**
  * Root: path-based routing with React Router (Development-Phases.md §0). The route table, role
@@ -11,6 +12,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppRoutes user={getMockSessionUser()} />
+      <KeyboardShortcuts />
     </BrowserRouter>
   )
 }

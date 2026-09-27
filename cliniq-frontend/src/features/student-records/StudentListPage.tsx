@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import {
   Badge,
   Card,
@@ -115,6 +115,7 @@ const columns: Array<DataTableColumn<Student>> = [
  * medical/confidential fields are shown inline.
  */
 export function StudentListPage() {
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [search, setSearch] = useState('')
   const [gradeLevel, setGradeLevel] = useState('')
   const [includeArchived, setIncludeArchived] = useState(false)
@@ -122,6 +123,12 @@ export function StudentListPage() {
   const { data, status, isRefetching, reload } = useAsyncData(key, () =>
     fetchStudentList({ search, gradeLevel, includeArchived }),
   )
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('focus') === 'search') {
+      searchInputRef.current?.focus()
+    }
+  }, [])
 
   if (status === 'error') {
     return (
@@ -162,6 +169,7 @@ export function StudentListPage() {
         <CardBody className="flex flex-col gap-4">
           <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-[minmax(0,1fr)_16rem_auto]">
             <Input
+              ref={searchInputRef}
               label="Search"
               value={search}
               placeholder="Name or Student Number"
