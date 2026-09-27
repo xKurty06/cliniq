@@ -32,4 +32,7 @@ export const paths = {
   inventoryNew: '/inventory/new',
   inventoryDispense: (studentNumber?: string) => withStudent('/inventory/dispense', studentNumber),
   followUps: '/follow-ups',
+  qrPrint: '/qr/print',
+  qrDesktop: '/qr/desktop',
+  emergencyMobile: '/emergency/mobile',
 } as const

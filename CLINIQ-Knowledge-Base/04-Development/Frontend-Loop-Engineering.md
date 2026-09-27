@@ -150,38 +150,38 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 
 ### Phase F1 — The 5 Reference Screens (Build in This Order; Audit After)
 
-- [ ] Build / [ ] Audit — **1. Student Profile** (`features/student-records/`)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
-  Build note: · Audit note:
+- [x] Build / [ ] Audit — **1. Student Profile** (`features/student-records/`)
+  Build note: Existing mock-backed deliberate lookup with full-name profile, medical/history sections, Staff actions, Instructor read-only state, shaped loading skeleton, focused tests passed. · Audit note:
+- [x] Build / [ ] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
+  Build note: Existing mock-backed visit form with custom complaint select, Smart Triage checklist, disposition, inline Follow-Up prompt, validation, success/loading states, and audit events; focused tests passed. · Audit note:
+- [x] Build / [ ] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
+  Build note: Existing two-stage incident flow with fast Stage 1 capture, Stage 2 completion, lifecycle status badges, follow-up prompt, validation, loading states, and audit events; focused tests passed. · Audit note:
 - [x] Build / [ ] Audit — **4. QR Scan/Lookup Hub + Quick-Actions, mobile** (`features/qr-digital-health-id/mobile/` + `shared/`) — Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated
   Build note: Staff and Instructor variants use the shared camera/manual/demo scanner, Staff quick-actions preserve the identified Student Number in route query state, and every lookup records a mock audit scan. Focused and full frontend tests plus production build pass. Audit note:
-- [ ] Build / [ ] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
-  Build note: · Audit note:
+- [x] Build / [x] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
+  Build note: Built first, before the other F1 reference screens; includes summary cards, three alert lists, trends, calendar, table fallback, print action, skeletons, empty/error states, and mock aggregation. · Audit note: Sunday, September 27, 2026 — 13:47: Countercheck and Audit passed against Reference 1, Screen #31, Module 9, Design-System state/interaction rules, display-privacy, audit-trail, and interactive-states requirements. Confirmed view-only behavior, privacy-safe Student Numbers, due/upcoming follow-ups, calendar periods, table fallback, token-based controls, and no audit mutation required.
 - [ ] **F1 exit check (Audit phase only):** all 5 screens work end-to-end against mock data; accessibility pass run against each; Simulate step traced across all 5 together; ready to show the client for feedback per ADR-006
   Audit note:
 
 ### Phase F2 — Remaining Screens, Module by Module
 
 **Student Records**
-- [ ] Build / [ ] Audit — #3 App Shell/Nav — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #6 Student List — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #8 Add/Edit Student — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: · Audit note:
+- [x] Build / [ ] Audit — #3 App Shell/Nav — Build note: Role-aware shell and navigation are implemented with Staff, Admin, and Instructor behavior plus enabled-route links; focused navigation tests pass. · Audit note:
+- [x] Build / [ ] Audit — #6 Student List — Build note: Masterlist with privacy-safe medical-field boundary, name/Student Number search, grade/archive filters, status badges, table fallback, and skeleton/error/empty states. · Audit note:
+- [x] Build / [ ] Audit — #8 Add/Edit Student — Build note: Staff-only validated form with system-assigned Student Number, duplicate confirmation, custom grade select, success/loading/error states, and audit events. · Audit note:
+- [x] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: Staff review queue with status/search filters, missing-field context, resolver state, approval audit event, and skeleton/error/empty states. · Audit note:
 
 **Clinic Visit Monitoring**
-- [ ] Build / [ ] Audit — #10 Visit Log List — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: · Audit note:
+- [x] Build / [ ] Audit — #10 Visit Log List — Build note: Date/filterable Staff visit list with Student Number rows, disposition filters, search, status/context fields, and skeleton/error/empty states. · Audit note:
+- [x] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: Single-record deliberate detail/edit screen with full student context, validation, editable clinical fields, success state, and update audit event. · Audit note:
+- [x] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: Visit-backed Staff print layout with approval gate, explicit non-medical-certificate boundary, print-only controls, and approval audit event. · Audit note:
+- [x] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: Staff referral form with validation, treatment/disposition, hospital escalation, success/loading states, and submission/escalation audit events. · Audit note:
 
 **QR Digital Health ID (remaining)**
-- [ ] Build / [ ] Audit — #22 QR Code Print View — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #24 Student Quick-Actions (desktop) — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: · Audit note:
+- [x] Build / [ ] Audit — #22 QR Code Print View — Build note: Staff print layout with Student Number-only QR encoding preview, student selector, print action, and print-safe sticker boundary. · Audit note:
+- [x] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: Desktop Staff lookup reuses the shared scanner/manual fallback and records the existing QR scan audit event. · Audit note:
+- [x] Build / [ ] Audit — #24 Student Quick-Actions (desktop) — Build note: Desktop identified-student action grid routes to pre-filled Visit, Emergency, Profile, and Inventory flows. · Audit note:
+- [x] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: Standalone mobile emergency entry point routes directly to Stage 1 incident capture with an urgent, touch-sized action. · Audit note:
 
 **Emergency Response (remaining)**
 - [ ] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: · Audit note:
