@@ -20,6 +20,13 @@ const paths = {
       <path d="M12 8v4M12 16h.01" />
     </>
   ),
+  archive: (
+    <>
+      <rect x="3" y="4" width="18" height="4" rx="1" />
+      <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8" />
+      <path d="M10 12h4" />
+    </>
+  ),
   arrowDown: <path d="M12 5v14M19 12l-7 7-7-7" />,
   arrowUp: <path d="M12 19V5M5 12l7-7 7 7" />,
   barChart: <path d="M3 3v18h18M8 17V11M13 17V7M18 17v-4" />,

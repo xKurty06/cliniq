@@ -20,9 +20,8 @@ export interface DashboardHeaderProps {
 
 /**
  * Page header, following the reference: title/greeting on the left, and the period selector plus
- * the one page action (Print) on the right. Staff get a greeting (Staff Dashboard mockup); Admin
- * gets the plain title (Admin Dashboard mockup). Both still say "Clinic Overview", so "Where am I?"
- * is always answered. No "New Visit" button until #11 exists.
+ * the one page action (Print) on the right. Staff get a greeting in the supporting line; Admin gets
+ * the same page title without Staff-specific warmth. No "New Visit" button until #11 exists.
  */
 export function DashboardHeader({
   viewer,
@@ -36,12 +35,10 @@ export function DashboardHeader({
   return (
     <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
       <div className="min-w-0">
-        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-          {isStaff ? `${greeting(new Date())}, ${viewer.name}!` : 'Clinic Overview'}
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">Clinic Overview</h1>
         <p className="mt-1 text-sm text-text-secondary">
           {isStaff
-            ? "Today's clinic activity and student health updates."
+            ? `${greeting(new Date())}, ${viewer.name}. Today's clinic activity and student health updates.`
             : 'Today’s clinic activity and student health updates.'}
         </p>
         <p className="mt-0.5 text-xs text-text-secondary" aria-live="polite">

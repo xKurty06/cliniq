@@ -26,12 +26,9 @@ describe('Clinic Overview Dashboard', () => {
 
   it('renders every section Reference 1 requires', async () => {
     await renderLoaded()
-    // Staff (default mock session) get the reference's greeting; "Clinic Overview" still names the page.
+    expect(screen.getByRole('heading', { level: 1, name: 'Clinic Overview' })).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { level: 1, name: /, Ms\. Jenne Baas!$/ }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(/today's clinic activity and student health updates\.?/i),
+      screen.getByText(/good (morning|afternoon|evening), Ms\. Jenne Baas\. Today's clinic activity and student health updates\./i),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('Date range')).toBeInTheDocument()
     for (const label of [

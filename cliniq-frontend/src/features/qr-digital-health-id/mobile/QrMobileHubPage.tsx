@@ -1,0 +1,256 @@
+import { useState } from 'react'
+import {
+  Badge,
+  Card,
+  CardBody,
+  CardHeader,
+  EmptyState,
+  ErrorState,
+  Icon,
+  ListRow,
+  RowList,
+  Skeleton,
+} from '../../../components'
+import { getMockSessionUser, type SessionUser } from '../../../lib/mocks/session'
+import type { StudentNumber } from '../../../types/entities'
+import { lookupStudentByNumber, type QrLookupResult } from '../api/qrLookupApi'
+import { QrScannerView } from '../shared/QrScannerView'
+
+type LookupStatus = 'idle' | 'loading' | 'success' | 'error' | 'not_found'
+
+function formatDateTime(value: string): string {
+  return `${value.slice(0, 10)} · ${value.slice(11, 16)}`
+}
+
+function LoadingCard() {
+  return (
+    <Card aria-hidden="true" className="p-5">
+      <Skeleton className="h-6 w-56 max-w-full" />
+      <Skeleton className="mt-2 h-4 w-40" />
+      <Skeleton className="mt-4 h-20 w-full" />
+    </Card>
+  )
+}
+
+function StudentSummary({ result }: { result: QrLookupResult }) {
+  const { student } = result
+  return (
+    <Card aria-labelledby="lookup-result-title">
+      <CardHeader
+        titleId="lookup-result-title"
+        title={student.fullName}
+        description={`${student.studentNumber} · ${student.gradeLevel}`}
+        icon={<Icon name="users" />}
+      />
+      <CardBody className="flex flex-col gap-3">
+        <div>
+          <p className="text-xs font-semibold text-text-secondary">Allergies and restrictions</p>
+          {student.allergies.length ? (
+            <ul className="mt-1 flex flex-wrap gap-2">
+              {student.allergies.map((item) => (
+                <li key={item}>
+                  <Badge tone="warning" variant="soft">
+                    {item}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-secondary">No allergies recorded.</p>
+          )}
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-text-secondary">Conditions</p>
+          {student.medicalConditions.length ? (
+            <ul className="mt-1 flex flex-wrap gap-2">
+              {student.medicalConditions.map((item) => (
+                <li key={item}>
+                  <Badge tone="info" variant="soft">
+                    {item}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-secondary">No conditions recorded.</p>
+          )}
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-text-secondary">Emergency contact</p>
+          <p className="text-sm font-semibold text-text-primary">
+            {student.emergencyContact
+              ? `${student.emergencyContact.name} · ${student.emergencyContact.phone}`
+              : 'No emergency contact recorded'}
+          </p>
+        </div>
+      </CardBody>
+    </Card>
+  )
+}
+
+function StaffActions() {
+  return (
+    <Card aria-labelledby="quick-actions-title">
+      <CardHeader
+        titleId="quick-actions-title"
+        title="Quick actions"
+        description="Touch-sized actions after a deliberate student lookup."
+        icon={<Icon name="layoutGrid" />}
+      />
+      <CardBody>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <a
+            href="?screen=new-visit"
+            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-brand-green bg-background px-4 text-sm font-semibold text-brand-green-dark shadow-card transition-colors hover:bg-surface"
+          >
+            <Icon name="stethoscope" />
+            Record Visit
+          </a>
+          <a
+            href="?screen=incident-entry"
+            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-warning bg-warning text-sm font-semibold text-white shadow-card transition-[filter] hover:brightness-90"
+          >
+            <Icon name="alertTriangle" />
+            Log Emergency
+          </a>
+          <a
+            href="?screen=student-profile"
+            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-brand-green bg-background px-4 text-sm font-semibold text-brand-green-dark shadow-card transition-colors hover:bg-surface"
+          >
+            <Icon name="users" />
+            View Full Profile
+          </a>
+          <button
+            type="button"
+            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-border bg-background px-4 text-sm font-semibold text-text-primary shadow-card transition-colors hover:bg-surface"
+          >
+            <Icon name="package" />
+            Dispense Medicine
+          </button>
+        </div>
+      </CardBody>
+    </Card>
+  )
+}
+
+function InstructorReadOnly({ result }: { result: QrLookupResult }) {
+  return (
+    <Card aria-labelledby="readonly-title">
+      <CardHeader
+        titleId="readonly-title"
+        title="Read-only health history"
+        description="No action buttons are available for PE/Sports Instructor accounts."
+        icon={<Icon name="shieldPlus" />}
+      />
+      <CardBody className="flex flex-col gap-4">
+        <section>
+          <h3 className="text-sm font-semibold text-text-primary">Recent visits</h3>
+          {result.visits.length ? (
+            <RowList className="mt-2 rounded-md border border-border">
+              {result.visits.map((visit) => (
+                <ListRow
+                  key={visit.id}
+                  primary={visit.complaint}
+                  secondary={visit.treatment}
+                  meta={formatDateTime(visit.dateTime)}
+                />
+              ))}
+            </RowList>
+          ) : (
+            <EmptyState title="No recent visits" />
+          )}
+        </section>
+        <section>
+          <h3 className="text-sm font-semibold text-text-primary">Recent incidents</h3>
+          {result.incidents.length ? (
+            <RowList className="mt-2 rounded-md border border-border">
+              {result.incidents.map((incident) => (
+                <ListRow
+                  key={incident.id}
+                  primary={incident.complaint}
+                  secondary={incident.stage === 1 ? 'Needs completion' : 'Complete'}
+                  meta={formatDateTime(incident.time)}
+                />
+              ))}
+            </RowList>
+          ) : (
+            <EmptyState title="No recent incidents" />
+          )}
+        </section>
+      </CardBody>
+    </Card>
+  )
+}
+
+export function QrMobileHubPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
+  const [status, setStatus] = useState<LookupStatus>('idle')
+  const [result, setResult] = useState<QrLookupResult | null>(null)
+
+  async function lookup(studentNumber: StudentNumber) {
+    setStatus('loading')
+    setResult(null)
+    try {
+      const next = await lookupStudentByNumber(studentNumber, viewer)
+      setResult(next)
+      setStatus('success')
+    } catch (error) {
+      setStatus(error instanceof Error && error.message === 'Student not found' ? 'not_found' : 'error')
+    }
+  }
+
+  const instructor = viewer.role === 'instructor'
+
+  return (
+    <main className="min-h-screen bg-surface px-4 py-5">
+      <div className="mx-auto flex max-w-md flex-col gap-4">
+        <header className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase text-brand-green-dark">CLINIQ mobile</p>
+            <h1 className="text-2xl font-bold text-text-primary">
+              {instructor ? 'Instructor Lookup' : 'QR Scan / Lookup'}
+            </h1>
+            <p className="mt-1 text-sm text-text-secondary">
+              {instructor
+                ? 'Scan or enter a Student Number to view a read-only profile.'
+                : 'Scan or enter a Student Number for fast clinic actions.'}
+            </p>
+          </div>
+          <Badge tone={instructor ? 'info' : 'success'} variant="soft" icon="shieldPlus">
+            {instructor ? 'Read-only' : 'Staff'}
+          </Badge>
+        </header>
+
+        {!instructor && (
+          <a
+            href="?screen=incident-entry"
+            className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-md bg-warning px-4 text-sm font-bold text-white shadow-raised transition-[filter] hover:brightness-90"
+          >
+            <Icon name="alertTriangle" />
+            Emergency button
+          </a>
+        )}
+
+        <QrScannerView
+          title="Identify student"
+          description="Use the camera scanner, demo scan, or manual Student Number fallback."
+          onDetected={lookup}
+        />
+
+        {status === 'loading' && <LoadingCard />}
+        {status === 'error' && <ErrorState title="Unable to complete lookup." />}
+        {status === 'not_found' && (
+          <ErrorState
+            title="Student not found."
+            description="Check the Student Number, then try the manual fallback again."
+          />
+        )}
+        {result && (
+          <>
+            <StudentSummary result={result} />
+            {instructor ? <InstructorReadOnly result={result} /> : <StaffActions />}
+          </>
+        )}
+      </div>
+    </main>
+  )
+}

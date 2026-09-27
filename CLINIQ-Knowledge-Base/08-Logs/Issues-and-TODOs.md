@@ -10,6 +10,7 @@
 
 ## Resolved since last update
 
+- **Sunday, September 27, 2026 — 07:39:** ~~No code exists yet~~ — resolved. `cliniq-frontend/` now contains the Vite/React scaffold, shared UI components, App Shell/Nav, mock data utilities, and the built/audited Clinic Overview Dashboard. Remaining frontend work should continue from `04-Development/Frontend-Loop-Engineering.md`, not from the old empty-skeleton assumption.
 - ~~Laravel Sanctum, Vite, and QR libraries~~ — confirmed September 25, 2026, after researching current maintenance/compatibility status. See `06-Decisions/ADR-007-Stack-Finalization.md` and `02-Architecture/Tech-Stack.md`.
 - ~~XAMPP standardization~~ — confirmed.
 - ~~Chart.js vs. Recharts~~ — Chart.js chosen, for bundle size and Canvas rendering given the 4GB RAM target.
@@ -18,7 +19,6 @@
 ## Known gaps
 
 - Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
-- No code exists yet — this vault was set up before implementation began, per the team's explicit request.
 
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.

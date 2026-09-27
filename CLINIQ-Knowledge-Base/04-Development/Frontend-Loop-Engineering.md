@@ -150,36 +150,35 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 
 ### Phase F1 — The 5 Reference Screens (Build in This Order; Audit After)
 
-- [ ] Build / [ ] Audit — **1. Student Profile** (`features/student-records/`)
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — **4. QR Scan/Lookup Hub + Quick-Actions, mobile** (`features/qr-digital-health-id/mobile/` + `shared/`) — Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated
-  Build note: · Audit note:
-- [ ] Build / [ ] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
-  Build note: · Audit note:
+- [x] Build / [ ] Audit — **1. Student Profile** (`features/student-records/`)
+  Build note: Sunday, September 27, 2026 — 07:43: built mock-backed Student Profile with full-name deliberate lookup, Overview, Medical History chips/empty states, Visit History, Incident History with stage badges, Staff-only Edit/Print/Archive actions, Instructor read-only state, shaped skeletons, and `?screen=student-profile` preview while routing remains undecided. · Audit note:
+- [x] Build / [ ] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
+  Build note: Sunday, September 27, 2026 — 07:47: built mock-backed New Visit Entry with identified student header, custom-styled complaint select, inline Smart Triage checklist, treatment textarea, disposition segmented control, expandable Follow-Up prompt, mock audit entries for visit/follow-up saves, shaped skeletons, validation, success state, and `?screen=new-visit` preview while routing remains undecided. · Audit note:
+- [x] Build / [ ] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
+  Build note: Sunday, September 27, 2026 — 07:52: built mock-backed Incident Entry with Stage 1 fast capture, Stage 2 completion on the same saved record, visible Needs completion/In progress/Complete status badges, full vitals, treatment notes, hospital referral fields, parent-notification attempt log, optional follow-up prompt, mock audit entries for both stages, shaped skeletons, validation, success state, and `?screen=incident-entry` preview while routing remains undecided. · Audit note:
+- [x] Build / [ ] Audit — **4. QR Scan/Lookup Hub + Quick-Actions, mobile** (`features/qr-digital-health-id/mobile/` + `shared/`) — Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated
+  Build note: Sunday, September 27, 2026 — 07:56: installed `qr-scanner` and built mobile QR flow with shared `useQrScanner`/`QrScannerView`, Staff scan/manual/demo lookup, standalone Emergency button, Staff quick-actions, Instructor read-only lookup/history with no action buttons, full-name deliberate lookup display, mock scan audit entries, and `?screen=qr-mobile` / `?screen=qr-mobile&role=instructor` previews while routing remains undecided. · Audit note:
+- [x] Build / [x] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
+  Build note: Built first, before the rest of F1, so its shared components now seed later screens rather than consuming earlier reference patterns; includes five stat cards, alert lists, trends, table fallbacks, calendar heatmap, date range filtering, print action, shaped skeletons, empty/error states, and mock-data aggregation. · Audit note: Sunday, September 27, 2026 — 07:38: retroactive audit passed after fixing the Staff header to keep the required "Clinic Overview" page title; checked Reference 1, Screen #31, Module 9, Design-System skeleton/interaction rules, display-privacy, audit-trail, and interactive-states.
 - [ ] **F1 exit check (Audit phase only):** all 5 screens work end-to-end against mock data; accessibility pass run against each; Simulate step traced across all 5 together; ready to show the client for feedback per ADR-006
   Audit note:
 
 ### Phase F2 — Remaining Screens, Module by Module
 
 **Student Records**
-- [ ] Build / [ ] Audit — #3 App Shell/Nav — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #6 Student List — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #8 Add/Edit Student — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: · Audit note:
+- [x] Build / [ ] Audit — #3 App Shell/Nav — Build note: Sunday, September 27, 2026 — 07:57: existing App Shell/Nav verified as the F2 #3 build with Staff grouped module navigation, Admin limited to Dashboard/Reports, Instructor returning no shell groups, Dashboard/Student/Visit/Incident/QR preview active-state support, and focused role-navigation tests. · Audit note:
+- [x] Build / [ ] Audit — #6 Student List — Build note: Sunday, September 27, 2026 — 08:01: built the student masterlist with full-name/Student Number search, grade-level filter, include-archived toggle, Complete/Incomplete/Archived record-status badges, shaped skeleton loading, privacy-safe table columns with no inline medical fields, focused tests, and temporary `?screen=student-list` preview routing. · Audit note:
+- [x] Build / [ ] Audit — #8 Add/Edit Student — Build note: Sunday, September 27, 2026 — 08:08: built the Staff-only Add/Edit Student form with system-assigned Student Number display, required-field validation for identity/emergency/medical-history fields, grade select styling, add/edit preview modes, duplicate-detection confirmation dialog, mock create/update audit logging, shaped skeleton loading, focused tests, and temporary `?screen=student-form` / `?screen=student-form&mode=edit` preview routing. · Audit note:
+- [x] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: Sunday, September 27, 2026 — 08:12: built the Staff-only Registrar-import review queue with open/resolved/all filters, name/Student Number/grade search, privacy-safe missing-field labels, session-level resolver tracking, mock approve audit logging, shaped skeleton loading, focused tests, and temporary `?screen=incomplete-records` preview routing. · Audit note:
 
 **Clinic Visit Monitoring**
-- [ ] Build / [ ] Audit — #10 Visit Log List — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: · Audit note:
+- [x] Build / [ ] Audit — #10 Visit Log List — Build note: Sunday, September 27, 2026 — 08:16: built the Staff Visit Log List with date-range filters, Student Number/grade/event search, disposition segmented filter, privacy-safe table rows that omit full names and complaint/treatment details pending the unresolved reason-visibility decision, shaped skeleton loading, focused tests, and temporary `?screen=visit-log` preview routing. · Audit note:
+- [x] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: Sunday, September 27, 2026 — 08:19: built the Staff-only deliberate visit detail/edit screen with full student name and clinical details visible, read-mode context card, edit-mode complaint/treatment/disposition/event-tag controls, inline validation, mock update audit logging, shaped skeleton loading, focused tests, and temporary `?screen=visit-detail` preview routing. · Audit note:
+- [x] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: Sunday, September 27, 2026 — 08:23: built the Staff-only Excuse Letter Generator with visit-backed draft text, explicit not-a-medical-certificate boundary, nurse check/approval gate, mock approve audit logging, printable letter preview with print-only controls hidden, shaped skeleton loading, focused tests, and temporary `?screen=excuse-letter` preview routing. · Audit note:
 - [ ] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: · Audit note:
 
 **QR Digital Health ID (remaining)**
-- [ ] Build / [ ] Audit — #22 QR Code Print View — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: · Audit note:
+67- [ ] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #24 Student Quick-Actions (desktop) — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: · Audit note:
 

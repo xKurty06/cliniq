@@ -1,0 +1,70 @@
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it } from 'vitest'
+import { StudentListPage } from './StudentListPage'
+import { fetchStudentList } from './api/studentListApi'
+
+describe('Student List', () => {
+  it('renders the masterlist without inline medical details', async () => {
+    render(<StudentListPage />)
+
+    expect(await screen.findByRole('heading', { name: 'Student List' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Full name' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Student Number' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Record status' })).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: /allergies/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: /medical conditions/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('Peanuts')).not.toBeInTheDocument()
+    expect(screen.queryByText('Asthma')).not.toBeInTheDocument()
+  })
+
+  it('searches by Student Number', async () => {
+    const user = userEvent.setup()
+    const [student] = await fetchStudentList({
+      search: '',
+      gradeLevel: '',
+      includeArchived: false,
+    })
+
+    render(<StudentListPage />)
+    await screen.findByRole('heading', { name: 'Student List' })
+    await user.type(screen.getByLabelText('Search'), student.studentNumber)
+
+    expect(await screen.findByText('1 result shown')).toBeInTheDocument()
+    expect(screen.getByRole('rowheader', { name: student.fullName })).toBeInTheDocument()
+    expect(screen.getByRole('cell', { name: student.studentNumber })).toBeInTheDocument()
+  })
+
+  it('keeps archived records hidden until requested', async () => {
+    const user = userEvent.setup()
+    const archivedStudent = (
+      await fetchStudentList({ search: '', gradeLevel: '', includeArchived: true })
+    ).find((student) => student.archived)
+
+    expect(archivedStudent).toBeDefined()
+    render(<StudentListPage />)
+    await screen.findByRole('heading', { name: 'Student List' })
+
+    await user.type(screen.getByLabelText('Search'), archivedStudent!.studentNumber)
+    expect(await screen.findByText('No students found')).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText('Include archived'))
+    const row = await screen.findByRole('row', { name: new RegExp(archivedStudent!.studentNumber) })
+    expect(within(row).getByText('Archived')).toBeInTheDocument()
+  })
+
+  it('filters by grade level', async () => {
+    const user = userEvent.setup()
+    render(<StudentListPage />)
+
+    await screen.findByRole('heading', { name: 'Student List' })
+    await user.selectOptions(screen.getByLabelText('Grade level'), 'Grade 12')
+
+    await waitFor(() => {
+      expect(screen.getByText(/results? shown/)).toBeInTheDocument()
+    })
+    for (const gradeCell of screen.getAllByRole('cell', { name: 'Grade 12' })) {
+      expect(gradeCell).toBeInTheDocument()
+    }
+  })
+})
