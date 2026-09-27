@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { Icon } from '../components'
 import { cn } from '../lib/cn'
 import { navGroupsFor, type NavKey } from './navigation'
@@ -19,7 +20,7 @@ export function BrandLogo() {
 }
 
 interface SidebarProps {
-  active: NavKey
+  active: NavKey | null
   collapsed: boolean
   onCollapsedChange: (collapsed: boolean) => void
   user: SessionUser
@@ -99,11 +100,11 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
               <ul className={cn('flex flex-col', collapsed ? 'items-center gap-1' : 'gap-1.5')}>
                 {group.items.map((item) => {
                   const isActive = item.key === active
-                  if (item.available) {
+                  if (item.available && item.to) {
                     return (
                       <li key={item.key}>
-                        <a
-                          href="#main-content"
+                        <Link
+                          to={item.to}
                           aria-label={collapsed ? item.label : undefined}
                           aria-current={isActive ? 'page' : undefined}
                           title={collapsed ? item.label : undefined}
@@ -117,7 +118,7 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
                         >
                           <Icon name={item.icon} />
                           <span className={labelVisibility}>{item.label}</span>
-                        </a>
+                        </Link>
                       </li>
                     )
                   }

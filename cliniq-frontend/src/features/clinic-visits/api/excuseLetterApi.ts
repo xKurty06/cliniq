@@ -34,17 +34,20 @@ function defaultBody(student: Student, visit: Visit): string {
   ].join('\n\n')
 }
 
-export async function fetchExcuseLetterContext(): Promise<ExcuseLetterContext> {
+/** `visitId` comes from `/visits/:visitId/excuse-letter`; omitted, the latest active visit is used. */
+export async function fetchExcuseLetterContext(visitId?: string): Promise<ExcuseLetterContext> {
   const mode = mockMode()
   await simulateLatency(mode)
   if (mode === 'error') throw new Error('Mock excuse letter failure')
 
   const dataset = getMockDataset(todayISO())
-  const visit = [...dataset.visits].reverse().find((candidate) => {
-    const student = dataset.students.find((item) => item.id === candidate.studentId)
-    return student && !student.archived
-  })
-  if (!visit) throw new Error('No mock visit available')
+  const visit = visitId
+    ? dataset.visits.find((candidate) => candidate.id === visitId)
+    : [...dataset.visits].reverse().find((candidate) => {
+        const student = dataset.students.find((item) => item.id === candidate.studentId)
+        return student && !student.archived
+      })
+  if (!visit) throw new Error('Visit not found')
 
   const student = dataset.students.find((item) => item.id === visit.studentId)
   if (!student) throw new Error('Mock visit has no student')

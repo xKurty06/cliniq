@@ -1,33 +1,8 @@
 import type { ButtonHTMLAttributes } from 'react'
-import { cn } from '../../lib/cn'
 import { Icon, type IconName } from '../icons/Icon'
+import { buttonClassName, type ButtonSize, type ButtonVariant } from './buttonClassName'
 
-/**
- * Button hierarchy (Design-System.md, "Button Hierarchy & Color"):
- * - primary: the one likely action. Filled brand-green-dark with white text. Button labels are
- *   14px, which counts as *small* text, and the contrast rules only allow small white text on
- *   brand-green-dark (9.19:1), not brand-green (3.74:1).
- * - secondary: quieter outline with brand-green-dark text (brand-green text is only 3.74:1).
- * - neutral: cancel / go back. Visible, never competing.
- * - destructive: filled error red, reserved for genuinely irreversible actions only.
- */
-export type ButtonVariant = 'primary' | 'secondary' | 'neutral' | 'destructive'
-export type ButtonSize = 'sm' | 'md'
-
-const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    'bg-brand-green text-white border border-brand-green shadow-raised hover:bg-brand-green-dark hover:border-brand-green-dark',
-  secondary:
-    'bg-background text-brand-green-dark border border-brand-green shadow-card hover:bg-surface',
-  neutral:
-    'bg-background text-text-secondary border border-border hover:bg-surface hover:text-text-primary',
-  destructive: 'bg-error text-white border border-error hover:brightness-90',
-}
-
-const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 gap-1.5 text-sm',
-  md: 'h-10 px-4 gap-2 text-sm',
-}
+export type { ButtonSize, ButtonVariant }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -38,6 +13,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean
 }
 
+/** Variant hierarchy and colors are documented in `./buttonClassName.ts`. */
 export function Button({
   variant = 'secondary',
   size = 'md',
@@ -54,14 +30,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={cn(
-        'inline-flex items-center justify-center rounded-md font-semibold whitespace-nowrap',
-        'transition-colors duration-150 motion-reduce:transition-none',
-        'cursor-pointer disabled:cursor-not-allowed disabled:opacity-50',
-        variantClasses[variant],
-        sizeClasses[size],
-        className,
-      )}
+      className={buttonClassName({ variant, size, className })}
       {...rest}
     >
       {loading ? (

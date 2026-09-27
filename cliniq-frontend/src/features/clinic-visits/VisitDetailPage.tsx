@@ -297,8 +297,16 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
   )
 }
 
-export function VisitDetailPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
-  const { data, status, reload } = useAsyncData('visit-detail', fetchVisitDetail)
+export function VisitDetailPage({
+  viewer = getMockSessionUser(),
+  visitId,
+}: {
+  viewer?: SessionUser
+  visitId?: string
+}) {
+  const { data, status, reload } = useAsyncData(`visit-detail|${visitId ?? 'default'}`, () =>
+    fetchVisitDetail(visitId),
+  )
 
   if (viewer.role !== 'staff') {
     return (

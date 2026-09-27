@@ -208,8 +208,16 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
   )
 }
 
-export function ExcuseLetterPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
-  const { data, status, reload } = useAsyncData('excuse-letter', fetchExcuseLetterContext)
+export function ExcuseLetterPage({
+  viewer = getMockSessionUser(),
+  visitId,
+}: {
+  viewer?: SessionUser
+  visitId?: string
+}) {
+  const { data, status, reload } = useAsyncData(`excuse-letter|${visitId ?? 'default'}`, () =>
+    fetchExcuseLetterContext(visitId),
+  )
 
   if (viewer.role !== 'staff') {
     return (

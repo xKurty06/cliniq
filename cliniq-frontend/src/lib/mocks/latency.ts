@@ -20,7 +20,7 @@ export async function mockRequest(failureMessage: string): Promise<void> {
   if (mode === 'error') throw new Error(failureMessage)
 }
 
-/** Reads one query-string value (temporary, until the routing decision lands). */
+/** Reads one query-string value, for in-screen state and mock preview switches (ADR-012: query = screen state). */
 export function queryParam(name: string): string | null {
   if (typeof window === 'undefined') return null
   return new URLSearchParams(window.location.search).get(name)

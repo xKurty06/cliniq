@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Badge,
-  Button,
+  buttonClassName,
   Card,
   CardBody,
   CardHeader,
@@ -15,8 +15,10 @@ import {
   type BadgeTone,
   type DataTableColumn,
 } from '../../components'
+import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { formatDate, todayISO } from '../../lib/dates'
+import { paths } from '../../routes/paths'
 import type { Disposition } from '../../types/entities'
 import {
   defaultVisitLogRange,
@@ -111,10 +113,11 @@ const columns: Array<DataTableColumn<VisitLogRow>> = [
   {
     key: 'actions',
     header: 'Actions',
-    cell: () => (
-      <Button size="sm" variant="secondary" icon="fileText">
+    cell: (row) => (
+      <Link to={paths.visitDetail(row.id)} className={buttonClassName({ size: 'sm' })}>
+        <Icon name="fileText" />
         View Detail
-      </Button>
+      </Link>
     ),
   },
 ]

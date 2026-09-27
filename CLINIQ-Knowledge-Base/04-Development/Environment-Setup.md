@@ -11,6 +11,7 @@
 | QR generation (backend) | `composer require endroid/qr-code` | Server-side QR generation |
 | QR scanning (frontend) | `npm install qr-scanner` | Camera-based scanning with a Safari/iOS-safe fallback; needs a small custom React wrapper component around it |
 | Charts | `npm install chart.js react-chartjs-2` | Dashboard charts |
+| Routing | `npm install react-router` | Path-based routes, lazy-loaded screens, role guards (ADR-012). The production web server must fall back to `index.html` for unknown paths so deep links like `/students/2026-00001` load the app |
 | MySQL | Configure Laravel `.env` against XAMPP's MySQL | Database connection |
 | Git | `git init` at the repo root | Version control from day one |
 

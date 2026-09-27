@@ -224,14 +224,14 @@ function TriagePanel({
  */
 export function NewVisitEntryPage({
   viewer = getMockSessionUser(),
-  studentId,
+  studentNumber,
 }: {
   viewer?: SessionUser
-  studentId?: string
+  studentNumber?: string
 }) {
   const today = todayISO()
-  const { data, status, reload } = useAsyncData(`new-visit|${studentId ?? 'default'}`, () =>
-    fetchNewVisitContext(studentId),
+  const { data, status, reload } = useAsyncData(`new-visit|${studentNumber ?? 'default'}`, () =>
+    fetchNewVisitContext(studentNumber),
   )
   const [complaint, setComplaint] = useState<Complaint | ''>('')
   const [treatment, setTreatment] = useState('')

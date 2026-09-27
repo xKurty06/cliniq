@@ -1,7 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { renderWithRouter } from '../../../test/renderWithRouter'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { clearMockAuditEntries, getMockAuditEntries } from '../../../lib/mocks/audit'
+import { demoStudentNumber } from '../api/qrLookupApi'
 import { QrMobileHubPage } from './QrMobileHubPage'
 
 describe('QR Mobile Hub', () => {
@@ -9,27 +11,28 @@ describe('QR Mobile Hub', () => {
 
   it('shows Staff mobile quick actions after lookup', async () => {
     const user = userEvent.setup()
-    render(<QrMobileHubPage />)
+    renderWithRouter(<QrMobileHubPage />)
 
     expect(screen.getByRole('heading', { name: 'QR Scan / Lookup' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /emergency button/i })).toHaveAttribute(
       'href',
-      '?screen=incident-entry',
+      '/incidents/new',
     )
     await user.click(screen.getByRole('button', { name: 'Use demo scan' }))
 
     expect(await screen.findByRole('heading', { name: /quick actions/i })).toBeInTheDocument()
+    const studentNumber = demoStudentNumber()
     expect(screen.getByRole('link', { name: 'Record Visit' })).toHaveAttribute(
       'href',
-      '?screen=new-visit',
+      `/visits/new?student=${studentNumber}`,
     )
     expect(screen.getByRole('link', { name: 'Log Emergency' })).toHaveAttribute(
       'href',
-      '?screen=incident-entry',
+      `/incidents/new?student=${studentNumber}`,
     )
     expect(screen.getByRole('link', { name: 'View Full Profile' })).toHaveAttribute(
       'href',
-      '?screen=student-profile',
+      `/students/${studentNumber}`,
     )
     expect(screen.getByRole('button', { name: 'Dispense Medicine' })).toBeInTheDocument()
     expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['scan'])
@@ -37,7 +40,7 @@ describe('QR Mobile Hub', () => {
 
   it('shows Instructor read-only lookup with no action buttons', async () => {
     const user = userEvent.setup()
-    render(<QrMobileHubPage viewer={{ id: 'usr-pe', name: 'PE Instructor', role: 'instructor' }} />)
+    renderWithRouter(<QrMobileHubPage viewer={{ id: 'usr-pe', name: 'PE Instructor', role: 'instructor' }} />)
 
     expect(screen.getByRole('heading', { name: 'Instructor Lookup' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /emergency button/i })).not.toBeInTheDocument()

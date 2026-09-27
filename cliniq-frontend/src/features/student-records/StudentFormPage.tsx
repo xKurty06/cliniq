@@ -416,8 +416,17 @@ function StudentFormEditor({
   )
 }
 
-export function StudentFormPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
-  const { data, status, isRefetching, reload } = useAsyncData('student-form', fetchStudentFormContext)
+export function StudentFormPage({
+  viewer = getMockSessionUser(),
+  studentNumber,
+}: {
+  viewer?: SessionUser
+  studentNumber?: string
+}) {
+  const { data, status, isRefetching, reload } = useAsyncData(
+    `student-form|${studentNumber ?? 'new'}`,
+    () => fetchStudentFormContext(studentNumber),
+  )
 
   if (viewer.role !== 'staff') {
     return (

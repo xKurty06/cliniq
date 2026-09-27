@@ -2,6 +2,7 @@
 export { Icon, type IconName } from './icons/Icon'
 export { Badge, type BadgeTone, type BadgeVariant } from './ui/Badge'
 export { Button, type ButtonVariant } from './ui/Button'
+export { buttonClassName } from './ui/buttonClassName'
 export { Card, CardBody, CardHeader, CARD_SURFACE } from './ui/Card'
 export { DataTable, type DataTableColumn } from './ui/DataTable'
 export { DateRangePicker } from './ui/DateRangePicker'

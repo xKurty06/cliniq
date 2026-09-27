@@ -53,12 +53,16 @@ function defaultStudent(): Student {
   return dataset.students.find((s) => !s.archived && s.recordComplete) ?? dataset.students[0]
 }
 
-export async function fetchIncidentEntryContext(studentId?: string): Promise<IncidentEntryContext> {
+export async function fetchIncidentEntryContext(studentNumber?: string): Promise<IncidentEntryContext> {
   const mode = mockMode()
   await simulateLatency(mode)
   if (mode === 'error') throw new Error('Mock incident context failure')
   const dataset = getMockDataset(todayISO())
-  const student = dataset.students.find((s) => s.id === studentId) ?? defaultStudent()
+  // `studentNumber` is the route's `?student=` pre-selection; without one a demo student is used.
+  const student = studentNumber
+    ? dataset.students.find((s) => s.studentNumber === studentNumber)
+    : defaultStudent()
+  if (!student) throw new Error('Student not found')
   return { student }
 }
 

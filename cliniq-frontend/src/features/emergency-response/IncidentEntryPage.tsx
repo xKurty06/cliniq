@@ -189,14 +189,14 @@ function validateStageOne(complaint: string, temperatureC: string, pulseBpm: str
  */
 export function IncidentEntryPage({
   viewer = getMockSessionUser(),
-  studentId,
+  studentNumber,
 }: {
   viewer?: SessionUser
-  studentId?: string
+  studentNumber?: string
 }) {
   const today = todayISO()
-  const { data, status, reload } = useAsyncData(`incident-entry|${studentId ?? 'default'}`, () =>
-    fetchIncidentEntryContext(studentId),
+  const { data, status, reload } = useAsyncData(`incident-entry|${studentNumber ?? 'default'}`, () =>
+    fetchIncidentEntryContext(studentNumber),
   )
   const [stage, setStage] = useState<ScreenStage>('stage1')
   const [incident, setIncident] = useState<Incident | null>(null)

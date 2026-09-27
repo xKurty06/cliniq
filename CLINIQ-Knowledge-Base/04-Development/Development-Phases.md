@@ -8,18 +8,18 @@ The execution roadmap agents should actually follow, one phase at a time. This i
 
 ## 0. Two Blocking Decisions — Resolve Before Frontend Phase 1
 
-Neither of these was decided anywhere in planning. Don't guess either one — ask, the same way every other open item in this project has been handled rather than assumed. **Status as of Sunday, September 27, 2026 — 09:50:** data-fetching is still fully open; routing is half-resolved (URL shape confirmed, library still only proposed) — see below.
+Neither of these was decided anywhere in planning. Don't guess either one — ask, the same way every other open item in this project has been handled rather than assumed. **Status as of Sunday, September 27, 2026 — 10:01:** data-fetching is still fully open; routing is **resolved** (path-based URLs + React Router, ADR-012) — see below.
 
 - **Data-fetching library.** The Frontend Context Brief explicitly leaves this open: React Query/TanStack Query, SWR, or plain fetch+context. This affects how every single API-consuming screen is written, so it needs to be picked before Phase 2 (the first screen that actually fetches data), not discovered mid-build. If TanStack Query gets picked, the matching skill (`Pythoughts-labs/react-frontend-skills -s tanstack-query`, deliberately excluded from `Skills-Setup.md` until this decision exists) should be installed then.
-- **Routing library.** Nothing in any canonical document names one. This decision has two halves, and only one is settled:
+- **Routing library — RESOLVED (ADR-012).** Nothing in any canonical document named one. Both halves are now settled:
   - **URL shape — CONFIRMED: path-based routes** (`/{screen}`, e.g. `/students`, `/qr/scan`), **not** query-param routes (`?screen=X`). Reasons:
     - It maps 1:1 onto the modular feature-folder structure already committed to in ADR-008 (`src/features/<module>/`) — a route segment is the module, not a string the app has to switch on.
     - It enables per-screen code-splitting (lazy-loaded route chunks), which matters given the Performance NFR's 4GB-RAM minimum-spec workstation: a nurse opening the Dashboard shouldn't pay the bundle cost of screens she hasn't visited. (Current builds already warn the single bundle exceeds 500 kB.)
     - It makes role-based route guards declarative and auditable — the guard is attached to the route definition itself, readable in one place, not buried in a manually-written screen-switcher.
     - It handles nested/dynamic segments naturally (`/students/2026-00001/history`).
     - **Query params still have a job:** filters and view-state *within* a screen (`/visits?dateRange=last30days`). The rule: **path = which screen, query = what state that screen is in.**
-    - The existing `?screen=X` preview switch in `App.tsx` (and the `&role=` preview param) is temporary scaffolding from before this was settled and should be migrated to paths when the router is wired — it is not the target design.
-  - **Library — PROPOSED, NOT CONFIRMED: React Router.** Given path-based routing is now confirmed, it's the natural fit for a Vite + React SPA: the ecosystem default, and it handles nested routes, lazy-loaded route components, and route guards cleanly. But "natural fit" isn't "decided for this project" — confirm with the owner before installing it or wiring real routes into the App Shell/Nav, since the library choice shapes how `layouts/` and every feature folder's screens connect to each other. Until confirmed, treat this half as still blocking.
+    - The old `?screen=X` preview switch in `App.tsx` has been replaced by real routes (Sunday, September 27, 2026 — 10:01). `?role=` remains only as the mock-session role preview until Sanctum auth lands (Phase B2).
+  - **Library — CONFIRMED (Sunday, September 27, 2026 — 10:01): React Router** (`react-router` v7). The ecosystem default for a Vite + React SPA, and it handles nested routes, lazy-loaded route components, and route guards cleanly. Where things live: the route table, role guards, and shell placement are in `cliniq-frontend/src/routes/AppRoutes.tsx`; every URL is built through `src/routes/paths.ts` (screens never hand-write URL strings). **New screens add one entry to that route table** (path, allowed roles, nav item, shell yes/no) instead of their own switching logic.
 
 ---
 

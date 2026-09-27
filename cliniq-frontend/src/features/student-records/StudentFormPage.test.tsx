@@ -21,7 +21,6 @@ async function fillRequiredStudentFields() {
 describe('Student Form', () => {
   beforeEach(() => {
     clearMockAuditEntries()
-    window.history.pushState({}, '', '/')
   })
 
   it('renders add mode with a system-assigned Student Number preview', async () => {
@@ -87,8 +86,8 @@ describe('Student Form', () => {
 
   it('supports edit mode and records an update audit entry', async () => {
     const user = userEvent.setup()
-    window.history.pushState({}, '', '/?mode=edit')
-    render(<StudentFormPage />)
+    const [existing] = await fetchStudentList({ search: '', gradeLevel: '', includeArchived: false })
+    render(<StudentFormPage studentNumber={existing.studentNumber} />)
 
     expect(await screen.findByRole('heading', { name: 'Edit Student' })).toBeInTheDocument()
     await user.clear(screen.getByLabelText(/student contact information/i))

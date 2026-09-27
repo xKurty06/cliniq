@@ -8,10 +8,10 @@ import type { NavKey } from './navigation'
  * App shell: left sidebar (logo + role-aware nav) and a top bar (user chip), following the reference
  * mockup's layout.
  *
- * VISUAL SHELL ONLY. There's no router yet (the routing library is an open decision,
- * Development-Phases.md §0), and the full App Shell/Nav is its own screen (#3). Only the Dashboard
- * item is live; the rest are marked "Soon" and aren't clickable. No search box and no notification
- * bell: neither exists as a feature yet, and a dead control would mislead.
+ * Placed around each screen by `routes/AppRoutes.tsx`; `active` is the route's nav item (`null` on
+ * the not-found page). Nav items for screens that exist link to their routes; the rest are marked
+ * "Soon" and aren't clickable. No search box and no notification bell: neither exists as a feature
+ * yet, and a dead control would mislead.
  */
 
 function initials(name: string): string {
@@ -25,7 +25,7 @@ function initials(name: string): string {
 
 export interface AppShellProps {
   user: SessionUser
-  active: NavKey
+  active: NavKey | null
   children: ReactNode
 }
 

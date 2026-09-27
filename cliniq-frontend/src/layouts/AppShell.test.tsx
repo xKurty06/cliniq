@@ -1,11 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { renderWithRouter } from '../test/renderWithRouter'
+import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { AppShell } from './AppShell'
 import { navGroupsFor } from './navigation'
 
 describe('App Shell / Navigation', () => {
   it('shows Staff navigation groups across modules', () => {
-    render(
+    renderWithRouter(
       <AppShell user={{ id: 'usr-nurse', name: 'Ms. Jenne Baas', role: 'staff' }} active="dashboard">
         <div>Screen</div>
       </AppShell>,

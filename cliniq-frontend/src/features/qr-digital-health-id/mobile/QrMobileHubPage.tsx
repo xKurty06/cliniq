@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import {
   Badge,
   Card,
@@ -14,6 +15,7 @@ import {
 import { getMockSessionUser, type SessionUser } from '../../../lib/mocks/session'
 import type { StudentNumber } from '../../../types/entities'
 import { lookupStudentByNumber, type QrLookupResult } from '../api/qrLookupApi'
+import { paths } from '../../../routes/paths'
 import { QrScannerView } from '../shared/QrScannerView'
 
 type LookupStatus = 'idle' | 'loading' | 'success' | 'error' | 'not_found'
@@ -88,7 +90,7 @@ function StudentSummary({ result }: { result: QrLookupResult }) {
   )
 }
 
-function StaffActions() {
+function StaffActions({ studentNumber }: { studentNumber: StudentNumber }) {
   return (
     <Card aria-labelledby="quick-actions-title">
       <CardHeader
@@ -99,27 +101,27 @@ function StaffActions() {
       />
       <CardBody>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <a
-            href="?screen=new-visit"
+          <Link
+            to={paths.visitNew(studentNumber)}
             className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-brand-green bg-background px-4 text-sm font-semibold text-brand-green-dark shadow-card transition-colors hover:bg-surface"
           >
             <Icon name="stethoscope" />
             Record Visit
-          </a>
-          <a
-            href="?screen=incident-entry"
+          </Link>
+          <Link
+            to={paths.incidentNew(studentNumber)}
             className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-warning bg-warning text-sm font-semibold text-white shadow-card transition-[filter] hover:brightness-90"
           >
             <Icon name="alertTriangle" />
             Log Emergency
-          </a>
-          <a
-            href="?screen=student-profile"
+          </Link>
+          <Link
+            to={paths.studentProfile(studentNumber)}
             className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-brand-green bg-background px-4 text-sm font-semibold text-brand-green-dark shadow-card transition-colors hover:bg-surface"
           >
             <Icon name="users" />
             View Full Profile
-          </a>
+          </Link>
           <button
             type="button"
             className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-border bg-background px-4 text-sm font-semibold text-text-primary shadow-card transition-colors hover:bg-surface"
@@ -221,13 +223,13 @@ export function QrMobileHubPage({ viewer = getMockSessionUser() }: { viewer?: Se
         </header>
 
         {!instructor && (
-          <a
-            href="?screen=incident-entry"
+          <Link
+            to={paths.incidentNew()}
             className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-md bg-warning px-4 text-sm font-bold text-white shadow-raised transition-[filter] hover:brightness-90"
           >
             <Icon name="alertTriangle" />
             Emergency button
-          </a>
+          </Link>
         )}
 
         <QrScannerView
@@ -247,7 +249,7 @@ export function QrMobileHubPage({ viewer = getMockSessionUser() }: { viewer?: Se
         {result && (
           <>
             <StudentSummary result={result} />
-            {instructor ? <InstructorReadOnly result={result} /> : <StaffActions />}
+            {instructor ? <InstructorReadOnly result={result} /> : <StaffActions studentNumber={result.student.studentNumber} />}
           </>
         )}
       </div>

@@ -42,11 +42,6 @@ function mockMode(): MockMode {
   return mode === 'error' || mode === 'slow' ? mode : 'normal'
 }
 
-function formMode(): StudentFormMode {
-  if (typeof window === 'undefined') return 'add'
-  return new URLSearchParams(window.location.search).get('mode') === 'edit' ? 'edit' : 'add'
-}
-
 async function simulateLatency(mode: MockMode) {
   if (import.meta.env.MODE === 'test') return
   await new Promise((resolve) => setTimeout(resolve, mode === 'slow' ? 1200 : 200))
@@ -71,16 +66,20 @@ function nextStudentNumber(students: Student[]): StudentNumber {
   return `${year}-${String(maxSequence + 1).padStart(5, '0')}`
 }
 
-export async function fetchStudentFormContext(): Promise<StudentFormContext> {
+/** Edit mode when `studentNumber` is given (`/students/:studentNumber/edit`); add mode otherwise. */
+export async function fetchStudentFormContext(studentNumber?: string): Promise<StudentFormContext> {
   const mode = mockMode()
   await simulateLatency(mode)
   if (mode === 'error') throw new Error('Mock student form failure')
 
   const dataset = getMockDataset(todayISO())
-  const activeStudents = dataset.students.filter((student) => !student.archived)
-  const student = formMode() === 'edit' ? activeStudents[0] : null
+  const formMode: StudentFormMode = studentNumber ? 'edit' : 'add'
+  const student = studentNumber
+    ? dataset.students.find((candidate) => candidate.studentNumber === studentNumber)
+    : null
+  if (student === undefined) throw new Error('Student not found')
   return {
-    mode: formMode(),
+    mode: formMode,
     gradeLevels: gradeLevels(),
     nextStudentNumber: nextStudentNumber(dataset.students),
     student,

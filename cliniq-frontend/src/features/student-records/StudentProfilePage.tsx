@@ -1,6 +1,7 @@
 import {
   Badge,
   Button,
+  buttonClassName,
   Card,
   CardBody,
   CardHeader,
@@ -13,11 +14,13 @@ import {
   StatusBadge,
   type StatusMap,
 } from '../../components'
+import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { formatDate } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
 import type { Disposition, Incident, Student, Visit } from '../../types/entities'
+import { paths } from '../../routes/paths'
 import { fetchStudentProfile } from './api/studentProfileApi'
 
 const incidentStageMap = {
@@ -109,7 +112,9 @@ function ProfileHeader({ student, viewer }: { student: Student; viewer: SessionU
         </div>
         {staffCanAct && (
           <div className="flex flex-wrap justify-end gap-2 print:hidden">
-            <Button variant="secondary">Edit</Button>
+            <Link to={paths.studentEdit(student.studentNumber)} className={buttonClassName()}>
+              Edit
+            </Link>
             <Button variant="secondary" icon="printer" onClick={() => window.print()}>
               Print
             </Button>
@@ -268,13 +273,13 @@ function IncidentHistoryCard({ incidents }: { incidents: Incident[] }) {
  */
 export function StudentProfilePage({
   viewer = getMockSessionUser(),
-  studentId,
+  studentNumber,
 }: {
   viewer?: SessionUser
-  studentId?: string
+  studentNumber?: string
 }) {
-  const { data, status, reload } = useAsyncData(`student-profile|${studentId ?? 'default'}`, () =>
-    fetchStudentProfile(studentId),
+  const { data, status, reload } = useAsyncData(`student-profile|${studentNumber ?? 'default'}`, () =>
+    fetchStudentProfile(studentNumber),
   )
 
   if (status === 'error') {

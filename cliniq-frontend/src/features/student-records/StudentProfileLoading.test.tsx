@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { renderWithRouter } from '../../test/renderWithRouter'
+import { screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { StudentProfilePage } from './StudentProfilePage'
 
@@ -8,7 +9,7 @@ vi.mock('./api/studentProfileApi', () => ({
 
 describe('Student Profile: first-load skeleton', () => {
   it('announces loading and shows shaped placeholders', () => {
-    const { container } = render(<StudentProfilePage />)
+    const { container } = renderWithRouter(<StudentProfilePage />)
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading student profile…')
     expect(container.querySelectorAll('[aria-hidden="true"] .animate-pulse').length).toBeGreaterThan(8)

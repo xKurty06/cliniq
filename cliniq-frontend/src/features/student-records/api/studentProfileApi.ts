@@ -39,13 +39,17 @@ function defaultStudentId(): string {
   return candidate?.id ?? dataset.students.find((s) => !s.archived)?.id ?? dataset.students[0].id
 }
 
-export async function fetchStudentProfile(studentId = defaultStudentId()): Promise<StudentProfileData> {
+/** `studentNumber` comes from the `/students/:studentNumber` route; omitted, a demo student is used. */
+export async function fetchStudentProfile(studentNumber?: string): Promise<StudentProfileData> {
   const mode = mockMode()
   await simulateLatency(mode)
   if (mode === 'error') throw new Error('Mock student profile failure')
 
   const dataset = getMockDataset(todayISO())
-  const student = dataset.students.find((s) => s.id === studentId) ?? dataset.students[0]
+  const student = studentNumber
+    ? dataset.students.find((s) => s.studentNumber === studentNumber)
+    : dataset.students.find((s) => s.id === defaultStudentId())
+  if (!student) throw new Error('Student not found')
   const visits =
     mode === 'empty-history'
       ? []

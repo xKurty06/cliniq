@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { renderWithRouter } from '../../test/renderWithRouter'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { VisitLogListPage } from './VisitLogListPage'
@@ -6,7 +7,7 @@ import { defaultVisitLogRange, fetchVisitLog } from './api/visitLogApi'
 
 describe('Visit Log List', () => {
   it('renders a privacy-safe multi-student visit list', async () => {
-    render(<VisitLogListPage />)
+    renderWithRouter(<VisitLogListPage />)
 
     expect(await screen.findByRole('heading', { name: 'Visit Log List' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Student Number' })).toBeInTheDocument()
@@ -27,7 +28,7 @@ describe('Visit Log List', () => {
       disposition: 'all',
     })
 
-    render(<VisitLogListPage />)
+    renderWithRouter(<VisitLogListPage />)
     await screen.findByRole('heading', { name: 'Visit Log List' })
     await user.type(screen.getByLabelText('Search'), visit.studentNumber)
 
@@ -37,7 +38,7 @@ describe('Visit Log List', () => {
 
   it('filters by disposition', async () => {
     const user = userEvent.setup()
-    render(<VisitLogListPage />)
+    renderWithRouter(<VisitLogListPage />)
 
     await screen.findByRole('heading', { name: 'Visit Log List' })
     await user.click(screen.getByRole('radio', { name: 'Sent home' }))
@@ -52,7 +53,7 @@ describe('Visit Log List', () => {
 
   it('shows an empty state for a date range with no visits', async () => {
     const user = userEvent.setup()
-    render(<VisitLogListPage />)
+    renderWithRouter(<VisitLogListPage />)
 
     await screen.findByRole('heading', { name: 'Visit Log List' })
     await user.clear(screen.getByLabelText('From'))

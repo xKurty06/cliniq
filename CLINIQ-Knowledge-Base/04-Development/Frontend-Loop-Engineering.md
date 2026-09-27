@@ -120,7 +120,7 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 ### Phase F0 — Environment, Design Foundation, Shared Components
 
 - [ ] Build / [ ] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
-  Build note: · Audit note:
+  Build note: Sunday, September 27, 2026 — 10:01: routing resolved and wired (path-based + React Router, ADR-012); data-fetching still open, so this box stays unchecked. · Audit note:
 - [ ] Build / [ ] Audit — Vite scaffold run into `cliniq-frontend/`
   Build note: · Audit note:
 - [ ] Build / [ ] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
