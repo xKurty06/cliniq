@@ -79,6 +79,7 @@ const FollowUpListPage = page(() => import('../features/emergency-response/Follo
 const QrDesktopHubPage = page(() => import('../features/qr-digital-health-id/desktop/QrDesktopHubPage'), 'QrDesktopHubPage')
 const QrPrintPage = page(() => import('../features/qr-digital-health-id/desktop/QrPrintPage'), 'QrPrintPage')
 const EmergencyMobilePage = page(() => import('../features/emergency-response/EmergencyMobilePage'), 'EmergencyMobilePage')
+const ReportsPage = page(() => import('../features/reports/ReportsPage'), 'ReportsPage')
 
 type Viewer = { viewer: SessionUser }
 
@@ -245,6 +246,7 @@ const APP_ROUTES: AppRoute[] = [
   { path: paths.qrDesktop, roles: ['staff'], nav: 'qrLookup', shell: true, render: (viewer) => <QrDesktopHubPage viewer={viewer} /> },
   { path: paths.qrPrint, roles: ['staff'], nav: 'qrLookup', shell: true, render: () => <QrPrintPage /> },
   { path: paths.emergencyMobile, roles: ['staff'], nav: 'incidents', shell: false, render: () => <EmergencyMobilePage /> },
+  { path: paths.reports, roles: ['staff', 'admin'], nav: 'reports', shell: true, render: (viewer) => <ReportsPage viewer={viewer} /> },
 ]
 
 /** Where a role lands on `/` or when it opens a screen it can't use. */

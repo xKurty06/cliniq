@@ -197,9 +197,9 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #30 Dispense/Log Usage — Build note: Student-linkable dispense form with quantity validation, audit logging, and below-zero warning result per Module 8 requirements; QR quick-action now routes here. · Audit note:
 
 **Reports Generation**
-- [ ] Build / [ ] Audit — #19 Monthly Report View/Generate (+ print) — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #20 Incident Report Archive (+ print) — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: · Audit note:
+- [x] Build / [ ] Audit — #19 Monthly Report View/Generate (+ print) — Build note: Staff/Admin monthly report view with month selector, visit/incident/follow-up summary counts, role-aware access, and print/Save as PDF action. · Audit note:
+- [x] Build / [ ] Audit — #20 Incident Report Archive (+ print) — Build note: Staff/Admin incident archive with Student Number rows, date/complaint/status fields, and print-friendly table layout. · Audit note:
+- [x] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: Staff/Admin complaint summary with privacy-safe aggregate table, reporting period selector, and print/export layout. · Audit note:
 
 **User Management**
 - [ ] Build / [ ] Audit — #33 User List — Build note: · Audit note:

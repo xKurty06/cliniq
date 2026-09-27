@@ -35,4 +35,5 @@ export const paths = {
   qrPrint: '/qr/print',
   qrDesktop: '/qr/desktop',
   emergencyMobile: '/emergency/mobile',
+  reports: '/reports',
 } as const
