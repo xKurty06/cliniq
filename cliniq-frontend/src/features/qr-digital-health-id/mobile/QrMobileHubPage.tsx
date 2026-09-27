@@ -122,13 +122,13 @@ function StaffActions({ studentNumber }: { studentNumber: StudentNumber }) {
             <Icon name="users" />
             View Full Profile
           </Link>
-          <button
-            type="button"
+          <Link
+            to={paths.inventoryDispense(studentNumber)}
             className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-border bg-background px-4 text-sm font-semibold text-text-primary shadow-card transition-colors hover:bg-surface"
           >
             <Icon name="package" />
             Dispense Medicine
-          </button>
+          </Link>
         </div>
       </CardBody>
     </Card>

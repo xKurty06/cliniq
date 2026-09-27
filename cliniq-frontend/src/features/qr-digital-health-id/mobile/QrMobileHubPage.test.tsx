@@ -34,7 +34,10 @@ describe('QR Mobile Hub', () => {
       'href',
       `/students/${studentNumber}`,
     )
-    expect(screen.getByRole('button', { name: 'Dispense Medicine' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Dispense Medicine' })).toHaveAttribute(
+      'href',
+      `/inventory/dispense?student=${studentNumber}`,
+    )
     expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['scan'])
   })
 

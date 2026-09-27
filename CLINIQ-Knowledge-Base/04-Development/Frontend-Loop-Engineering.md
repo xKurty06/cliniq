@@ -189,12 +189,12 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 
 **Follow-Up Handling**
 - [ ] Build / [ ] Audit — #18b Follow-Up Prompt — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #18c Follow-Up List View — Build note: · Audit note:
+- [x] Build / [ ] Audit — #18c Follow-Up List View — Build note: Staff-only status-filtered follow-up list with privacy-safe Student Number rows, visible reasons/due dates/status badges, loading skeleton, empty state, and real navigation. Focused typecheck and tests pass. · Audit note:
 
 **Medicine & Supply Inventory Tracker**
-- [ ] Build / [ ] Audit — #28 Inventory List — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #29 Add/Edit Inventory Item — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #30 Dispense/Log Usage — Build note: · Audit note:
+- [x] Build / [ ] Audit — #28 Inventory List — Build note: Staff-only searchable/filterable inventory list with stock, expiry, threshold status, and add/edit entry point; verified by full test/build run. · Audit note:
+- [x] Build / [ ] Audit — #29 Add/Edit Inventory Item — Build note: Staff-only validated add/edit form with category, stock, unit, expiry, threshold, success feedback, and create/update audit logging. · Audit note:
+- [x] Build / [ ] Audit — #30 Dispense/Log Usage — Build note: Student-linkable dispense form with quantity validation, audit logging, and below-zero warning result per Module 8 requirements; QR quick-action now routes here. · Audit note:
 
 **Reports Generation**
 - [ ] Build / [ ] Audit — #19 Monthly Report View/Generate (+ print) — Build note: · Audit note:

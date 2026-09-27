@@ -72,6 +72,10 @@ const QrMobileHubPage = page(
   () => import('../features/qr-digital-health-id/mobile/QrMobileHubPage'),
   'QrMobileHubPage',
 )
+const InventoryListPage = page(() => import('../features/inventory/InventoryListPage'), 'InventoryListPage')
+const InventoryFormPage = page(() => import('../features/inventory/InventoryFormPage'), 'InventoryFormPage')
+const InventoryDispensePage = page(() => import('../features/inventory/InventoryDispensePage'), 'InventoryDispensePage')
+const FollowUpListPage = page(() => import('../features/emergency-response/FollowUpListPage'), 'FollowUpListPage')
 
 type Viewer = { viewer: SessionUser }
 
@@ -199,6 +203,34 @@ const APP_ROUTES: AppRoute[] = [
     nav: 'incidents',
     shell: true,
     render: (viewer) => <IncidentEntryRoute viewer={viewer} />,
+  },
+  {
+    path: paths.inventory,
+    roles: ['staff'],
+    nav: 'inventory',
+    shell: true,
+    render: () => <InventoryListPage />,
+  },
+  {
+    path: paths.inventoryNew,
+    roles: ['staff'],
+    nav: 'inventory',
+    shell: true,
+    render: () => <InventoryFormPage />,
+  },
+  {
+    path: '/inventory/dispense',
+    roles: ['staff'],
+    nav: 'inventory',
+    shell: true,
+    render: () => <InventoryDispensePage />,
+  },
+  {
+    path: paths.followUps,
+    roles: ['staff'],
+    nav: 'followUps',
+    shell: true,
+    render: () => <FollowUpListPage />,
   },
   {
     path: paths.qrScan,

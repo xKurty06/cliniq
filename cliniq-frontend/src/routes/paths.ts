@@ -28,4 +28,8 @@ export const paths = {
   /** `?student=` pre-selects the identified student; the Emergency button opens it without one. */
   incidentNew: (studentNumber?: string) => withStudent('/incidents/new', studentNumber),
   qrScan: '/qr/scan',
+  inventory: '/inventory',
+  inventoryNew: '/inventory/new',
+  inventoryDispense: (studentNumber?: string) => withStudent('/inventory/dispense', studentNumber),
+  followUps: '/follow-ups',
 } as const
