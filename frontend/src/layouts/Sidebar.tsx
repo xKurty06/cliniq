@@ -12,8 +12,8 @@ export function BrandLogo() {
   return (
     <span className="flex items-center gap-2.5">
       <img
-        src="/MCA_Logo.png"
-        alt="Mendez Christian Academy"
+        src="/Healware_Logo.png"
+        alt="Healware logo"
         className="size-9 shrink-0 object-contain"
       />
       <span className="flex flex-col leading-tight">
@@ -56,7 +56,7 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
               aria-hidden="true"
               className="absolute inset-0 flex items-center justify-center transition-[opacity,transform] duration-200 ease-out group-hover:scale-75 group-hover:opacity-0 group-focus-visible:scale-75 group-focus-visible:opacity-0 motion-reduce:transition-none"
             >
-              <img src="/MCA_Logo.png" alt="" className="size-9 object-contain" />
+              <img src="/Healware_Logo.png" alt="" className="size-9 object-contain" />
             </span>
             <span
               aria-hidden="true"

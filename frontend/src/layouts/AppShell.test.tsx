@@ -25,10 +25,10 @@ describe('App Shell / Navigation', () => {
     expect(screen.getByText('Students')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Inventory' })).toHaveAttribute('href', '/inventory')
     expect(screen.getByText('Backup')).toBeInTheDocument()
-    expect(screen.getAllByAltText('Mendez Christian Academy')).toHaveLength(2)
+    expect(screen.getAllByAltText('Healware logo')).toHaveLength(2)
     screen
-      .getAllByAltText('Mendez Christian Academy')
-      .forEach((logo) => expect(logo).toHaveAttribute('src', '/MCA_Logo.png'))
+      .getAllByAltText('Healware logo')
+      .forEach((logo) => expect(logo).toHaveAttribute('src', '/Healware_Logo.png'))
   })
 
   it('puts an icon-only red logout action beside the signed-in user', () => {

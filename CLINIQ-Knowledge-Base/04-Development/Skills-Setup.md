@@ -8,6 +8,7 @@ This is a substantially expanded pass over the first one — that version only c
 
 | Skill | Location | Purpose |
 |---|---|---|
+| `cliniq-sidebar-patterns` | `.claude/skills/cliniq-sidebar-patterns/` | Keeps the shared sidebar's Healware system mark, favicon pairing, expanded academy label, and plain collapsed-logo treatment consistent |
 | `cliniq-dropdown-patterns` | `.claude/skills/cliniq-dropdown-patterns/` | Keeps dropdown selection feedback icon-free, compact, keyboard-accessible, and sized to the longest option |
 | `cliniq-display-privacy` | `.claude/skills/cliniq-display-privacy/` | Enforces the Student Number vs full name rule on every new screen |
 | `cliniq-audit-trail` | `.claude/skills/cliniq-audit-trail/` | Ensures every mutating action gets logged per RA 10173 |
@@ -17,12 +18,13 @@ Write more of these as new CLINIQ-specific rules get established — they encode
 
 ### Component skills
 
-A component skill holds the standing rules for one major, shared, or repeated UI component (dropdown, search bar, date picker, table, modal…), so every future build of that component matches. `AGENTS.md` ("Component skills — look before you build, and keep them current") says when agents must look for one, create one, or update one.
+A component skill holds standing rules for a UI pattern that is already reused, or is reasonably likely to be reused, across many pages (for example, a dropdown, search bar, button, date picker, table, or modal). `AGENTS.md` ("Component skills — create only for reusable cross-page patterns") says when agents must look for one, create one, or update one.
 
 - **Name:** `cliniq-<component>-patterns`, in `.claude/skills/`. Follow the format of `cliniq-dropdown-patterns`.
 - **`description`** names the component and says when to apply it ("Apply when building or changing a CLINIQ …"), because that is what lets an agent find it by reading only the frontmatter.
 - **Body:** the rules the user actually asked for, grouped by behavior; where the shared component lives; and a pointer to `cliniq-interactive-states` for hover/cursor rules instead of repeating them.
-- **Don't** create one for a one-off widget used on a single screen, and don't record visual rules the user never stated.
+- **Create one only** when the agent reasonably expects the component pattern to recur across many pages. Don't create one merely because it is a major or shared component, and don't record visual rules the user never stated.
+- **Don't** create one for a one-off widget used on a single screen.
 - **Every create or edit** gets a row in the table above, an `Agent-Sessions/` entry, and a Changelog row.
 - These skills are edited by agents in the live repo, so they are never copied over the repo from an export (`AGENTS.md`, Step 0).
 
