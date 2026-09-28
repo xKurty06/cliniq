@@ -208,7 +208,7 @@ export function DateRangePicker({
               id={listboxId}
               role="listbox"
               aria-label="Date range presets"
-              className="absolute top-full right-0 z-30 mt-1.5 w-48 overflow-hidden rounded-md border border-border bg-background p-1 shadow-raised"
+              className="absolute top-full right-0 z-30 mt-1.5 min-w-full w-max max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border border-border bg-background p-1 shadow-raised"
             >
               {presets.map((preset, index) => {
                 const selected = preset === value.preset
@@ -224,15 +224,12 @@ export function DateRangePicker({
                     onClick={() => onPresetChange(preset)}
                     onKeyDown={(event) => onOptionKeyDown(event, index)}
                     className={cn(
-                      'flex w-full cursor-pointer items-center gap-2 rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors duration-150 motion-reduce:transition-none',
+                      'flex w-full cursor-pointer whitespace-nowrap rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors duration-150 motion-reduce:transition-none',
                       selected
                         ? 'bg-surface font-semibold text-brand-green-dark'
                         : 'text-text-primary hover:bg-surface',
                     )}
                   >
-                    <span className="flex size-4 items-center justify-center text-brand-green-dark">
-                      {selected && <Icon name="checkCircle" size={14} />}
-                    </span>
                     <span>{labelForPreset(preset)}</span>
                   </button>
                 )

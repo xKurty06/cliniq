@@ -98,8 +98,15 @@ describe('Clinic Overview Dashboard', () => {
     expect(dateRange).toHaveClass('border-border')
     expect(dateRange).toHaveClass('hover:bg-surface')
     await userEvent.click(dateRange)
-    expect(screen.getByRole('listbox', { name: 'Date range presets' })).toHaveClass('border-border')
-    expect(screen.getByRole('option', { name: 'Last 30 days' })).toHaveClass('bg-surface')
+    const presets = screen.getByRole('listbox', { name: 'Date range presets' })
+    expect(presets).toHaveClass('border-border')
+    expect(presets).toHaveClass('min-w-full')
+    expect(presets).toHaveClass('w-max')
+    expect(presets.querySelector('svg')).not.toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Last 30 days' })).toHaveClass(
+      'bg-surface',
+      'text-brand-green-dark',
+    )
 
     expect(screen.getByRole('button', { name: /print \/ save as pdf/i })).toHaveClass(
       'cursor-pointer',

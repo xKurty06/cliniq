@@ -6,6 +6,9 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Monday, September 28, 2026 — 19:53 | Refined the local dropdown rule and shared date-range menu: trigger width is now the minimum before longer option text can expand the panel. | `Agent-Sessions/2026-09-28-dropdown-trigger-width.md` |
+| Monday, September 28, 2026 — 19:47 | Added the local `cliniq-dropdown-patterns` skill so future dropdown work keeps the icon-free active state and content-fit menu sizing. | `Agent-Sessions/2026-09-28-local-dropdown-skill.md` |
+| Monday, September 28, 2026 — 19:44 | Refined every shared date-range dropdown: removed the selected check icon, retained the green active treatment, and sized each menu to its longest option. | `Agent-Sessions/2026-09-28-dropdown-active-state.md` |
 | 2026-09-13 | Project Plan created; tech stack upgraded to React+Laravel; group roster corrected | Project Plan rev 1.0–1.2 |
 | 2026-09-13 | Review of Existing Alternatives rebuilt with 10 researched systems | Project Plan rev 1.3 |
 | 2026-09-17 | QR Digital Health ID redesigned as Staff-only hub; Student Number scheme added | `06-Decisions/ADR-002`, `ADR-005`; Project Plan rev 1.7 |
