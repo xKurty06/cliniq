@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router'
-import { getMockSessionUser } from './lib/mocks/session'
+import { getMockSessionUser } from './lib/mock-db'
 import { AppRoutes } from './routes/AppRoutes'
 import { KeyboardShortcuts } from './components/KeyboardShortcuts'
 

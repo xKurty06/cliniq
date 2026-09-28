@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Badge, Button, Card, CardBody, CardHeader, Icon, Select } from '../../components'
 import { getMockDataset } from '../../lib/mocks/dataset'
-import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import { todayISO } from '../../lib/dates'
 import { recordMockAudit } from '../../lib/mocks/audit'
 

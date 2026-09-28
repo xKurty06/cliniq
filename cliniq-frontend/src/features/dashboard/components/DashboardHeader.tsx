@@ -1,7 +1,7 @@
 import { Button, DateRangePicker } from '../../../components'
 import { formatDateRange, formatLongDate } from '../../../lib/dates'
 import type { DateRange } from '../../../lib/dateRange'
-import type { SessionUser } from '../../../lib/mocks/session'
+import type { SessionUser } from '../../../lib/mock-db'
 import type { ISODate } from '../../../types/entities'
 
 function greeting(now: Date): string {

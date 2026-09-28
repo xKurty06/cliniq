@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Badge, Button, Card, CardBody, CardHeader, Icon } from '../../components'
 import { recordMockAudit } from '../../lib/mocks/audit'
-import { getMockSessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser } from '../../lib/mock-db'
 
 export function BackupStatusPage() {
     const viewer = getMockSessionUser()

@@ -12,7 +12,7 @@ import {
   Skeleton,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { Disposition } from '../../types/entities'
 import {
   fetchPeReferralContext,

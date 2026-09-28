@@ -4,7 +4,7 @@ import { MemoryRouter, useLocation } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { todayISO } from '../lib/dates'
 import { getMockDataset } from '../lib/mocks/dataset'
-import type { SessionUser } from '../lib/mocks/session'
+import type { SessionUser } from '../lib/mock-db'
 import { AppRoutes } from './AppRoutes'
 
 // jsdom has no canvas. Replace the chart with a stub that keeps its accessible label.

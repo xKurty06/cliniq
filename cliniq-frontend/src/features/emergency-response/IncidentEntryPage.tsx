@@ -17,7 +17,7 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { addDays, todayISO } from '../../lib/dates'
-import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { HospitalReferral, Incident, ParentNotificationOutcome } from '../../types/entities'
 import {
   completeStageTwoIncident,

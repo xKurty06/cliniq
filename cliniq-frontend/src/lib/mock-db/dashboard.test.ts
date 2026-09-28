@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { rangeForPreset } from '../../../lib/dateRange'
-import { getMockDataset, type MockDataset } from '../../../lib/mocks/dataset'
-import type { FollowUp, InventoryItem, Student, Visit } from '../../../types/entities'
+import { rangeForPreset } from '../dateRange'
+import type { FollowUp, InventoryItem, Visit } from '../../types/entities'
 import {
   buildBuckets,
   buildCalendarDays,
@@ -10,23 +9,33 @@ import {
   buildDueFollowUps,
   buildInventoryAlerts,
   detectClusters,
-  MOCK_RULES,
-} from './aggregate'
+} from './dashboard'
+import type { DbState, MockDbConfig, SeedStudent } from './types'
 
 const TODAY = '2026-09-26'
 
+// Pinned here so these rule tests don't move when someone tunes `config` in mock-db.json.
+const CONFIG: MockDbConfig = {
+  frequentVisitorMinVisits: 3,
+  frequentVisitorWindowDays: 30,
+  upcomingFollowUpDays: 7,
+  expiryWarningDays: 30,
+  clusterMinCount: 8,
+  clusterRatio: 2,
+  topComplaints: 5,
+}
+
 // Hand-built records typed against the §5 entity shapes. If the entity contract changes, this
 // file stops compiling, which is exactly the check the loop's "Simulate" step wants.
-const student = (id: string, n: string, extra: Partial<Student> = {}): Student => ({
+const student = (id: string, n: string, extra: Partial<SeedStudent> = {}): SeedStudent => ({
   id,
   studentNumber: n,
   fullName: `SECRET NAME ${id}`,
   gradeLevel: 'Grade 5',
-  contactInfo: '',
+  contactInfo: '0900-000-0000',
   allergies: [],
   medicalConditions: [],
-  emergencyContact: null,
-  recordComplete: true,
+  emergencyContact: { name: 'Guardian', relationship: 'Parent', phone: '0900-111-0000', verified: true },
   archived: false,
   ...extra,
 })
@@ -70,23 +79,38 @@ const item = (id: string, extra: Partial<InventoryItem>): InventoryItem => ({
   ...extra,
 })
 
-function dataset(partial: Partial<MockDataset>): MockDataset {
+function dataset(partial: Partial<DbState>): DbState {
   return {
     today: TODAY,
+    config: CONFIG,
+    users: [],
     students: [],
     visits: [],
     incidents: [],
     followUps: [],
-    inventory: [],
+    inventoryItems: [],
+    reports: [],
+    backupLogs: [],
+    auditLog: [],
+    frontendOnly: {
+      devAccounts: [],
+      visitComplaintTypes: [],
+      incidentComplaintTypes: [],
+      inventoryTransactions: [],
+      recordReviews: [],
+      excuseLetterApprovals: [],
+      peReferrals: [],
+    },
     ...partial,
   }
 }
 
 describe('due/upcoming follow-ups', () => {
-  const students = new Map([['s1', student('s1', '2026-00001')]])
+  const students = [student('s1', '2026-00001')]
 
   it('lists only pending follow-ups up to the upcoming window, with the right due state', () => {
     const data = dataset({
+      students,
       followUps: [
         followUp('overdue', '2026-09-24'),
         followUp('today', TODAY),
@@ -96,7 +120,7 @@ describe('due/upcoming follow-ups', () => {
         followUp('missed', '2026-09-20', 'missed'),
       ],
     })
-    const rows = buildDueFollowUps(data, students)
+    const rows = buildDueFollowUps(data)
     expect(rows.map((r) => [r.followUp.id, r.dueState, r.daysFromToday])).toEqual([
       ['overdue', 'overdue', -2],
       ['today', 'due_today', 0],
@@ -105,7 +129,7 @@ describe('due/upcoming follow-ups', () => {
   })
 
   it('carries the Student Number and never the name', () => {
-    const rows = buildDueFollowUps(dataset({ followUps: [followUp('a', TODAY)] }), students)
+    const rows = buildDueFollowUps(dataset({ students, followUps: [followUp('a', TODAY)] }))
     expect(rows[0].student).toEqual({ id: 's1', studentNumber: '2026-00001' })
     expect(JSON.stringify(rows)).not.toContain('SECRET NAME')
   })
@@ -114,17 +138,14 @@ describe('due/upcoming follow-ups', () => {
 describe('inventory alerts', () => {
   it('keeps low-stock and expiry as separate flags that can both apply', () => {
     const data = dataset({
-      inventory: [
+      inventoryItems: [
         item('both', { currentStock: 2, expirationDate: '2026-10-06' }),
         item('expired', { expirationDate: '2026-09-20' }),
         item('at-threshold', { currentStock: 10 }), // "below" the threshold = strictly less
         item('fine', { expirationDate: '2027-09-26' }),
       ],
     })
-    const low = new Set(
-      data.inventory.filter((i) => i.currentStock < i.lowStockThreshold).map((i) => i.id),
-    )
-    const rows = buildInventoryAlerts(data, low)
+    const rows = buildInventoryAlerts(data)
     expect(rows.map((r) => [r.item.id, r.flags, r.daysUntilExpiry])).toEqual([
       ['expired', ['expired'], -6],
       ['both', ['low_stock', 'nearing_expiration'], 10],
@@ -144,25 +165,25 @@ describe('complaint trends', () => {
     const events = names.flatMap((c, i) =>
       Array.from({ length: 10 - i }, () => ({ date: '2026-09-10', complaint: c })),
     )
-    const trends = buildComplaintTrends(events, '2026-09-01', '2026-09-30', 'month')
-    expect(trends.series.map((s) => s.complaint)).toEqual(names.slice(0, MOCK_RULES.topComplaints))
+    const trends = buildComplaintTrends(events, '2026-09-01', '2026-09-30', 'month', CONFIG)
+    expect(trends.series.map((s) => s.complaint)).toEqual(names.slice(0, CONFIG.topComplaints))
     expect(trends.otherComplaints.map((s) => s.complaint)).toEqual(
-      names.slice(MOCK_RULES.topComplaints),
+      names.slice(CONFIG.topComplaints),
     )
   })
 
   it('flags a spike as a possible cluster only when there are buckets to compare', () => {
-    expect(detectClusters([2, 3, 12, 2])).toEqual([2])
-    expect(detectClusters([12])).toEqual([])
-    expect(detectClusters([6, 7, 6])).toEqual([])
+    expect(detectClusters([2, 3, 12, 2], CONFIG)).toEqual([2])
+    expect(detectClusters([12], CONFIG)).toEqual([])
+    expect(detectClusters([6, 7, 6], CONFIG)).toEqual([])
   })
 })
 
 describe('dashboard summary', () => {
   const students = [
     student('s1', '2026-00001'),
-    student('s2', '2026-00002', { recordComplete: false }),
-    student('s3', '2020-00003', { archived: true, recordComplete: false }),
+    student('s2', '2026-00002', { emergencyContact: null }), // incomplete: counts as pending
+    student('s3', '2020-00003', { archived: true, emergencyContact: null }), // archived: doesn't
   ]
   const data = dataset({
     students,
@@ -207,13 +228,5 @@ describe('calendar days', () => {
       { date: '2026-09-15', visits: 1, incidents: 0, eventTags: [] },
       { date: '2026-09-16', visits: 0, incidents: 0, eventTags: [] },
     ])
-  })
-})
-
-describe('shared mock dataset', () => {
-  it('generates unique Student Numbers in YYYY-NNNNN format', () => {
-    const numbers = getMockDataset(TODAY).students.map((s) => s.studentNumber)
-    expect(numbers.every((n) => /^\d{4}-\d{5}$/.test(n))).toBe(true)
-    expect(new Set(numbers).size).toBe(numbers.length)
   })
 })

@@ -16,7 +16,7 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { formatDate } from '../../lib/dates'
-import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import {
   fetchIncompleteRecords,
   markIncompleteRecordResolved,

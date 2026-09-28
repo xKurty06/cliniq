@@ -2,7 +2,7 @@ import { recordMockAudit } from '../../../lib/mocks/audit'
 import { getMockDataset } from '../../../lib/mocks/dataset'
 import { todayISO } from '../../../lib/dates'
 import type { Incident, Student, StudentNumber, Visit } from '../../../types/entities'
-import type { SessionUser } from '../../../lib/mocks/session'
+import type { SessionUser } from '../../../lib/mock-db'
 
 type MockMode = 'normal' | 'error' | 'slow'
 

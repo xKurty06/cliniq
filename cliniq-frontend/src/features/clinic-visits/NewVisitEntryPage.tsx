@@ -15,7 +15,7 @@ import {
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { addDays, todayISO } from '../../lib/dates'
-import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { Disposition } from '../../types/entities'
 import { fetchNewVisitContext, submitNewVisit } from './api/newVisitApi'
 

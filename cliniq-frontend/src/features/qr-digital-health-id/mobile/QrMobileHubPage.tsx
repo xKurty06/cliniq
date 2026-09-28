@@ -12,7 +12,7 @@ import {
   RowList,
   Skeleton,
 } from '../../../components'
-import { getMockSessionUser, type SessionUser } from '../../../lib/mocks/session'
+import { getMockSessionUser, type SessionUser } from '../../../lib/mock-db'
 import type { StudentNumber } from '../../../types/entities'
 import { lookupStudentByNumber, type QrLookupResult } from '../api/qrLookupApi'
 import { paths } from '../../../routes/paths'

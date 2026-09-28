@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { cn } from '../lib/cn'
-import { ROLE_LABELS, type SessionUser } from '../lib/mocks/session'
+import { ROLE_LABELS, type SessionUser } from '../lib/mock-db'
 import { BrandLogo, Sidebar } from './Sidebar'
 import type { NavKey } from './navigation'
 

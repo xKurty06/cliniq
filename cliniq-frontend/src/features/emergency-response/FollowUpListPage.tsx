@@ -4,7 +4,7 @@ import { useAsyncData } from '../../hooks/useAsyncData'
 import { getMockDataset } from '../../lib/mocks/dataset'
 import { todayISO } from '../../lib/dates'
 import { recordMockAudit } from '../../lib/mocks/audit'
-import { getMockSessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser } from '../../lib/mock-db'
 import type { FollowUp, FollowUpStatus } from '../../types/entities'
 
 function fetchFollowUps(status: '' | FollowUpStatus): FollowUp[] {

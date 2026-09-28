@@ -3,7 +3,7 @@ import { ErrorState } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { todayISO } from '../../lib/dates'
-import { getMockSessionUser, type SessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import { rangeForPreset, type DateRange } from '../../lib/dateRange'
 import { fetchDashboardSummary } from './api/dashboardApi'
 import {

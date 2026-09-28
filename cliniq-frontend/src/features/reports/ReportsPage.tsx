@@ -3,7 +3,7 @@ import { Badge, Button, Card, CardBody, CardHeader, DataTable, Icon, type DataTa
 import { getMockDataset } from '../../lib/mocks/dataset'
 import { todayISO } from '../../lib/dates'
 import type { Incident } from '../../types/entities'
-import type { SessionUser } from '../../lib/mocks/session'
+import type { SessionUser } from '../../lib/mock-db'
 import { HealthSummary } from './components/HealthSummary'
 
 type ReportView = 'monthly' | 'incidents' | 'health'

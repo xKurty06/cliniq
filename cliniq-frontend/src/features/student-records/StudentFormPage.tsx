@@ -12,8 +12,8 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
-import type { SessionUser } from '../../lib/mocks/session'
-import { getMockSessionUser } from '../../lib/mocks/session'
+import type { SessionUser } from '../../lib/mock-db'
+import { getMockSessionUser } from '../../lib/mock-db'
 import type { Student } from '../../types/entities'
 import {
   fetchStudentFormContext,

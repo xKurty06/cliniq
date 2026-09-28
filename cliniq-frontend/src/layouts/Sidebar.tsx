@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 import { Icon } from '../components'
 import { cn } from '../lib/cn'
 import { navGroupsFor, type NavKey } from './navigation'
-import type { SessionUser } from '../lib/mocks/session'
+import type { SessionUser } from '../lib/mock-db'
 
 function navGroupId(label: string): string {
   return `nav-group-${label.toLowerCase().replace(/\s+/g, '-')}`

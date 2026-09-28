@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Card, CardBody, CardHeader, ErrorState, Icon, Skeleton, buttonClassName } from '../../../components'
-import type { SessionUser } from '../../../lib/mocks/session'
+import type { SessionUser } from '../../../lib/mock-db'
 import type { StudentNumber } from '../../../types/entities'
 import { paths } from '../../../routes/paths'
 import { lookupStudentByNumber, type QrLookupResult } from '../api/qrLookupApi'

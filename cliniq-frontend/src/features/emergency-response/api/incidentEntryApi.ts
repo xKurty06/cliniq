@@ -8,7 +8,7 @@ import type {
   ParentNotificationAttempt,
   Student,
 } from '../../../types/entities'
-import type { SessionUser } from '../../../lib/mocks/session'
+import type { SessionUser } from '../../../lib/mock-db'
 
 type MockMode = 'normal' | 'error' | 'slow'
 

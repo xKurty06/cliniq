@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button, Card, CardBody, CardHeader, Icon, Input, Select } from '../../components'
 import { recordMockAudit } from '../../lib/mocks/audit'
-import { getMockSessionUser } from '../../lib/mocks/session'
+import { getMockSessionUser } from '../../lib/mock-db'
 
 export function UserFormPage({ userId }: { userId?: string }) {
   const navigate = useNavigate()
