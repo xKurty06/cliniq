@@ -50,6 +50,7 @@ describe('App routes', () => {
 
     expect(await screen.findByRole('heading', { name: 'Visit Log List' })).toBeInTheDocument()
     expect(screen.getByTestId('path')).toHaveTextContent('/visits')
+    expect(document.title).toBe('CLINIQ — Visit Log')
   })
 
   it('opens the Staff incident log from sidebar navigation', async () => {

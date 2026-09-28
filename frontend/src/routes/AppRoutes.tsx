@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useParams, useSearchParams } from 'react-router'
 import { AppShell } from '../layouts/AppShell'
 import type { NavKey } from '../layouts/navigation'
@@ -128,6 +128,8 @@ function UserFormRoute() { const { userId } = useParams(); return <UserFormPage 
 
 interface AppRoute {
   path: string
+  /** Browser-tab label, paired with the route so it changes with the active screen. */
+  title: string
   roles: UserRole[]
   /** Sidebar item highlighted while this screen is open. */
   nav: NavKey
@@ -135,9 +137,18 @@ interface AppRoute {
   render: (viewer: SessionUser) => ReactNode
 }
 
+function PageTitle({ children, title }: { children: ReactNode; title: string }) {
+  useEffect(() => {
+    document.title = `CLINIQ — ${title}`
+  }, [title])
+
+  return children
+}
+
 const APP_ROUTES: AppRoute[] = [
   {
     path: paths.dashboard,
+    title: 'Clinic Overview',
     roles: ['staff', 'admin'],
     nav: 'dashboard',
     shell: true,
@@ -145,6 +156,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.students,
+    title: 'Student List',
     roles: ['staff'],
     nav: 'students',
     shell: true,
@@ -152,6 +164,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.studentNew,
+    title: 'Add Student',
     roles: ['staff'],
     nav: 'students',
     shell: true,
@@ -159,6 +172,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.incompleteRecords,
+    title: 'Incomplete Records',
     roles: ['staff'],
     nav: 'students',
     shell: true,
@@ -167,6 +181,7 @@ const APP_ROUTES: AppRoute[] = [
   {
     // Instructors reach this read-only from a QR lookup; the page hides every record action.
     path: '/students/:studentNumber',
+    title: 'Student Profile',
     roles: ['staff', 'instructor'],
     nav: 'students',
     shell: true,
@@ -174,6 +189,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: '/students/:studentNumber/edit',
+    title: 'Edit Student',
     roles: ['staff'],
     nav: 'students',
     shell: true,
@@ -181,6 +197,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.visits,
+    title: 'Visit Log',
     roles: ['staff'],
     nav: 'visits',
     shell: true,
@@ -188,6 +205,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: '/visits/new',
+    title: 'New Visit',
     roles: ['staff'],
     nav: 'visits',
     shell: true,
@@ -195,6 +213,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.peReferral,
+    title: 'PE/Sports Referrals',
     roles: ['staff'],
     nav: 'visits',
     shell: true,
@@ -202,6 +221,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: '/visits/:visitId',
+    title: 'Visit Details',
     roles: ['staff'],
     nav: 'visits',
     shell: true,
@@ -209,6 +229,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: '/visits/:visitId/excuse-letter',
+    title: 'Excuse Letter',
     roles: ['staff'],
     nav: 'visits',
     shell: true,
@@ -216,6 +237,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.incidents,
+    title: 'Incident Log',
     roles: ['staff'],
     nav: 'incidents',
     shell: true,
@@ -223,17 +245,19 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: '/incidents/new',
+    title: 'Report Incident',
     roles: ['staff'],
     nav: 'incidents',
     shell: true,
     render: (viewer) => <IncidentEntryRoute viewer={viewer} />,
   },
-  { path: '/incidents/notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
-  { path: '/incidents/:incidentId/notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
-  { path: '/incidents/report', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentReportRoute viewer={viewer} /> },
-  { path: '/incidents/:incidentId/report', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentReportRoute viewer={viewer} /> },
+  { path: '/incidents/notifications', title: 'Parent Notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
+  { path: '/incidents/:incidentId/notifications', title: 'Parent Notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
+  { path: '/incidents/report', title: 'Incident Report', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentReportRoute viewer={viewer} /> },
+  { path: '/incidents/:incidentId/report', title: 'Incident Report', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentReportRoute viewer={viewer} /> },
   {
     path: paths.inventory,
+    title: 'Inventory',
     roles: ['staff'],
     nav: 'inventory',
     shell: true,
@@ -241,6 +265,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.inventoryNew,
+    title: 'Add Inventory Item',
     roles: ['staff'],
     nav: 'inventory',
     shell: true,
@@ -248,6 +273,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: '/inventory/dispense',
+    title: 'Dispense Item',
     roles: ['staff'],
     nav: 'inventory',
     shell: true,
@@ -255,6 +281,7 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.followUps,
+    title: 'Follow-Ups',
     roles: ['staff'],
     nav: 'followUps',
     shell: true,
@@ -262,19 +289,20 @@ const APP_ROUTES: AppRoute[] = [
   },
   {
     path: paths.qrScan,
+    title: 'QR Lookup',
     roles: ['staff', 'instructor'],
     nav: 'qrLookup',
     shell: false,
     render: (viewer) => <QrMobileHubPage viewer={viewer} />,
   },
-  { path: paths.qrDesktop, roles: ['staff'], nav: 'qrLookup', shell: true, render: (viewer) => <QrDesktopHubPage viewer={viewer} /> },
-  { path: paths.qrPrint, roles: ['staff'], nav: 'qrLookup', shell: true, render: () => <QrPrintPage /> },
-  { path: paths.emergencyMobile, roles: ['staff'], nav: 'incidents', shell: false, render: () => <EmergencyMobilePage /> },
-  { path: paths.reports, roles: ['staff', 'admin'], nav: 'reports', shell: true, render: (viewer) => <ReportsPage viewer={viewer} /> },
-  { path: paths.users, roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserListPage /> },
-  { path: paths.userNew, roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormPage /> },
-  { path: '/users/:userId/edit', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormRoute /> },
-  { path: paths.backup, roles: ['staff'], nav: 'backup', shell: true, render: () => <BackupStatusPage /> },
+  { path: paths.qrDesktop, title: 'QR Health IDs', roles: ['staff'], nav: 'qrLookup', shell: true, render: (viewer) => <QrDesktopHubPage viewer={viewer} /> },
+  { path: paths.qrPrint, title: 'Print QR Health IDs', roles: ['staff'], nav: 'qrLookup', shell: true, render: () => <QrPrintPage /> },
+  { path: paths.emergencyMobile, title: 'Emergency Response', roles: ['staff'], nav: 'incidents', shell: false, render: () => <EmergencyMobilePage /> },
+  { path: paths.reports, title: 'Reports', roles: ['staff', 'admin'], nav: 'reports', shell: true, render: (viewer) => <ReportsPage viewer={viewer} /> },
+  { path: paths.users, title: 'User Accounts', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserListPage /> },
+  { path: paths.userNew, title: 'Add User', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormPage /> },
+  { path: '/users/:userId/edit', title: 'Edit User', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormRoute /> },
+  { path: paths.backup, title: 'Backup', roles: ['staff'], nav: 'backup', shell: true, render: () => <BackupStatusPage /> },
 ]
 
 /** Where a role lands on `/` or when it opens a screen it can't use. */
@@ -311,7 +339,11 @@ export function AppRoutes({ user, onLogout }: { user: SessionUser; onLogout: () 
     <Routes>
       {APP_ROUTES.map((route) => {
         const allowed = route.roles.includes(user.role)
-        const content = <Suspense fallback={<RouteLoading />}>{route.render(user)}</Suspense>
+        const content = (
+          <PageTitle title={route.title}>
+            <Suspense fallback={<RouteLoading />}>{route.render(user)}</Suspense>
+          </PageTitle>
+        )
         return (
           <Route
             key={route.path}
@@ -330,7 +362,12 @@ export function AppRoutes({ user, onLogout }: { user: SessionUser; onLogout: () 
       })}
       <Route
         path="*"
-        element={withShell(user, null, <NotFoundPage home={homePathFor(user.role)} />, onLogout)}
+        element={withShell(
+          user,
+          null,
+          <PageTitle title="Page Not Found"><NotFoundPage home={homePathFor(user.role)} /></PageTitle>,
+          onLogout,
+        )}
       />
     </Routes>
   )
