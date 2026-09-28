@@ -28,6 +28,9 @@
 
 ## Resolved since last update
 
+- ~~Monday, September 28, 2026 — 08:40 — F2 audit finding: Follow-Up List generated a pseudo Student Number from its internal ID and offered no way to update a pending follow-up.~~ Resolved Monday, September 28, 2026 — 08:40: the list now resolves the actual linked Student Number, exposes an audited “Mark completed” action, and has regression coverage.
+- ~~Sunday, September 27, 2026 — 16:10 — F2 audit blocker: Screen #15 Incident Log List is missing.~~ Resolved Monday, September 28, 2026 — 08:25: added the Staff Incident Log List, `/incidents` route and navigation destination, privacy-safe Student Number rows, ADR-010-approved reason/description context, and Needs Completion/Complete status badges.
+- ~~Monday, September 28, 2026 — 08:12 — F2 audit finding: Incident Report Archive displays a fabricated Student Number.~~ Resolved Monday, September 28, 2026 — 08:25: the archive now maps each incident's `studentId` to the linked `Student.studentNumber`, with regression coverage.
 - ~~Laravel Sanctum, Vite, and QR libraries~~ — confirmed September 25, 2026, after researching current maintenance/compatibility status. See `06-Decisions/ADR-007-Stack-Finalization.md` and `02-Architecture/Tech-Stack.md`.
 - ~~XAMPP standardization~~ — confirmed.
 - ~~Chart.js vs. Recharts~~ — Chart.js chosen, for bundle size and Canvas rendering given the 4GB RAM target.
@@ -36,7 +39,42 @@
 ## Known gaps
 
 - Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
-- No code exists yet — this vault was set up before implementation began, per the team's explicit request.
+- Frontend mock implementation is now substantially built through the F2 screen set; Laravel API integration, database schema, and production authentication remain future backend work.
+
+## Reported UI/UX follow-ups — Monday, September 28, 2026 — 08:17
+
+These items were supplied for the frontend backlog. Confirmed implementation gaps are stated as such; items whose desired behavior needs a visual or product decision are retained as validation tasks rather than silently interpreted.
+
+### QR scan/lookup
+
+- **Align QR-screen text consistently.** Review the mobile and desktop scan/lookup headings, descriptions, manual-entry label, and result-card text at their intended breakpoints; correct any inconsistent alignment without compromising the mobile-first flow.
+- **Clarify and label optional fields.** Identify which QR-related fields are optional, display that status consistently, and keep the manual Student Number path usable without unnecessary required fields.
+- **Show fields that depend on the selected complaint.** Confirm the intended complaint-to-field rules and implement them consistently in the visit and incident flows. New Visit currently changes its Smart Triage checklist by complaint; this request may require additional conditional fields and must not be guessed.
+- **Auto-insert the Student Number dash.** Manual QR lookup currently trims and uppercases input but does not convert `YYYYNNNNN` to `YYYY-NNNNN`; add safe formatting while allowing deletion and paste.
+- **Provide a working Cancel action on every relevant form.** Audit all entry forms. The current Incident Stage 1 Cancel button has no handler; each Cancel must safely return to the prior relevant screen without submitting data.
+
+### Student records
+
+- **Prevent the masterlist table layout from shifting when “Include archived” is toggled.** Reproduce at desktop widths, identify the changing column/row geometry, and preserve a stable table layout during the refetch.
+- **Add a “View profile” action to Student List rows.** The masterlist currently displays static rows only; add an accessible profile link for each student, including archived records when they are shown.
+
+### Dashboard
+
+- **Make dashboard alerts redirect to their respective module pages.** The current alert-list rows are static. Add appropriate, privacy-safe navigation targets for follow-ups, frequent-visitor/student context, and inventory alerts, preserving the Dashboard's view-only rule.
+
+### Visit and incident entry
+
+- **Confirm the intended meaning of independent visit and incident entry.** Separate routes already exist (`/visits/new` and `/incidents/new`), but validate whether the requested independence means separate standalone navigation/actions, separate data workflows, or removal of shared assumptions before changing the flow.
+- **Add parent contact information near Parent Notification Log.** Display the selected student's relevant emergency-contact name, relationship, phone number, and verification status near the outcome controls, subject to the single-student privacy rule.
+- **Add an optional General Notes field to Incident Stage 1.** It must remain optional so the fast-capture requirement is not weakened, and must carry forward into Stage 2/report data once the API contract is finalized.
+
+## Open product decisions from the mock-data layer — Monday, September 28, 2026 — 09:19
+
+*(This entry was lost when a zip overwrote the file and was rebuilt from `ADR-014` and that session's log.)*
+
+- **Config values now in `mock-db.json`, carried over from the Dashboard mock — not requirements, they need a team or nurse decision:** `frequentVisitorMinVisits` (3), `frequentVisitorWindowDays` (30; the Dashboard uses its selected range instead), `upcomingFollowUpDays` (7), `expiryWarningDays` (30), `clusterMinCount` (8), `clusterRatio` (2), `topComplaints` (5). Also open: whether stock *at* the threshold counts as low (currently strictly below).
+- **`frontendOnly` data to review when the ERD is designed:** `devAccounts` (credentials, `mustChangePassword`), `visitComplaintTypes` (incl. Smart Triage steps), `incidentComplaintTypes`, `inventoryTransactions`, `recordReviews`, `excuseLetterApprovals`, `peReferrals`.
+- **Login (#1) and Force Password Change (#2) do not exist in the frontend yet** (verified against tip c7eac45, Monday, September 28, 2026 — 23:33 PHT). Only a prototype role picker for client demos exists after logout — explicitly not authentication, no passwords. Both screens are tracked in the Phase F2 checklist.
 
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.

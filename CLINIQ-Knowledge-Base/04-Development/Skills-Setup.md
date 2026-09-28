@@ -15,6 +15,17 @@ This is a substantially expanded pass over the first one — that version only c
 
 Write more of these as new CLINIQ-specific rules get established — they encode decisions unique to this project that no public skill will ever have.
 
+### Component skills
+
+A component skill holds the standing rules for one major, shared, or repeated UI component (dropdown, search bar, date picker, table, modal…), so every future build of that component matches. `AGENTS.md` ("Component skills — look before you build, and keep them current") says when agents must look for one, create one, or update one.
+
+- **Name:** `cliniq-<component>-patterns`, in `.claude/skills/`. Follow the format of `cliniq-dropdown-patterns`.
+- **`description`** names the component and says when to apply it ("Apply when building or changing a CLINIQ …"), because that is what lets an agent find it by reading only the frontmatter.
+- **Body:** the rules the user actually asked for, grouped by behavior; where the shared component lives; and a pointer to `cliniq-interactive-states` for hover/cursor rules instead of repeating them.
+- **Don't** create one for a one-off widget used on a single screen, and don't record visual rules the user never stated.
+- **Every create or edit** gets a row in the table above, an `Agent-Sessions/` entry, and a Changelog row.
+- These skills are edited by agents in the live repo, so they are never copied over the repo from an export (`AGENTS.md`, Step 0).
+
 ---
 
 ## Accessibility

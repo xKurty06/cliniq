@@ -17,3 +17,4 @@ Reason: Direct decision from the user, applied consistently across every file th
 Testing Performed: grep verification and diffs only — documentation change, no code.
 Known Issues: Project Plan PDF is not rebuilt (already stale relative to the .md before this change). GitHub's docs are behind the local vault and need this zip's documentation files copied in (never cliniq-frontend/ or cliniq-backend/, per AGENTS.md Step 0a).
 Next Steps: Confirm the 1-week/no-idle-timeout trade-off with the client; decide whether to add the Sec 5.4 risk row.
+Correction (Monday, September 28, 2026 — 22:29 PHT): the ADR this session wrote as ADR-010 collided with the existing ADR-010 (Reason Visibility) and was renumbered ADR-015. Everywhere this log says ADR-010 in the session-lifetime sense, read ADR-015.
