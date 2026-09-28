@@ -79,22 +79,27 @@ export function IncompleteRecordsQueuePage({
   async function resolveRecord(record: IncompleteRecord) {
     setSavingId(record.id)
     try {
-      await markIncompleteRecordResolved(record)
+      const updated = await markIncompleteRecordResolved(record, viewer)
       setResolved((current) => ({
         ...current,
-        [record.id]: { resolvedBy: viewer.name, resolvedAt: new Date().toISOString() },
+        [record.id]: { resolvedBy: updated.resolvedBy ?? viewer.name, resolvedAt: updated.resolvedAt ?? '' },
       }))
     } finally {
       setSavingId(null)
     }
   }
 
+  // Resolutions come from the data layer; `resolved` only holds ones made since this page loaded.
+  const resolutionOf = (record: IncompleteRecord): ResolvedRecord | undefined =>
+    resolved[record.id] ??
+    (record.resolvedAt ? { resolvedBy: record.resolvedBy ?? 'Unknown user', resolvedAt: record.resolvedAt } : undefined)
+
   const visibleRows = useMemo(() => {
     if (!data) return []
     const term = search.trim().toLowerCase()
     return data
       .filter((record) => {
-        const isResolved = Boolean(resolved[record.id])
+        const isResolved = Boolean(resolutionOf(record))
         if (filter === 'open') return !isResolved
         if (filter === 'resolved') return isResolved
         return true
@@ -107,6 +112,7 @@ export function IncompleteRecordsQueuePage({
           record.gradeLevel.toLowerCase().includes(term)
         )
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resolutionOf only reads `resolved`
   }, [data, filter, resolved, search])
 
   const columns: Array<DataTableColumn<IncompleteRecord>> = [
@@ -144,7 +150,7 @@ export function IncompleteRecordsQueuePage({
       header: 'Imported',
       cell: (record) => (
         <div>
-          <p>{formatDate(record.importedAt)}</p>
+          <p>{record.importedAt ? formatDate(record.importedAt) : '—'}</p>
           <p className="text-xs text-text-secondary">{record.importedBy}</p>
         </div>
       ),
@@ -153,7 +159,7 @@ export function IncompleteRecordsQueuePage({
       key: 'status',
       header: 'Resolution',
       cell: (record) => {
-        const resolution = resolved[record.id]
+        const resolution = resolutionOf(record)
         if (resolution) {
           return (
             <div>
@@ -208,8 +214,8 @@ export function IncompleteRecordsQueuePage({
     )
   }
 
-  const openCount = data.filter((record) => !resolved[record.id]).length
-  const resolvedCount = Object.keys(resolved).length
+  const openCount = data.filter((record) => !resolutionOf(record)).length
+  const resolvedCount = data.length - openCount
 
   return (
     <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8">
@@ -228,7 +234,7 @@ export function IncompleteRecordsQueuePage({
               {openCount} open
             </Badge>
             <Badge tone="success" variant="soft">
-              {resolvedCount} resolved this session
+              {resolvedCount} resolved
             </Badge>
           </div>
         </div>

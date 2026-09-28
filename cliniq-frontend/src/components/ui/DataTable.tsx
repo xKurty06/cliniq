@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { Icon } from '../icons/Icon'
+
+export type DataTableSortDirection = 'ascending' | 'descending'
 
 export interface DataTableColumn<Row> {
   key: string
@@ -8,6 +11,12 @@ export interface DataTableColumn<Row> {
   align?: 'left' | 'right'
   /** Marks the column that names each row (rendered as a row header, `<th scope="row">`). */
   rowHeader?: boolean
+  /** Optional accessible sort control for a column header. */
+  sort?: {
+    label: string
+    direction?: DataTableSortDirection
+    onSort: () => void
+  }
 }
 
 export interface DataTableProps<Row> {
@@ -47,12 +56,35 @@ export function DataTable<Row>({
               <th
                 key={col.key}
                 scope="col"
+                aria-sort={col.sort?.direction}
                 className={cn(
                   'px-2 py-1.5 text-xs font-semibold whitespace-nowrap text-text-secondary',
                   col.align === 'right' ? 'text-right' : 'text-left',
                 )}
               >
-                {col.header}
+                {col.sort ? (
+                  <button
+                    type="button"
+                    onClick={col.sort.onSort}
+                    className="inline-flex cursor-pointer items-center gap-1 rounded-sm transition-colors duration-150 hover:text-brand-green-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
+                    aria-label={`Sort by ${col.sort.label}${col.sort.direction ? `, currently ${col.sort.direction}` : ''}`}
+                  >
+                    {col.header}
+                    {col.sort.direction ? (
+                      <Icon
+                        name={col.sort.direction === 'ascending' ? 'arrowUp' : 'arrowDown'}
+                        size={13}
+                      />
+                    ) : (
+                      <span aria-hidden="true" className="flex flex-col -space-y-1">
+                        <Icon name="arrowUp" size={10} />
+                        <Icon name="arrowDown" size={10} />
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  col.header
+                )}
               </th>
             ))}
           </tr>

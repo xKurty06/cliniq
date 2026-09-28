@@ -1,8 +1,6 @@
-import { addDays, isWithin, todayISO } from '../../../lib/dates'
-import { getMockDataset } from '../../../lib/mocks/dataset'
+import { listIncidents, listStudents } from '../../../lib/mock-db'
+import { addDays, todayISO } from '../../../lib/dates'
 import type { ISODate, ISODateTime } from '../../../types/entities'
-
-type MockMode = 'normal' | 'error' | 'slow'
 
 export type IncidentCompletion = 'needs_completion' | 'complete'
 
@@ -23,47 +21,34 @@ export interface IncidentLogRow {
   eventTag: string | null
 }
 
-function mockMode(): MockMode {
-  if (typeof window === 'undefined') return 'normal'
-  const mode = new URLSearchParams(window.location.search).get('mock')
-  return mode === 'error' || mode === 'slow' ? mode : 'normal'
-}
-
-async function simulateLatency(mode: MockMode) {
-  if (import.meta.env.MODE === 'test') return
-  await new Promise((resolve) => setTimeout(resolve, mode === 'slow' ? 1200 : 200))
-}
-
 export function defaultIncidentLogRange(today = todayISO()): { from: ISODate; to: ISODate } {
   return { from: addDays(today, -30), to: today }
 }
 
 export async function fetchIncidentLog(query: IncidentLogQuery): Promise<IncidentLogRow[]> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock incident log failure')
-
-  const dataset = getMockDataset(todayISO())
-  const studentsById = new Map(dataset.students.map((student) => [student.id, student]))
+  const [incidents, students] = await Promise.all([
+    listIncidents({ from: query.from, to: query.to }),
+    listStudents({ includeArchived: true }),
+  ])
+  const studentsById = new Map(students.map((student) => [student.id, student]))
   const search = query.search.trim().toLowerCase()
 
-  return dataset.incidents
-    .filter((incident) => isWithin(incident.time.slice(0, 10), query.from, query.to))
-    .map((incident) => {
+  return incidents
+    .flatMap((incident): IncidentLogRow[] => {
       const student = studentsById.get(incident.studentId)
-      if (!student) return null
-      const completion: IncidentCompletion = incident.stage === 1 ? 'needs_completion' : 'complete'
-      return {
-        id: incident.id,
-        studentNumber: student.studentNumber,
-        gradeLevel: student.gradeLevel,
-        time: incident.time,
-        complaint: incident.complaint,
-        completion,
-        eventTag: incident.eventTag,
-      }
+      if (!student) return []
+      return [
+        {
+          id: incident.id,
+          studentNumber: student.studentNumber,
+          gradeLevel: student.gradeLevel,
+          time: incident.time,
+          complaint: incident.complaint,
+          completion: incident.stage === 1 ? 'needs_completion' : 'complete',
+          eventTag: incident.eventTag,
+        },
+      ]
     })
-    .filter((row): row is IncidentLogRow => Boolean(row))
     .filter((row) => query.completion === 'all' || row.completion === query.completion)
     .filter((row) => {
       if (!search) return true
@@ -74,6 +59,5 @@ export async function fetchIncidentLog(query: IncidentLogQuery): Promise<Inciden
         (row.eventTag?.toLowerCase().includes(search) ?? false)
       )
     })
-    .sort((a, b) => b.time.localeCompare(a.time))
     .slice(0, 120)
 }

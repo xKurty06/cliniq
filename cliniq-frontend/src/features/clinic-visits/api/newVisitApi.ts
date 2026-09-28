@@ -1,13 +1,17 @@
-import { recordMockAudit } from '../../../lib/mocks/audit'
-import { getMockDataset } from '../../../lib/mocks/dataset'
-import { todayISO } from '../../../lib/dates'
+import {
+  getDemoStudent,
+  getStudent,
+  getVisitComplaintTypes,
+  recordVisit,
+  type ComplaintType,
+  type SessionUser,
+} from '../../../lib/mock-db'
 import type { Disposition, FollowUp, Student, Visit } from '../../../types/entities'
-import type { SessionUser } from '../../../lib/mock-db'
-
-type MockMode = 'normal' | 'error' | 'slow'
 
 export interface NewVisitContext {
   student: Student
+  /** Complaint options + their Smart Triage checklists (mock-only content; see mock-db.json). */
+  complaintTypes: ComplaintType[]
 }
 
 export interface NewVisitInput {
@@ -24,78 +28,28 @@ export interface NewVisitResult {
   followUp: FollowUp | null
 }
 
-function mockMode(): MockMode {
-  if (typeof window === 'undefined') return 'normal'
-  const mode = new URLSearchParams(window.location.search).get('mock')
-  return mode === 'error' || mode === 'slow' ? mode : 'normal'
-}
-
-async function simulateLatency(mode: MockMode) {
-  if (import.meta.env.MODE === 'test') return
-  await new Promise((resolve) => setTimeout(resolve, mode === 'slow' ? 1800 : 250))
-}
-
-function defaultStudent(): Student {
-  const dataset = getMockDataset(todayISO())
-  return dataset.students.find((s) => !s.archived && s.recordComplete) ?? dataset.students[0]
-}
-
+/** `studentNumber` is the route's `?student=` pre-selection; without one a demo student is used. */
 export async function fetchNewVisitContext(studentNumber?: string): Promise<NewVisitContext> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock visit context failure')
-  const dataset = getMockDataset(todayISO())
-  // `studentNumber` is the route's `?student=` pre-selection; without one a demo student is used.
-  const student = studentNumber
-    ? dataset.students.find((s) => s.studentNumber === studentNumber)
-    : defaultStudent()
-  if (!student) throw new Error('Student not found')
-  return { student }
+  const [student, complaintTypes] = await Promise.all([
+    studentNumber ? getStudent(studentNumber) : getDemoStudent(),
+    getVisitComplaintTypes(),
+  ])
+  return { student, complaintTypes }
 }
 
-export async function submitNewVisit(input: NewVisitInput, user: SessionUser): Promise<NewVisitResult> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock visit submit failure')
-
-  const visit: Visit = {
-    id: `mock-visit-${Date.now()}`,
-    studentId: input.studentId,
-    dateTime: new Date().toISOString(),
-    complaint: input.complaint,
-    treatment: input.treatment,
-    disposition: input.disposition,
-    loggedByUserId: user.id,
-    eventTag: null,
-  }
-  const followUp: FollowUp | null = input.followUp
-    ? {
-        id: `mock-follow-up-${Date.now()}`,
-        studentId: input.studentId,
-        relatedRecord: { type: 'visit', id: visit.id },
-        followUpDate: input.followUp.followUpDate,
-        reason: input.followUp.reason,
-        status: 'pending',
-        notes: input.followUp.notes,
-        createdByUserId: user.id,
-      }
-    : null
-
-  const timestamp = new Date().toISOString()
-  recordMockAudit({
-    userId: user.id,
-    actionType: 'submit',
-    targetRecord: { type: 'visit', id: visit.id },
-    timestamp,
-  })
-  if (followUp) {
-    recordMockAudit({
-      userId: user.id,
-      actionType: 'create',
-      targetRecord: { type: 'follow-up', id: followUp.id },
-      timestamp,
-    })
-  }
-
-  return { visit, followUp }
+/**
+ * Saves the visit and its optional follow-up in one flow. The data layer writes both audit entries.
+ * `triageStepsCompleted` has no field in the §5 Visit shape yet, so it isn't persisted (ADR-014).
+ */
+export function submitNewVisit(input: NewVisitInput, user: SessionUser): Promise<NewVisitResult> {
+  return recordVisit(
+    {
+      studentId: input.studentId,
+      complaint: input.complaint,
+      treatment: input.treatment,
+      disposition: input.disposition,
+      followUp: input.followUp,
+    },
+    user,
+  )
 }

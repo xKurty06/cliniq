@@ -1,8 +1,13 @@
 import '@testing-library/jest-dom/vitest'
 import { afterEach } from 'vitest'
 
-// The mock session remembers a previewed `?role=` per tab; don't let it leak between tests.
-afterEach(() => {
+// The mock session remembers a previewed `?role=` per tab, and every write lands in the shared
+// in-memory store; don't let either leak between tests. The data layer is imported lazily so a test
+// file can still `vi.mock('.../mock-db.json')` before anything loads the real seed.
+afterEach(async () => {
   window.sessionStorage.clear()
   window.history.replaceState({}, '', '/')
+  const { resetMockDb, setMockToday } = await import('../lib/mock-db')
+  setMockToday(null)
+  resetMockDb()
 })

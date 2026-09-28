@@ -2,8 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
-import { todayISO } from '../lib/dates'
-import { getMockDataset } from '../lib/mocks/dataset'
+import { listStudents } from '../lib/mock-db'
 import type { SessionUser } from '../lib/mock-db'
 import { AppRoutes } from './AppRoutes'
 
@@ -15,7 +14,7 @@ vi.mock('react-chartjs-2', () => {
   return { Bar: Stub, Line: Stub }
 })
 
-const STAFF: SessionUser = { id: 'usr-nurse', name: 'Ms. Jenne Baas', role: 'staff' }
+const STAFF: SessionUser = { id: 'user-staff-01', name: 'Liza Manalastas', role: 'staff' }
 const ADMIN: SessionUser = { id: 'usr-principal', name: 'Principal', role: 'admin' }
 const INSTRUCTOR: SessionUser = { id: 'usr-pe', name: 'PE Instructor', role: 'instructor' }
 
@@ -63,7 +62,7 @@ describe('App routes', () => {
   })
 
   it('resolves the student from the /students/:studentNumber segment', async () => {
-    const student = getMockDataset(todayISO()).students.find((s) => !s.archived)!
+    const [student] = await listStudents()
     renderAt(`/students/${student.studentNumber}`)
 
     expect(await screen.findByRole('heading', { name: student.fullName })).toBeInTheDocument()

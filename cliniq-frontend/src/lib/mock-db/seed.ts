@@ -38,7 +38,8 @@ export const seed = shapeChecked as unknown as MockDbSeed
 export function resolveSeed(source: MockDbSeed, today: ISODate): DbState {
   const idByNumber = new Map(source.students.map((s) => [s.studentNumber, s.id]))
   const studentId = (studentNumber: string) => idByNumber.get(studentNumber) ?? `missing:${studentNumber}`
-  const { _note: _configNote, ...config } = source.config
+  const config = { ...source.config }
+  delete config._note
   const fo = source.frontendOnly
 
   return structuredClone({

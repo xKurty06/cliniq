@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../lib/mocks/audit'
+import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { VisitDetailPage } from './VisitDetailPage'
 import { fetchVisitDetail } from './api/visitDetailApi'
 
 describe('Visit Detail/Edit', () => {
-  beforeEach(() => clearMockAuditEntries())
+  beforeEach(() => resetMockDb())
 
   it('shows full student and clinical details for a deliberately opened visit', async () => {
     const detail = await fetchVisitDetail()
@@ -45,6 +45,6 @@ describe('Visit Detail/Edit', () => {
 
     expect(await screen.findByText('Visit updated.')).toBeInTheDocument()
     expect(screen.getByText('Observed in clinic and released.')).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['update'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['update'])
   })
 })

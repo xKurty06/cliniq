@@ -1,9 +1,5 @@
-import { recordMockAudit } from '../../../lib/mocks/audit'
-import { getMockDataset } from '../../../lib/mocks/dataset'
-import { todayISO } from '../../../lib/dates'
+import { getLatestVisit, getStudentById, getUser, getVisit, updateVisit, type SessionUser } from '../../../lib/mock-db'
 import type { Disposition, ISODateTime, Student } from '../../../types/entities'
-
-type MockMode = 'normal' | 'error' | 'slow'
 
 export interface VisitDetail {
   id: string
@@ -23,17 +19,6 @@ export interface VisitDetailValues {
   eventTag: string
 }
 
-function mockMode(): MockMode {
-  if (typeof window === 'undefined') return 'normal'
-  const mode = new URLSearchParams(window.location.search).get('mock')
-  return mode === 'error' || mode === 'slow' ? mode : 'normal'
-}
-
-async function simulateLatency(mode: MockMode) {
-  if (import.meta.env.MODE === 'test') return
-  await new Promise((resolve) => setTimeout(resolve, mode === 'slow' ? 1200 : 200))
-}
-
 export function valuesFromVisit(visit: VisitDetail): VisitDetailValues {
   return {
     complaint: visit.complaint,
@@ -45,22 +30,11 @@ export function valuesFromVisit(visit: VisitDetail): VisitDetailValues {
 
 /** `visitId` comes from the `/visits/:visitId` route; omitted, the latest active visit is used. */
 export async function fetchVisitDetail(visitId?: string): Promise<VisitDetail> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock visit detail failure')
-
-  const dataset = getMockDataset(todayISO())
-  const visit = visitId
-    ? dataset.visits.find((candidate) => candidate.id === visitId)
-    : [...dataset.visits].reverse().find((candidate) => {
-        const student = dataset.students.find((item) => item.id === candidate.studentId)
-        return student && !student.archived
-      })
-  if (!visit) throw new Error('Visit not found')
-
-  const student = dataset.students.find((item) => item.id === visit.studentId)
-  if (!student) throw new Error('Mock visit has no student')
-
+  const visit = visitId ? await getVisit(visitId) : await getLatestVisit()
+  const [student, loggedBy] = await Promise.all([
+    getStudentById(visit.studentId),
+    getUser(visit.loggedByUserId).then((user) => user.name, () => 'Unknown user'),
+  ])
   return {
     id: visit.id,
     student,
@@ -69,30 +43,24 @@ export async function fetchVisitDetail(visitId?: string): Promise<VisitDetail> {
     treatment: visit.treatment,
     disposition: visit.disposition,
     eventTag: visit.eventTag ?? '',
-    loggedBy: 'Staff Nurse',
+    loggedBy,
   }
 }
 
 export async function updateVisitDetail(
   visit: VisitDetail,
   values: VisitDetailValues,
+  actor?: SessionUser,
 ): Promise<VisitDetail> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock visit update failure')
-
-  recordMockAudit({
-    userId: 'usr-nurse',
-    actionType: 'update',
-    targetRecord: { type: 'visit', id: visit.id },
-    timestamp: new Date().toISOString(),
-  })
-
-  return {
-    ...visit,
-    complaint: values.complaint.trim(),
-    treatment: values.treatment.trim(),
-    disposition: values.disposition,
-    eventTag: values.eventTag.trim(),
-  }
+  const updated = await updateVisit(
+    visit.id,
+    {
+      complaint: values.complaint.trim(),
+      treatment: values.treatment.trim(),
+      disposition: values.disposition,
+      eventTag: values.eventTag.trim() || null,
+    },
+    actor,
+  )
+  return { ...visit, ...updated, eventTag: updated.eventTag ?? '' }
 }

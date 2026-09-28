@@ -1,7 +1,20 @@
-import { recordMockAudit } from '../../../lib/mocks/audit'
-import { getMockDataset } from '../../../lib/mocks/dataset'
-import { todayISO } from '../../../lib/dates'
+import {
+  dispenseInventoryItem as dispenseInLayer,
+  getInventoryItem,
+  listInventory,
+  saveInventoryItem as saveInLayer,
+  type DispenseResult,
+  type InventoryItemView,
+  type SessionUser,
+} from '../../../lib/mock-db'
 import type { InventoryCategory, InventoryItem } from '../../../types/entities'
+
+/**
+ * Inventory (#28–#30). Low-stock, nearing-expiration, expired, and below-zero states are computed
+ * by the data layer on every read (`InventoryItemView`), never stored and never recomputed here, so
+ * the list, the dispense form, and the Dashboard's alerts always agree.
+ */
+export type { InventoryItemView }
 
 export interface InventoryFilters {
   search: string
@@ -19,62 +32,39 @@ export interface InventoryFormValues {
 
 export interface InventoryFormContext {
   item: InventoryItem | null
-  nextId: string
 }
 
-export async function fetchInventory(filters: InventoryFilters): Promise<InventoryItem[]> {
-  const dataset = getMockDataset(todayISO())
-  const search = filters.search.trim().toLowerCase()
-  return dataset.inventory.filter((item) => {
-    const matchesSearch = !search || item.name.toLowerCase().includes(search)
-    const matchesCategory = !filters.category || item.category === filters.category
-    return matchesSearch && matchesCategory
-  })
+export function fetchInventory(filters: InventoryFilters): Promise<InventoryItemView[]> {
+  return listInventory(filters)
 }
 
 export async function fetchInventoryForm(itemId?: string): Promise<InventoryFormContext> {
-  const inventory = getMockDataset(todayISO()).inventory
-  return {
-    item: itemId ? inventory.find((item) => item.id === itemId) ?? null : null,
-    nextId: `inv-${inventory.length + 1}`,
-  }
+  return { item: itemId ? await getInventoryItem(itemId) : null }
 }
 
-export async function saveInventoryItem(
+export function saveInventoryItem(
   values: InventoryFormValues,
-  options: { itemId?: string },
+  options: { itemId?: string; actor?: SessionUser },
 ): Promise<InventoryItem> {
-  const item: InventoryItem = {
-    id: options.itemId ?? `inv-new-${Date.now()}`,
-    name: values.name.trim(),
-    category: values.category,
-    currentStock: Number(values.currentStock),
-    unit: values.unit.trim(),
-    expirationDate: values.expirationDate || null,
-    lowStockThreshold: Number(values.lowStockThreshold),
-  }
-  recordMockAudit({
-    userId: 'usr-nurse',
-    actionType: options.itemId ? 'update' : 'create',
-    targetRecord: { type: 'inventory', id: item.id },
-    timestamp: new Date().toISOString(),
-  })
-  return item
+  return saveInLayer(
+    {
+      name: values.name.trim(),
+      category: values.category,
+      currentStock: Number(values.currentStock),
+      unit: values.unit.trim(),
+      expirationDate: values.expirationDate || null,
+      lowStockThreshold: Number(values.lowStockThreshold),
+    },
+    options,
+  )
 }
 
-export async function dispenseInventoryItem(
+/** Decrements stock; going below zero warns but never blocks recording care (Module 8). */
+export function dispenseInventoryItem(
   itemId: string,
   quantity: number,
   studentNumber?: string,
-): Promise<{ item: InventoryItem; remainingStock: number; belowZero: boolean }> {
-  const item = getMockDataset(todayISO()).inventory.find((candidate) => candidate.id === itemId)
-  if (!item) throw new Error('Inventory item not found')
-  const remainingStock = item.currentStock - quantity
-  recordMockAudit({
-    userId: 'usr-nurse',
-    actionType: 'submit',
-    targetRecord: { type: 'inventory-dispensation', id: `${item.id}:${studentNumber ?? 'unlinked'}` },
-    timestamp: new Date().toISOString(),
-  })
-  return { item, remainingStock, belowZero: remainingStock < 0 }
+  actor?: SessionUser,
+): Promise<DispenseResult> {
+  return dispenseInLayer(itemId, quantity, { studentNumber }, actor)
 }

@@ -1,25 +1,54 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import { Button, Card, CardBody, CardHeader, Icon, Input, Select } from '../../components'
-import { recordMockAudit } from '../../lib/mocks/audit'
+import { Button, Card, CardBody, CardHeader, ErrorState, Icon, Input, Select, Skeleton } from '../../components'
+import { useAsyncData } from '../../hooks/useAsyncData'
 import { getMockSessionUser } from '../../lib/mock-db'
+import type { UserRole } from '../../types/entities'
+import { fetchUser, submitUser } from './api/userApi'
 
 export function UserFormPage({ userId }: { userId?: string }) {
+  const { data: existing, status } = useAsyncData(`user|${userId ?? 'new'}`, () =>
+    userId ? fetchUser(userId) : Promise.resolve(null),
+  )
+  if (status === 'error') return <ErrorState title="Unable to load this account." />
+  if (existing === undefined) return <FormSkeleton />
+  return <UserForm key={existing?.id ?? 'new'} userId={userId} initial={existing} />
+}
+
+function FormSkeleton() {
+  return (
+    <>
+      <p className="sr-only" role="status">
+        Loading account...
+      </p>
+      <div aria-hidden="true" className="mx-auto max-w-[760px] px-4 py-6 sm:px-8">
+        <Card className="p-5">
+          <Skeleton className="h-7 w-40" />
+          {Array.from({ length: 3 }, (_, index) => (
+            <Skeleton key={index} className="mt-4 h-12" />
+          ))}
+        </Card>
+      </div>
+    </>
+  )
+}
+
+function UserForm({
+  userId,
+  initial,
+}: {
+  userId?: string
+  initial: { name: string; username: string; role: UserRole } | null
+}) {
   const navigate = useNavigate()
-  const [name, setName] = useState('')
-  const [username, setUsername] = useState('')
-  const [role, setRole] = useState('staff')
+  const [name, setName] = useState(initial?.name ?? '')
+  const [username, setUsername] = useState(initial?.username ?? '')
+  const [role, setRole] = useState<UserRole>(initial?.role ?? 'staff')
   const [saved, setSaved] = useState(false)
-  function submit(event: FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault()
     if (!name.trim() || !username.trim()) return
-    const user = getMockSessionUser()
-    recordMockAudit({
-      userId: user.id,
-      actionType: userId ? 'update' : 'create',
-      targetRecord: { type: 'user', id: userId ?? `mock-user-${Date.now()}` },
-      timestamp: new Date().toISOString(),
-    })
+    await submitUser({ name, username, role }, { userId, actor: getMockSessionUser() })
     setSaved(true)
   }
   return (
@@ -52,7 +81,7 @@ export function UserFormPage({ userId }: { userId?: string }) {
                 { value: 'admin', label: 'Admin / Principal' },
                 { value: 'instructor', label: 'PE/Sports Instructor' },
               ]}
-              onChange={setRole}
+              onChange={(value) => setRole(value as UserRole)}
             />
             <p className="text-xs text-text-secondary">
               Passwords are provisioned through the future Sanctum account workflow and are never

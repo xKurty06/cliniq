@@ -1,10 +1,15 @@
-import { todayISO } from '../../../lib/dates'
-import { recordMockAudit } from '../../../lib/mocks/audit'
-import { getMockDataset } from '../../../lib/mocks/dataset'
+import {
+  getGradeLevels,
+  getNextStudentNumber,
+  getStudent,
+  getStudentById,
+  saveStudent,
+  type DuplicateMatch,
+  type SessionUser,
+} from '../../../lib/mock-db'
 import type { Student, StudentNumber } from '../../../types/entities'
-import { gradeLevels } from './studentListApi'
 
-type MockMode = 'normal' | 'error' | 'slow'
+export type { DuplicateMatch }
 export type StudentFormMode = 'add' | 'edit'
 
 export interface StudentFormValues {
@@ -25,27 +30,9 @@ export interface StudentFormContext {
   student: Student | null
 }
 
-export interface DuplicateMatch {
-  id: string
-  fullName: string
-  studentNumber: StudentNumber
-  gradeLevel: string
-}
-
 export type StudentFormSubmitResult =
   | { status: 'duplicate'; matches: DuplicateMatch[] }
   | { status: 'saved'; student: Student; action: 'create' | 'update' }
-
-function mockMode(): MockMode {
-  if (typeof window === 'undefined') return 'normal'
-  const mode = new URLSearchParams(window.location.search).get('mock')
-  return mode === 'error' || mode === 'slow' ? mode : 'normal'
-}
-
-async function simulateLatency(mode: MockMode) {
-  if (import.meta.env.MODE === 'test') return
-  await new Promise((resolve) => setTimeout(resolve, mode === 'slow' ? 1200 : 200))
-}
 
 function parseList(value: string): string[] {
   return value
@@ -55,94 +42,36 @@ function parseList(value: string): string[] {
     .filter((item) => item.toLowerCase() !== 'none')
 }
 
-function nextStudentNumber(students: Student[]): StudentNumber {
-  const year = todayISO().slice(0, 4)
-  const maxSequence = students
-    .map((student) => student.studentNumber)
-    .filter((number) => number.startsWith(`${year}-`))
-    .map((number) => Number(number.slice(5)))
-    .filter(Number.isFinite)
-    .reduce((max, sequence) => Math.max(max, sequence), 0)
-  return `${year}-${String(maxSequence + 1).padStart(5, '0')}`
-}
-
 /** Edit mode when `studentNumber` is given (`/students/:studentNumber/edit`); add mode otherwise. */
 export async function fetchStudentFormContext(studentNumber?: string): Promise<StudentFormContext> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock student form failure')
-
-  const dataset = getMockDataset(todayISO())
-  const formMode: StudentFormMode = studentNumber ? 'edit' : 'add'
-  const student = studentNumber
-    ? dataset.students.find((candidate) => candidate.studentNumber === studentNumber)
-    : null
-  if (student === undefined) throw new Error('Student not found')
-  return {
-    mode: formMode,
-    gradeLevels: gradeLevels(),
-    nextStudentNumber: nextStudentNumber(dataset.students),
-    student,
-  }
+  const [student, gradeLevels, nextStudentNumber] = await Promise.all([
+    studentNumber ? getStudent(studentNumber) : Promise.resolve(null),
+    getGradeLevels(),
+    getNextStudentNumber(),
+  ])
+  return { mode: studentNumber ? 'edit' : 'add', gradeLevels, nextStudentNumber, student }
 }
 
 export async function submitStudentForm(
   values: StudentFormValues,
-  options: { mode: StudentFormMode; studentId?: string; confirmDuplicate?: boolean },
+  options: { mode: StudentFormMode; studentId?: string; confirmDuplicate?: boolean; actor?: SessionUser },
 ): Promise<StudentFormSubmitResult> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock student save failure')
-
-  const dataset = getMockDataset(todayISO())
-  const normalizedName = values.fullName.trim().toLowerCase()
-  const matches = dataset.students
-    .filter((student) => student.id !== options.studentId)
-    .filter((student) => !student.archived)
-    .filter(
-      (student) =>
-        student.fullName.trim().toLowerCase() === normalizedName &&
-        student.gradeLevel === values.gradeLevel,
-    )
-    .map((student) => ({
-      id: student.id,
-      fullName: student.fullName,
-      studentNumber: student.studentNumber,
-      gradeLevel: student.gradeLevel,
-    }))
-
-  if (options.mode === 'add' && matches.length > 0 && !options.confirmDuplicate) {
-    return { status: 'duplicate', matches }
-  }
-
-  const existing = options.studentId
-    ? dataset.students.find((student) => student.id === options.studentId)
-    : null
-  const action = existing ? 'update' : 'create'
-  const student: Student = {
-    id: existing?.id ?? `stu-new-${Date.now()}`,
-    studentNumber: existing?.studentNumber ?? nextStudentNumber(dataset.students),
-    fullName: values.fullName.trim(),
-    gradeLevel: values.gradeLevel,
-    contactInfo: values.contactInfo.trim(),
-    allergies: parseList(values.allergies),
-    medicalConditions: parseList(values.medicalConditions),
-    emergencyContact: {
-      name: values.emergencyContactName.trim(),
-      relationship: values.emergencyContactRelationship.trim(),
-      phone: values.emergencyContactPhone.trim(),
-      verified: existing?.emergencyContact?.verified ?? false,
+  const current = options.studentId ? await getStudentById(options.studentId) : null
+  return saveStudent(
+    {
+      fullName: values.fullName,
+      gradeLevel: values.gradeLevel,
+      contactInfo: values.contactInfo,
+      allergies: parseList(values.allergies),
+      medicalConditions: parseList(values.medicalConditions),
+      emergencyContact: {
+        name: values.emergencyContactName.trim(),
+        relationship: values.emergencyContactRelationship.trim(),
+        phone: values.emergencyContactPhone.trim(),
+        verified: current?.emergencyContact?.verified ?? false,
+      },
     },
-    recordComplete: true,
-    archived: existing?.archived ?? false,
-  }
-
-  recordMockAudit({
-    userId: 'usr-nurse',
-    actionType: action,
-    targetRecord: { type: 'student', id: student.id },
-    timestamp: new Date().toISOString(),
-  })
-
-  return { status: 'saved', student, action }
+    { studentId: options.mode === 'edit' ? options.studentId : undefined, confirmDuplicate: options.confirmDuplicate, actor: options.actor },
+  )
 }
+

@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../lib/mocks/audit'
+import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { NewVisitEntryPage } from './NewVisitEntryPage'
 
 describe('New Visit Entry', () => {
-  beforeEach(() => clearMockAuditEntries())
+  beforeEach(() => resetMockDb())
 
   it('shows the identified student and reveals Smart Triage after complaint selection', async () => {
     const user = userEvent.setup()
@@ -42,7 +42,7 @@ describe('New Visit Entry', () => {
 
     expect(await screen.findByText(/visit saved/i)).toBeInTheDocument()
     expect(screen.getByText(/pending follow-up was created/i)).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['submit', 'create'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['submit', 'create'])
   })
 
   it('uses a custom-styled complaint select instead of an unstyled native control', async () => {

@@ -55,7 +55,7 @@ export function QrScannerView({ title, description, onDetected }: QrScannerViewP
           >
             {status === 'scanning' ? 'Stop camera' : 'Scan QR Code'}
           </Button>
-          <Button type="button" variant="secondary" onClick={() => onDetected(demoStudentNumber())}>
+          <Button type="button" variant="secondary" onClick={async () => onDetected(await demoStudentNumber())}>
             Use demo scan
           </Button>
         </div>

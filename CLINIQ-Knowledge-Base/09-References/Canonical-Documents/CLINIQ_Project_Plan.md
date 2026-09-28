@@ -9,7 +9,7 @@
 
 | Field | Detail |
 |---|---|
-| Document Revision No. | 2.4 |
+| Document Revision No. | 2.5 |
 | Date of Issue | September 13, 2026 |
 | Project Manager | Ghenly B. Tinapay |
 | System Analyst | Christian John C. Lugami |
@@ -38,6 +38,7 @@
 | 2.2 | September 25, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Finalized every previously-pending tech stack item (Section 4.3) after researching current maintenance/compatibility status rather than picking the first candidate: Vite as the build tool; Laravel Sanctum for auth; XAMPP standardized across all dev machines; `endroid/qr-code` for backend QR generation (the original `simplesoftwareio/simple-qrcode` candidate has had no real release since 2021); `qr-scanner` (nimiq) for frontend QR scanning, specifically because it falls back to its own decoder on browsers lacking the Barcode Detection API — Safari on iOS has never supported that API, so the more "modern-looking" hooks-based alternative would have silently failed to scan on any iPhone; and Chart.js over Recharts for dashboard charts, for smaller bundle size and Canvas rendering given the 4GB RAM target. Full reasoning: Obsidian vault, `06-Decisions/ADR-007`. |
 | 2.3 | September 25, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Consistency fix: Section 5.1's Security & Privacy requirement still named "Laravel's built-in authentication" after Revision 2.2 had already confirmed Laravel Sanctum specifically — updated to match. Caught while expanding the Obsidian knowledge base to full detail. |
 | 2.4 | September 26, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Added a Modularity & Scalability non-functional requirement (Section 5.1): each of the 10 modules must be loosely-coupled and independently developable/testable in the actual code, not just at the planning level. Formalizes what the frontend already committed to and extends it to the backend, which previously had no committed code-organization pattern. Full architectural detail in the Obsidian vault (ADR-008, ADR-009). |
+| 2.5 | September 28, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Removed the 15-minute idle session timeout. Every role now has one session lifetime: 1 week, until the login token expires — the same session length the retired QR Viewer role had (Revision 1.5), applied to all logins. Updated Section 5.1's Security & Privacy requirement to match, and Module 1 in Modules & Features. Account lockout after repeated failed logins is unchanged. Trade-offs and reasoning are recorded in the Obsidian vault, ADR-010. |
 
 ---
 
@@ -316,7 +317,7 @@ This stack replaces the original plain HTML/CSS/JS + PHP approach documented in 
 
 **Non-Functional Requirements:**
 - **Performance:** must run acceptably on the existing minimum-spec workstation (Intel Core i3 or equivalent, 4GB RAM) with no perceptible lag during data entry. The React frontend is compiled into optimized static assets at build time, so the workstation only ever serves and renders a finished bundle — it does not need to run the heavier Node.js build tooling in production, only during development
-- **Security & Privacy:** Laravel Sanctum (bcrypt password hashing, session/token handling), session timeout, account lockout after repeated failed logins, and handling aligned with RA 10173 (legitimate purpose, consent, purpose limitation, and a defined data retention policy — see Section 5.3)
+- **Security & Privacy:** Laravel Sanctum (bcrypt password hashing, session/token handling), a 1-week session lifetime for every role (the token expires after 7 days; there is no idle timeout), account lockout after repeated failed logins, and handling aligned with RA 10173 (legitimate purpose, consent, purpose limitation, and a defined data retention policy — see Section 5.3)
 - **Availability:** must function fully offline from the public internet, over the school's employee-tier intranet only
 - **Usability:** must be learnable by non-technical clinic staff within a single training session
 - **Maintainability:** codebase and database schema documented clearly enough for the school's outsourced IT provider to support after the team's academic involvement ends

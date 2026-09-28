@@ -1,9 +1,16 @@
-import { formatDate, todayISO } from '../../../lib/dates'
-import { recordMockAudit } from '../../../lib/mocks/audit'
-import { getMockDataset } from '../../../lib/mocks/dataset'
+import {
+  approveExcuseLetter as approveInLayer,
+  getExcuseLetterApproval,
+  getLatestVisit,
+  getMockSessionUser,
+  getStudentById,
+  getUser,
+  getVisit,
+  type ExcuseLetterApproval,
+  type SessionUser,
+} from '../../../lib/mock-db'
+import { formatDate } from '../../../lib/dates'
 import type { ISODateTime, Student, Visit } from '../../../types/entities'
-
-type MockMode = 'normal' | 'error' | 'slow'
 
 export interface ExcuseLetterContext {
   id: string
@@ -13,17 +20,8 @@ export interface ExcuseLetterContext {
   checkedBy: string
   recipient: string
   body: string
-}
-
-function mockMode(): MockMode {
-  if (typeof window === 'undefined') return 'normal'
-  const mode = new URLSearchParams(window.location.search).get('mock')
-  return mode === 'error' || mode === 'slow' ? mode : 'normal'
-}
-
-async function simulateLatency(mode: MockMode) {
-  if (import.meta.env.MODE === 'test') return
-  await new Promise((resolve) => setTimeout(resolve, mode === 'slow' ? 1200 : 200))
+  /** Set once Staff has approved this letter; it's then kept in the student's record. */
+  approval: ExcuseLetterApproval | null
 }
 
 function defaultBody(student: Student, visit: Visit): string {
@@ -36,42 +34,32 @@ function defaultBody(student: Student, visit: Visit): string {
 
 /** `visitId` comes from `/visits/:visitId/excuse-letter`; omitted, the latest active visit is used. */
 export async function fetchExcuseLetterContext(visitId?: string): Promise<ExcuseLetterContext> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock excuse letter failure')
-
-  const dataset = getMockDataset(todayISO())
-  const visit = visitId
-    ? dataset.visits.find((candidate) => candidate.id === visitId)
-    : [...dataset.visits].reverse().find((candidate) => {
-        const student = dataset.students.find((item) => item.id === candidate.studentId)
-        return student && !student.archived
-      })
-  if (!visit) throw new Error('Visit not found')
-
-  const student = dataset.students.find((item) => item.id === visit.studentId)
-  if (!student) throw new Error('Mock visit has no student')
-
+  const visit = visitId ? await getVisit(visitId) : await getLatestVisit()
+  const [student, approval] = await Promise.all([
+    getStudentById(visit.studentId),
+    getExcuseLetterApproval(visit.id),
+  ])
+  const checkedBy = approval
+    ? await getUser(approval.approvedByUserId).then(
+        (user) => user.name,
+        () => 'Unknown user',
+      )
+    : getMockSessionUser().name
   return {
     id: `excuse-${visit.id}`,
     student,
     visit,
-    issuedAt: new Date().toISOString(),
-    checkedBy: 'Ms. Jenne Baas',
+    issuedAt: approval?.approvedAt ?? new Date().toISOString(),
+    checkedBy,
     recipient: 'Class Adviser',
     body: defaultBody(student, visit),
+    approval,
   }
 }
 
-export async function approveExcuseLetter(context: ExcuseLetterContext): Promise<void> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock excuse letter approval failure')
-
-  recordMockAudit({
-    userId: 'usr-nurse',
-    actionType: 'approve',
-    targetRecord: { type: 'excuse-letter', id: context.id },
-    timestamp: new Date().toISOString(),
-  })
+export async function approveExcuseLetter(
+  context: ExcuseLetterContext,
+  actor?: SessionUser,
+): Promise<void> {
+  await approveInLayer(context.visit.id, actor)
 }

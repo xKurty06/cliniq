@@ -14,7 +14,7 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import type { Student } from '../../types/entities'
-import { fetchStudentList, gradeLevels } from './api/studentListApi'
+import { fetchGradeLevels, fetchStudentList } from './api/studentListApi'
 
 function StudentListSkeleton() {
   return (
@@ -47,6 +47,7 @@ function GradeSelect({
   onChange: (value: string) => void
 }) {
   const id = useId()
+  const { data: gradeLevels = [] } = useAsyncData('grade-levels', fetchGradeLevels)
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs font-semibold text-text-primary">
@@ -60,7 +61,7 @@ function GradeSelect({
           className="h-10 w-full cursor-pointer appearance-none rounded-md border border-border bg-background px-3 pr-9 text-sm text-text-primary shadow-card transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none"
         >
           <option value="">All grade levels</option>
-          {gradeLevels().map((level) => (
+          {gradeLevels.map((level) => (
             <option key={level} value={level}>
               {level}
             </option>

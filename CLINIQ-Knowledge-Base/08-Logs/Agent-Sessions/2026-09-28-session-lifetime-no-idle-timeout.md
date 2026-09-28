@@ -1,0 +1,19 @@
+Date/Day/Time: Monday, September 28, 2026 — actual time not available (no system clock access in this environment)
+Agent: Claude (chat session)
+Task: Remove the idle session timeout; set one 1-week token-expiry session lifetime for all roles; revise every affected file
+Status: Completed
+Prompt/Request: "read the repo again, then I want the idle timeout be removed but instead same as the qr viewer login to be 1 week until token expires. So you'll be revising all files needed"
+Files Modified: canonical CLINIQ_Project_Plan.md (Rev 2.4 -> 2.5, both copies synced), canonical CLINIQ_Modules_and_Features.md (both copies), canonical CLINIQ_Frontend_Context_Brief.md (both copies), 01-Requirements/Features/Module-Overview.md, 01-Requirements/Non-Functional-Requirements.md, 03-Design/Screen-Inventory.md, 04-Development/Development-Phases.md, 06-Decisions/ADR-010-Session-Lifetime-No-Idle-Timeout.md (new), README.md, 08-Logs/Changelog.md
+Repo read (step 0): Re-read the live GitHub repo. Its Changelog ends at an earlier zip (last entry: Frontend-Loop-Engineering added) and contains no entries from other agents or teammates; homepage still shows 9 commits and the same file list. Nothing on GitHub that the local vault lacks, so edits were made from the local vault. GitHub blocks directory (tree) pages, so frontend source could not be read. GitHub's docs remain several sessions behind the local vault.
+Changes Made:
+- Found every mention first (grep across vault + canonical docs) rather than assuming: the 15-minute idle timeout appeared in Modules & Features (Module 1), Module-Overview, and the Project Plan / NFR Security & Privacy bullet ("session timeout"). The 1-week QR Viewer session length is documented in Project Plan Rev 1.5 and ADR-002.
+- Replaced the idle timeout with a single rule for every role: 1 week until the login token expires, no idle timeout. Applied to all of the above, plus Screen-Inventory #1, the Frontend Context Brief (Auth model + Login entry, telling the frontend not to build inactivity-logout logic), and Development-Phases Phase B2 (set the expiry to 7 days; confirm whether Sanctum API-token expiration or SPA cookie session lifetime is the mechanism, since they are configured separately).
+- Fixed two stale statements in the Brief's Auth-model line I was already editing: "two roles" (there are three) and "Laravel Authentication" (Sanctum was confirmed in ADR-007).
+- Wrote ADR-010 recording the decision, alternatives, and the trade-off plainly: without an idle timeout, an unattended logged-in session on the shared clinic workstation stays usable for up to a week; remaining controls (audit trail, lockout, manual log-out, display-privacy rule) attribute and limit but do not prevent that. Flagged as worth confirming with the client given the RA 10173 goal. Did not add a Project Plan risk-table row (Sec 5.4); noted in the ADR that it can be added.
+- Recorded the lifetime as fixed from login; sliding/renew-on-activity noted as a separate, undecided rule.
+- Dropped the hardcoded "Rev 2.3" from the root README's documentation list so it can't go stale again.
+- Verified after editing: grep shows no remaining "15 minutes idle" / "session timeout" outside history rows and logs; all four canonical docs identical between outputs and the vault.
+Reason: Direct decision from the user, applied consistently across every file that stated the old rule.
+Testing Performed: grep verification and diffs only — documentation change, no code.
+Known Issues: Project Plan PDF is not rebuilt (already stale relative to the .md before this change). GitHub's docs are behind the local vault and need this zip's documentation files copied in (never cliniq-frontend/ or cliniq-backend/, per AGENTS.md Step 0a).
+Next Steps: Confirm the 1-week/no-idle-timeout trade-off with the client; decide whether to add the Sec 5.4 risk row.

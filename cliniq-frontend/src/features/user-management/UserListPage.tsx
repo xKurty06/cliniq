@@ -5,36 +5,19 @@ import {
   CardBody,
   CardHeader,
   DataTable,
+  EmptyState,
+  ErrorState,
   Icon,
+  Skeleton,
   buttonClassName,
   type DataTableColumn,
 } from '../../components'
+import { useAsyncData } from '../../hooks/useAsyncData'
+import { ROLE_LABELS } from '../../lib/mock-db'
 import { paths } from '../../routes/paths'
 import type { User } from '../../types/entities'
+import { fetchUsers } from './api/userApi'
 
-const users: User[] = [
-  {
-    id: 'usr-nurse',
-    name: 'Ms. Jenne Baas',
-    username: 'jenne.baas',
-    role: 'staff',
-    lastLogin: '2026-09-27T08:10:00+08:00',
-  },
-  {
-    id: 'usr-principal',
-    name: 'Principal',
-    username: 'principal',
-    role: 'admin',
-    lastLogin: '2026-09-26T16:12:00+08:00',
-  },
-  {
-    id: 'usr-pe',
-    name: 'PE Instructor',
-    username: 'pe.instructor',
-    role: 'instructor',
-    lastLogin: null,
-  },
-]
 const columns: Array<DataTableColumn<User>> = [
   { key: 'name', header: 'Name', rowHeader: true, cell: (user) => user.name },
   { key: 'username', header: 'Username', cell: (user) => user.username },
@@ -43,11 +26,7 @@ const columns: Array<DataTableColumn<User>> = [
     header: 'Role',
     cell: (user) => (
       <Badge tone="neutral" variant="soft">
-        {user.role === 'admin'
-          ? 'Admin / Principal'
-          : user.role === 'staff'
-            ? 'School Clinician'
-            : 'PE/Sports Instructor'}
+        {ROLE_LABELS[user.role]}
       </Badge>
     ),
   },
@@ -69,7 +48,39 @@ const columns: Array<DataTableColumn<User>> = [
     ),
   },
 ]
+function UserListSkeleton() {
+  return (
+    <div aria-hidden="true" className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 py-6 sm:px-8">
+      <Card className="p-5">
+        <Skeleton className="h-7 w-56" />
+        <Skeleton className="mt-2 h-4 w-80 max-w-full" />
+      </Card>
+      <Card className="p-5">
+        {Array.from({ length: 5 }, (_, index) => (
+          <Skeleton key={index} className="mt-3 h-8 w-full" />
+        ))}
+      </Card>
+    </div>
+  )
+}
+
 export function UserListPage() {
+  const { data: users, status, reload } = useAsyncData('users', fetchUsers)
+  if (status === 'error')
+    return (
+      <main className="mx-auto max-w-[1100px] px-4 py-6 sm:px-8">
+        <ErrorState title="Unable to load user accounts." onRetry={reload} />
+      </main>
+    )
+  if (!users)
+    return (
+      <>
+        <p className="sr-only" role="status">
+          Loading user accounts...
+        </p>
+        <UserListSkeleton />
+      </>
+    )
   return (
     <main className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 py-6 sm:px-8">
       <Card className="p-5">
@@ -94,12 +105,16 @@ export function UserListPage() {
           icon={<Icon name="userCog" />}
         />
         <CardBody>
-          <DataTable
-            caption="User accounts"
-            columns={columns}
-            rows={users}
-            rowKey={(user) => user.id}
-          />
+          {users.length ? (
+            <DataTable
+              caption="User accounts"
+              columns={columns}
+              rows={users}
+              rowKey={(user) => user.id}
+            />
+          ) : (
+            <EmptyState icon="userCog" title="No user accounts" description="Add the first account." />
+          )}
         </CardBody>
       </Card>
     </main>

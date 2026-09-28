@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../lib/mocks/audit'
+import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { IncidentEntryPage } from './IncidentEntryPage'
 
 describe('Incident Entry', () => {
-  beforeEach(() => clearMockAuditEntries())
+  beforeEach(() => resetMockDb())
 
   it('starts as Stage 1 fast capture with visible status', async () => {
     render(<IncidentEntryPage />)
@@ -39,7 +39,7 @@ describe('Incident Entry', () => {
 
     expect(await screen.findByText(/stage 1 saved/i)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Stage 2 completion' })).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['submit'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['submit'])
 
     await user.type(screen.getByLabelText(/blood pressure/i), '120/80')
     await user.type(screen.getByLabelText(/oxygen saturation/i), '98%')
@@ -52,7 +52,7 @@ describe('Incident Entry', () => {
 
     expect(await screen.findByText(/incident completed/i)).toBeInTheDocument()
     expect(screen.getByText('Complete')).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual([
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual([
       'submit',
       'update',
       'create',

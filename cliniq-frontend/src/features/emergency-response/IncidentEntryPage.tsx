@@ -39,7 +39,6 @@ const incidentStatusMap = {
   complete: { label: 'Complete', tone: 'success', icon: 'checkCircle', variant: 'soft' },
 } satisfies StatusMap<IncidentStatus>
 
-const COMPLAINTS = ['Fainting', 'Fall injury', 'Asthma attack', 'Severe allergic reaction', 'Head bump during PE']
 const notificationOutcomes = [
   { value: 'reached', label: 'Reached' },
   { value: 'not_reached', label: 'Not reached' },
@@ -395,7 +394,7 @@ export function IncidentEntryPage({
                   setComplaint(value)
                   setErrors((current) => ({ ...current, complaint: undefined }))
                 }}
-                options={COMPLAINTS}
+                options={data.complaintTypes}
                 error={errors.complaint}
               />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

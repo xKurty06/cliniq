@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../lib/mocks/audit'
+import { getRecordedAuditEntries, listUsers, resetMockDb } from '../../lib/mock-db'
 import { PeSportsReferralPage } from './PeSportsReferralPage'
 import { fetchPeReferralContext } from './api/peReferralApi'
 
 describe('PE/Sports Injury Referral Form', () => {
-  beforeEach(() => clearMockAuditEntries())
+  beforeEach(() => resetMockDb())
 
   it('renders a deliberate single-student referral form', async () => {
     const context = await fetchPeReferralContext()
@@ -37,7 +37,8 @@ describe('PE/Sports Injury Referral Form', () => {
 
     await screen.findByRole('heading', { name: 'PE/Sports Injury Referral Form' })
     await user.click(screen.getByRole('button', { name: 'Use PE Defaults' }))
-    expect(screen.getByDisplayValue('PE Instructor')).toBeInTheDocument()
+    const instructor = (await listUsers()).find((u) => u.role === 'instructor')!
+    expect(screen.getByDisplayValue(instructor.name)).toBeInTheDocument()
 
     await user.type(screen.getByLabelText(/injury summary/i), 'Ankle twist during drills.')
     await user.type(screen.getByLabelText(/clinical assessment/i), 'Mild swelling, able to stand.')
@@ -45,7 +46,7 @@ describe('PE/Sports Injury Referral Form', () => {
     await user.click(screen.getByRole('button', { name: 'Save Referral' }))
 
     expect(await screen.findByText('PE/Sports referral saved.')).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['submit'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['submit'])
   })
 
   it('queues Emergency Response escalation when hospital referral is selected', async () => {
@@ -63,6 +64,6 @@ describe('PE/Sports Injury Referral Form', () => {
     await user.click(screen.getByRole('button', { name: 'Save Referral' }))
 
     expect(await screen.findByText(/Emergency Response escalation was queued/)).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['submit', 'create'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['submit', 'create'])
   })
 })

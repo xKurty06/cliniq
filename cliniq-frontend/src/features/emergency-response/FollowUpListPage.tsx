@@ -1,15 +1,9 @@
 import { useState } from 'react'
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, ErrorState, Icon, Select, Skeleton, DataTable, type DataTableColumn } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import { getMockDataset } from '../../lib/mocks/dataset'
-import { todayISO } from '../../lib/dates'
-import { recordMockAudit } from '../../lib/mocks/audit'
 import { getMockSessionUser } from '../../lib/mock-db'
-import type { FollowUp, FollowUpStatus } from '../../types/entities'
-
-function fetchFollowUps(status: '' | FollowUpStatus): FollowUp[] {
-  return getMockDataset(todayISO()).followUps.filter((item) => !status || item.status === status)
-}
+import type { FollowUpStatus } from '../../types/entities'
+import { fetchFollowUps, updateFollowUpStatus, type FollowUpRow } from './api/followUpApi'
 
 function FollowUpSkeleton() {
   return <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8"><Card className="p-5"><Skeleton className="h-7 w-52" /><Skeleton className="mt-2 h-4 w-96 max-w-full" /></Card><Card className="p-5"><Skeleton className="h-10 w-44" /><Skeleton className="mt-5 h-56 w-full" /></Card></div>
@@ -23,18 +17,17 @@ function statusBadge(status: FollowUpStatus) {
 export function FollowUpListPage() {
   const [statusFilter, setStatusFilter] = useState<'' | FollowUpStatus>('')
   const [statusOverrides, setStatusOverrides] = useState<Record<string, FollowUpStatus>>({})
-  const { data, status } = useAsyncData(statusFilter, () => Promise.resolve(fetchFollowUps(statusFilter)))
-  if (status === 'error') return <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-8"><ErrorState title="Unable to load follow-ups." /></div>
+  const { data, status, reload } = useAsyncData(statusFilter, () => fetchFollowUps(statusFilter))
+  if (status === 'error') return <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-8"><ErrorState title="Unable to load follow-ups." onRetry={reload} /></div>
   if (!data) return <><p className="sr-only" role="status">Loading follow-ups...</p><FollowUpSkeleton /></>
-  const studentNumberById = new Map(getMockDataset(todayISO()).students.map((student) => [student.id, student.studentNumber]))
   const rows = data.map((item) => ({ ...item, status: statusOverrides[item.id] ?? item.status }))
-  function markComplete(item: FollowUp) {
-    const timestamp = new Date().toISOString()
+  async function markComplete(item: FollowUpRow) {
+    // Optimistic: the row flips immediately; the data layer writes the status and its audit entry.
     setStatusOverrides((current) => ({ ...current, [item.id]: 'completed' }))
-    recordMockAudit({ userId: getMockSessionUser().id, actionType: 'update', targetRecord: { type: 'follow-up', id: item.id }, timestamp })
+    await updateFollowUpStatus(item.id, 'completed', getMockSessionUser())
   }
-  const columns: Array<DataTableColumn<FollowUp>> = [
-    { key: 'student', header: 'Student Number', rowHeader: true, cell: (item) => studentNumberById.get(item.studentId) ?? 'Unknown student' },
+  const columns: Array<DataTableColumn<FollowUpRow>> = [
+    { key: 'student', header: 'Student Number', rowHeader: true, cell: (item) => item.studentNumber },
     { key: 'reason', header: 'Reason', cell: (item) => item.reason },
     { key: 'due', header: 'Due date', cell: (item) => item.followUpDate },
     { key: 'status', header: 'Status', cell: (item) => statusBadge(item.status) },

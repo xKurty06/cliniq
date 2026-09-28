@@ -87,8 +87,8 @@ function PrintableLetter({
 function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
   const [recipient, setRecipient] = useState(context.recipient)
   const [body, setBody] = useState(context.body)
-  const [checked, setChecked] = useState(false)
-  const [approved, setApproved] = useState(false)
+  const [checked, setChecked] = useState(Boolean(context.approval))
+  const [approved, setApproved] = useState(Boolean(context.approval))
   const [saving, setSaving] = useState(false)
 
   async function approve() {

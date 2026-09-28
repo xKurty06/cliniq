@@ -1,12 +1,12 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../lib/mocks/audit'
+import { getMockSessionUser, getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { IncompleteRecordsQueuePage } from './IncompleteRecordsQueuePage'
 import { fetchIncompleteRecords } from './api/incompleteRecordsApi'
 
 describe('Incomplete Records Review Queue', () => {
-  beforeEach(() => clearMockAuditEntries())
+  beforeEach(() => resetMockDb())
 
   it('renders incomplete student records without inline medical values', async () => {
     render(<IncompleteRecordsQueuePage />)
@@ -47,8 +47,8 @@ describe('Incomplete Records Review Queue', () => {
     await user.click(screen.getByRole('radio', { name: 'Resolved' }))
     const resolvedRow = await screen.findByRole('row', { name: new RegExp(record.studentNumber) })
     expect(within(resolvedRow).getByText('Resolved')).toBeInTheDocument()
-    expect(within(resolvedRow).getByText(/Ms\. Jenne Baas/)).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['approve'])
+    expect(within(resolvedRow).getByText(new RegExp(getMockSessionUser().name))).toBeInTheDocument()
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['approve'])
   })
 
   it('can show the resolved queue view', async () => {

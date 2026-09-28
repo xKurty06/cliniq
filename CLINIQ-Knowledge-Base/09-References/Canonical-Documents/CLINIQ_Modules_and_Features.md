@@ -19,7 +19,7 @@ Ten modules total: five baseline (from the Software Engineering I Technical Docu
 **Login Authentication** *(Staff, Admin/Principal, PE/Sports Instructor — everyone with an account)*
 - Log in (username/password)
 - Log out
-- Auto session timeout after 15 minutes idle
+- Session lasts 1 week, until the login token expires — there is no idle timeout. One session lifetime applies to every role (Staff, Admin/Principal, PE/Sports Instructor)
 - Account lockout after 5 consecutive failed attempts (30-minute lock)
 - Every login logged with who and when (see Audit Trail, below)
 

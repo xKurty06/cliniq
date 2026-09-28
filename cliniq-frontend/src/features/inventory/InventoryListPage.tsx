@@ -13,13 +13,14 @@ import {
   Input,
   Select,
   Skeleton,
+  StatusBadge,
   buttonClassName,
+  inventoryFlagMap,
   type DataTableColumn,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import type { InventoryItem } from '../../types/entities'
 import { paths } from '../../routes/paths'
-import { fetchInventory, type InventoryFilters } from './api/inventoryApi'
+import { fetchInventory, type InventoryFilters, type InventoryItemView } from './api/inventoryApi'
 
 function InventorySkeleton() {
   return (
@@ -30,18 +31,23 @@ function InventorySkeleton() {
   )
 }
 
-function stockBadge(item: InventoryItem) {
-  if (item.currentStock < 0) return <Badge tone="error" variant="soft">Below zero</Badge>
-  if (item.currentStock < item.lowStockThreshold) return <Badge tone="warning" variant="soft">Low stock</Badge>
-  return <Badge tone="success" variant="soft">In stock</Badge>
+/** Flags come computed from the data layer; this only chooses how to show them. */
+function stockBadges(item: InventoryItemView) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      {item.belowZero && <Badge tone="error" variant="soft">Below zero</Badge>}
+      {item.flags.map((flag) => <StatusBadge key={flag} status={flag} map={inventoryFlagMap} />)}
+      {!item.belowZero && item.flags.length === 0 && <Badge tone="success" variant="soft">In stock</Badge>}
+    </div>
+  )
 }
 
-const columns: Array<DataTableColumn<InventoryItem>> = [
+const columns: Array<DataTableColumn<InventoryItemView>> = [
   { key: 'name', header: 'Item', rowHeader: true, cell: (item) => item.name },
   { key: 'category', header: 'Category', cell: (item) => item.category === 'medicine' ? 'Medicine' : 'Supply' },
   { key: 'stock', header: 'Current stock', align: 'right', cell: (item) => `${item.currentStock} ${item.unit}` },
   { key: 'expiry', header: 'Expiration', cell: (item) => item.expirationDate ?? 'No expiration' },
-  { key: 'status', header: 'Status', cell: stockBadge },
+  { key: 'status', header: 'Status', cell: stockBadges },
   { key: 'actions', header: 'Actions', cell: (item) => <Link className={buttonClassName({ variant: 'secondary', size: 'sm' })} to={`${paths.inventoryNew}?item=${encodeURIComponent(item.id)}`}>Edit</Link> },
 ]
 

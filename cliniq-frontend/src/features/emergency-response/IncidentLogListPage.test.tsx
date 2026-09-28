@@ -18,12 +18,14 @@ describe('Incident Log List', () => {
 
   it('searches incidents by actual Student Number', async () => {
     const user = userEvent.setup()
-    const [incident] = await fetchIncidentLog({ ...defaultIncidentLogRange(), search: '', completion: 'all' })
+    const all = await fetchIncidentLog({ ...defaultIncidentLogRange(), search: '', completion: 'all' })
+    const [incident] = all
+    const expected = all.filter((row) => row.studentNumber === incident.studentNumber).length
     renderWithRouter(<IncidentLogListPage />)
     await screen.findByRole('heading', { name: 'Incident Log List' })
     await user.type(screen.getByLabelText('Search'), incident.studentNumber)
-    expect(await screen.findByText('1 record shown')).toBeInTheDocument()
-    expect(screen.getByText(incident.studentNumber)).toBeInTheDocument()
+    expect(await screen.findByText(`${expected} record${expected === 1 ? '' : 's'} shown`)).toBeInTheDocument()
+    expect(screen.getAllByText(incident.studentNumber)).toHaveLength(expected)
   })
 
   it('filters by completion state', async () => {

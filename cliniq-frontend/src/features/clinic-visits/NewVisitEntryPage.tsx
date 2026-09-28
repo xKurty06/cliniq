@@ -15,34 +15,10 @@ import {
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { addDays, todayISO } from '../../lib/dates'
-import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
+import { getMockSessionUser, type ComplaintType, type SessionUser } from '../../lib/mock-db'
 import type { Disposition } from '../../types/entities'
 import { fetchNewVisitContext, submitNewVisit } from './api/newVisitApi'
 
-const COMPLAINTS = [
-  {
-    value: 'Headache',
-    label: 'Headache',
-    steps: ['Check temperature', 'Ask about hydration and meals', 'Allow supervised rest'],
-  },
-  {
-    value: 'Fever',
-    label: 'Fever',
-    steps: ['Check temperature', 'Ask about onset of symptoms', 'Notify parent if fever persists'],
-  },
-  {
-    value: 'Fainting',
-    label: 'Fainting',
-    steps: ['Check responsiveness', 'Record pulse and breathing', 'Keep student lying down'],
-  },
-  {
-    value: 'Minor wound',
-    label: 'Minor wound',
-    steps: ['Clean wound', 'Apply dressing', 'Record location and cause'],
-  },
-] as const
-
-type Complaint = (typeof COMPLAINTS)[number]['value']
 
 const dispositionOptions = [
   { value: 'returned_to_class', label: 'Returned to class' },
@@ -79,12 +55,14 @@ function VisitSkeleton() {
 function SelectField({
   label,
   value,
+  options,
   onChange,
   error,
 }: {
   label: string
   value: string
-  onChange: (value: Complaint | '') => void
+  options: ComplaintType[]
+  onChange: (value: string) => void
   error?: string
 }) {
   const id = useId()
@@ -101,7 +79,7 @@ function SelectField({
           required
           aria-invalid={error ? true : undefined}
           aria-describedby={errorId}
-          onChange={(event) => onChange(event.target.value as Complaint | '')}
+          onChange={(event) => onChange(event.target.value)}
           className={cn(
             'h-10 w-full cursor-pointer appearance-none rounded-md border bg-background px-3 pr-9 text-sm text-text-primary shadow-card',
             'transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none',
@@ -109,8 +87,8 @@ function SelectField({
           )}
         >
           <option value="">Select complaint</option>
-          {COMPLAINTS.map((complaint) => (
-            <option key={complaint.value} value={complaint.value}>
+          {options.map((complaint) => (
+            <option key={complaint.label} value={complaint.label}>
               {complaint.label}
             </option>
           ))}
@@ -177,15 +155,18 @@ function TextareaField({
 
 function TriagePanel({
   complaint,
+  complaintTypes,
   checked,
   onToggle,
 }: {
-  complaint: Complaint
+  complaint: string
+  complaintTypes: ComplaintType[]
   checked: string[]
   onToggle: (step: string) => void
 }) {
-  const selected = COMPLAINTS.find((item) => item.value === complaint)
-  if (!selected) return null
+  const selected = complaintTypes.find((item) => item.label === complaint)
+  // Not every complaint has a checklist yet (checklist content is mock-only, see mock-db.json).
+  if (!selected || selected.triageSteps.length === 0) return null
   return (
     <div className="rounded-md border border-border bg-surface p-4">
       <div className="flex items-start gap-2">
@@ -200,7 +181,7 @@ function TriagePanel({
         </div>
       </div>
       <ul className="mt-3 flex flex-col gap-2">
-        {selected.steps.map((step) => (
+        {selected.triageSteps.map((step) => (
           <li key={step}>
             <label className="flex cursor-pointer items-start gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-background motion-reduce:transition-none">
               <input
@@ -233,7 +214,7 @@ export function NewVisitEntryPage({
   const { data, status, reload } = useAsyncData(`new-visit|${studentNumber ?? 'default'}`, () =>
     fetchNewVisitContext(studentNumber),
   )
-  const [complaint, setComplaint] = useState<Complaint | ''>('')
+  const [complaint, setComplaint] = useState('')
   const [treatment, setTreatment] = useState('')
   const [disposition, setDisposition] = useState<Disposition>('returned_to_class')
   const [triageSteps, setTriageSteps] = useState<string[]>([])
@@ -256,7 +237,7 @@ export function NewVisitEntryPage({
     return () => window.removeEventListener('cliniq:save-and-new', saveAndNew)
   }, [])
 
-  function updateComplaint(value: Complaint | '') {
+  function updateComplaint(value: string) {
     setComplaint(value)
     setTriageSteps([])
     setErrors((current) => ({ ...current, complaint: undefined }))
@@ -290,7 +271,7 @@ export function NewVisitEntryPage({
       await submitNewVisit(
         {
           studentId: data.student.id,
-          complaint: complaint as Complaint,
+          complaint,
           treatment: treatment.trim(),
           disposition,
           triageStepsCompleted: triageSteps,
@@ -379,11 +360,17 @@ export function NewVisitEntryPage({
             <SelectField
               label="Complaint"
               value={complaint}
+              options={data.complaintTypes}
               onChange={updateComplaint}
               error={errors.complaint}
             />
             {complaint ? (
-              <TriagePanel complaint={complaint} checked={triageSteps} onToggle={toggleStep} />
+              <TriagePanel
+                complaint={complaint}
+                complaintTypes={data.complaintTypes}
+                checked={triageSteps}
+                onToggle={toggleStep}
+              />
             ) : (
               <EmptyState
                 icon="clipboardList"

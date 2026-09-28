@@ -5,8 +5,7 @@ import { Bar } from 'react-chartjs-2'
 import { DataTable, EmptyState, SegmentedControl, type DataTableColumn } from '../../../components'
 import { cn } from '../../../lib/cn'
 import { colorToken } from '../../../lib/tokens'
-import type { Visit } from '../../../types/entities'
-import { complaintCounts, type ComplaintCount } from '../lib/complaintCounts'
+import type { ComplaintCount } from '../../../lib/mock-db'
 
 /*
  * Health Summaries (Screen Inventory #21): clinic visits per complaint for the report month.
@@ -95,9 +94,10 @@ function ComplaintBarChart({ rows }: { rows: ComplaintCount[] }) {
   )
 }
 
-export function HealthSummary({ visits }: { visits: Visit[] }) {
+/** `rows` arrive computed (visits per complaint, most frequent first) from the data layer. */
+export function HealthSummary({ rows }: { rows: ComplaintCount[] }) {
   const [view, setView] = useState<ViewMode>('chart')
-  const rows = complaintCounts(visits)
+  const totalVisits = rows.reduce((sum, row) => sum + row.count, 0)
 
   if (rows.length === 0) {
     return (
@@ -118,7 +118,7 @@ export function HealthSummary({ visits }: { visits: Visit[] }) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-text-primary">
-          <span className="font-semibold">{plural(visits.length, 'visit')}</span> across{' '}
+          <span className="font-semibold">{plural(totalVisits, 'visit')}</span> across{' '}
           {plural(rows.length, 'complaint type')}. Most common:{' '}
           <span className="font-semibold">{rows[0].complaint}</span> ({rows[0].count}).
         </p>

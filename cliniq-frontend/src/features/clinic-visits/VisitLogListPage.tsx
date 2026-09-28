@@ -6,6 +6,7 @@ import {
   CardBody,
   CardHeader,
   DataTable,
+  DateRangePicker,
   EmptyState,
   ErrorState,
   Icon,
@@ -14,10 +15,12 @@ import {
   Skeleton,
   type BadgeTone,
   type DataTableColumn,
+  type DataTableSortDirection,
 } from '../../components'
 import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import { formatDate, todayISO } from '../../lib/dates'
+import { formatDate } from '../../lib/dates'
+import { describeRange, type DateRange } from '../../lib/dateRange'
 import { paths } from '../../routes/paths'
 import type { Disposition } from '../../types/entities'
 import {
@@ -27,6 +30,12 @@ import {
 } from './api/visitLogApi'
 
 type DispositionFilter = Disposition | 'all'
+type VisitLogSortKey = 'dateTime' | 'studentNumber' | 'record' | 'disposition'
+
+interface VisitLogSort {
+  key: VisitLogSortKey
+  direction: DataTableSortDirection
+}
 
 const dispositionOptions = [
   { value: 'all', label: 'All' },
@@ -74,65 +83,25 @@ function VisitLogSkeleton() {
   )
 }
 
-const columns: Array<DataTableColumn<VisitLogRow>> = [
-  {
-    key: 'date',
-    header: 'Date and time',
-    rowHeader: true,
-    cell: (row) => formatDateTime(row.dateTime),
-  },
-  {
-    key: 'student',
-    header: 'Student Number',
-    cell: (row) => (
-      <div>
-        <p>{row.studentNumber}</p>
-        <p className="text-xs text-text-secondary">{row.gradeLevel}</p>
-      </div>
-    ),
-  },
-  {
-    key: 'summary',
-    header: 'Record',
-    cell: (row) => (
-      <div>
-        <p>Visit recorded</p>
-        {row.eventTag && <p className="text-xs text-text-secondary">{row.eventTag}</p>}
-      </div>
-    ),
-  },
-  {
-    key: 'disposition',
-    header: 'Disposition',
-    cell: (row) => (
-      <Badge tone={dispositionMeta[row.disposition].tone} variant="soft">
-        {dispositionMeta[row.disposition].label}
-      </Badge>
-    ),
-  },
-  {
-    key: 'actions',
-    header: 'Actions',
-    cell: (row) => (
-      <Link to={paths.visitDetail(row.id)} className={buttonClassName({ size: 'sm' })}>
-        <Icon name="fileText" />
-        View Detail
-      </Link>
-    ),
-  },
-]
-
 export function VisitLogListPage() {
   const defaultRange = defaultVisitLogRange()
-  const [from, setFrom] = useState(defaultRange.from)
-  const [to, setTo] = useState(defaultRange.to)
+  const [range, setRange] = useState<DateRange>({ preset: 'all', ...defaultRange })
   const [search, setSearch] = useState('')
   const [disposition, setDisposition] = useState<DispositionFilter>('all')
+  const [sort, setSort] = useState<VisitLogSort>({ key: 'dateTime', direction: 'descending' })
 
   const { data, status, isRefetching, reload } = useAsyncData(
-    `${from}|${to}|${search}|${disposition}`,
-    () => fetchVisitLog({ from, to, search, disposition }),
+    `${range.from}|${range.to}|${search}|${disposition}`,
+    () => fetchVisitLog({ from: range.from, to: range.to, search, disposition }),
   )
+
+  function toggleSort(key: VisitLogSortKey) {
+    setSort((current) =>
+      current.key === key
+        ? { key, direction: current.direction === 'ascending' ? 'descending' : 'ascending' }
+        : { key, direction: 'ascending' },
+    )
+  }
 
   if (status === 'error') {
     return (
@@ -153,6 +122,81 @@ export function VisitLogListPage() {
     )
   }
 
+  const sortedRows = [...data].sort((a, b) => {
+    const valueFor = (row: VisitLogRow) => {
+      switch (sort.key) {
+        case 'dateTime':
+          return row.dateTime
+        case 'studentNumber':
+          return row.studentNumber
+        case 'record':
+          return row.eventTag ?? 'Visit recorded'
+        case 'disposition':
+          return dispositionMeta[row.disposition].label
+      }
+    }
+    const comparison = valueFor(a).localeCompare(valueFor(b), undefined, { numeric: true })
+    return sort.direction === 'ascending' ? comparison : -comparison
+  })
+
+  const sortColumn = (key: VisitLogSortKey, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => toggleSort(key),
+  })
+
+  const columns: Array<DataTableColumn<VisitLogRow>> = [
+    {
+      key: 'date',
+      header: 'Date and time',
+      rowHeader: true,
+      sort: sortColumn('dateTime', 'Date and time'),
+      cell: (row) => formatDateTime(row.dateTime),
+    },
+    {
+      key: 'student',
+      header: 'Student Number',
+      sort: sortColumn('studentNumber', 'Student Number'),
+      cell: (row) => (
+        <div>
+          <p>{row.studentNumber}</p>
+          <p className="text-xs text-text-secondary">{row.gradeLevel}</p>
+        </div>
+      ),
+    },
+    {
+      key: 'summary',
+      header: 'Record',
+      sort: sortColumn('record', 'Record'),
+      cell: (row) => (
+        <div>
+          <p>Visit recorded</p>
+          {row.eventTag && <p className="text-xs text-text-secondary">{row.eventTag}</p>}
+        </div>
+      ),
+    },
+    {
+      key: 'disposition',
+      header: 'Disposition',
+      sort: sortColumn('disposition', 'Disposition'),
+      cell: (row) => (
+        <Badge tone={dispositionMeta[row.disposition].tone} variant="soft">
+          {dispositionMeta[row.disposition].label}
+        </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      cell: (row) => (
+        <Link to={paths.visitDetail(row.id)} className={buttonClassName({ size: 'sm' })}>
+          <Icon name="fileText" />
+          View Detail
+        </Link>
+      ),
+    },
+  ]
+
   return (
     <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8">
       <Card className="p-5">
@@ -167,7 +211,7 @@ export function VisitLogListPage() {
             </p>
           </div>
           <Badge tone="info" variant="soft">
-            {formatDate(from)} to {formatDate(to)}
+            {range.preset === 'all' ? 'All visits' : describeRange(range)}
           </Badge>
         </div>
       </Card>
@@ -188,26 +232,21 @@ export function VisitLogListPage() {
           }
         />
         <CardBody className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-[minmax(0,1fr)_10rem_10rem]">
+          <div className="flex flex-wrap items-end gap-3">
             <Input
               label="Search"
               value={search}
               placeholder="Student Number, grade, or event"
               onChange={(event) => setSearch(event.target.value)}
+              className="min-w-56 flex-1"
             />
-            <Input
-              label="From"
-              type="date"
-              max={to || todayISO()}
-              value={from}
-              onChange={(event) => setFrom(event.target.value)}
-            />
-            <Input
-              label="To"
-              type="date"
-              min={from}
-              value={to}
-              onChange={(event) => setTo(event.target.value)}
+            <DateRangePicker
+              value={range}
+              onChange={setRange}
+              today={defaultRange.to}
+              presets={['today', 'last7', 'thisMonth', 'all', 'custom']}
+              presetLabels={{ last7: 'This week' }}
+              customPopover
             />
           </div>
 
@@ -216,7 +255,7 @@ export function VisitLogListPage() {
               <DataTable
                 caption="Clinic visit log"
                 columns={columns}
-                rows={data}
+                rows={sortedRows}
                 rowKey={(row) => row.id}
               />
             ) : (

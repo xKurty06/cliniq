@@ -1,8 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { todayISO } from '../../lib/dates'
-import { getMockDataset } from '../../lib/mocks/dataset'
+import { getMockSessionUser, listStudents } from '../../lib/mock-db'
 import { DashboardPage } from './DashboardPage'
 
 // jsdom has no canvas. Replace the chart with a stub that keeps its accessible label.
@@ -28,7 +27,12 @@ describe('Clinic Overview Dashboard', () => {
     await renderLoaded()
     expect(screen.getByRole('heading', { level: 1, name: 'Clinic Overview' })).toBeInTheDocument()
     expect(
-      screen.getByText(/good (morning|afternoon|evening), Ms\. Jenne Baas\. Today's clinic activity and student health updates\./i),
+      screen.getByText(
+        new RegExp(
+          `good (morning|afternoon|evening), ${getMockSessionUser().name}\\. Today's clinic activity and student health updates\\.`,
+          'i',
+        ),
+      ),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('Date range')).toBeInTheDocument()
     for (const label of [
@@ -59,7 +63,7 @@ describe('Clinic Overview Dashboard', () => {
   it('never shows a student name anywhere on the page (display-privacy rule)', async () => {
     await renderLoaded()
     const text = document.body.textContent ?? ''
-    const names = new Set(getMockDataset(todayISO()).students.map((s) => s.fullName))
+    const names = new Set((await listStudents({ includeArchived: true })).map((s) => s.fullName))
     for (const name of names) expect(text).not.toContain(name)
     // Frequent-visitor rows lead with a Student Number.
     const list = screen.getByRole('region', {

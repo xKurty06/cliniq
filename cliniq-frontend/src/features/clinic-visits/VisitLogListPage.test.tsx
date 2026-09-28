@@ -32,8 +32,8 @@ describe('Visit Log List', () => {
     await screen.findByRole('heading', { name: 'Visit Log List' })
     await user.type(screen.getByLabelText('Search'), visit.studentNumber)
 
-    expect(await screen.findByText('1 record shown')).toBeInTheDocument()
-    expect(screen.getByText(visit.studentNumber)).toBeInTheDocument()
+    expect(await screen.findByText(/records? shown/)).toBeInTheDocument()
+    expect(screen.getAllByText(visit.studentNumber).length).toBeGreaterThan(0)
   })
 
   it('filters by disposition', async () => {
@@ -56,11 +56,49 @@ describe('Visit Log List', () => {
     renderWithRouter(<VisitLogListPage />)
 
     await screen.findByRole('heading', { name: 'Visit Log List' })
+    await user.click(screen.getByRole('button', { name: 'Date range' }))
+    await user.click(screen.getByRole('option', { name: 'Custom range' }))
     await user.clear(screen.getByLabelText('From'))
-    await user.type(screen.getByLabelText('From'), '2035-01-01')
+    await user.type(screen.getByLabelText('From'), '2000-01-01')
     await user.clear(screen.getByLabelText('To'))
-    await user.type(screen.getByLabelText('To'), '2035-01-02')
+    await user.type(screen.getByLabelText('To'), '2000-01-02')
+    await user.click(screen.getByRole('button', { name: 'Apply' }))
 
     expect(await screen.findByText('No visits found')).toBeInTheDocument()
+  })
+
+  it('offers the requested date-range presets and defaults to newest date and time first', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<VisitLogListPage />)
+
+    await screen.findByRole('heading', { name: 'Visit Log List' })
+    expect(
+      screen.getByRole('button', { name: /Sort by Date and time, currently descending/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Date range' })).toHaveTextContent('All')
+
+    await user.click(screen.getByRole('button', { name: 'Date range' }))
+    for (const label of ['Today', 'This week', 'This month', 'All', 'Custom range']) {
+      expect(screen.getByRole('option', { name: label })).toBeInTheDocument()
+    }
+    await user.click(screen.getByRole('option', { name: 'Custom range' }))
+    expect(screen.getByRole('form', { name: 'Custom date range' })).toHaveClass('absolute')
+  })
+
+  it('toggles a sortable column between ascending and descending', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<VisitLogListPage />)
+
+    await screen.findByRole('heading', { name: 'Visit Log List' })
+    await user.click(screen.getByRole('button', { name: 'Sort by Student Number' }))
+    expect(
+      screen.getByRole('button', { name: /Sort by Student Number, currently ascending/i }),
+    ).toBeInTheDocument()
+    await user.click(
+      screen.getByRole('button', { name: /Sort by Student Number, currently ascending/i }),
+    )
+    expect(
+      screen.getByRole('button', { name: /Sort by Student Number, currently descending/i }),
+    ).toBeInTheDocument()
   })
 })

@@ -2,12 +2,12 @@ import { renderWithRouter } from '../../../test/renderWithRouter'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../../lib/mocks/audit'
+import { getRecordedAuditEntries, resetMockDb } from '../../../lib/mock-db'
 import { demoStudentNumber } from '../api/qrLookupApi'
 import { QrMobileHubPage } from './QrMobileHubPage'
 
 describe('QR Mobile Hub', () => {
-  beforeEach(() => clearMockAuditEntries())
+  beforeEach(() => resetMockDb())
 
   it('shows Staff mobile quick actions after lookup', async () => {
     const user = userEvent.setup()
@@ -21,7 +21,7 @@ describe('QR Mobile Hub', () => {
     await user.click(screen.getByRole('button', { name: 'Use demo scan' }))
 
     expect(await screen.findByRole('heading', { name: /quick actions/i })).toBeInTheDocument()
-    const studentNumber = demoStudentNumber()
+    const studentNumber = await demoStudentNumber()
     expect(screen.getByRole('link', { name: 'Record Visit' })).toHaveAttribute(
       'href',
       `/visits/new?student=${studentNumber}`,
@@ -38,7 +38,7 @@ describe('QR Mobile Hub', () => {
       'href',
       `/inventory/dispense?student=${studentNumber}`,
     )
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['scan'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['scan'])
   })
 
   it('shows Instructor read-only lookup with no action buttons', async () => {
@@ -53,6 +53,6 @@ describe('QR Mobile Hub', () => {
     expect(screen.queryByRole('link', { name: 'Record Visit' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Log Emergency' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Dispense Medicine' })).not.toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['scan'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['scan'])
   })
 })

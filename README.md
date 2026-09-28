@@ -189,7 +189,7 @@ Full phase-by-phase detail, dependencies, and the two decisions still blocking P
 
 This project takes documentation seriously — every real decision has a paper trail.
 
-- 📋 **[Project Plan](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Project_Plan.md)** — problem domain, approach, system design, timeline, budget (Rev 2.3, full change history included)
+- 📋 **[Project Plan](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Project_Plan.md)** — problem domain, approach, system design, timeline, budget (full revision history included)
 - 🧩 **[Modules & Features](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Modules_and_Features.md)** — every module, submodule, and access rule
 - 🖥️ **[Frontend Context Brief](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Frontend_Context_Brief.md)** — full spec for an AI coding agent
 - 🎨 **[Frontend Design Reference](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Frontend_Design_Reference.md)** — the 5 reference screens, in depth

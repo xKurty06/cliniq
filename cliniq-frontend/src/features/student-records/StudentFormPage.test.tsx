@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../lib/mocks/audit'
+import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { StudentFormPage } from './StudentFormPage'
 import { fetchStudentList } from './api/studentListApi'
 
@@ -20,7 +20,7 @@ async function fillRequiredStudentFields() {
 
 describe('Student Form', () => {
   beforeEach(() => {
-    clearMockAuditEntries()
+    resetMockDb()
   })
 
   it('renders add mode with a system-assigned Student Number preview', async () => {
@@ -70,7 +70,7 @@ describe('Student Form', () => {
 
     await user.click(screen.getByRole('button', { name: 'Confirm Create' }))
     expect(await screen.findByText(/student record created/i)).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['create'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['create'])
   })
 
   it('saves a non-duplicate new student', async () => {
@@ -81,7 +81,7 @@ describe('Student Form', () => {
     await user.click(screen.getByRole('button', { name: 'Save Student' }))
 
     expect(await screen.findByText('Student record created for Lara Santos.')).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['create'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['create'])
   })
 
   it('supports edit mode and records an update audit entry', async () => {
@@ -95,6 +95,6 @@ describe('Student Form', () => {
     await user.click(screen.getByRole('button', { name: 'Save Changes' }))
 
     expect(await screen.findByText(/student record updated/i)).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['update'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['update'])
   })
 })

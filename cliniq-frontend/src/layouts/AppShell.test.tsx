@@ -7,7 +7,7 @@ import { navGroupsFor } from './navigation'
 describe('App Shell / Navigation', () => {
   it('shows Staff navigation groups across modules', () => {
     renderWithRouter(
-      <AppShell user={{ id: 'usr-nurse', name: 'Ms. Jenne Baas', role: 'staff' }} active="dashboard">
+      <AppShell user={{ id: 'user-staff-01', name: 'Liza Manalastas', role: 'staff' }} active="dashboard">
         <div>Screen</div>
       </AppShell>,
     )

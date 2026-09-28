@@ -1,13 +1,13 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { clearMockAuditEntries, getMockAuditEntries } from '../../lib/mocks/audit'
+import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { ExcuseLetterPage } from './ExcuseLetterPage'
 import { fetchExcuseLetterContext } from './api/excuseLetterApi'
 
 describe('Excuse Letter Generator', () => {
   beforeEach(() => {
-    clearMockAuditEntries()
+    resetMockDb()
     vi.restoreAllMocks()
   })
 
@@ -50,6 +50,6 @@ describe('Excuse Letter Generator', () => {
     expect(
       await screen.findByText('Excuse letter approved and stored in the student record.'),
     ).toBeInTheDocument()
-    expect(getMockAuditEntries().map((entry) => entry.actionType)).toEqual(['approve'])
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['approve'])
   })
 })

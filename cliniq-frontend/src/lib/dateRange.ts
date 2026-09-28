@@ -1,7 +1,7 @@
 import type { ISODate } from '../types/entities'
 import { addDays, diffDays, formatDateRange, startOfMonth } from './dates'
 
-export type DateRangePreset = 'today' | 'last7' | 'last30' | 'thisMonth' | 'custom'
+export type DateRangePreset = 'today' | 'last7' | 'last30' | 'thisMonth' | 'all' | 'custom'
 
 export interface DateRange {
   preset: DateRangePreset
@@ -14,6 +14,7 @@ export const PRESET_LABELS: Record<DateRangePreset, string> = {
   last7: 'Last 7 days',
   last30: 'Last 30 days',
   thisMonth: 'This month',
+  all: 'All',
   custom: 'Custom range',
 }
 
@@ -30,6 +31,9 @@ export function rangeForPreset(
       return { preset, from: addDays(today, -29), to: today }
     case 'thisMonth':
       return { preset, from: startOfMonth(today), to: today }
+    case 'all':
+      // HTML date inputs do not consistently support year 0000. This safely predates CLINIQ.
+      return { preset, from: '1900-01-01', to: today }
   }
 }
 

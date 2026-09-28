@@ -1,9 +1,10 @@
-import { recordMockAudit } from '../../../lib/mocks/audit'
-import { getMockDataset } from '../../../lib/mocks/dataset'
-import { todayISO } from '../../../lib/dates'
+import {
+  getDemoStudent,
+  listUsers,
+  submitPeReferral as submitToLayer,
+  type SessionUser,
+} from '../../../lib/mock-db'
 import type { Disposition, Student } from '../../../types/entities'
-
-type MockMode = 'normal' | 'error' | 'slow'
 
 export interface PeReferralContext {
   student: Student
@@ -20,51 +21,40 @@ export interface PeReferralValues {
   disposition: Disposition
 }
 
-function mockMode(): MockMode {
-  if (typeof window === 'undefined') return 'normal'
-  const mode = new URLSearchParams(window.location.search).get('mock')
-  return mode === 'error' || mode === 'slow' ? mode : 'normal'
-}
-
-async function simulateLatency(mode: MockMode) {
-  if (import.meta.env.MODE === 'test') return
-  await new Promise((resolve) => setTimeout(resolve, mode === 'slow' ? 1200 : 200))
-}
-
 export async function fetchPeReferralContext(): Promise<PeReferralContext> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock PE referral failure')
-
-  const dataset = getMockDataset(todayISO())
-  const student = dataset.students.find((candidate) => !candidate.archived && candidate.recordComplete)
-  if (!student) throw new Error('No mock student available')
-
+  const [student, users] = await Promise.all([getDemoStudent(), listUsers()])
+  const instructor = users.find((user) => user.role === 'instructor')
   return {
     student,
-    referredBy: 'PE Instructor',
+    referredBy: instructor?.name ?? '',
     activity: 'Physical Education class',
   }
 }
 
-export async function submitPeReferral(values: PeReferralValues, student: Student): Promise<void> {
-  const mode = mockMode()
-  await simulateLatency(mode)
-  if (mode === 'error') throw new Error('Mock PE referral submit failure')
-
-  recordMockAudit({
-    userId: 'usr-nurse',
-    actionType: 'submit',
-    targetRecord: { type: 'pe-sports-referral', id: `pe-ref-${student.id}` },
-    timestamp: new Date().toISOString(),
-  })
-
-  if (values.disposition === 'referred_to_hospital') {
-    recordMockAudit({
-      userId: 'usr-nurse',
-      actionType: 'create',
-      targetRecord: { type: 'incident-escalation', id: `inc-from-pe-${student.id}` },
-      timestamp: new Date().toISOString(),
-    })
-  }
+/**
+ * Stores the referral (a mock-only record: §5 has no PE referral entity yet, see ADR-014). The
+ * referring instructor is linked when the name matches a known account. The data layer writes the
+ * submission audit entry, plus an escalation entry when the student is referred to hospital.
+ */
+export async function submitPeReferral(
+  values: PeReferralValues,
+  student: Student,
+  actor?: SessionUser,
+): Promise<void> {
+  const users = await listUsers()
+  const referrer = users.find(
+    (user) => user.name.toLowerCase() === values.referredBy.trim().toLowerCase(),
+  )
+  await submitToLayer(
+    {
+      studentNumber: student.studentNumber,
+      referredByUserId: referrer?.id,
+      activity: values.activity,
+      injurySummary: values.injurySummary,
+      clinicalAssessment: values.clinicalAssessment,
+      treatment: values.treatment,
+      disposition: values.disposition,
+    },
+    actor,
+  )
 }

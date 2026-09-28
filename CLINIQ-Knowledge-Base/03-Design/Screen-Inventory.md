@@ -9,7 +9,7 @@ Complete list, kept in sync with the canonical **Frontend Context Brief**, Secti
 Give the agent this full list — it maps directly to the two module groups (baseline + enhancements) already finalized in planning.
 
 ### Auth & Shell
-1. **Login** — username/password, role-aware redirect after login
+1. **Login** — username/password, role-aware redirect after login; the session lasts 1 week until the token expires, with no idle timeout
 2. **Force Password Change** — shown on first login (backend enforces this)
 3. **App Shell/Nav** — role-aware sidebar or nav; Staff sees all modules, Admin sees only Reports + Dashboard, Instructor sees only the mobile scan/lookup screen (no shell/nav needed for that one)
 

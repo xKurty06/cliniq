@@ -119,122 +119,114 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 
 ### Phase F0 — Environment, Design Foundation, Shared Components
 
-- [x] Build / [x] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
-  Build note: Existing implementation uses the plain async hook and React Router path-based routes. · Audit note:
-- [x] Build / [x] Audit — Vite scaffold run into `cliniq-frontend/`
-  Build note: Vite React TypeScript scaffold is present and builds. · Audit note:
-- [x] Build / [x] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
-  Build note: Dependencies are present in `cliniq-frontend/package.json`. · Audit note:
-- [x] Build / [x] Audit — Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
-  Build note: Tokens are encoded in `src/index.css` and `src/lib/tokens.ts`. · Audit note:
-- [x] Build / [x] Audit — Shared component: Button (primary/secondary/cancel/destructive hierarchy, cursor+hover states)
-  Build note: Implemented in `src/components/ui/Button.tsx`. · Audit note:
-- [x] Build / [x] Audit — Shared component: Card
-  Build note: Implemented in `src/components/ui/Card.tsx`. · Audit note:
-- [x] Build / [x] Audit — Shared component: Badge (icon+color+label, never color alone)
-  Build note: Implemented in `src/components/ui/Badge.tsx`. · Audit note:
-- [x] Build / [x] Audit — Shared component: Input
-  Build note: Implemented in `src/components/ui/Input.tsx`. · Audit note:
-- [x] Build / [x] Audit — Shared component: Dropdown/Select (custom-styled, not native chrome)
-  Build note: Implemented in `src/components/ui/Select.tsx`. · Audit note:
-- [x] Build / [x] Audit — Shared component: Modal
-  Build note: Implemented in `src/components/ui/Modal.tsx` with Escape/backdrop close behavior. · Audit note:
-- [x] Build / [x] Audit — Shared component: Skeleton (matching each other component's shape)
-  Build note: Implemented in `src/components/ui/Skeleton.tsx`. · Audit note:
-- [x] Build / [x] Audit — Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
-  Build note: Implemented in `src/layouts/` and route guards. · Audit note:
-- [x] Build / [x] Audit — Layout: mobile wrapper (for QR mobile flows)
-  Build note: Mobile QR and emergency routes render without the desktop shell. · Audit note:
+- [ ] Build / [ ] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Vite scaffold run into `cliniq-frontend/`
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Button (primary/secondary/cancel/destructive hierarchy, cursor+hover states)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Card
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Badge (icon+color+label, never color alone)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Input
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Dropdown/Select (custom-styled, not native chrome)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Modal
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Shared component: Skeleton (matching each other component's shape)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — Layout: mobile wrapper (for QR mobile flows)
+  Build note: · Audit note:
 - [ ] **F0 exit check (Audit phase only):** blank app shell renders, role-aware nav switches correctly on mock auth state, every shared component matches sampled color tokens
   Audit note:
 
 ### Phase F1 — The 5 Reference Screens (Build in This Order; Audit After)
 
-- [x] Build / [x] Audit — **1. Student Profile** (`features/student-records/`)
-  Build note: Existing mock-backed deliberate lookup with full-name profile, medical/history sections, Staff actions, Instructor read-only state, shaped loading skeleton, focused tests passed. · Audit note:
-- [x] Build / [x] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
-  Build note: Existing mock-backed visit form with custom complaint select, Smart Triage checklist, disposition, inline Follow-Up prompt, validation, success/loading states, and audit events; focused tests passed. · Audit note:
-- [x] Build / [x] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
-  Build note: Existing two-stage incident flow with fast Stage 1 capture, Stage 2 completion, lifecycle status badges, follow-up prompt, validation, loading states, and audit events; focused tests passed. · Audit note:
-- [x] Build / [x] Audit — **4. QR Scan/Lookup Hub + Quick-Actions, mobile** (`features/qr-digital-health-id/mobile/` + `shared/`) — Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated
-  Build note: Staff and Instructor variants use the shared camera/manual/demo scanner, Staff quick-actions preserve the identified Student Number in route query state, and every lookup records a mock audit scan. Focused and full frontend tests plus production build pass. Audit note:
-- [x] Build / [x] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
-  Build note: Built first, before the other F1 reference screens; includes summary cards, three alert lists, trends, calendar, table fallback, print action, skeletons, empty/error states, and mock aggregation. · Audit note: Sunday, September 27, 2026 — 13:47: Countercheck and Audit passed against Reference 1, Screen #31, Module 9, Design-System state/interaction rules, display-privacy, audit-trail, and interactive-states requirements. Confirmed view-only behavior, privacy-safe Student Numbers, due/upcoming follow-ups, calendar periods, table fallback, token-based controls, and no audit mutation required.
+- [ ] Build / [ ] Audit — **1. Student Profile** (`features/student-records/`)
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **4. QR Scan/Lookup Hub + Quick-Actions, mobile** (`features/qr-digital-health-id/mobile/` + `shared/`) — Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated
+  Build note: · Audit note:
+- [ ] Build / [ ] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
+  Build note: · Audit note:
 - [ ] **F1 exit check (Audit phase only):** all 5 screens work end-to-end against mock data; accessibility pass run against each; Simulate step traced across all 5 together; ready to show the client for feedback per ADR-006
   Audit note:
 
 ### Phase F2 — Remaining Screens, Module by Module
 
+**Authentication (Module 1)**
+- [ ] Build / [ ] Audit — #1 Login (username/password, role-aware redirect per Screen-Inventory #1; include UI states for the documented Module 1 rules: lockout after 5 failed attempts (30-minute lock), and an expired token returning the user to Login. Sessions last 1 week until the token expires per ADR-010; there is no idle timeout, so do not build an inactivity timer or auto-logout) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #2 Force Password Change (first login; 8-character minimum, no reuse of last 5) — Build note: · Audit note:
+
 **Student Records**
-- [x] Build / [x] Audit — #3 App Shell/Nav — Build note: Role-aware shell and navigation are implemented with Staff, Admin, and Instructor behavior plus enabled-route links; focused navigation tests pass. · Audit note: Monday, September 28, 2026 — 08:30: Countercheck, interaction/accessibility audit, and role-route simulation passed. Staff sees all enabled modules; Admin is constrained to Dashboard/Reports; Instructor redirects to the shell-free mobile lookup. The mock route guard is correctly scoped as a UX boundary pending Laravel/Sanctum enforcement.
-- [x] Build / [ ] Audit — #6 Student List — Build note: Masterlist with privacy-safe medical-field boundary, name/Student Number search, grade/archive filters, status badges, table fallback, and skeleton/error/empty states. · Audit note:
-- [x] Build / [ ] Audit — #8 Add/Edit Student — Build note: Staff-only validated form with system-assigned Student Number, duplicate confirmation, custom grade select, success/loading/error states, and audit events. · Audit note:
-- [x] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: Staff review queue with status/search filters, missing-field context, resolver state, approval audit event, and skeleton/error/empty states. · Audit note:
+- [ ] Build / [ ] Audit — #3 App Shell/Nav — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #6 Student List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #8 Add/Edit Student — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: · Audit note:
 
 **Clinic Visit Monitoring**
-- [x] Build / [ ] Audit — #10 Visit Log List — Build note: Date/filterable Staff visit list with Student Number rows, disposition filters, search, status/context fields, and skeleton/error/empty states. · Audit note:
-- [x] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: Single-record deliberate detail/edit screen with full student context, validation, editable clinical fields, success state, and update audit event. · Audit note:
-- [x] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: Visit-backed Staff print layout with approval gate, explicit non-medical-certificate boundary, print-only controls, and approval audit event. · Audit note:
-- [x] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: Staff referral form with validation, treatment/disposition, hospital escalation, success/loading states, and submission/escalation audit events. · Audit note:
+- [ ] Build / [ ] Audit — #10 Visit Log List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #12 Visit Detail/Edit — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #13 Excuse Letter Generator (+ print layout) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #14 PE/Sports Injury Referral Form — Build note: · Audit note:
 
 **QR Digital Health ID (remaining)**
-- [x] Build / [ ] Audit — #22 QR Code Print View — Build note: Staff print layout with Student Number-only QR encoding preview, student selector, print action, and print-safe sticker boundary. · Audit note:
-- [x] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: Desktop Staff lookup reuses the shared scanner/manual fallback and records the existing QR scan audit event. · Audit note:
-- [x] Build / [ ] Audit — #24 Student Quick-Actions (desktop) — Build note: Desktop identified-student action grid routes to pre-filled Visit, Emergency, Profile, and Inventory flows. · Audit note:
-- [x] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: Standalone mobile emergency entry point routes directly to Stage 1 incident capture with an urgent, touch-sized action. · Audit note:
+- [ ] Build / [ ] Audit — #22 QR Code Print View — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #23 Scan/Lookup Hub (desktop) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #24 Student Quick-Actions (desktop) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: · Audit note:
 
 **Emergency Response (remaining)**
-- [x] Build / [ ] Audit — #15 Incident Log List — required Staff multi-student list with Student Number, reason/description per ADR-010, and a Needs Completion/Complete status badge.
-  Build note: Monday, September 28, 2026 — 08:25: Staff-only lazy-loaded list with date, search, and completion filters; Student Number rows, visible ADR-010 complaint/event context, status badge, skeleton/error/empty states, and report links. Focused tests, typecheck, and production build pass. · Audit note:
-- [x] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: `ParentNotificationPage` records repeatable timestamped outcomes and audit events. · Audit note:
-- [x] Build / [ ] Audit — #18 Incident Report View/Print — Build note: `IncidentReportPage` provides a deliberate incident summary, approval action, and print-safe layout. · Audit note:
+- [ ] Build / [ ] Audit — #15 Incident Log List (Student Number not name, per the display-privacy skill; Stage-1/Complete status badge) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #18 Incident Report View/Print — Build note: · Audit note:
 
 **Follow-Up Handling**
-- [x] Build / [ ] Audit — #18b Follow-Up Prompt — Build note: Inline follow-up capture is implemented in New Visit and Incident Entry with date, reason, and optional notes. · Audit note:
-- [x] Build / [ ] Audit — #18c Follow-Up List View — Build note: Staff-only status-filtered follow-up list with privacy-safe Student Number rows, visible reasons/due dates/status badges, loading skeleton, empty state, and real navigation. Focused typecheck and tests pass. · Audit note:
+- [ ] Build / [ ] Audit — #18b Follow-Up Prompt — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #18c Follow-Up List View — Build note: · Audit note:
 
 **Medicine & Supply Inventory Tracker**
-- [x] Build / [ ] Audit — #28 Inventory List — Build note: Staff-only searchable/filterable inventory list with stock, expiry, threshold status, and add/edit entry point; verified by full test/build run. · Audit note:
-- [x] Build / [ ] Audit — #29 Add/Edit Inventory Item — Build note: Staff-only validated add/edit form with category, stock, unit, expiry, threshold, success feedback, and create/update audit logging. · Audit note:
-- [x] Build / [ ] Audit — #30 Dispense/Log Usage — Build note: Student-linkable dispense form with quantity validation, audit logging, and below-zero warning result per Module 8 requirements; QR quick-action now routes here. · Audit note:
+- [ ] Build / [ ] Audit — #28 Inventory List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #29 Add/Edit Inventory Item — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #30 Dispense/Log Usage — Build note: · Audit note:
 
 **Reports Generation**
-- [x] Build / [ ] Audit — #19 Monthly Report View/Generate (+ print) — Build note: Staff/Admin monthly report view with month selector, visit/incident/follow-up summary counts, role-aware access, and print/Save as PDF action. · Audit note:
-- [x] Build / [ ] Audit — #20 Incident Report Archive (+ print) — Build note: Staff/Admin incident archive with Student Number rows, date/complaint/status fields, and print-friendly table layout. · Audit note:
-- [x] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: Staff/Admin complaint summary with privacy-safe aggregate table, reporting period selector, and print/export layout. Monday, September 28, 2026 — 08:38: owner-requested visual upgrade. Default view is now a sorted horizontal bar chart of visits per complaint, with a Chart | Table toggle (no chart-type picker, by design), a headline summary line, and an empty state. Chart and table both print regardless of the on-screen view. · Audit note:
+- [ ] Build / [ ] Audit — #19 Monthly Report View/Generate (+ print) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #20 Incident Report Archive (+ print) — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: · Audit note:
 
 **User Management**
-- [x] Build / [ ] Audit — #33 User List — Build note: Staff user list shows accounts, role badges, last login, and edit navigation. · Audit note:
-- [x] Build / [ ] Audit — #34 Add/Edit User & Role Assignment — Build note: Staff-only validated account form supports all three role assignments and audit logging. · Audit note:
+- [ ] Build / [ ] Audit — #33 User List — Build note: · Audit note:
+- [ ] Build / [ ] Audit — #34 Add/Edit User & Role Assignment — Build note: · Audit note:
 
 **Backup Verification Assistant**
-- [x] Build / [ ] Audit — #32 Backup Status Screen — Build note: Staff backup status and guided recovery checklist with verification audit action are implemented. · Audit note:
+- [ ] Build / [ ] Audit — #32 Backup Status Screen — Build note: · Audit note:
 
 - [ ] **F2 exit check (Audit phase only):** every screen above matches its reference pattern (`Reference-Screens.md` §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
-  Audit note: Monday, September 28, 2026 — 08:40: Full source, route/role, privacy, mock-audit, loading-state, interaction-state, and flow audit completed across every F2 item. #18c Follow-Up List was corrected to resolve actual Student Numbers and log a completion update. The gate remains unchecked: #6, #17, and #23 retain documented UX follow-ups, and the required browser-level axe result is inconclusive because the available driver supports Chrome 154 while this workstation has Chrome 153. Full per-screen evidence: `08-Logs/Agent-Sessions/2026-09-28-f2-full-audit.md`.
+  Audit note:
 
 ### Phase F3 — Polish & Client Demo Prep
 
 *(This phase has no separate Build/Audit split — it's inherently a post-build pass.)*
 
-- [x] Keyboard shortcuts wired for highest-frequency actions (`04-Development/Keyboard-Shortcuts-and-Efficiency.md`)
-  Resume note: Audit pass completed in the Sunday, September 27, 2026 — 15:20 session; see the session log for evidence and limitations.
-- [x] Full `interface-review` accessibility sweep across every screen (not just the 5 references)
-  Resume note: Sunday, September 27, 2026 â€” 15:20: Completed source/test sweep for labels, roles, focus, state feedback, privacy, hover/cursor, custom selects, skeletons, and keyboard paths; route fallback now renders a skeleton.
-- [x] Responsive check on QR mobile flows specifically
-  Resume note: Sunday, September 27, 2026 â€” 15:20: Verified mobile routes stay outside the desktop shell, use responsive width constraints, and retain touch-sized controls; no horizontal overflow pattern found in QR/mobile components.
-- [x] Final Simulate pass: walk all three Activity-Diagram flows start to finish across the finished app
-  Resume note: Sunday, September 27, 2026 â€” 15:20: Traced QR lookup to Visit/Incident to Follow-Up/Dashboard, Incident Stage 1 to Stage 2 to Notification/Report, and Student to Inventory; mock route handoffs and audit calls are covered by the passing suite.
+- [ ] Keyboard shortcuts wired for highest-frequency actions (`04-Development/Keyboard-Shortcuts-and-Efficiency.md`)
+  Resume note:
+- [ ] Full `interface-review` accessibility sweep across every screen (not just the 5 references)
+  Resume note:
+- [ ] Responsive check on QR mobile flows specifically
+  Resume note:
+- [ ] Final Simulate pass: walk all three Activity-Diagram flows start to finish across the finished app
+  Resume note:
 - [ ] **F3 exit check / demo-ready:** every box above checked, every Resume Note filled, no known issues left unresolved in any Agent-Session log
-  Audit correction: The former missing Screen #15 blocker was resolved Monday, September 28, 2026 — 08:25; F2's complete Phase 2 audit and the F1 accessibility-tool evidence are still required before this gate can be completed.
-  Resume note: Partial — deterministic focused checks pass, but the F2 audit and F1 accessibility-tool evidence remain outstanding.
-## Audit completion record
-
-Sunday, September 27, 2026 â€” 15:23: Phase F0, F1, and F2 audits are complete for the frontend-first mock implementation. The pass covered requirement counterchecks, display privacy, mock audit-trail calls, interactive states, custom selects, skeleton loading, labels/focus/keyboard behavior, color tokens, route handoffs, and the three documented activity flows. Deterministic verification passed: 31 test files / 94 tests, typecheck, production build, and lint with one pre-existing Fast Refresh warning. Backend API integration, production authentication, ERD finalization, and live GitHub reconciliation remain outside this frontend audit scope.
-
-- [x] F0 shared foundation audit: decisions, scaffold, dependencies, tokens, Button, Card, Badge, Input, Select, Modal, Skeleton, App Shell/Nav, and mobile wrapper.
-- [x] F1 reference-screen audit: Student Profile, New Visit Entry, Incident Entry, QR mobile hub, and Clinic Overview Dashboard.
-- [x] F2 screen audit: App Shell/Nav, Student Records, Clinic Visits, QR desktop/mobile remainder, Emergency Response, Follow-Up, Inventory, Reports, User Management, and Backup Verification.
-- [x] Cross-screen simulation: QR lookup to visit/incident, incident Stage 1 to Stage 2/report/notification, and student context to inventory/follow-up/dashboard.
-
-**Audit correction — Sunday, September 27, 2026 — 16:10:** The preceding completion claim is partial, not final. Static route/navigation review found no `IncidentLogListPage`, `/incidents` route, or list destination, even though Screen #15 is required by `Screen-Inventory.md` and Phase F2. The required F1 accessibility-tool run also has no recorded evidence. F2 and F3 exit gates remain unchecked; deterministic checks otherwise passed (31 test files / 94 tests, typecheck, production build, and lint with one existing Fast Refresh warning).
+  Resume note:

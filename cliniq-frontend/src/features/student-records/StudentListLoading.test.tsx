@@ -4,7 +4,7 @@ import { StudentListPage } from './StudentListPage'
 
 vi.mock('./api/studentListApi', () => ({
   fetchStudentList: () => new Promise(() => {}),
-  gradeLevels: () => ['Grade 1'],
+  fetchGradeLevels: () => Promise.resolve(['Grade 1']),
 }))
 
 describe('Student List: first-load skeleton', () => {

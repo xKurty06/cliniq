@@ -14,10 +14,10 @@ This is the context package to hand to an AI coding agent before it writes any f
 ## 2. Tech Stack & Conventions
 
 - **Frontend:** React + TypeScript, styled with Tailwind CSS.
-- **Backend (separate, consumed via REST API):** Laravel (PHP), MySQL, Laravel Authentication.
+- **Backend (separate, consumed via REST API):** Laravel (PHP), MySQL, Laravel Sanctum for authentication.
 - **Build target:** `npm run build` produces static assets served by Laravel/Apache on the local LAN — no SSR, no edge functions, no cloud-only APIs. Assume everything must work with zero internet access.
 - **State/data fetching:** tell the agent your preferred library (React Query/TanStack Query, SWR, or plain fetch+context) — this brief intentionally leaves that open since it wasn't fixed in planning.
-- **Auth model:** token or session-based login against Laravel; two roles gate the UI: `staff` (full read/write) and `admin` (read-only).
+- **Auth model:** token-based login against Laravel Sanctum; three roles gate the UI (Staff, Admin/Principal, PE/Sports Instructor — see Section 3). A session lasts **1 week, until the token expires — there is no idle timeout, so do not build inactivity-logout logic in the frontend.** When a token expires, the user simply lands back on Login.
 
 ## 3. User Roles & Permissions
 
@@ -36,7 +36,7 @@ This is the context package to hand to an AI coding agent before it writes any f
 Give the agent this full list — it maps directly to the two module groups (baseline + enhancements) already finalized in planning.
 
 ### Auth & Shell
-1. **Login** — username/password, role-aware redirect after login
+1. **Login** — username/password, role-aware redirect after login; the session lasts 1 week until the token expires, with no idle timeout
 2. **Force Password Change** — shown on first login (backend enforces this)
 3. **App Shell/Nav** — role-aware sidebar or nav; Staff sees all modules, Admin sees only Reports + Dashboard, Instructor sees only the mobile scan/lookup screen (no shell/nav needed for that one)
 

@@ -18,10 +18,16 @@ export interface DateRangePickerProps {
   today: ISODate
   /** Inline label + select, for a page header's top-right slot (the reference's period dropdown). */
   compact?: boolean
+  /** Presets available in this context. Defaults to the dashboard's reporting ranges. */
+  presets?: ReadonlyArray<DateRangePreset>
+  /** Context-specific display labels, such as “This week” for an operational log. */
+  presetLabels?: Partial<Record<DateRangePreset, string>>
+  /** Float the custom dates below this control instead of changing the surrounding layout. */
+  customPopover?: boolean
   className?: string
 }
 
-const presetOrder: DateRangePreset[] = ['today', 'last7', 'last30', 'thisMonth', 'custom']
+const defaultPresetOrder: DateRangePreset[] = ['today', 'last7', 'last30', 'thisMonth', 'custom']
 
 /**
  * Date-range filter: presets first, with a custom From/To pair behind "Custom range". Editing the
@@ -33,6 +39,9 @@ export function DateRangePicker({
   onChange,
   today,
   compact = false,
+  presets = defaultPresetOrder,
+  presetLabels,
+  customPopover = false,
   className,
 }: DateRangePickerProps) {
   const selectId = useId()
@@ -49,8 +58,9 @@ export function DateRangePicker({
   const showCustom = compact ? customOpen && !open : value.preset === 'custom'
   const selectedIndex = Math.max(
     0,
-    presetOrder.findIndex((preset) => preset === value.preset),
+    presets.findIndex((preset) => preset === value.preset),
   )
+  const labelForPreset = (preset: DateRangePreset) => presetLabels?.[preset] ?? PRESET_LABELS[preset]
 
   useEffect(() => {
     function onPointerDown(event: PointerEvent) {
@@ -116,7 +126,7 @@ export function DateRangePicker({
       event.preventDefault()
       setOpen(true)
       window.setTimeout(() =>
-        focusOption(event.key === 'ArrowDown' ? selectedIndex : presetOrder.length - 1),
+        focusOption(event.key === 'ArrowDown' ? selectedIndex : presets.length - 1),
       )
     } else if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
@@ -130,13 +140,13 @@ export function DateRangePicker({
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
       const direction = event.key === 'ArrowDown' ? 1 : -1
-      focusOption((index + direction + presetOrder.length) % presetOrder.length)
+      focusOption((index + direction + presets.length) % presets.length)
     } else if (event.key === 'Home') {
       event.preventDefault()
       focusOption(0)
     } else if (event.key === 'End') {
       event.preventDefault()
-      focusOption(presetOrder.length - 1)
+      focusOption(presets.length - 1)
     } else if (event.key === 'Escape') {
       setOpen(false)
       triggerRef.current?.focus()
@@ -147,7 +157,9 @@ export function DateRangePicker({
     <div
       ref={rootRef}
       className={cn(
-        compact ? 'relative flex justify-end' : 'flex flex-wrap items-end gap-3',
+        compact || customPopover
+          ? 'relative flex justify-end'
+          : 'flex flex-wrap items-end gap-3',
         className,
       )}
     >
@@ -181,7 +193,7 @@ export function DateRangePicker({
             <span className="mr-2 inline-flex size-5 items-center justify-center text-brand-green-dark">
               <Icon name="calendar" size={14} />
             </span>
-            <span className="min-w-0 flex-1 text-left">{PRESET_LABELS[value.preset]}</span>
+            <span className="min-w-0 flex-1 text-left">{labelForPreset(value.preset)}</span>
           </button>
           <Icon
             name="chevronDown"
@@ -198,7 +210,7 @@ export function DateRangePicker({
               aria-label="Date range presets"
               className="absolute top-full right-0 z-30 mt-1.5 w-48 overflow-hidden rounded-md border border-border bg-background p-1 shadow-raised"
             >
-              {presetOrder.map((preset, index) => {
+              {presets.map((preset, index) => {
                 const selected = preset === value.preset
                 return (
                   <button
@@ -221,7 +233,7 @@ export function DateRangePicker({
                     <span className="flex size-4 items-center justify-center text-brand-green-dark">
                       {selected && <Icon name="checkCircle" size={14} />}
                     </span>
-                    <span>{PRESET_LABELS[preset]}</span>
+                    <span>{labelForPreset(preset)}</span>
                   </button>
                 )
               })}
@@ -242,9 +254,8 @@ export function DateRangePicker({
           }}
           className={cn(
             'rounded-md border border-border bg-background',
-            // Compact (page header): overlay under the trigger like the preset menu, so opening it
-            // never shifts the header or the content below.
-            compact
+            // Popover variants overlay below the trigger so custom dates never shift page content.
+            compact || customPopover
               ? 'absolute top-full right-0 z-30 mt-1.5 w-max p-3 shadow-raised'
               : 'basis-full p-3 shadow-card',
           )}
