@@ -211,7 +211,7 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #32 Backup Status Screen — Build note: Staff backup status and guided recovery checklist with verification audit action are implemented. · Audit note:
 
 - [ ] **F2 exit check (Audit phase only):** every screen above matches its reference pattern (`Reference-Screens.md` §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
-  Audit note: Blocked in the Sunday, September 27, 2026 — 16:10 audit: Screen #15 Incident Log List is required by `Screen-Inventory.md` and Phase F2 but has no implementation or route. Individual F2 audit boxes remain unchecked pending that build and a complete screen-by-screen audit.
+  Audit note: Blocked in the Monday, September 28, 2026 — 08:12 re-audit: Screen #15 Incident Log List is still required by `Screen-Inventory.md` and Phase F2 but has no implementation, `/incidents` route, or navigation destination. The Incident Report Archive (#20) also derives an invalid display value from `studentId` instead of using the actual `Student.studentNumber`; see Issues-and-TODOs. Individual F2 audit boxes remain unchecked pending the missing build, that privacy/data-correctness fix, and a complete screen-by-screen audit.
 
 ### Phase F3 — Polish & Client Demo Prep
 

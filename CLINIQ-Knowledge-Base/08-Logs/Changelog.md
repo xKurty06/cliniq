@@ -1,5 +1,9 @@
 # Changelog
 
+| Monday, September 28, 2026 — 08:17 | Added the requested QR, Student Records, Dashboard, Visit/Incident, Parent Notification, and Stage 1 UI/UX follow-ups to the known-issues backlog; distinguished confirmed gaps from items requiring product or visual validation. | `08-Logs/Agent-Sessions/2026-09-28-ui-ux-followups.md`, `Issues-and-TODOs.md` |
+
+| Monday, September 28, 2026 — 08:12 | Re-audited Phase F2 against routes, requirements, bespoke privacy/audit/interaction rules, and deterministic frontend checks. F2 remains blocked by the missing Incident Log List (#15); also recorded an Incident Report Archive Student Number data-correctness/privacy finding. | `08-Logs/Agent-Sessions/2026-09-28-f2-audit-recheck.md`, `Frontend-Loop-Engineering.md`, `Issues-and-TODOs.md` |
+
 One line per entry. Full detail for planning-level changes lives in the Project Plan's own revision table (Section, "Document Change Control"); this changelog covers vault/implementation-level activity going forward, cross-referencing the Project Plan revision number where relevant.
 
 **Timestamp rule (applies from the start of actual coding onward):** every new entry gets a real day-of-week + date + time, pulled from the agent's actual system clock — see `AGENTS.md` at the repo root, "Timestamps" section. The rows below, from the planning phase before any code existed, are date-only because that's what was genuinely available at the time — they aren't being back-filled with invented times.
