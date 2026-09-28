@@ -35,8 +35,7 @@ const ALL: Record<NavKey, NavItem> = {
   dashboard: { key: 'dashboard', label: 'Dashboard', icon: 'layoutGrid', available: true, to: paths.dashboard },
   students: { key: 'students', label: 'Students', icon: 'users', available: true, to: paths.students },
   visits: { key: 'visits', label: 'Visits', icon: 'stethoscope', available: true, to: paths.visits },
-  // No incident list screen exists yet; the item opens a new incident (Stage 1) until it does.
-  incidents: { key: 'incidents', label: 'Incidents', icon: 'alertTriangle', available: true, to: paths.incidentNew() },
+  incidents: { key: 'incidents', label: 'Incidents', icon: 'alertTriangle', available: true, to: paths.incidents },
   followUps: { key: 'followUps', label: 'Follow-Ups', icon: 'calendarClock', available: true, to: paths.followUps },
   qrLookup: { key: 'qrLookup', label: 'QR Lookup', icon: 'qrCode', available: true, to: paths.qrScan },
   inventory: { key: 'inventory', label: 'Inventory', icon: 'package', available: true, to: paths.inventory },

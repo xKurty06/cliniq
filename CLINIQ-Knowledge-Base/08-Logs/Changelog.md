@@ -1,5 +1,7 @@
 # Changelog
 
+| Monday, September 28, 2026 — 08:25 | Built the missing Staff Incident Log List (#15), routed the Incidents navigation to it, and corrected the Incident Report Archive (#20) to display actual linked Student Numbers; both former F2 implementation blockers are resolved, while the formal full F2 audit remains pending. | `08-Logs/Agent-Sessions/2026-09-28-incident-log-and-report-identifier.md`, `Frontend-Loop-Engineering.md`, `Issues-and-TODOs.md`, `cliniq-frontend/src/features/emergency-response/`, `cliniq-frontend/src/features/reports/ReportsPage.tsx` |
+
 | Monday, September 28, 2026 — 08:17 | Added the requested QR, Student Records, Dashboard, Visit/Incident, Parent Notification, and Stage 1 UI/UX follow-ups to the known-issues backlog; distinguished confirmed gaps from items requiring product or visual validation. | `08-Logs/Agent-Sessions/2026-09-28-ui-ux-followups.md`, `Issues-and-TODOs.md` |
 
 | Monday, September 28, 2026 — 08:12 | Re-audited Phase F2 against routes, requirements, bespoke privacy/audit/interaction rules, and deterministic frontend checks. F2 remains blocked by the missing Incident Log List (#15); also recorded an Incident Report Archive Student Number data-correctness/privacy finding. | `08-Logs/Agent-Sessions/2026-09-28-f2-audit-recheck.md`, `Frontend-Loop-Engineering.md`, `Issues-and-TODOs.md` |

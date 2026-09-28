@@ -69,6 +69,10 @@ const IncidentEntryPage = page(
   () => import('../features/emergency-response/IncidentEntryPage'),
   'IncidentEntryPage',
 )
+const IncidentLogListPage = page(
+  () => import('../features/emergency-response/IncidentLogListPage'),
+  'IncidentLogListPage',
+)
 const QrMobileHubPage = page(
   () => import('../features/qr-digital-health-id/mobile/QrMobileHubPage'),
   'QrMobileHubPage',
@@ -209,6 +213,13 @@ const APP_ROUTES: AppRoute[] = [
     nav: 'visits',
     shell: true,
     render: (viewer) => <ExcuseLetterRoute viewer={viewer} />,
+  },
+  {
+    path: paths.incidents,
+    roles: ['staff'],
+    nav: 'incidents',
+    shell: true,
+    render: () => <IncidentLogListPage />,
   },
   {
     path: '/incidents/new',

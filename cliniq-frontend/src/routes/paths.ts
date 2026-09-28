@@ -25,6 +25,7 @@ export const paths = {
   peReferral: '/visits/pe-referral',
   visitDetail: (visitId: string) => `/visits/${seg(visitId)}`,
   excuseLetter: (visitId: string) => `/visits/${seg(visitId)}/excuse-letter`,
+  incidents: '/incidents',
   /** `?student=` pre-selects the identified student; the Emergency button opens it without one. */
   incidentNew: (studentNumber?: string) => withStudent('/incidents/new', studentNumber),
   qrScan: '/qr/scan',

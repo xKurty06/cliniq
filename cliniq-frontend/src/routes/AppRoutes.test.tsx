@@ -53,6 +53,15 @@ describe('App routes', () => {
     expect(screen.getByTestId('path')).toHaveTextContent('/visits')
   })
 
+  it('opens the Staff incident log from sidebar navigation', async () => {
+    const user = userEvent.setup()
+    renderAt('/students')
+    await screen.findByRole('heading', { name: 'Student List' })
+    await user.click(screen.getByRole('link', { name: 'Incidents' }))
+    expect(await screen.findByRole('heading', { name: 'Incident Log List' })).toBeInTheDocument()
+    expect(screen.getByTestId('path')).toHaveTextContent('/incidents')
+  })
+
   it('resolves the student from the /students/:studentNumber segment', async () => {
     const student = getMockDataset(todayISO()).students.find((s) => !s.archived)!
     renderAt(`/students/${student.studentNumber}`)

@@ -184,8 +184,8 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: Standalone mobile emergency entry point routes directly to Stage 1 incident capture with an urgent, touch-sized action. · Audit note:
 
 **Emergency Response (remaining)**
-- [ ] Build / [ ] Audit — #15 Incident Log List — required Staff multi-student list with Student Number, reason/description per ADR-010, and a Needs Completion/Complete status badge.
-  Build note: / Audit note:
+- [x] Build / [ ] Audit — #15 Incident Log List — required Staff multi-student list with Student Number, reason/description per ADR-010, and a Needs Completion/Complete status badge.
+  Build note: Monday, September 28, 2026 — 08:25: Staff-only lazy-loaded list with date, search, and completion filters; Student Number rows, visible ADR-010 complaint/event context, status badge, skeleton/error/empty states, and report links. Focused tests, typecheck, and production build pass. · Audit note:
 - [x] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: `ParentNotificationPage` records repeatable timestamped outcomes and audit events. · Audit note:
 - [x] Build / [ ] Audit — #18 Incident Report View/Print — Build note: `IncidentReportPage` provides a deliberate incident summary, approval action, and print-safe layout. · Audit note:
 
@@ -211,7 +211,7 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #32 Backup Status Screen — Build note: Staff backup status and guided recovery checklist with verification audit action are implemented. · Audit note:
 
 - [ ] **F2 exit check (Audit phase only):** every screen above matches its reference pattern (`Reference-Screens.md` §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
-  Audit note: Blocked in the Monday, September 28, 2026 — 08:12 re-audit: Screen #15 Incident Log List is still required by `Screen-Inventory.md` and Phase F2 but has no implementation, `/incidents` route, or navigation destination. The Incident Report Archive (#20) also derives an invalid display value from `studentId` instead of using the actual `Student.studentNumber`; see Issues-and-TODOs. Individual F2 audit boxes remain unchecked pending the missing build, that privacy/data-correctness fix, and a complete screen-by-screen audit.
+  Audit note: Monday, September 28, 2026 — 08:25: the two implementation blockers are resolved: Screen #15 now exists at `/incidents`, and Screen #20 resolves the actual linked `Student.studentNumber`. The formal F2 gate remains unchecked until the complete screen-by-screen Phase 2 audit is recorded.
 
 ### Phase F3 — Polish & Client Demo Prep
 
@@ -226,8 +226,8 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Final Simulate pass: walk all three Activity-Diagram flows start to finish across the finished app
   Resume note: Sunday, September 27, 2026 â€” 15:20: Traced QR lookup to Visit/Incident to Follow-Up/Dashboard, Incident Stage 1 to Stage 2 to Notification/Report, and Student to Inventory; mock route handoffs and audit calls are covered by the passing suite.
 - [ ] **F3 exit check / demo-ready:** every box above checked, every Resume Note filled, no known issues left unresolved in any Agent-Session log
-  Audit correction: Blocked by the F2 audit failure recorded Sunday, September 27, 2026 — 16:10: Screen #15 Incident Log List is missing.
-  Resume note: Partial — deterministic frontend checks pass, but Screen #15 must be built and the F1 accessibility-tool pass evidenced before this gate can be completed.
+  Audit correction: The former missing Screen #15 blocker was resolved Monday, September 28, 2026 — 08:25; F2's complete Phase 2 audit and the F1 accessibility-tool evidence are still required before this gate can be completed.
+  Resume note: Partial — deterministic focused checks pass, but the F2 audit and F1 accessibility-tool evidence remain outstanding.
 ## Audit completion record
 
 Sunday, September 27, 2026 â€” 15:23: Phase F0, F1, and F2 audits are complete for the frontend-first mock implementation. The pass covered requirement counterchecks, display privacy, mock audit-trail calls, interactive states, custom selects, skeleton loading, labels/focus/keyboard behavior, color tokens, route handoffs, and the three documented activity flows. Deterministic verification passed: 31 test files / 94 tests, typecheck, production build, and lint with one pre-existing Fast Refresh warning. Backend API integration, production authentication, ERD finalization, and live GitHub reconciliation remain outside this frontend audit scope.

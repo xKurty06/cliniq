@@ -28,6 +28,8 @@
 
 ## Resolved since last update
 
+- ~~Sunday, September 27, 2026 — 16:10 — F2 audit blocker: Screen #15 Incident Log List is missing.~~ Resolved Monday, September 28, 2026 — 08:25: added the Staff Incident Log List, `/incidents` route and navigation destination, privacy-safe Student Number rows, ADR-010-approved reason/description context, and Needs Completion/Complete status badges.
+- ~~Monday, September 28, 2026 — 08:12 — F2 audit finding: Incident Report Archive displays a fabricated Student Number.~~ Resolved Monday, September 28, 2026 — 08:25: the archive now maps each incident's `studentId` to the linked `Student.studentNumber`, with regression coverage.
 - ~~Laravel Sanctum, Vite, and QR libraries~~ — confirmed September 25, 2026, after researching current maintenance/compatibility status. See `06-Decisions/ADR-007-Stack-Finalization.md` and `02-Architecture/Tech-Stack.md`.
 - ~~XAMPP standardization~~ — confirmed.
 - ~~Chart.js vs. Recharts~~ — Chart.js chosen, for bundle size and Canvas rendering given the 4GB RAM target.
@@ -35,8 +37,6 @@
 
 ## Known gaps
 
-- **Sunday, September 27, 2026 — 16:10 — F2 audit blocker: Screen #15 Incident Log List is missing.** `Screen-Inventory.md` and `Development-Phases.md` both require a Staff multi-student incident list showing Student Number, the ADR-010-approved reason/description, and a Needs Completion/Complete badge. No `IncidentLogListPage`, `/incidents` route, or navigation destination exists; the current Incidents navigation opens `/incidents/new` instead. Build and audit this screen before marking F2 or F3 demo-ready.
-- **Monday, September 28, 2026 — 08:12 — F2 audit finding: Incident Report Archive displays a fabricated Student Number.** `cliniq-frontend/src/features/reports/ReportsPage.tsx` creates its “Student Number” table value by replacing `stu-` in an internal `Incident.studentId` with `2026-`. This omits the required five-digit sequence and is not guaranteed to match the linked student's actual `Student.studentNumber`. Resolve the linked student from the shared mock dataset (and preserve that relationship in the eventual API/report data) before certifying Screen #20's privacy/data-correctness audit.
 - Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
 - Frontend mock implementation is now substantially built through the F2 screen set; Laravel API integration, database schema, and production authentication remain future backend work.
 
