@@ -19,6 +19,10 @@ describe('App Shell / Navigation', () => {
     expect(screen.getByText('Students')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Inventory' })).toHaveAttribute('href', '/inventory')
     expect(screen.getByText('Backup')).toBeInTheDocument()
+    expect(screen.getAllByAltText('Mendez Christian Academy')).toHaveLength(2)
+    screen
+      .getAllByAltText('Mendez Christian Academy')
+      .forEach((logo) => expect(logo).toHaveAttribute('src', '/MCA_Logo.png'))
   })
 
   it('limits Admin/Principal navigation to Dashboard and Reports', () => {

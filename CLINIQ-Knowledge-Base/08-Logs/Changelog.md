@@ -6,6 +6,8 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Monday, September 28, 2026 — 22:00 | Widened the expanded sidebar from 14rem to 16rem so the academy label under CLINIQ remains on one line; collapsed width is unchanged. | `Agent-Sessions/2026-09-28-sidebar-brand-width.md` |
+| Monday, September 28, 2026 — 21:59 | Applied MCA_Logo.png as the expanded and plain collapsed CLINIQ system mark, placed Mendez Christian Academy below the product name, set Healware_Logo.png as the browser favicon, and used a generic user icon in place of profile initials. | `Agent-Sessions/2026-09-28-brand-assets-profile-icon.md` |
 | Monday, September 28, 2026 — 19:53 | Refined the local dropdown rule and shared date-range menu: trigger width is now the minimum before longer option text can expand the panel. | `Agent-Sessions/2026-09-28-dropdown-trigger-width.md` |
 | Monday, September 28, 2026 — 19:47 | Added the local `cliniq-dropdown-patterns` skill so future dropdown work keeps the icon-free active state and content-fit menu sizing. | `Agent-Sessions/2026-09-28-local-dropdown-skill.md` |
 | Monday, September 28, 2026 — 19:44 | Refined every shared date-range dropdown: removed the selected check icon, retained the green active treatment, and sized each menu to its longest option. | `Agent-Sessions/2026-09-28-dropdown-active-state.md` |

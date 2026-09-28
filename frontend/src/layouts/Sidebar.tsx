@@ -11,10 +11,15 @@ function navGroupId(label: string): string {
 export function BrandLogo() {
   return (
     <span className="flex items-center gap-2.5">
-      <span className="flex size-9 items-center justify-center rounded-md bg-brand-green-dark text-white shadow-raised">
-        <Icon name="shieldPlus" size={20} />
+      <img
+        src="/MCA_Logo.png"
+        alt="Mendez Christian Academy"
+        className="size-9 shrink-0 object-contain"
+      />
+      <span className="flex flex-col leading-tight">
+        <span className="text-xl font-bold tracking-tight text-brand-green-dark">CLINIQ</span>
+        <span className="text-[0.625rem] font-medium text-text-secondary">Mendez Christian Academy</span>
       </span>
-      <span className="text-xl font-bold tracking-tight text-brand-green-dark">CLINIQ</span>
     </span>
   )
 }
@@ -49,9 +54,9 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
             {/* Logo and hamburger are stacked and crossfaded, so hover never snaps between them. */}
             <span
               aria-hidden="true"
-              className="absolute inset-0 flex items-center justify-center rounded-md bg-brand-green-dark text-white shadow-raised transition-[opacity,transform] duration-200 ease-out group-hover:scale-75 group-hover:opacity-0 group-focus-visible:scale-75 group-focus-visible:opacity-0 motion-reduce:transition-none"
+              className="absolute inset-0 flex items-center justify-center transition-[opacity,transform] duration-200 ease-out group-hover:scale-75 group-hover:opacity-0 group-focus-visible:scale-75 group-focus-visible:opacity-0 motion-reduce:transition-none"
             >
-              <Icon name="shieldPlus" size={20} />
+              <img src="/MCA_Logo.png" alt="" className="size-9 object-contain" />
             </span>
             <span
               aria-hidden="true"
@@ -144,14 +149,6 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
           )
         })}
       </nav>
-
-      {!collapsed && (
-        <p className="mt-auto px-2 text-xs leading-snug text-text-secondary">
-          Mendez Christian Academy
-          <br />
-          School Clinic
-        </p>
-      )}
     </aside>
   )
 }

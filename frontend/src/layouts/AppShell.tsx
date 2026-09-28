@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { Icon } from '../components'
 import { cn } from '../lib/cn'
 import { ROLE_LABELS, type SessionUser } from '../lib/mock-db'
 import { BrandLogo, Sidebar } from './Sidebar'
@@ -13,15 +14,6 @@ import type { NavKey } from './navigation'
  * "Soon" and aren't clickable. No search box and no notification bell: neither exists as a feature
  * yet, and a dead control would mislead.
  */
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-}
 
 export interface AppShellProps {
   user: SessionUser
@@ -38,7 +30,7 @@ export function AppShell({ user, active, children }: AppShellProps) {
         'min-h-screen bg-surface transition-[grid-template-columns] duration-200 motion-reduce:transition-none lg:grid print:block print:bg-background',
         isSidebarCollapsed
           ? 'lg:grid-cols-[4.75rem_minmax(0,1fr)]'
-          : 'lg:grid-cols-[14rem_minmax(0,1fr)]',
+          : 'lg:grid-cols-[16rem_minmax(0,1fr)]',
       )}
     >
       <a
@@ -65,7 +57,7 @@ export function AppShell({ user, active, children }: AppShellProps) {
               aria-hidden="true"
               className="flex size-9 items-center justify-center rounded-full bg-brand-green-light text-xs font-bold text-text-primary ring-2 ring-background"
             >
-              {initials(user.name)}
+              <Icon name="user" size={20} />
             </span>
             <span className="flex flex-col leading-tight">
               <span className="text-sm font-semibold text-text-primary">{user.name}</span>
