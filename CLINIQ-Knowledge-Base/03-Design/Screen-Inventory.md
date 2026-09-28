@@ -11,7 +11,7 @@ Give the agent this full list — it maps directly to the two module groups (bas
 ### Auth & Shell
 1. **Login** — username/password, role-aware redirect after login; the session lasts 1 week until the token expires, with no idle timeout
 2. **Force Password Change** — shown on first login (backend enforces this)
-3. **App Shell/Nav** — role-aware sidebar or nav; Staff sees all modules, Admin sees only Reports + Dashboard, Instructor sees only the mobile scan/lookup screen (no shell/nav needed for that one)
+3. **App Shell/Nav** — role-aware sidebar or nav; Staff sees all modules, Admin sees only Reports + Dashboard, Instructor sees only the mobile scan/lookup screen (no shell/nav needed for that one). The desktop header shows the signed-in user's name and role with a red, icon-only Log out control carrying an accessible label.
 
 ### Dashboard
 4. **Staff Dashboard** — today's visit count, low-stock alerts, expiring-medicine alerts, backup status widget, quick "New Visit" action
@@ -75,4 +75,3 @@ No separate login screen for Staff here — the computer and mobile Staff flows 
 34. **Add/Edit User & Role Assignment**
 
 **Total: ~35 screens/views** (accounting for the two-stage incident entry and the new Instructor and Emergency-button screens), several of which (Excuse Letter, Incident Report, Monthly Report, QR print) also need a distinct print layout — call that out to the agent explicitly since print CSS is easy to forget.
-

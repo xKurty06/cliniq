@@ -46,6 +46,19 @@ export function getMockSessionUser(): SessionUser {
   }
 }
 
+/**
+ * Ends the development-only role preview. The real Sanctum logout endpoint will replace this
+ * when authentication is implemented in Phase B2.
+ */
+export function clearMockSession() {
+  if (typeof window === 'undefined') return
+  try {
+    window.sessionStorage.removeItem(ROLE_STORAGE_KEY)
+  } catch {
+    // Storage can be blocked; the app still moves to its signed-out view.
+  }
+}
+
 export const ROLE_LABELS: Record<UserRole, string> = {
   staff: 'School Clinician',
   admin: 'Admin / Principal',

@@ -26,7 +26,7 @@ function CurrentPath() {
 function renderAt(route: string, user: SessionUser = STAFF) {
   return render(
     <MemoryRouter initialEntries={[route]}>
-      <AppRoutes user={user} />
+      <AppRoutes user={user} onLogout={() => {}} />
       <CurrentPath />
     </MemoryRouter>,
   )

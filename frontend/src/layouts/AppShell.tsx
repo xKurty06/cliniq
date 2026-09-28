@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Icon } from '../components'
 import { cn } from '../lib/cn'
-import { ROLE_LABELS, type SessionUser } from '../lib/mock-db'
+import { logoutMockSession, ROLE_LABELS, type SessionUser } from '../lib/mock-db'
 import { BrandLogo, Sidebar } from './Sidebar'
 import type { NavKey } from './navigation'
 
@@ -19,10 +19,22 @@ export interface AppShellProps {
   user: SessionUser
   active: NavKey | null
   children: ReactNode
+  onLogout: () => void
 }
 
-export function AppShell({ user, active, children }: AppShellProps) {
+export function AppShell({ user, active, children, onLogout }: AppShellProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  async function handleLogout() {
+    setIsLoggingOut(true)
+    try {
+      await logoutMockSession(user)
+      onLogout()
+    } catch {
+      setIsLoggingOut(false)
+    }
+  }
 
   return (
     <div
@@ -63,6 +75,16 @@ export function AppShell({ user, active, children }: AppShellProps) {
               <span className="text-sm font-semibold text-text-primary">{user.name}</span>
               <span className="text-xs text-text-secondary">{ROLE_LABELS[user.role]}</span>
             </span>
+            <button
+              type="button"
+              aria-label={isLoggingOut ? 'Logging out' : 'Log out'}
+              title="Log out"
+              disabled={isLoggingOut}
+              onClick={() => void handleLogout()}
+              className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-error transition-colors hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Icon name="logout" className={isLoggingOut ? 'animate-spin motion-reduce:animate-none' : undefined} />
+            </button>
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">

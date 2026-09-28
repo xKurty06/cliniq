@@ -39,7 +39,7 @@ import {
   type IncompleteRecordRow,
   type InventoryStatus,
 } from './selectors'
-import { getMockSessionUser, type SessionUser } from './session'
+import { clearMockSession, getMockSessionUser, type SessionUser } from './session'
 import { commit, db } from './store'
 import type {
   ComplaintType,
@@ -139,6 +139,17 @@ function audit(
 
 function actorOr(actor?: SessionUser): SessionUser {
   return actor ?? getMockSessionUser()
+}
+
+/**
+ * Development stand-in for Sanctum's logout endpoint. It keeps logout accountable even while the
+ * frontend uses the mock session, then clears the selected mock role from this browser tab.
+ */
+export async function logoutMockSession(actor: SessionUser): Promise<void> {
+  await write('logout', (s) => {
+    audit(s, actor, 'logout', null)
+  })
+  clearMockSession()
 }
 
 function userName(state: DbState, id: string | null): string | null {

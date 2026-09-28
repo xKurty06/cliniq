@@ -19,6 +19,8 @@ export interface SelectProps
   error?: string
   id?: string
   className?: string
+  /** Places the label beside the control from the small breakpoint upward. */
+  inline?: boolean
 }
 
 /**
@@ -37,6 +39,7 @@ export function Select({
   id,
   required,
   className,
+  inline = false,
   ...rest
 }: SelectProps) {
   const autoId = useId()
@@ -44,8 +47,17 @@ export function Select({
   const hintId = hint ? `${selectId}-hint` : undefined
   const errorId = error ? `${selectId}-error` : undefined
   return (
-    <div className={cn('flex flex-col gap-1', className)}>
-      <label htmlFor={selectId} className="text-xs font-semibold text-text-primary">
+    <div
+      className={cn(
+        'flex flex-col gap-1',
+        inline && 'sm:flex-row sm:items-center sm:gap-3',
+        className,
+      )}
+    >
+      <label
+        htmlFor={selectId}
+        className={cn('text-xs font-semibold text-text-primary', inline && 'sm:shrink-0')}
+      >
         {label}
         {required && (
           <span className="text-error" aria-hidden="true">
@@ -55,7 +67,7 @@ export function Select({
         )}
         {required && <span className="sr-only"> (required)</span>}
       </label>
-      <div className="relative">
+      <div className={cn('relative', inline && 'sm:min-w-0 sm:flex-1')}>
         <select
           id={selectId}
           value={value}

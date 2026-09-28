@@ -6,6 +6,12 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Monday, September 28, 2026 — 22:12 | Replaced the logout glyph with a conventional arrow-leaving-a-door icon. | `Agent-Sessions/2026-09-28-profile-logout-icon-glyph.md` |
+| Monday, September 28, 2026 — 22:11 | Refined the desktop-header logout control to a compact red icon immediately beside the signed-in user, retaining its accessible label and audited session behavior. | `Agent-Sessions/2026-09-28-profile-logout-icon.md` |
+| Monday, September 28, 2026 — 22:10 | Enlarged and vertically centered shared card-header icons; aligned the Follow-Up Status label and select trigger horizontally on desktop. | `Agent-Sessions/2026-09-28-card-header-icon-and-status-alignment.md` |
+| Monday, September 28, 2026 — 22:07 | Added a labelled Log out control beside the signed-in user in the desktop header; the current mock implementation audits the logout and ends the UI session until Sanctum authentication is connected. | `Agent-Sessions/2026-09-28-profile-logout.md` |
+| Monday, September 28, 2026 — 22:07 | Vertically centered shared card-header icons against the combined title-and-description block. | `Agent-Sessions/2026-09-28-card-header-icon-alignment.md` |
+| Monday, September 28, 2026 — 22:06 | Moved the Follow-Up status filter into the Follow-up tasks header, right-aligned with its title and responsive on smaller screens. | `Agent-Sessions/2026-09-28-follow-up-filter-alignment.md` |
 | Monday, September 28, 2026 — 22:00 | Widened the expanded sidebar from 14rem to 16rem so the academy label under CLINIQ remains on one line; collapsed width is unchanged. | `Agent-Sessions/2026-09-28-sidebar-brand-width.md` |
 | Monday, September 28, 2026 — 21:59 | Applied MCA_Logo.png as the expanded and plain collapsed CLINIQ system mark, placed Mendez Christian Academy below the product name, set Healware_Logo.png as the browser favicon, and used a generic user icon in place of profile initials. | `Agent-Sessions/2026-09-28-brand-assets-profile-icon.md` |
 | Monday, September 28, 2026 — 19:53 | Refined the local dropdown rule and shared date-range menu: trigger width is now the minimum before longer option text can expand the panel. | `Agent-Sessions/2026-09-28-dropdown-trigger-width.md` |

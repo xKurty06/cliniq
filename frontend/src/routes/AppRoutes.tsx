@@ -292,16 +292,21 @@ function RouteLoading() {
   )
 }
 
-function withShell(user: SessionUser, nav: NavKey | null, content: ReactNode) {
+function withShell(
+  user: SessionUser,
+  nav: NavKey | null,
+  content: ReactNode,
+  onLogout: () => void,
+) {
   if (user.role === 'instructor') return content
   return (
-    <AppShell user={user} active={nav}>
+    <AppShell user={user} active={nav} onLogout={onLogout}>
       {content}
     </AppShell>
   )
 }
 
-export function AppRoutes({ user }: { user: SessionUser }) {
+export function AppRoutes({ user, onLogout }: { user: SessionUser; onLogout: () => void }) {
   return (
     <Routes>
       {APP_ROUTES.map((route) => {
@@ -315,7 +320,7 @@ export function AppRoutes({ user }: { user: SessionUser }) {
               !allowed ? (
                 <Navigate to={homePathFor(user.role)} replace />
               ) : route.shell ? (
-                withShell(user, route.nav, content)
+                withShell(user, route.nav, content, onLogout)
               ) : (
                 content
               )
@@ -323,7 +328,10 @@ export function AppRoutes({ user }: { user: SessionUser }) {
           />
         )
       })}
-      <Route path="*" element={withShell(user, null, <NotFoundPage home={homePathFor(user.role)} />)} />
+      <Route
+        path="*"
+        element={withShell(user, null, <NotFoundPage home={homePathFor(user.role)} />, onLogout)}
+      />
     </Routes>
   )
 }
