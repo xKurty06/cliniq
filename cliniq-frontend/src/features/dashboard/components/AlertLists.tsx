@@ -9,7 +9,7 @@ import {
 } from '../../../components'
 import { formatDate } from '../../../lib/dates'
 import { describeRange, type DateRange } from '../../../lib/dateRange'
-import type { DashboardSummary, DueFollowUpRow, InventoryAlertRow } from '../types'
+import type { DashboardSummary, DueFollowUpRow, InventoryAlertRow } from '../../../types/dashboard'
 
 /*
  * The three alert groups (Reference 1, item 3). All three are read-only: no resolve or complete

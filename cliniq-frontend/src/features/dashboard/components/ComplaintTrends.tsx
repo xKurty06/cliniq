@@ -22,7 +22,7 @@ import type {
   ComplaintTrends as Trends,
   TrendBucket,
   TrendGranularity,
-} from '../types'
+} from '../../../types/dashboard'
 
 /*
  * Trends row (Reference 1, item 4), laid out like the reference mockup's "Visits Trend" +

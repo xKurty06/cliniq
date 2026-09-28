@@ -6,7 +6,7 @@ import {
   type StatTrend,
 } from '../../../components'
 import { rangeLengthDays, type DateRange } from '../../../lib/dateRange'
-import type { DashboardSummary } from '../types'
+import type { DashboardSummary } from '../../../types/dashboard'
 
 /**
  * Icon, label, and accent per card, shared by the loaded cards and their skeletons so the two never

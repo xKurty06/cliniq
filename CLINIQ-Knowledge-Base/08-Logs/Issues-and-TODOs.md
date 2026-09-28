@@ -28,6 +28,7 @@
 
 ## Resolved since last update
 
+- ~~Monday, September 28, 2026 — 08:40 — F2 audit finding: Follow-Up List generated a pseudo Student Number from its internal ID and offered no way to update a pending follow-up.~~ Resolved Monday, September 28, 2026 — 08:40: the list now resolves the actual linked Student Number, exposes an audited “Mark completed” action, and has regression coverage.
 - ~~Sunday, September 27, 2026 — 16:10 — F2 audit blocker: Screen #15 Incident Log List is missing.~~ Resolved Monday, September 28, 2026 — 08:25: added the Staff Incident Log List, `/incidents` route and navigation destination, privacy-safe Student Number rows, ADR-010-approved reason/description context, and Needs Completion/Complete status badges.
 - ~~Monday, September 28, 2026 — 08:12 — F2 audit finding: Incident Report Archive displays a fabricated Student Number.~~ Resolved Monday, September 28, 2026 — 08:25: the archive now maps each incident's `studentId` to the linked `Student.studentNumber`, with regression coverage.
 - ~~Laravel Sanctum, Vite, and QR libraries~~ — confirmed September 25, 2026, after researching current maintenance/compatibility status. See `06-Decisions/ADR-007-Stack-Finalization.md` and `02-Architecture/Tech-Stack.md`.

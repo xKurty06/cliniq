@@ -17,7 +17,7 @@ import { ComplaintTrends, ComplaintTrendsSkeleton } from './components/Complaint
 import { DashboardHeader } from './components/DashboardHeader'
 import { StatCardRow, StatCardRowSkeleton } from './components/StatCardRow'
 import { VisitCalendar } from './components/VisitCalendar'
-import type { TrendGranularity } from './types'
+import type { TrendGranularity } from '../../types/dashboard'
 
 /**
  * First-load skeleton: each section's own shaped placeholder in the same grid positions as the

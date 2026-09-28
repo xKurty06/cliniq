@@ -1,12 +1,12 @@
-import type { FollowUpDueState, InventoryFlag } from '../../components'
-import type { DateRange } from '../../lib/dateRange'
+import type { FollowUpDueState, InventoryFlag } from '../components'
+import type { DateRange } from '../lib/dateRange'
 import type {
   FollowUp,
   ISODate,
   ISODateTime,
   InventoryItem,
   StudentListRef,
-} from '../../types/entities'
+} from './entities'
 
 /**
  * The Clinic Overview Dashboard's data contract (Screen Inventory #31, Module 9). This is the shape

@@ -1,5 +1,11 @@
 # Changelog
 
+| Monday, September 28, 2026 — 08:40 | Ran the full F2 Phase 2 audit. Corrected Follow-Up List Student Number resolution and status-completion audit logging; the F2 exit gate remains open for three documented UX follow-ups and inconclusive browser-level axe evidence. | `08-Logs/Agent-Sessions/2026-09-28-f2-full-audit.md`, `Frontend-Loop-Engineering.md`, `FollowUpListPage.tsx` |
+
+| Monday, September 28, 2026 — 08:38 | Health Summaries (#21) now defaults to a sorted horizontal bar chart with a Chart/Table toggle; both print; empty state for months with no visits; 102 tests pass | `features/reports/components/HealthSummary.tsx`, `features/reports/lib/complaintCounts.ts`, `ReportsPage.tsx`, `ReportsPage.test.tsx`, `Agent-Sessions/2026-09-28-health-summary-chart.md` |
+
+| Monday, September 28, 2026 — 08:30 | Continued the formal screen-by-screen F2 audit: App Shell/Nav (#3) passed its role, route, interactive-state, accessibility-pattern, and mock-flow checks. | `08-Logs/Agent-Sessions/2026-09-28-f2-app-shell-nav-audit.md`, `Frontend-Loop-Engineering.md` |
+
 | Monday, September 28, 2026 — 08:25 | Built the missing Staff Incident Log List (#15), routed the Incidents navigation to it, and corrected the Incident Report Archive (#20) to display actual linked Student Numbers; both former F2 implementation blockers are resolved, while the formal full F2 audit remains pending. | `08-Logs/Agent-Sessions/2026-09-28-incident-log-and-report-identifier.md`, `Frontend-Loop-Engineering.md`, `Issues-and-TODOs.md`, `cliniq-frontend/src/features/emergency-response/`, `cliniq-frontend/src/features/reports/ReportsPage.tsx` |
 
 | Monday, September 28, 2026 — 08:17 | Added the requested QR, Student Records, Dashboard, Visit/Incident, Parent Notification, and Stage 1 UI/UX follow-ups to the known-issues backlog; distinguished confirmed gaps from items requiring product or visual validation. | `08-Logs/Agent-Sessions/2026-09-28-ui-ux-followups.md`, `Issues-and-TODOs.md` |

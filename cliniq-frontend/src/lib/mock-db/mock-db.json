@@ -1,0 +1,3538 @@
+{
+  "meta": {
+    "notice": "SYNTHETIC DATA ONLY. Every name, Student Number, contact number, allergy, condition, and event in this file is fictional. No real Mendez Christian Academy student or staff member appears here, ever: these are minors' health records under RA 10173 (Data Privacy Act of 2012), and this repository is public. Never paste real records into this file.",
+    "purpose": "Seed data for the CLINIQ frontend mock layer (ADR-006, ADR-014). Hand-edit this file to change what every screen shows; see README.md next to it.",
+    "dates": "All dates are relative to the injectable \"today\" in the data layer: {\"daysAgo\": n} or {\"daysFromNow\": n}, plus \"time\": \"HH:MM\" (Philippine time) for timestamps.",
+    "derivedValues": "Only raw records live here. Counts, flags, statuses like low-stock / overdue / incomplete, and report contents are computed by selectors in src/lib/mock-db/. The integrity test fails if you store one.",
+    "schema": "Frontend-facing shapes from CLINIQ_Frontend_Context_Brief.md §5. This is NOT a database design; the ERD is TBA."
+  },
+  "config": {
+    "_note": "OPEN PRODUCT DECISIONS: none of these values is defined in the requirements. They are carried over from the Dashboard mock so screens have something to show. See ADR-014.",
+    "frequentVisitorMinVisits": 3,
+    "frequentVisitorWindowDays": 30,
+    "upcomingFollowUpDays": 7,
+    "expiryWarningDays": 30,
+    "clusterMinCount": 8,
+    "clusterRatio": 2,
+    "topComplaints": 5
+  },
+  "users": [
+    {
+      "id": "user-staff-01",
+      "name": "Liza Manalastas",
+      "username": "demo.nurse",
+      "role": "staff",
+      "lastLogin": { "daysAgo": 0, "time": "07:02" }
+    },
+    {
+      "id": "user-admin-01",
+      "name": "Ernesto Villacorta",
+      "username": "demo.principal",
+      "role": "admin",
+      "lastLogin": { "daysAgo": 2, "time": "16:12" }
+    },
+    {
+      "id": "user-instructor-01",
+      "name": "Paolo Sandoval",
+      "username": "demo.pe",
+      "role": "instructor",
+      "lastLogin": { "daysAgo": 1, "time": "10:40" }
+    },
+    {
+      "id": "user-instructor-02",
+      "name": "Grace Tolentino",
+      "username": "demo.pe2",
+      "role": "instructor",
+      "lastLogin": null
+    }
+  ],
+  "students": [
+    {
+      "id": "student-0001",
+      "studentNumber": "2026-00001",
+      "fullName": "Gian Quizon",
+      "gradeLevel": "Grade 2",
+      "contactInfo": "0900-000-1000",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Ferdie Quizon",
+        "relationship": "Guardian",
+        "phone": "0900-111-2000",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0002",
+      "studentNumber": "2020-00001",
+      "fullName": "Oliver Valdez",
+      "gradeLevel": "Grade 9",
+      "contactInfo": "0900-000-1001",
+      "allergies": ["Peanuts"],
+      "medicalConditions": ["Allergic rhinitis"],
+      "emergencyContact": {
+        "name": "Maricel Valdez",
+        "relationship": "Father",
+        "phone": "0900-111-2001",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0003",
+      "studentNumber": "2026-00002",
+      "fullName": "Erica Umali",
+      "gradeLevel": "Grade 3",
+      "contactInfo": "0900-000-1002",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Ferdie Umali",
+        "relationship": "Father",
+        "phone": "0900-111-2002",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0004",
+      "studentNumber": "2022-00001",
+      "fullName": "Marco Quizon",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1003",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Joy Quizon",
+        "relationship": "Guardian",
+        "phone": "0900-111-2003",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0005",
+      "studentNumber": "2021-00001",
+      "fullName": "Patricia Fajardo",
+      "gradeLevel": "Grade 7",
+      "contactInfo": "0900-000-1004",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Ramon Fajardo",
+        "relationship": "Guardian",
+        "phone": "0900-111-2004",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0006",
+      "studentNumber": "2023-00001",
+      "fullName": "Marco Umali",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1005",
+      "allergies": ["Penicillin"],
+      "medicalConditions": ["Asthma"],
+      "emergencyContact": null,
+      "archived": false
+    },
+    {
+      "id": "student-0007",
+      "studentNumber": "2026-00003",
+      "fullName": "Warren Rivera",
+      "gradeLevel": "Grade 4",
+      "contactInfo": "0900-000-1006",
+      "allergies": ["Shrimp"],
+      "medicalConditions": ["Allergic rhinitis"],
+      "emergencyContact": {
+        "name": "Ferdie Rivera",
+        "relationship": "Mother",
+        "phone": "0900-111-2006",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0008",
+      "studentNumber": "2020-00002",
+      "fullName": "Francine Ocampo",
+      "gradeLevel": "Grade 9",
+      "contactInfo": "0900-000-1007",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Ocampo",
+        "relationship": "Aunt",
+        "phone": "0900-111-2007",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0009",
+      "studentNumber": "2022-00002",
+      "fullName": "Vina Quizon",
+      "gradeLevel": "Grade 9",
+      "contactInfo": "0900-000-1008",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Maricel Quizon",
+        "relationship": "Mother",
+        "phone": "0900-111-2008",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0010",
+      "studentNumber": "2022-00003",
+      "fullName": "Santi Quizon",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1009",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Cecilia Quizon",
+        "relationship": "Mother",
+        "phone": "0900-111-2009",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0011",
+      "studentNumber": "2024-00001",
+      "fullName": "Erica Panganiban",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1010",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Ramon Panganiban",
+        "relationship": "Grandmother",
+        "phone": "0900-111-2010",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0012",
+      "studentNumber": "2023-00002",
+      "fullName": "Danica Cabrera",
+      "gradeLevel": "Grade 7",
+      "contactInfo": "0900-000-1011",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Cabrera",
+        "relationship": "Aunt",
+        "phone": "0900-111-2011",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0013",
+      "studentNumber": "2026-00004",
+      "fullName": "Elijah Buenaventura",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1012",
+      "allergies": [],
+      "medicalConditions": ["Allergic rhinitis"],
+      "emergencyContact": {
+        "name": "Joy Buenaventura",
+        "relationship": "Grandmother",
+        "phone": "0900-111-2012",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0014",
+      "studentNumber": "2024-00002",
+      "fullName": "Dominic Jimenez",
+      "gradeLevel": "Grade 2",
+      "contactInfo": "0900-000-1013",
+      "allergies": ["Dust mites"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Jimenez",
+        "relationship": "Mother",
+        "phone": "0900-111-2013",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0015",
+      "studentNumber": "2026-00005",
+      "fullName": "Zach Valdez",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1014",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Joy Valdez",
+        "relationship": "Aunt",
+        "phone": "0900-111-2014",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0016",
+      "studentNumber": "2020-00003",
+      "fullName": "Warren Katigbak",
+      "gradeLevel": "Grade 6",
+      "contactInfo": "0900-000-1015",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Lorna Katigbak",
+        "relationship": "Mother",
+        "phone": "0900-111-2015",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0017",
+      "studentNumber": "2023-00003",
+      "fullName": "Marco Nepomuceno",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1016",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Nepomuceno",
+        "relationship": "Grandmother",
+        "phone": "0900-111-2016",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0018",
+      "studentNumber": "2023-00004",
+      "fullName": "Gian Ilagan",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1017",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": null,
+      "archived": false
+    },
+    {
+      "id": "student-0019",
+      "studentNumber": "2022-00004",
+      "fullName": "Danica Lacson",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1018",
+      "allergies": [],
+      "medicalConditions": ["Eczema"],
+      "emergencyContact": {
+        "name": "Ferdie Lacson",
+        "relationship": "Mother",
+        "phone": "0900-111-2018",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0020",
+      "studentNumber": "2026-00006",
+      "fullName": "Danica Tuazon",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1019",
+      "allergies": ["Peanuts"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Tuazon",
+        "relationship": "Father",
+        "phone": "0900-111-2019",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0021",
+      "studentNumber": "2026-00007",
+      "fullName": "Oliver Katigbak",
+      "gradeLevel": "Grade 3",
+      "contactInfo": "0900-000-1020",
+      "allergies": ["Shrimp"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Rodel Katigbak",
+        "relationship": "Mother",
+        "phone": "0900-111-2020",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0022",
+      "studentNumber": "2021-00002",
+      "fullName": "Andrei Buenaventura",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1021",
+      "allergies": ["Shrimp"],
+      "medicalConditions": ["Asthma"],
+      "emergencyContact": {
+        "name": "Ferdie Buenaventura",
+        "relationship": "Mother",
+        "phone": "0900-111-2021",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0023",
+      "studentNumber": "2025-00001",
+      "fullName": "Francine Yap",
+      "gradeLevel": "Grade 3",
+      "contactInfo": "0900-000-1022",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Rodel Yap",
+        "relationship": "Mother",
+        "phone": "0900-111-2022",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0024",
+      "studentNumber": "2023-00005",
+      "fullName": "Uriel Tuazon",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Cecilia Tuazon",
+        "relationship": "Guardian",
+        "phone": "0900-111-2023",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0025",
+      "studentNumber": "2022-00005",
+      "fullName": "Erica Dimaculangan",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1024",
+      "allergies": ["Peanuts"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Cecilia Dimaculangan",
+        "relationship": "Mother",
+        "phone": "0900-111-2024",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0026",
+      "studentNumber": "2026-00008",
+      "fullName": "Bryan Salazar",
+      "gradeLevel": "Grade 1",
+      "contactInfo": "0900-000-1025",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Maricel Salazar",
+        "relationship": "Mother",
+        "phone": "0900-111-2025",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0027",
+      "studentNumber": "2023-00006",
+      "fullName": "Jasmine Hernandez",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1026",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Maricel Hernandez",
+        "relationship": "Father",
+        "phone": "0900-111-2026",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0028",
+      "studentNumber": "2023-00007",
+      "fullName": "Hannah Macaraeg",
+      "gradeLevel": "Grade 6",
+      "contactInfo": "0900-000-1027",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Cecilia Macaraeg",
+        "relationship": "Father",
+        "phone": "0900-111-2027",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0029",
+      "studentNumber": "2026-00009",
+      "fullName": "Patricia Yap",
+      "gradeLevel": "Grade 3",
+      "contactInfo": "0900-000-1028",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Maricel Yap",
+        "relationship": "Aunt",
+        "phone": "0900-111-2028",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0030",
+      "studentNumber": "2024-00003",
+      "fullName": "Carlo Zamora",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1029",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Lorna Zamora",
+        "relationship": "Grandmother",
+        "phone": "0900-111-2029",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0031",
+      "studentNumber": "2024-00004",
+      "fullName": "Ivan Yap",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1030",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Maricel Yap",
+        "relationship": "Guardian",
+        "phone": "0900-111-2030",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0032",
+      "studentNumber": "2025-00002",
+      "fullName": "Trisha Tuazon",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "",
+      "allergies": ["Peanuts"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Joy Tuazon",
+        "relationship": "Guardian",
+        "phone": "0900-111-2031",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0033",
+      "studentNumber": "2020-00004",
+      "fullName": "Bryan Yap",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1032",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Maricel Yap",
+        "relationship": "Father",
+        "phone": "0900-111-2032",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0034",
+      "studentNumber": "2020-00005",
+      "fullName": "Rhea Quizon",
+      "gradeLevel": "Grade 6",
+      "contactInfo": "0900-000-1033",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Joy Quizon",
+        "relationship": "Grandmother",
+        "phone": "0900-111-2033",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0035",
+      "studentNumber": "2021-00003",
+      "fullName": "Ivan Hernandez",
+      "gradeLevel": "Grade 6",
+      "contactInfo": "0900-000-1034",
+      "allergies": ["Penicillin"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Maricel Hernandez",
+        "relationship": "Aunt",
+        "phone": "0900-111-2034",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0036",
+      "studentNumber": "2020-00006",
+      "fullName": "Bryan Buenaventura",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1035",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Joy Buenaventura",
+        "relationship": "Guardian",
+        "phone": "0900-111-2035",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0037",
+      "studentNumber": "2020-00007",
+      "fullName": "Kian Quizon",
+      "gradeLevel": "Grade 7",
+      "contactInfo": "0900-000-1036",
+      "allergies": [],
+      "medicalConditions": ["Eczema"],
+      "emergencyContact": {
+        "name": "Ferdie Quizon",
+        "relationship": "Father",
+        "phone": "0900-111-2036",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0038",
+      "studentNumber": "2021-00004",
+      "fullName": "Warren Tuazon",
+      "gradeLevel": "Grade 10",
+      "contactInfo": "0900-000-1037",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Rodel Tuazon",
+        "relationship": "Aunt",
+        "phone": "0900-111-2037",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0039",
+      "studentNumber": "2023-00008",
+      "fullName": "Hannah Lacson",
+      "gradeLevel": "Grade 3",
+      "contactInfo": "0900-000-1038",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Ramon Lacson",
+        "relationship": "Mother",
+        "phone": "0900-111-2038",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0040",
+      "studentNumber": "2020-00008",
+      "fullName": "Uriel Estrella",
+      "gradeLevel": "Grade 10",
+      "contactInfo": "0900-000-1039",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Lorna Estrella",
+        "relationship": "Grandmother",
+        "phone": "0900-111-2039",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0041",
+      "studentNumber": "2021-00005",
+      "fullName": "Santi Jimenez",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1040",
+      "allergies": ["Peanuts"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Lorna Jimenez",
+        "relationship": "Mother",
+        "phone": "",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0042",
+      "studentNumber": "2024-00005",
+      "fullName": "Dominic Nepomuceno",
+      "gradeLevel": "Grade 2",
+      "contactInfo": "0900-000-1041",
+      "allergies": ["Peanuts"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Lorna Nepomuceno",
+        "relationship": "Guardian",
+        "phone": "0900-111-2041",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0043",
+      "studentNumber": "2021-00006",
+      "fullName": "Francine Nepomuceno",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1042",
+      "allergies": ["Shrimp"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Nepomuceno",
+        "relationship": "Mother",
+        "phone": "0900-111-2042",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0044",
+      "studentNumber": "2022-00006",
+      "fullName": "Francine Lacson",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1043",
+      "allergies": [],
+      "medicalConditions": ["Allergic rhinitis"],
+      "emergencyContact": {
+        "name": "Cecilia Lacson",
+        "relationship": "Guardian",
+        "phone": "0900-111-2043",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0045",
+      "studentNumber": "2021-00007",
+      "fullName": "Francine Rivera",
+      "gradeLevel": "Grade 5",
+      "contactInfo": "0900-000-1044",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Joy Rivera",
+        "relationship": "Aunt",
+        "phone": "0900-111-2044",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0046",
+      "studentNumber": "2020-00009",
+      "fullName": "Zach Panganiban",
+      "gradeLevel": "Grade 9",
+      "contactInfo": "0900-000-1045",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Panganiban",
+        "relationship": "Father",
+        "phone": "0900-111-2045",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0047",
+      "studentNumber": "2025-00003",
+      "fullName": "Czarina Valdez",
+      "gradeLevel": "Grade 3",
+      "contactInfo": "0900-000-1046",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Arnel Valdez",
+        "relationship": "Grandmother",
+        "phone": "0900-111-2046",
+        "verified": true
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0048",
+      "studentNumber": "2023-00009",
+      "fullName": "Uriel Abalos",
+      "gradeLevel": "Grade 6",
+      "contactInfo": "0900-000-1047",
+      "allergies": ["Penicillin"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Rodel Abalos",
+        "relationship": "Aunt",
+        "phone": "0900-111-2047",
+        "verified": false
+      },
+      "archived": false
+    },
+    {
+      "id": "student-0049",
+      "studentNumber": "2023-00010",
+      "fullName": "Erica Lacson",
+      "gradeLevel": "Grade 7",
+      "contactInfo": "0900-000-1048",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Joy Lacson",
+        "relationship": "Mother",
+        "phone": "0900-111-2048",
+        "verified": true
+      },
+      "archived": true
+    },
+    {
+      "id": "student-0050",
+      "studentNumber": "2026-00010",
+      "fullName": "Hannah Umali",
+      "gradeLevel": "Grade 4",
+      "contactInfo": "0900-000-1049",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Lorna Umali",
+        "relationship": "Father",
+        "phone": "0900-111-2049",
+        "verified": false
+      },
+      "archived": true
+    },
+    {
+      "id": "student-0051",
+      "studentNumber": "2022-00007",
+      "fullName": "Oliver Cabrera",
+      "gradeLevel": "Grade 4",
+      "contactInfo": "0900-000-1050",
+      "allergies": ["Peanuts"],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Lorna Cabrera",
+        "relationship": "Aunt",
+        "phone": "0900-111-2050",
+        "verified": true
+      },
+      "archived": true
+    },
+    {
+      "id": "student-0052",
+      "studentNumber": "2022-00008",
+      "fullName": "Althea Lacson",
+      "gradeLevel": "Grade 8",
+      "contactInfo": "0900-000-1051",
+      "allergies": [],
+      "medicalConditions": [],
+      "emergencyContact": {
+        "name": "Rodel Lacson",
+        "relationship": "Mother",
+        "phone": "0900-111-2051",
+        "verified": true
+      },
+      "archived": true
+    }
+  ],
+  "visits": [
+    {
+      "id": "visit-0001",
+      "studentNumber": "2023-00004",
+      "dateTime": { "daysAgo": 393, "time": "08:04" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0002",
+      "studentNumber": "2020-00004",
+      "dateTime": { "daysAgo": 390, "time": "11:44" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0003",
+      "studentNumber": "2021-00006",
+      "dateTime": { "daysAgo": 387, "time": "09:47" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0004",
+      "studentNumber": "2026-00006",
+      "dateTime": { "daysAgo": 386, "time": "10:42" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0005",
+      "studentNumber": "2022-00002",
+      "dateTime": { "daysAgo": 382, "time": "09:52" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0006",
+      "studentNumber": "2026-00003",
+      "dateTime": { "daysAgo": 380, "time": "11:25" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0007",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 372, "time": "11:46" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0008",
+      "studentNumber": "2020-00003",
+      "dateTime": { "daysAgo": 368, "time": "10:07" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0009",
+      "studentNumber": "2021-00002",
+      "dateTime": { "daysAgo": 366, "time": "14:08" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0010",
+      "studentNumber": "2025-00003",
+      "dateTime": { "daysAgo": 365, "time": "08:21" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0011",
+      "studentNumber": "2023-00007",
+      "dateTime": { "daysAgo": 362, "time": "13:21" },
+      "complaint": "Toothache",
+      "treatment": "Cold compress; advised dental visit",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0012",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 359, "time": "09:33" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0013",
+      "studentNumber": "2023-00007",
+      "dateTime": { "daysAgo": 352, "time": "10:27" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0014",
+      "studentNumber": "2024-00003",
+      "dateTime": { "daysAgo": 347, "time": "12:11" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0015",
+      "studentNumber": "2021-00006",
+      "dateTime": { "daysAgo": 346, "time": "10:14" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0016",
+      "studentNumber": "2021-00004",
+      "dateTime": { "daysAgo": 344, "time": "11:57" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0017",
+      "studentNumber": "2025-00003",
+      "dateTime": { "daysAgo": 336, "time": "09:18" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0018",
+      "studentNumber": "2020-00001",
+      "dateTime": { "daysAgo": 335, "time": "13:10" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0019",
+      "studentNumber": "2021-00001",
+      "dateTime": { "daysAgo": 331, "time": "12:04" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0020",
+      "studentNumber": "2021-00002",
+      "dateTime": { "daysAgo": 326, "time": "09:45" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0021",
+      "studentNumber": "2022-00002",
+      "dateTime": { "daysAgo": 324, "time": "14:25" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0022",
+      "studentNumber": "2022-00002",
+      "dateTime": { "daysAgo": 319, "time": "13:27" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0023",
+      "studentNumber": "2023-00006",
+      "dateTime": { "daysAgo": 316, "time": "10:36" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0024",
+      "studentNumber": "2021-00003",
+      "dateTime": { "daysAgo": 311, "time": "10:24" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0025",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 310, "time": "11:23" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0026",
+      "studentNumber": "2020-00006",
+      "dateTime": { "daysAgo": 309, "time": "11:32" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0027",
+      "studentNumber": "2024-00003",
+      "dateTime": { "daysAgo": 308, "time": "08:07" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0028",
+      "studentNumber": "2020-00006",
+      "dateTime": { "daysAgo": 304, "time": "13:06" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0029",
+      "studentNumber": "2020-00001",
+      "dateTime": { "daysAgo": 292, "time": "10:15" },
+      "complaint": "Allergic reaction",
+      "treatment": "Cetirizine given; observed 30 minutes",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0030",
+      "studentNumber": "2021-00007",
+      "dateTime": { "daysAgo": 291, "time": "11:06" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0031",
+      "studentNumber": "2021-00001",
+      "dateTime": { "daysAgo": 284, "time": "13:28" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0032",
+      "studentNumber": "2026-00005",
+      "dateTime": { "daysAgo": 283, "time": "11:19" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0033",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 280, "time": "08:28" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0034",
+      "studentNumber": "2020-00007",
+      "dateTime": { "daysAgo": 278, "time": "14:42" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0035",
+      "studentNumber": "2021-00001",
+      "dateTime": { "daysAgo": 277, "time": "09:43" },
+      "complaint": "Toothache",
+      "treatment": "Cold compress; advised dental visit",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0036",
+      "studentNumber": "2023-00004",
+      "dateTime": { "daysAgo": 275, "time": "09:21" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0037",
+      "studentNumber": "2020-00001",
+      "dateTime": { "daysAgo": 273, "time": "12:30" },
+      "complaint": "Sprain",
+      "treatment": "Cold compress and elevation",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0038",
+      "studentNumber": "2023-00005",
+      "dateTime": { "daysAgo": 271, "time": "13:38" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0039",
+      "studentNumber": "2026-00005",
+      "dateTime": { "daysAgo": 268, "time": "11:37" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0040",
+      "studentNumber": "2026-00003",
+      "dateTime": { "daysAgo": 267, "time": "14:20" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0041",
+      "studentNumber": "2026-00002",
+      "dateTime": { "daysAgo": 264, "time": "08:07" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0042",
+      "studentNumber": "2024-00004",
+      "dateTime": { "daysAgo": 262, "time": "12:23" },
+      "complaint": "Sprain",
+      "treatment": "Cold compress and elevation",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0043",
+      "studentNumber": "2022-00004",
+      "dateTime": { "daysAgo": 261, "time": "08:49" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0044",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 259, "time": "10:16" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0045",
+      "studentNumber": "2025-00001",
+      "dateTime": { "daysAgo": 249, "time": "11:06" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0046",
+      "studentNumber": "2026-00007",
+      "dateTime": { "daysAgo": 246, "time": "12:52" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0047",
+      "studentNumber": "2020-00008",
+      "dateTime": { "daysAgo": 245, "time": "10:25" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0048",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 240, "time": "14:12" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0049",
+      "studentNumber": "2023-00006",
+      "dateTime": { "daysAgo": 239, "time": "14:08" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0050",
+      "studentNumber": "2020-00001",
+      "dateTime": { "daysAgo": 236, "time": "11:44" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0051",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 226, "time": "11:13" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0052",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 224, "time": "08:01" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0053",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 222, "time": "12:50" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0054",
+      "studentNumber": "2023-00005",
+      "dateTime": { "daysAgo": 217, "time": "12:08" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0055",
+      "studentNumber": "2020-00006",
+      "dateTime": { "daysAgo": 215, "time": "14:24" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0056",
+      "studentNumber": "2020-00005",
+      "dateTime": { "daysAgo": 213, "time": "14:31" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0057",
+      "studentNumber": "2023-00001",
+      "dateTime": { "daysAgo": 211, "time": "14:03" },
+      "complaint": "Toothache",
+      "treatment": "Cold compress; advised dental visit",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0058",
+      "studentNumber": "2026-00007",
+      "dateTime": { "daysAgo": 209, "time": "11:47" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0059",
+      "studentNumber": "2025-00002",
+      "dateTime": { "daysAgo": 202, "time": "13:45" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0060",
+      "studentNumber": "2026-00007",
+      "dateTime": { "daysAgo": 194, "time": "14:40" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0061",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 192, "time": "13:08" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0062",
+      "studentNumber": "2026-00001",
+      "dateTime": { "daysAgo": 186, "time": "11:32" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0063",
+      "studentNumber": "2024-00003",
+      "dateTime": { "daysAgo": 181, "time": "14:05" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0064",
+      "studentNumber": "2022-00005",
+      "dateTime": { "daysAgo": 180, "time": "13:53" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0065",
+      "studentNumber": "2021-00002",
+      "dateTime": { "daysAgo": 179, "time": "08:55" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0066",
+      "studentNumber": "2021-00003",
+      "dateTime": { "daysAgo": 176, "time": "14:07" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0067",
+      "studentNumber": "2021-00006",
+      "dateTime": { "daysAgo": 175, "time": "13:00" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0068",
+      "studentNumber": "2024-00003",
+      "dateTime": { "daysAgo": 171, "time": "09:50" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0069",
+      "studentNumber": "2026-00008",
+      "dateTime": { "daysAgo": 170, "time": "08:54" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0070",
+      "studentNumber": "2023-00009",
+      "dateTime": { "daysAgo": 166, "time": "13:25" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0071",
+      "studentNumber": "2026-00002",
+      "dateTime": { "daysAgo": 153, "time": "12:13" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0072",
+      "studentNumber": "2024-00005",
+      "dateTime": { "daysAgo": 151, "time": "10:52" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0073",
+      "studentNumber": "2026-00001",
+      "dateTime": { "daysAgo": 150, "time": "12:24" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0074",
+      "studentNumber": "2026-00005",
+      "dateTime": { "daysAgo": 149, "time": "14:53" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0075",
+      "studentNumber": "2021-00003",
+      "dateTime": { "daysAgo": 148, "time": "13:20" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0076",
+      "studentNumber": "2024-00005",
+      "dateTime": { "daysAgo": 147, "time": "09:52" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0077",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 140, "time": "08:00" },
+      "complaint": "Allergic reaction",
+      "treatment": "Cetirizine given; observed 30 minutes",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0078",
+      "studentNumber": "2023-00001",
+      "dateTime": { "daysAgo": 135, "time": "11:08" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0079",
+      "studentNumber": "2022-00002",
+      "dateTime": { "daysAgo": 131, "time": "08:05" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0080",
+      "studentNumber": "2020-00004",
+      "dateTime": { "daysAgo": 120, "time": "14:35" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0081",
+      "studentNumber": "2023-00009",
+      "dateTime": { "daysAgo": 112, "time": "11:36" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0082",
+      "studentNumber": "2022-00002",
+      "dateTime": { "daysAgo": 111, "time": "10:04" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0083",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 109, "time": "11:02" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0084",
+      "studentNumber": "2026-00008",
+      "dateTime": { "daysAgo": 102, "time": "14:15" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0085",
+      "studentNumber": "2026-00007",
+      "dateTime": { "daysAgo": 100, "time": "13:08" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0086",
+      "studentNumber": "2020-00008",
+      "dateTime": { "daysAgo": 99, "time": "13:31" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0087",
+      "studentNumber": "2026-00009",
+      "dateTime": { "daysAgo": 97, "time": "13:06" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0088",
+      "studentNumber": "2026-00007",
+      "dateTime": { "daysAgo": 75, "time": "13:03" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0089",
+      "studentNumber": "2024-00004",
+      "dateTime": { "daysAgo": 71, "time": "13:00" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0090",
+      "studentNumber": "2020-00008",
+      "dateTime": { "daysAgo": 67, "time": "13:57" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0091",
+      "studentNumber": "2021-00002",
+      "dateTime": { "daysAgo": 66, "time": "10:40" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0092",
+      "studentNumber": "2022-00003",
+      "dateTime": { "daysAgo": 63, "time": "09:25" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0093",
+      "studentNumber": "2023-00007",
+      "dateTime": { "daysAgo": 59, "time": "13:27" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0094",
+      "studentNumber": "2021-00006",
+      "dateTime": { "daysAgo": 55, "time": "14:35" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0095",
+      "studentNumber": "2020-00005",
+      "dateTime": { "daysAgo": 52, "time": "09:59" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0096",
+      "studentNumber": "2026-00006",
+      "dateTime": { "daysAgo": 51, "time": "11:22" },
+      "complaint": "Allergic reaction",
+      "treatment": "Cetirizine given; observed 30 minutes",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0097",
+      "studentNumber": "2024-00002",
+      "dateTime": { "daysAgo": 48, "time": "10:57" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0098",
+      "studentNumber": "2023-00008",
+      "dateTime": { "daysAgo": 47, "time": "09:30" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0099",
+      "studentNumber": "2021-00002",
+      "dateTime": { "daysAgo": 44, "time": "14:42" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0100",
+      "studentNumber": "2020-00008",
+      "dateTime": { "daysAgo": 34, "time": "08:02" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0101",
+      "studentNumber": "2021-00005",
+      "dateTime": { "daysAgo": 29, "time": "10:34" },
+      "complaint": "Toothache",
+      "treatment": "Cold compress; advised dental visit",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0102",
+      "studentNumber": "2024-00004",
+      "dateTime": { "daysAgo": 29, "time": "10:34" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0103",
+      "studentNumber": "2022-00002",
+      "dateTime": { "daysAgo": 28, "time": "09:04" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0104",
+      "studentNumber": "2021-00003",
+      "dateTime": { "daysAgo": 28, "time": "12:06" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0105",
+      "studentNumber": "2023-00003",
+      "dateTime": { "daysAgo": 27, "time": "10:41" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0106",
+      "studentNumber": "2026-00006",
+      "dateTime": { "daysAgo": 27, "time": "11:06" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0107",
+      "studentNumber": "2024-00003",
+      "dateTime": { "daysAgo": 26, "time": "08:12" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0108",
+      "studentNumber": "2021-00003",
+      "dateTime": { "daysAgo": 25, "time": "09:01" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0109",
+      "studentNumber": "2025-00001",
+      "dateTime": { "daysAgo": 24, "time": "09:06" },
+      "complaint": "Toothache",
+      "treatment": "Cold compress; advised dental visit",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0110",
+      "studentNumber": "2026-00001",
+      "dateTime": { "daysAgo": 23, "time": "08:42" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0111",
+      "studentNumber": "2024-00004",
+      "dateTime": { "daysAgo": 23, "time": "09:23" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0112",
+      "studentNumber": "2026-00008",
+      "dateTime": { "daysAgo": 22, "time": "08:03" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0113",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 22, "time": "10:30" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0114",
+      "studentNumber": "2021-00004",
+      "dateTime": { "daysAgo": 22, "time": "13:16" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0115",
+      "studentNumber": "2020-00004",
+      "dateTime": { "daysAgo": 21, "time": "08:47" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0116",
+      "studentNumber": "2026-00006",
+      "dateTime": { "daysAgo": 21, "time": "13:35" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0117",
+      "studentNumber": "2020-00003",
+      "dateTime": { "daysAgo": 19, "time": "10:24" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0118",
+      "studentNumber": "2026-00008",
+      "dateTime": { "daysAgo": 18, "time": "11:54" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0119",
+      "studentNumber": "2020-00005",
+      "dateTime": { "daysAgo": 17, "time": "08:14" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0120",
+      "studentNumber": "2024-00001",
+      "dateTime": { "daysAgo": 17, "time": "08:14" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0121",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 17, "time": "10:30" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0122",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 17, "time": "10:30" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0123",
+      "studentNumber": "2026-00009",
+      "dateTime": { "daysAgo": 16, "time": "10:09" },
+      "complaint": "Menstrual cramps",
+      "treatment": "Rested; mefenamic acid given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0124",
+      "studentNumber": "2023-00008",
+      "dateTime": { "daysAgo": 16, "time": "14:36" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0125",
+      "studentNumber": "2023-00004",
+      "dateTime": { "daysAgo": 15, "time": "14:08" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0126",
+      "studentNumber": "2020-00008",
+      "dateTime": { "daysAgo": 14, "time": "14:56" },
+      "complaint": "Allergic reaction",
+      "treatment": "Cetirizine given; observed 30 minutes",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0127",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 12, "time": "10:30" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": "Intramurals"
+    },
+    {
+      "id": "visit-0128",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 12, "time": "10:30" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": "Intramurals"
+    },
+    {
+      "id": "visit-0129",
+      "studentNumber": "2023-00007",
+      "dateTime": { "daysAgo": 12, "time": "10:30" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": "Intramurals"
+    },
+    {
+      "id": "visit-0130",
+      "studentNumber": "2022-00005",
+      "dateTime": { "daysAgo": 12, "time": "13:14" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0131",
+      "studentNumber": "2026-00003",
+      "dateTime": { "daysAgo": 12, "time": "14:17" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0132",
+      "studentNumber": "2020-00002",
+      "dateTime": { "daysAgo": 11, "time": "11:50" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": "Intramurals"
+    },
+    {
+      "id": "visit-0133",
+      "studentNumber": "2023-00005",
+      "dateTime": { "daysAgo": 11, "time": "12:13" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0134",
+      "studentNumber": "2026-00009",
+      "dateTime": { "daysAgo": 11, "time": "12:18" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": "Intramurals"
+    },
+    {
+      "id": "visit-0135",
+      "studentNumber": "2026-00005",
+      "dateTime": { "daysAgo": 11, "time": "13:19" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": "Intramurals"
+    },
+    {
+      "id": "visit-0136",
+      "studentNumber": "2025-00001",
+      "dateTime": { "daysAgo": 10, "time": "11:12" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0137",
+      "studentNumber": "2023-00007",
+      "dateTime": { "daysAgo": 10, "time": "11:17" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0138",
+      "studentNumber": "2023-00009",
+      "dateTime": { "daysAgo": 10, "time": "12:06" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0139",
+      "studentNumber": "2021-00002",
+      "dateTime": { "daysAgo": 9, "time": "10:11" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0140",
+      "studentNumber": "2023-00006",
+      "dateTime": { "daysAgo": 9, "time": "10:16" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0141",
+      "studentNumber": "2020-00008",
+      "dateTime": { "daysAgo": 9, "time": "11:23" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0142",
+      "studentNumber": "2026-00007",
+      "dateTime": { "daysAgo": 8, "time": "09:10" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0143",
+      "studentNumber": "2026-00008",
+      "dateTime": { "daysAgo": 8, "time": "09:15" },
+      "complaint": "Fever",
+      "treatment": "Paracetamol given; temperature rechecked",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0144",
+      "studentNumber": "2026-00009",
+      "dateTime": { "daysAgo": 8, "time": "12:48" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0145",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 7, "time": "10:30" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0146",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 7, "time": "10:30" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0147",
+      "studentNumber": "2023-00007",
+      "dateTime": { "daysAgo": 7, "time": "10:30" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0148",
+      "studentNumber": "2021-00004",
+      "dateTime": { "daysAgo": 7, "time": "10:54" },
+      "complaint": "Cough and colds",
+      "treatment": "Observed; advised fluids",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0149",
+      "studentNumber": "2026-00006",
+      "dateTime": { "daysAgo": 7, "time": "13:45" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0150",
+      "studentNumber": "2025-00002",
+      "dateTime": { "daysAgo": 5, "time": "08:04" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0151",
+      "studentNumber": "2021-00005",
+      "dateTime": { "daysAgo": 5, "time": "10:54" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "sent_home",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0152",
+      "studentNumber": "2022-00001",
+      "dateTime": { "daysAgo": 2, "time": "10:30" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0153",
+      "studentNumber": "2026-00004",
+      "dateTime": { "daysAgo": 2, "time": "10:30" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0154",
+      "studentNumber": "2023-00007",
+      "dateTime": { "daysAgo": 2, "time": "10:30" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0155",
+      "studentNumber": "2025-00001",
+      "dateTime": { "daysAgo": 2, "time": "11:45" },
+      "complaint": "Dizziness",
+      "treatment": "Rested lying down; vitals normal",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0156",
+      "studentNumber": "2020-00009",
+      "dateTime": { "daysAgo": 2, "time": "12:01" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0157",
+      "studentNumber": "2026-00002",
+      "dateTime": { "daysAgo": 0, "time": "07:12" },
+      "complaint": "Headache",
+      "treatment": "Rested in clinic; paracetamol given",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0158",
+      "studentNumber": "2022-00003",
+      "dateTime": { "daysAgo": 0, "time": "07:31" },
+      "complaint": "Stomachache",
+      "treatment": "Rested in clinic; warm compress",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    },
+    {
+      "id": "visit-0159",
+      "studentNumber": "2026-00005",
+      "dateTime": { "daysAgo": 0, "time": "07:48" },
+      "complaint": "Minor wound",
+      "treatment": "Wound cleaned and dressed",
+      "disposition": "returned_to_class",
+      "loggedByUserId": "user-staff-01",
+      "eventTag": null
+    }
+  ],
+  "incidents": [
+    {
+      "id": "incident-0001",
+      "studentNumber": "2020-00003",
+      "time": { "daysAgo": 380, "time": "13:46" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 37.2,
+        "pulseBpm": 97,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 380, "time": "13:52" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0002",
+      "studentNumber": "2026-00002",
+      "time": { "daysAgo": 359, "time": "10:13" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 36.6,
+        "pulseBpm": 101,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 359, "time": "10:18" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 359, "time": "10:22" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0003",
+      "studentNumber": "2021-00006",
+      "time": { "daysAgo": 337, "time": "12:07" },
+      "complaint": "Head bump during PE",
+      "vitals": {
+        "temperatureC": 36.9,
+        "pulseBpm": 84,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 337, "time": "12:13" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0004",
+      "studentNumber": "2023-00001",
+      "time": { "daysAgo": 323, "time": "09:40" },
+      "complaint": "Severe allergic reaction",
+      "vitals": {
+        "temperatureC": 37.5,
+        "pulseBpm": 82,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 323, "time": "09:45" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 323, "time": "09:49" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0005",
+      "studentNumber": "2020-00006",
+      "time": { "daysAgo": 299, "time": "12:36" },
+      "complaint": "Severe allergic reaction",
+      "vitals": {
+        "temperatureC": 37.2,
+        "pulseBpm": 81,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 299, "time": "12:41" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 299, "time": "12:45" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0006",
+      "studentNumber": "2024-00005",
+      "time": { "daysAgo": 276, "time": "11:22" },
+      "complaint": "Severe allergic reaction",
+      "vitals": {
+        "temperatureC": 36.9,
+        "pulseBpm": 91,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 276, "time": "11:28" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0007",
+      "studentNumber": "2026-00002",
+      "time": { "daysAgo": 252, "time": "10:07" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 37.300000000000004,
+        "pulseBpm": 93,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 252, "time": "10:13" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0008",
+      "studentNumber": "2020-00001",
+      "time": { "daysAgo": 235, "time": "11:23" },
+      "complaint": "Head bump during PE",
+      "vitals": {
+        "temperatureC": 37.2,
+        "pulseBpm": 87,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 235, "time": "11:28" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 235, "time": "11:32" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0009",
+      "studentNumber": "2021-00007",
+      "time": { "daysAgo": 213, "time": "09:21" },
+      "complaint": "Fall injury",
+      "vitals": {
+        "temperatureC": 37.5,
+        "pulseBpm": 90,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 213, "time": "09:26" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 213, "time": "09:30" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0010",
+      "studentNumber": "2020-00004",
+      "time": { "daysAgo": 190, "time": "13:11" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 37.5,
+        "pulseBpm": 80,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 190, "time": "13:17" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0011",
+      "studentNumber": "2026-00004",
+      "time": { "daysAgo": 166, "time": "13:09" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 36.7,
+        "pulseBpm": 93,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 166, "time": "13:14" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 166, "time": "13:18" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0012",
+      "studentNumber": "2021-00007",
+      "time": { "daysAgo": 154, "time": "12:03" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 36.800000000000004,
+        "pulseBpm": 103,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 154, "time": "12:09" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0013",
+      "studentNumber": "2026-00003",
+      "time": { "daysAgo": 137, "time": "10:47" },
+      "complaint": "Fall injury",
+      "vitals": {
+        "temperatureC": 36.800000000000004,
+        "pulseBpm": 98,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 137, "time": "10:53" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0014",
+      "studentNumber": "2020-00006",
+      "time": { "daysAgo": 122, "time": "10:33" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 37.5,
+        "pulseBpm": 83,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 122, "time": "10:39" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0015",
+      "studentNumber": "2023-00005",
+      "time": { "daysAgo": 106, "time": "12:26" },
+      "complaint": "Fall injury",
+      "vitals": {
+        "temperatureC": 37.2,
+        "pulseBpm": 81,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 106, "time": "12:31" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 106, "time": "12:35" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0016",
+      "studentNumber": "2020-00001",
+      "time": { "daysAgo": 86, "time": "10:12" },
+      "complaint": "Asthma attack",
+      "vitals": {
+        "temperatureC": 36.800000000000004,
+        "pulseBpm": 102,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 86, "time": "10:18" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0017",
+      "studentNumber": "2023-00002",
+      "time": { "daysAgo": 71, "time": "12:04" },
+      "complaint": "Fainting",
+      "vitals": {
+        "temperatureC": 37.4,
+        "pulseBpm": 101,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 71, "time": "12:10" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0018",
+      "studentNumber": "2023-00004",
+      "time": { "daysAgo": 59, "time": "10:44" },
+      "complaint": "Fall injury",
+      "vitals": {
+        "temperatureC": 37.4,
+        "pulseBpm": 99,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 59, "time": "10:49" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 59, "time": "10:53" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0019",
+      "studentNumber": "2020-00009",
+      "time": { "daysAgo": 38, "time": "13:32" },
+      "complaint": "Severe allergic reaction",
+      "vitals": {
+        "temperatureC": 37.300000000000004,
+        "pulseBpm": 97,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 38, "time": "13:38" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0020",
+      "studentNumber": "2021-00001",
+      "time": { "daysAgo": 13, "time": "09:15" },
+      "complaint": "Fall injury",
+      "vitals": {
+        "temperatureC": 36.800000000000004,
+        "pulseBpm": 107,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": null,
+      "parentNotifications": [
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 13, "time": "09:21" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0021",
+      "studentNumber": "2025-00002",
+      "time": { "daysAgo": 2, "time": "12:00" },
+      "complaint": "Fall injury",
+      "vitals": {
+        "temperatureC": 36.7,
+        "pulseBpm": 80,
+        "bloodPressure": "110/70",
+        "oxygenSaturation": "98%",
+        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+      },
+      "hospitalReferral": {
+        "destination": "Demo General Hospital (fictional)",
+        "transportMode": "School vehicle",
+        "departureTime": { "daysAgo": 2, "time": "13:05" }
+      },
+      "parentNotifications": [
+        {
+          "outcome": "not_reached",
+          "timestamp": { "daysAgo": 2, "time": "12:05" }
+        },
+        {
+          "outcome": "reached",
+          "timestamp": { "daysAgo": 2, "time": "12:09" }
+        }
+      ],
+      "stage": 2,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0022",
+      "studentNumber": "2022-00001",
+      "time": { "daysAgo": 1, "time": "12:05" },
+      "complaint": "Fainting",
+      "vitals": { "temperatureC": 36.9, "pulseBpm": 104 },
+      "hospitalReferral": null,
+      "parentNotifications": [],
+      "stage": 1,
+      "eventTag": null
+    },
+    {
+      "id": "incident-0023",
+      "studentNumber": "2021-00001",
+      "time": { "daysAgo": 0, "time": "07:40" },
+      "complaint": "Asthma attack",
+      "vitals": { "temperatureC": 36.9, "pulseBpm": 104 },
+      "hospitalReferral": null,
+      "parentNotifications": [],
+      "stage": 1,
+      "eventTag": null
+    }
+  ],
+  "followUps": [
+    {
+      "id": "followup-0001",
+      "studentNumber": "2023-00001",
+      "relatedRecord": { "type": "visit", "id": "visit-0057" },
+      "followUpDate": { "daysAgo": 210 },
+      "reason": "Check wound dressing",
+      "status": "completed",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0002",
+      "studentNumber": "2026-00002",
+      "relatedRecord": { "type": "visit", "id": "visit-0071" },
+      "followUpDate": { "daysAgo": 152 },
+      "reason": "Return tomorrow for monitoring",
+      "status": "completed",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0003",
+      "studentNumber": "2026-00008",
+      "relatedRecord": { "type": "visit", "id": "visit-0084" },
+      "followUpDate": { "daysAgo": 101 },
+      "reason": "Recheck temperature",
+      "status": "missed",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0004",
+      "studentNumber": "2024-00004",
+      "relatedRecord": { "type": "visit", "id": "visit-0089" },
+      "followUpDate": { "daysAgo": 70 },
+      "reason": "Check wound dressing",
+      "status": "completed",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0005",
+      "studentNumber": "2021-00006",
+      "relatedRecord": { "type": "visit", "id": "visit-0094" },
+      "followUpDate": { "daysAgo": 54 },
+      "reason": "Check wound dressing",
+      "status": "cancelled",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0006",
+      "studentNumber": "2023-00008",
+      "relatedRecord": { "type": "visit", "id": "visit-0098" },
+      "followUpDate": { "daysAgo": 46 },
+      "reason": "Check wound dressing",
+      "status": "completed",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0007",
+      "studentNumber": "2025-00002",
+      "relatedRecord": { "type": "visit", "id": "visit-0150" },
+      "followUpDate": { "daysAgo": 3 },
+      "reason": "Recheck temperature",
+      "status": "pending",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0008",
+      "studentNumber": "2021-00005",
+      "relatedRecord": { "type": "visit", "id": "visit-0151" },
+      "followUpDate": { "daysAgo": 1 },
+      "reason": "Check wound dressing",
+      "status": "pending",
+      "notes": "Dressing changed once already",
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0009",
+      "studentNumber": "2026-00002",
+      "relatedRecord": { "type": "visit", "id": "visit-0157" },
+      "followUpDate": { "daysAgo": 0 },
+      "reason": "Return today for monitoring",
+      "status": "pending",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0010",
+      "studentNumber": "2026-00004",
+      "relatedRecord": { "type": "visit", "id": "visit-0153" },
+      "followUpDate": { "daysAgo": 0 },
+      "reason": "Recheck blood pressure",
+      "status": "pending",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0011",
+      "studentNumber": "2025-00002",
+      "relatedRecord": { "type": "incident", "id": "incident-0021" },
+      "followUpDate": { "daysFromNow": 2 },
+      "reason": "Monitor recovery after hospital referral",
+      "status": "pending",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0012",
+      "studentNumber": "2022-00001",
+      "relatedRecord": { "type": "incident", "id": "incident-0022" },
+      "followUpDate": { "daysFromNow": 5 },
+      "reason": "Monitor symptoms after incident",
+      "status": "pending",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0013",
+      "studentNumber": "2023-00007",
+      "relatedRecord": { "type": "visit", "id": "visit-0154" },
+      "followUpDate": { "daysFromNow": 12 },
+      "reason": "Recheck temperature",
+      "status": "pending",
+      "notes": null,
+      "createdByUserId": "user-staff-01"
+    },
+    {
+      "id": "followup-0014",
+      "studentNumber": "2025-00001",
+      "relatedRecord": { "type": "visit", "id": "visit-0155" },
+      "followUpDate": { "daysAgo": 2 },
+      "reason": "Return for monitoring",
+      "status": "completed",
+      "notes": "Student returned; no further concerns",
+      "createdByUserId": "user-staff-01"
+    }
+  ],
+  "inventoryItems": [
+    {
+      "id": "item-0001",
+      "name": "Paracetamol 500mg",
+      "category": "medicine",
+      "currentStock": 12,
+      "unit": "tablets",
+      "expirationDate": { "daysFromNow": 210 },
+      "lowStockThreshold": 50
+    },
+    {
+      "id": "item-0002",
+      "name": "Mefenamic Acid 250mg",
+      "category": "medicine",
+      "currentStock": 80,
+      "unit": "capsules",
+      "expirationDate": { "daysFromNow": 18 },
+      "lowStockThreshold": 30
+    },
+    {
+      "id": "item-0003",
+      "name": "Cetirizine 10mg",
+      "category": "medicine",
+      "currentStock": 9,
+      "unit": "tablets",
+      "expirationDate": { "daysFromNow": 11 },
+      "lowStockThreshold": 20
+    },
+    {
+      "id": "item-0004",
+      "name": "Oral Rehydration Salts",
+      "category": "medicine",
+      "currentStock": 25,
+      "unit": "sachets",
+      "expirationDate": { "daysAgo": 4 },
+      "lowStockThreshold": 10
+    },
+    {
+      "id": "item-0005",
+      "name": "Loperamide 2mg",
+      "category": "medicine",
+      "currentStock": 30,
+      "unit": "capsules",
+      "expirationDate": { "daysFromNow": 95 },
+      "lowStockThreshold": 10
+    },
+    {
+      "id": "item-0006",
+      "name": "Salbutamol Nebule 2.5mg",
+      "category": "medicine",
+      "currentStock": 14,
+      "unit": "nebules",
+      "expirationDate": { "daysFromNow": 160 },
+      "lowStockThreshold": 6
+    },
+    {
+      "id": "item-0007",
+      "name": "Antacid Tablets",
+      "category": "medicine",
+      "currentStock": 40,
+      "unit": "tablets",
+      "expirationDate": { "daysFromNow": 320 },
+      "lowStockThreshold": 15
+    },
+    {
+      "id": "item-0008",
+      "name": "Alcohol 70%",
+      "category": "supply",
+      "currentStock": 3,
+      "unit": "bottles",
+      "expirationDate": { "daysFromNow": 400 },
+      "lowStockThreshold": 5
+    },
+    {
+      "id": "item-0009",
+      "name": "Povidone-Iodine",
+      "category": "supply",
+      "currentStock": 6,
+      "unit": "bottles",
+      "expirationDate": { "daysFromNow": 300 },
+      "lowStockThreshold": 4
+    },
+    {
+      "id": "item-0010",
+      "name": "Adhesive Bandages",
+      "category": "supply",
+      "currentStock": 150,
+      "unit": "pieces",
+      "expirationDate": null,
+      "lowStockThreshold": 50
+    },
+    {
+      "id": "item-0011",
+      "name": "Gauze Pads",
+      "category": "supply",
+      "currentStock": 40,
+      "unit": "pieces",
+      "expirationDate": null,
+      "lowStockThreshold": 25
+    },
+    {
+      "id": "item-0012",
+      "name": "Cotton Balls",
+      "category": "supply",
+      "currentStock": 2,
+      "unit": "packs",
+      "expirationDate": null,
+      "lowStockThreshold": 3
+    },
+    {
+      "id": "item-0013",
+      "name": "Instant Cold Packs",
+      "category": "supply",
+      "currentStock": 18,
+      "unit": "packs",
+      "expirationDate": { "daysFromNow": 540 },
+      "lowStockThreshold": 8
+    },
+    {
+      "id": "item-0014",
+      "name": "Disposable Gloves",
+      "category": "supply",
+      "currentStock": 90,
+      "unit": "pairs",
+      "expirationDate": { "daysFromNow": 700 },
+      "lowStockThreshold": 40
+    }
+  ],
+  "reports": [
+    {
+      "type": "monthly",
+      "dateRange": {
+        "from": { "daysAgo": 60 },
+        "to": { "daysAgo": 31 }
+      }
+    },
+    {
+      "type": "health_summary",
+      "dateRange": {
+        "from": { "daysAgo": 60 },
+        "to": { "daysAgo": 31 }
+      }
+    }
+  ],
+  "backupLogs": [
+    {
+      "lastRun": { "daysAgo": 5, "time": "02:00" },
+      "fileSizeBytes": 18120704,
+      "status": "ok",
+      "verifiedByUserId": "user-staff-01"
+    },
+    {
+      "lastRun": { "daysAgo": 4, "time": "02:00" },
+      "fileSizeBytes": 18203648,
+      "status": "ok",
+      "verifiedByUserId": "user-staff-01"
+    },
+    {
+      "lastRun": { "daysAgo": 3, "time": "02:00" },
+      "fileSizeBytes": 0,
+      "status": "failed",
+      "verifiedByUserId": null
+    },
+    {
+      "lastRun": { "daysAgo": 2, "time": "02:00" },
+      "fileSizeBytes": 18350080,
+      "status": "ok",
+      "verifiedByUserId": "user-staff-01"
+    },
+    {
+      "lastRun": { "daysAgo": 1, "time": "02:00" },
+      "fileSizeBytes": 18412544,
+      "status": "ok",
+      "verifiedByUserId": null
+    }
+  ],
+  "auditLog": [
+    {
+      "userId": "user-staff-01",
+      "actionType": "login",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 1, "time": "07:05" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "submit",
+      "targetRecord": { "type": "visit", "id": "visit-0156" },
+      "timestamp": { "daysAgo": 1, "time": "11:00" }
+    },
+    {
+      "userId": "user-instructor-01",
+      "actionType": "login",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 1, "time": "10:38" }
+    },
+    {
+      "userId": "user-instructor-01",
+      "actionType": "scan",
+      "targetRecord": { "type": "student", "id": "student-0008" },
+      "timestamp": { "daysAgo": 1, "time": "10:41" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "submit",
+      "targetRecord": { "type": "incident", "id": "incident-0022" },
+      "timestamp": { "daysAgo": 1, "time": "12:05" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "logout",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 1, "time": "17:02" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "login",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 0, "time": "07:02" }
+    }
+  ],
+  "frontendOnly": {
+    "_note": "MOCK-ONLY. Data the screens need that CLINIQ_Frontend_Context_Brief.md §5 does not define. None of this is a schema decision; review every key when the ERD is designed.",
+    "devAccounts": [
+      {
+        "userId": "user-staff-01",
+        "password": "dev-only-not-a-real-password-1",
+        "mustChangePassword": false
+      },
+      {
+        "userId": "user-admin-01",
+        "password": "dev-only-not-a-real-password-2",
+        "mustChangePassword": false
+      },
+      {
+        "userId": "user-instructor-01",
+        "password": "dev-only-not-a-real-password-3",
+        "mustChangePassword": false
+      },
+      {
+        "userId": "user-instructor-02",
+        "password": "dev-only-not-a-real-password-4",
+        "mustChangePassword": true
+      }
+    ],
+    "visitComplaintTypes": [
+      {
+        "label": "Headache",
+        "triageSteps": ["Check temperature", "Ask about hydration and meals", "Allow supervised rest"]
+      },
+      {
+        "label": "Stomachache",
+        "triageSteps": []
+      },
+      {
+        "label": "Fever",
+        "triageSteps": ["Check temperature", "Ask about onset of symptoms", "Notify parent if fever persists"]
+      },
+      {
+        "label": "Cough and colds",
+        "triageSteps": []
+      },
+      {
+        "label": "Dizziness",
+        "triageSteps": []
+      },
+      {
+        "label": "Minor wound",
+        "triageSteps": ["Clean wound", "Apply dressing", "Record location and cause"]
+      },
+      {
+        "label": "Menstrual cramps",
+        "triageSteps": []
+      },
+      {
+        "label": "Toothache",
+        "triageSteps": []
+      },
+      {
+        "label": "Sprain",
+        "triageSteps": []
+      },
+      {
+        "label": "Allergic reaction",
+        "triageSteps": []
+      },
+      {
+        "label": "Fainting",
+        "triageSteps": ["Check responsiveness", "Record pulse and breathing", "Keep student lying down"]
+      }
+    ],
+    "incidentComplaintTypes": [
+      "Fainting",
+      "Fall injury",
+      "Asthma attack",
+      "Severe allergic reaction",
+      "Head bump during PE"
+    ],
+    "inventoryTransactions": [
+      {
+        "id": "txn-0001",
+        "itemId": "item-0001",
+        "type": "restock",
+        "quantity": 100,
+        "timestamp": { "daysAgo": 40, "time": "15:00" },
+        "userId": "user-staff-01",
+        "studentNumber": null,
+        "visitId": null
+      },
+      {
+        "id": "txn-0002",
+        "itemId": "item-0001",
+        "type": "dispense",
+        "quantity": 2,
+        "timestamp": { "daysAgo": 5, "time": "10:54" },
+        "userId": "user-staff-01",
+        "studentNumber": "2021-00005",
+        "visitId": "visit-0151"
+      },
+      {
+        "id": "txn-0003",
+        "itemId": "item-0003",
+        "type": "dispense",
+        "quantity": 1,
+        "timestamp": { "daysAgo": 7, "time": "13:45" },
+        "userId": "user-staff-01",
+        "studentNumber": "2026-00006",
+        "visitId": "visit-0149"
+      },
+      {
+        "id": "txn-0004",
+        "itemId": "item-0010",
+        "type": "dispense",
+        "quantity": 3,
+        "timestamp": { "daysAgo": 2, "time": "12:01" },
+        "userId": "user-staff-01",
+        "studentNumber": "2020-00009",
+        "visitId": "visit-0156"
+      }
+    ],
+    "recordReviews": [
+      {
+        "studentNumber": "2023-00001",
+        "importedAt": { "daysAgo": 3 },
+        "importedBy": "Registrar import",
+        "resolvedByUserId": null,
+        "resolvedAt": null
+      },
+      {
+        "studentNumber": "2023-00004",
+        "importedAt": { "daysAgo": 5 },
+        "importedBy": "Registrar import",
+        "resolvedByUserId": null,
+        "resolvedAt": null
+      },
+      {
+        "studentNumber": "2023-00005",
+        "importedAt": { "daysAgo": 7 },
+        "importedBy": "Registrar import",
+        "resolvedByUserId": null,
+        "resolvedAt": null
+      },
+      {
+        "studentNumber": "2025-00002",
+        "importedAt": { "daysAgo": 9 },
+        "importedBy": "Registrar import",
+        "resolvedByUserId": null,
+        "resolvedAt": null
+      },
+      {
+        "studentNumber": "2021-00005",
+        "importedAt": { "daysAgo": 11 },
+        "importedBy": "Registrar import",
+        "resolvedByUserId": null,
+        "resolvedAt": null
+      },
+      {
+        "studentNumber": "2022-00002",
+        "importedAt": { "daysAgo": 30 },
+        "importedBy": "Registrar import",
+        "resolvedByUserId": "user-staff-01",
+        "resolvedAt": { "daysAgo": 21, "time": "14:10" }
+      }
+    ],
+    "excuseLetterApprovals": [
+      {
+        "id": "excuse-visit-0141",
+        "visitId": "visit-0141",
+        "approvedByUserId": "user-staff-01",
+        "approvedAt": { "daysAgo": 9, "time": "11:23" }
+      }
+    ],
+    "peReferrals": [
+      {
+        "id": "pe-referral-0001",
+        "studentNumber": "2020-00005",
+        "referredByUserId": "user-instructor-01",
+        "activity": "Basketball drills",
+        "injurySummary": "Rolled left ankle landing a jump",
+        "clinicalAssessment": "Mild swelling, able to bear weight",
+        "treatment": "Cold compress and elevation",
+        "disposition": "returned_to_class",
+        "createdAt": { "daysAgo": 16, "time": "14:20" }
+      }
+    ]
+  }
+}

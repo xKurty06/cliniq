@@ -27,7 +27,7 @@ import {
   type CalendarView,
   type HeatScale,
 } from '../lib/calendar'
-import type { CalendarDay } from '../types'
+import type { CalendarDay } from '../../../types/dashboard'
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEKDAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']

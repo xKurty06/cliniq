@@ -166,7 +166,7 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 ### Phase F2 — Remaining Screens, Module by Module
 
 **Student Records**
-- [x] Build / [ ] Audit — #3 App Shell/Nav — Build note: Role-aware shell and navigation are implemented with Staff, Admin, and Instructor behavior plus enabled-route links; focused navigation tests pass. · Audit note:
+- [x] Build / [x] Audit — #3 App Shell/Nav — Build note: Role-aware shell and navigation are implemented with Staff, Admin, and Instructor behavior plus enabled-route links; focused navigation tests pass. · Audit note: Monday, September 28, 2026 — 08:30: Countercheck, interaction/accessibility audit, and role-route simulation passed. Staff sees all enabled modules; Admin is constrained to Dashboard/Reports; Instructor redirects to the shell-free mobile lookup. The mock route guard is correctly scoped as a UX boundary pending Laravel/Sanctum enforcement.
 - [x] Build / [ ] Audit — #6 Student List — Build note: Masterlist with privacy-safe medical-field boundary, name/Student Number search, grade/archive filters, status badges, table fallback, and skeleton/error/empty states. · Audit note:
 - [x] Build / [ ] Audit — #8 Add/Edit Student — Build note: Staff-only validated form with system-assigned Student Number, duplicate confirmation, custom grade select, success/loading/error states, and audit events. · Audit note:
 - [x] Build / [ ] Audit — #9 Incomplete Records Review Queue — Build note: Staff review queue with status/search filters, missing-field context, resolver state, approval audit event, and skeleton/error/empty states. · Audit note:
@@ -201,7 +201,7 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 **Reports Generation**
 - [x] Build / [ ] Audit — #19 Monthly Report View/Generate (+ print) — Build note: Staff/Admin monthly report view with month selector, visit/incident/follow-up summary counts, role-aware access, and print/Save as PDF action. · Audit note:
 - [x] Build / [ ] Audit — #20 Incident Report Archive (+ print) — Build note: Staff/Admin incident archive with Student Number rows, date/complaint/status fields, and print-friendly table layout. · Audit note:
-- [x] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: Staff/Admin complaint summary with privacy-safe aggregate table, reporting period selector, and print/export layout. · Audit note:
+- [x] Build / [ ] Audit — #21 Health Summaries View (+ print) — Build note: Staff/Admin complaint summary with privacy-safe aggregate table, reporting period selector, and print/export layout. Monday, September 28, 2026 — 08:38: owner-requested visual upgrade. Default view is now a sorted horizontal bar chart of visits per complaint, with a Chart | Table toggle (no chart-type picker, by design), a headline summary line, and an empty state. Chart and table both print regardless of the on-screen view. · Audit note:
 
 **User Management**
 - [x] Build / [ ] Audit — #33 User List — Build note: Staff user list shows accounts, role badges, last login, and edit navigation. · Audit note:
@@ -211,7 +211,7 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [ ] Audit — #32 Backup Status Screen — Build note: Staff backup status and guided recovery checklist with verification audit action are implemented. · Audit note:
 
 - [ ] **F2 exit check (Audit phase only):** every screen above matches its reference pattern (`Reference-Screens.md` §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
-  Audit note: Monday, September 28, 2026 — 08:25: the two implementation blockers are resolved: Screen #15 now exists at `/incidents`, and Screen #20 resolves the actual linked `Student.studentNumber`. The formal F2 gate remains unchecked until the complete screen-by-screen Phase 2 audit is recorded.
+  Audit note: Monday, September 28, 2026 — 08:40: Full source, route/role, privacy, mock-audit, loading-state, interaction-state, and flow audit completed across every F2 item. #18c Follow-Up List was corrected to resolve actual Student Numbers and log a completion update. The gate remains unchecked: #6, #17, and #23 retain documented UX follow-ups, and the required browser-level axe result is inconclusive because the available driver supports Chrome 154 while this workstation has Chrome 153. Full per-screen evidence: `08-Logs/Agent-Sessions/2026-09-28-f2-full-audit.md`.
 
 ### Phase F3 — Polish & Client Demo Prep
 

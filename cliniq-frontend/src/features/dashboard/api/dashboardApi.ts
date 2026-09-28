@@ -1,7 +1,7 @@
 import { todayISO } from '../../../lib/dates'
 import { getMockDataset } from '../../../lib/mocks/dataset'
 import type { ISODate } from '../../../types/entities'
-import type { CalendarDay, DashboardQuery, DashboardSummary } from '../types'
+import type { CalendarDay, DashboardQuery, DashboardSummary } from '../../../types/dashboard'
 import { buildCalendarDays, buildDashboardSummary } from './aggregate'
 
 /**
