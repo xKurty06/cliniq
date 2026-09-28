@@ -11,7 +11,7 @@ function formatSize(bytes: number): string {
 
 function BackupSkeleton() {
     return (
-        <div aria-hidden="true" className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 py-6 sm:px-8">
+        <div aria-hidden="true" className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
             <Card className="p-5">
                 <Skeleton className="h-7 w-56" />
                 <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -36,7 +36,7 @@ export function BackupStatusPage() {
 
     if (status === 'error')
         return (
-            <main className="mx-auto max-w-[900px] px-4 py-6 sm:px-8">
+            <main className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
                 <ErrorState title="Unable to load backup status." onRetry={reload} />
             </main>
         )
@@ -54,7 +54,7 @@ export function BackupStatusPage() {
     const latest = current.latest
     if (!latest)
         return (
-            <main className="mx-auto max-w-[900px] px-4 py-6 sm:px-8">
+            <main className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
                 <EmptyState
                     icon="shieldPlus"
                     title="No backups recorded yet"
@@ -74,7 +74,7 @@ export function BackupStatusPage() {
     }
 
     return (
-        <main className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 py-6 sm:px-8">
+        <main className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
             <Card className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

@@ -22,7 +22,7 @@ function FollowUpSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8"
+      className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8"
     >
       <Card className="p-5">
         <Skeleton className="h-7 w-52" />
@@ -58,7 +58,7 @@ export function FollowUpListPage() {
   const { data, status, reload } = useAsyncData(statusFilter, () => fetchFollowUps(statusFilter))
   if (status === 'error')
     return (
-      <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-8">
+      <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load follow-ups." onRetry={reload} />
       </div>
     )
@@ -101,7 +101,7 @@ export function FollowUpListPage() {
     },
   ]
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Follow-Ups</h1>
         <p className="mt-1 text-sm text-text-secondary">

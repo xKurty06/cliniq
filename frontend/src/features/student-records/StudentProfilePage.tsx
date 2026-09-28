@@ -55,7 +55,7 @@ function tagList(items: string[], empty: string) {
 
 function StudentProfileSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-2">
@@ -284,7 +284,7 @@ export function StudentProfilePage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1120px] px-4 py-6 sm:px-8">
+      <div className="mx-auto max-w-[1120px] px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load the student profile." onRetry={reload} />
       </div>
     )
@@ -304,7 +304,7 @@ export function StudentProfilePage({
   return (
     <div
       className={cn(
-        'mx-auto flex max-w-[1120px] flex-col gap-4 px-4 py-6 sm:px-8',
+        'mx-auto flex max-w-[1120px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8',
         viewer.role === 'instructor' && 'min-h-screen bg-surface',
       )}
     >

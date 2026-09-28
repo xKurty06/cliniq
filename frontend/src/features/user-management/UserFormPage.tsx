@@ -21,7 +21,7 @@ function FormSkeleton() {
       <p className="sr-only" role="status">
         Loading account...
       </p>
-      <div aria-hidden="true" className="mx-auto max-w-[760px] px-4 py-6 sm:px-8">
+      <div aria-hidden="true" className="mx-auto max-w-[760px] px-4 pt-10 pb-8 sm:px-8">
         <Card className="p-5">
           <Skeleton className="h-7 w-40" />
           {Array.from({ length: 3 }, (_, index) => (
@@ -52,7 +52,7 @@ function UserForm({
     setSaved(true)
   }
   return (
-    <main className="mx-auto flex max-w-[760px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <main className="mx-auto flex max-w-[760px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card>
         <CardHeader
           title={userId ? 'Edit user' : 'Add user'}

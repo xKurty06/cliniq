@@ -61,7 +61,7 @@ function formatDateTime(value: string): string {
 
 function VisitLogSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-48 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -105,7 +105,7 @@ export function VisitLogListPage() {
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-8">
+      <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load visit log." onRetry={reload} />
       </div>
     )
@@ -198,7 +198,7 @@ export function VisitLogListPage() {
   ]
 
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>

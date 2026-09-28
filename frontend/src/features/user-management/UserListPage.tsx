@@ -50,7 +50,7 @@ const columns: Array<DataTableColumn<User>> = [
 ]
 function UserListSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-56" />
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
@@ -68,7 +68,7 @@ export function UserListPage() {
   const { data: users, status, reload } = useAsyncData('users', fetchUsers)
   if (status === 'error')
     return (
-      <main className="mx-auto max-w-[1100px] px-4 py-6 sm:px-8">
+      <main className="mx-auto max-w-[1100px] px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load user accounts." onRetry={reload} />
       </main>
     )
@@ -82,7 +82,7 @@ export function UserListPage() {
       </>
     )
   return (
-    <main className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <main className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>

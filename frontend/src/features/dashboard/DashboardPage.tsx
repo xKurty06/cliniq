@@ -54,7 +54,7 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
   )
 
   return (
-    <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 pt-2 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 pt-10 pb-8 sm:px-8">
       <DashboardHeader
         viewer={viewer}
         today={today}

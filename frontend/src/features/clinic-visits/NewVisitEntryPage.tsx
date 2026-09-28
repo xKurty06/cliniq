@@ -35,7 +35,7 @@ interface Errors {
 
 function VisitSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-56 max-w-full" />
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
@@ -306,7 +306,7 @@ export function NewVisitEntryPage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 py-6 sm:px-8">
+      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load the visit form." onRetry={reload} />
       </div>
     )
@@ -324,7 +324,7 @@ export function NewVisitEntryPage({
   }
 
   return (
-    <div className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 py-6 sm:px-8">
+    <div className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>

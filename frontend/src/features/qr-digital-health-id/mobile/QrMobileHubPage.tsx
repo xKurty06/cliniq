@@ -203,7 +203,7 @@ export function QrMobileHubPage({ viewer = getMockSessionUser() }: { viewer?: Se
   const instructor = viewer.role === 'instructor'
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-5">
+    <main className="min-h-screen bg-surface px-4 pt-10 pb-8">
       <div className="mx-auto flex max-w-md flex-col gap-4">
         <header className="flex items-start justify-between gap-3">
           <div>

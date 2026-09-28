@@ -6,6 +6,7 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Tuesday, September 29, 2026 — 07:42 | Standardized screen-level spacing to `pt-10 pb-8` across the Dashboard and other content wrappers. | `frontend/src/features/`, `frontend/src/routes/`, `Agent-Sessions/2026-09-29-dashboard-top-spacing.md` |
 | Tuesday, September 29, 2026 — 00:07 | Narrowed component-skill creation to patterns expected to recur across many pages; isolated or merely shared components no longer trigger a new skill. | `Agent-Sessions/2026-09-29-component-skill-threshold.md` |
 | Tuesday, September 29, 2026 — 00:03 | Unified the system and browser branding on Healware_Logo.png; added the shared sidebar branding skill to retain the pairing. | `Agent-Sessions/2026-09-29-healware-system-logo.md` |
 | Monday, September 28, 2026 — 23:48 | Added a component-skills rule to AGENTS.md/CLAUDE.md: for any major, shared, or repeated component, agents look for its `cliniq-<component>-patterns` skill first, create it from the user's stated preferences if missing, and compare every request against it — updating the skill and the shared component together wherever they differ (one-off requests stay local), and reporting old → new. Wired into Frontend-Loop-Engineering (Phase 0 skim, Phase 1 Read, Phase 2 Audit) and Skills-Setup. `.claude/skills/` is now owned by the live repo and left out of exports. | `AGENTS.md`, `CLAUDE.md`, `Frontend-Loop-Engineering.md`, `Skills-Setup.md`, `Agent-Sessions/2026-09-28-component-skills-rule.md` |
