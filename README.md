@@ -102,14 +102,14 @@ CLINIQ/
 ├── 🤖 CLAUDE.md                 → identical to AGENTS.md (Claude Code auto-loads this one)
 ├── 📄 README.md                 → you are here
 │
-├── 🎨 cliniq-frontend/          → React + TypeScript + Vite
+├── 🎨 frontend/                 → React + TypeScript + Vite
 │   └── src/features/            → one folder per module, feature-based structure
 │       └── qr-digital-health-id/
 │           ├── desktop/         → Staff's computer quick-action hub
 │           ├── mobile/          → Staff mobile flow + PE/Sports Instructor lookup
 │           └── shared/          → the one camera-scanning implementation, used by both
 │
-├── ⚙️ cliniq-backend/           → Laravel API
+├── ⚙️ backend/                  → Laravel API
 │   └── app/Modules/             → one folder per module, mirroring the frontend directly
 │
 ├── 🧠 .claude/skills/           → bespoke, CLINIQ-specific agent skills
@@ -144,13 +144,13 @@ One repository, not three — frontend, backend, and the knowledge base travel t
 git clone <repo-url> CLINIQ && cd CLINIQ
 
 # 2. Backend
-composer create-project laravel/laravel cliniq-backend
-cd cliniq-backend
+composer create-project laravel/laravel backend
+cd backend
 composer require laravel/sanctum endroid/qr-code
 cp .env.example .env   # configure against XAMPP's MySQL
 
 # 3. Frontend
-cd ../cliniq-frontend
+cd ../frontend
 npm create vite@latest . -- --template react-ts
 npm install tailwindcss qr-scanner chart.js react-chartjs-2
 cp .env.example .env

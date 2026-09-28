@@ -3,6 +3,8 @@
 **Date:** Saturday, September 26, 2026 — actual time not available (no system clock access in this environment)
 **Status:** Accepted
 
+**Update (Monday, September 28, 2026 — 19:19):** the top-level folder is `backend/`. Paths in this record use that name; the decision itself is unchanged.
+
 ## Context
 ADR-008 committed the frontend to a feature-based folder structure (`src/features/<module>/`), specifically for scalability and maintainability across ~35 screens and 10 modules. The backend had no equivalent commitment — Development-Phases.md's B0–B10 phases organize *build sequencing* by module, but nothing decided whether that translates into actual code boundaries. Left alone, the default Laravel convention (everything in flat `app/Models/`, `app/Http/Controllers/`) would mean a "modular" project on paper with a monolithic, tightly-coupled backend underneath — the exact gap this ADR closes.
 
@@ -10,7 +12,7 @@ ADR-008 committed the frontend to a feature-based folder structure (`src/feature
 Organize backend code by module, mirroring the frontend's structure directly rather than inventing a separate convention:
 
 ```
-cliniq-backend/
+backend/
 └── app/
     ├── Modules/
     │   ├── StudentRecords/
@@ -44,5 +46,5 @@ Each module folder is self-contained: its own controllers, models, request valid
 
 ## Consequences
 - Every backend phase in `Development-Phases.md` (B4 onward) now has a concrete home for its code — Phase B4 (Student Records API) means literally building inside `app/Modules/StudentRecords/`, not just "the Student Records feature, organized however."
-- `04-Development/Coding-Conventions.md` and `cliniq-backend/README.md` are updated to reflect this structure so it's discoverable before the first migration or controller gets written.
+- `04-Development/Coding-Conventions.md` and `backend/README.md` are updated to reflect this structure so it's discoverable before the first migration or controller gets written.
 - This is a real constraint an agent must respect: don't create a new top-level `app/` folder for a module's code, and don't reach into another module's folder to reuse its logic directly — if two modules genuinely need to share logic, it belongs in `app/Shared/`, not copy-pasted or cross-imported.

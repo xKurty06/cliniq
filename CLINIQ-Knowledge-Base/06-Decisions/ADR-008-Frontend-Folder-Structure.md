@@ -3,8 +3,10 @@
 **Date:** September 25, 2026
 **Status:** Accepted
 
+**Update (Monday, September 28, 2026 — 19:19):** the top-level folder is `frontend/`. Paths in this record use that name; the decision itself is unchanged.
+
 ## Context
-Needed to decide how `cliniq-frontend/src/` is organized before any component code is written, and specifically where QR scanning code belongs — it's the one feature with a real desktop/mobile split, and it wasn't obvious whether that warranted its own frontend project.
+Needed to decide how `frontend/src/` is organized before any component code is written, and specifically where QR scanning code belongs — it's the one feature with a real desktop/mobile split, and it wasn't obvious whether that warranted its own frontend project.
 
 ## Decision
 **Feature-based folder structure** (`src/features/<module>/`), one folder per module from the Modules & Features canonical document, rather than organizing by file type (`src/components/`, `src/pages/`, `src/hooks/` all flat). Generic, truly cross-feature code still gets its own top-level folders (`components/`, `layouts/`, `hooks/`, `lib/`, `types/`), but feature-specific code lives inside that feature's folder, not scattered across the generic ones.

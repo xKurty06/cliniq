@@ -121,7 +121,7 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 
 - [ ] Build / [ ] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
   Build note: · Audit note:
-- [ ] Build / [ ] Audit — Vite scaffold run into `cliniq-frontend/`
+- [ ] Build / [ ] Audit — Vite scaffold run into `frontend/`
   Build note: · Audit note:
 - [ ] Build / [ ] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
   Build note: · Audit note:
@@ -165,10 +165,6 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 
 ### Phase F2 — Remaining Screens, Module by Module
 
-**Authentication (Module 1)**
-- [ ] Build / [ ] Audit — #1 Login (username/password, role-aware redirect per Screen-Inventory #1; include UI states for the documented Module 1 rules: lockout after 5 failed attempts (30-minute lock), and an expired token returning the user to Login. Sessions last 1 week until the token expires per ADR-010; there is no idle timeout, so do not build an inactivity timer or auto-logout) — Build note: · Audit note:
-- [ ] Build / [ ] Audit — #2 Force Password Change (first login; 8-character minimum, no reuse of last 5) — Build note: · Audit note:
-
 **Student Records**
 - [ ] Build / [ ] Audit — #3 App Shell/Nav — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #6 Student List — Build note: · Audit note:
@@ -188,7 +184,6 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [ ] Build / [ ] Audit — #25 Emergency Button (mobile) — Build note: · Audit note:
 
 **Emergency Response (remaining)**
-- [ ] Build / [ ] Audit — #15 Incident Log List (Student Number not name, per the display-privacy skill; Stage-1/Complete status badge) — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #17 Parent Notification Outcome Logging — Build note: · Audit note:
 - [ ] Build / [ ] Audit — #18 Incident Report View/Print — Build note: · Audit note:
 

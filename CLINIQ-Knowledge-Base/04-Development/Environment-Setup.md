@@ -4,8 +4,8 @@
 
 | Step | Command (illustrative) | Purpose |
 |---|---|---|
-| Laravel init | `composer create-project laravel/laravel cliniq-backend` | Scaffolds the backend |
-| React init | `npm create vite@latest cliniq-frontend -- --template react-ts` | Scaffolds frontend with TypeScript, via Vite |
+| Laravel init | `composer create-project laravel/laravel backend` | Scaffolds the backend |
+| React init | `npm create vite@latest frontend -- --template react-ts` | Scaffolds frontend with TypeScript, via Vite |
 | Tailwind | `npm install tailwindcss` + config | Styling |
 | Sanctum | `composer require laravel/sanctum` | SPA authentication |
 | QR generation (backend) | `composer require endroid/qr-code` | Server-side QR generation |

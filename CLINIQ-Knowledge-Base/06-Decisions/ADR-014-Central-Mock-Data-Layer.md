@@ -17,7 +17,7 @@ The project owner asked for one centralized mock-data file, read through one dat
 that editing the file changes every page consistently.
 
 ## Decision
-1. **One file:** `cliniq-frontend/src/lib/mock-db/mock-db.json`. Top-level keys: `meta`, `config`,
+1. **One file:** `frontend/src/lib/mock-db/mock-db.json`. Top-level keys: `meta`, `config`,
    `users`, `students`, `visits`, `incidents`, `followUps`, `inventoryItems`, `reports`,
    `backupLogs`, `auditLog`, `frontendOnly`. About 50 students, sized for hand-editing.
 2. **Raw records only.** Every derived value is computed by selectors in the layer, never stored in

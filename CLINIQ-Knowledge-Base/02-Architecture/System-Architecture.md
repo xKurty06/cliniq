@@ -13,9 +13,9 @@ CLINIQ/
 ├── AGENTS.md                  ← entry point for any AI agent
 ├── CLAUDE.md                  ← pointer to AGENTS.md
 ├── README.md
-├── cliniq-frontend/           ← React + TypeScript + Vite, feature-based structure (see ADR-008)
+├── frontend/                  ← React + TypeScript + Vite, feature-based structure (see ADR-008)
 │   └── src/features/          ← one folder per module; qr-digital-health-id/ further split into desktop/mobile/shared/api
-├── cliniq-backend/            ← Laravel API, module-based structure (see ADR-009)
+├── backend/                   ← Laravel API, module-based structure (see ADR-009)
 │   └── app/Modules/           ← one folder per module, mirroring the frontend directly; Shared/ holds genuinely cross-cutting code (audit trail, base classes)
 └── CLINIQ-Knowledge-Base/     ← this vault
 ```
