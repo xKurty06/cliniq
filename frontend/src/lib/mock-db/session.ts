@@ -47,6 +47,21 @@ export function getMockSessionUser(): SessionUser {
 }
 
 /**
+ * Client-demo-only role picker. It selects the same synthetic account used by the `?role=` preview
+ * and lets the logged-out prototype return to the app without implying real authentication exists.
+ */
+export function selectMockSessionUser(role: UserRole): SessionUser {
+  if (typeof window !== 'undefined') {
+    try {
+      window.sessionStorage.setItem(ROLE_STORAGE_KEY, role)
+    } catch {
+      // The chosen role can still be used for this render when browser storage is unavailable.
+    }
+  }
+  return userForRole(role)
+}
+
+/**
  * Ends the development-only role preview. The real Sanctum logout endpoint will replace this
  * when authentication is implemented in Phase B2.
  */

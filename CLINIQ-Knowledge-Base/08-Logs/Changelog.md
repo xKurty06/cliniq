@@ -6,6 +6,7 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Monday, September 28, 2026 — 23:20 | Added a clearly labelled prototype-only user picker after logout so client demos can switch among the existing mock roles without implying real authentication. | `Agent-Sessions/2026-09-28-demo-user-picker.md` |
 | Monday, September 28, 2026 — 22:44 | Made browser-tab titles follow the active route, including detail, form, QR, report, and not-found screens. | `Agent-Sessions/2026-09-28-route-tab-titles.md` |
 | Monday, September 28, 2026 — 22:12 | Replaced the logout glyph with a conventional arrow-leaving-a-door icon. | `Agent-Sessions/2026-09-28-profile-logout-icon-glyph.md` |
 | Monday, September 28, 2026 — 22:11 | Refined the desktop-header logout control to a compact red icon immediately beside the signed-in user, retaining its accessible label and audited session behavior. | `Agent-Sessions/2026-09-28-profile-logout-icon.md` |
