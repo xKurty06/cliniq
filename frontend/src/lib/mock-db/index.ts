@@ -14,6 +14,7 @@ export type {
   PeReferral,
   RecordReview,
 } from './types'
-export type { BackupStatus, FrequentVisitor, IncompleteRecordRow, InventoryStatus } from './selectors'
+export type { AuditLogList, AuditLogQuery, AuditLogRow, AuditTargetType, BackupStatus, FrequentVisitor, IncompleteRecordRow, InventoryStatus } from './selectors'
+export { auditTargetTypes } from './selectors'
 export { getMockToday, getRecordedAuditEntries, resetMockDb, setMockPersistence, setMockToday } from './store'
 export { queryParam } from './devToggles'

@@ -39,6 +39,7 @@ export const paths = {
   qrDesktop: '/qr/desktop',
   emergencyMobile: '/emergency/mobile',
   reports: '/reports',
+  auditLog: '/audit-log',
   incidentNotifications: (incidentId?: string) => incidentId ? `/incidents/${encodeURIComponent(incidentId)}/notifications` : '/incidents/notifications',
   incidentReport: (incidentId?: string) => incidentId ? `/incidents/${encodeURIComponent(incidentId)}/report` : '/incidents/report',
   users: '/users',

@@ -26,6 +26,7 @@ import { buildCalendarDays, buildDashboardSummary } from './dashboard'
 import { isEmptied, simulateRequest } from './devToggles'
 import {
   backupStatus,
+  auditLogList,
   dateOf,
   followUpDueState,
   gradeLevels,
@@ -36,6 +37,8 @@ import {
   studentsById,
   toStudent,
   type BackupStatus,
+  type AuditLogList,
+  type AuditLogQuery,
   type IncompleteRecordRow,
   type InventoryStatus,
 } from './selectors'
@@ -955,4 +958,9 @@ export function lookupStudentByScan(
 
 export function getAuditLog(): Promise<AuditLogEntry[]> {
   return read('audit log', (s) => [...s.auditLog].sort((a, b) => b.timestamp.localeCompare(a.timestamp)))
+}
+
+/** Privacy-safe, resolved Audit Log Viewer data. Reading it intentionally creates no audit entry (ADR-016). */
+export function listAuditLog(query: AuditLogQuery): Promise<AuditLogList> {
+  return read('audit log', (s) => auditLogList(s, query))
 }

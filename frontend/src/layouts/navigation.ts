@@ -4,7 +4,7 @@ import type { UserRole } from '../types/entities'
 
 /**
  * Role-aware navigation (Screen Inventory #3; Module-Overview Access Summary). Staff sees every
- * module; Admin/Principal sees Dashboard + Reports only; PE/Sports Instructor gets no shell at all.
+ * module; Admin/Principal sees Dashboard, Reports, and Audit Log; PE/Sports Instructor gets no shell at all.
  *
  * `to` is the item's route (routes/paths.ts). `available: false` marks screens not built yet (no
  * route exists). The shell shows them as "Soon" and not clickable,
@@ -20,6 +20,7 @@ export type NavKey =
   | 'qrLookup'
   | 'inventory'
   | 'reports'
+  | 'auditLog'
   | 'accounts'
   | 'backup'
 
@@ -40,6 +41,7 @@ const ALL: Record<NavKey, NavItem> = {
   qrLookup: { key: 'qrLookup', label: 'QR Lookup', icon: 'qrCode', available: true, to: paths.qrScan },
   inventory: { key: 'inventory', label: 'Inventory', icon: 'package', available: true, to: paths.inventory },
   reports: { key: 'reports', label: 'Reports', icon: 'fileText', available: true, to: paths.reports },
+  auditLog: { key: 'auditLog', label: 'Audit Log', icon: 'clipboardList', available: true, to: paths.auditLog },
   accounts: { key: 'accounts', label: 'Accounts', icon: 'userCog', available: true, to: paths.users },
   backup: { key: 'backup', label: 'Backup', icon: 'refresh', available: true, to: paths.backup },
 }
@@ -53,7 +55,7 @@ export function navGroupsFor(role: UserRole): NavGroup[] {
   if (role === 'admin') {
     return [
       { label: 'Overview', items: [ALL.dashboard] },
-      { label: 'Reporting', items: [ALL.reports] },
+      { label: 'Reporting', items: [ALL.reports, ALL.auditLog] },
     ]
   }
   if (role === 'staff') {
@@ -64,7 +66,7 @@ export function navGroupsFor(role: UserRole): NavGroup[] {
         items: [ALL.students, ALL.visits, ALL.incidents, ALL.followUps, ALL.qrLookup],
       },
       { label: 'Operations', items: [ALL.inventory, ALL.reports] },
-      { label: 'Administration', items: [ALL.accounts, ALL.backup] },
+      { label: 'Administration', items: [ALL.accounts, ALL.backup, ALL.auditLog] },
     ]
   }
   return []

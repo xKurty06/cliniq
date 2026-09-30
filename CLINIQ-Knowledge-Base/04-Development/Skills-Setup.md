@@ -13,6 +13,8 @@ This is a substantially expanded pass over the first one — that version only c
 | `cliniq-display-privacy` | `.claude/skills/cliniq-display-privacy/` | Enforces the Student Number vs full name rule on every new screen |
 | `cliniq-audit-trail` | `.claude/skills/cliniq-audit-trail/` | Ensures every mutating action gets logged per RA 10173 |
 | `cliniq-interactive-states` | `.claude/skills/cliniq-interactive-states/` | Enforces cursor states, hover feedback, and custom-styled dropdowns on every interactive element — added after the first Dashboard build shipped without any of these |
+| `cliniq-multi-select-patterns` | `.claude/skills/cliniq-multi-select-patterns/` | Reuses the accessible checkbox filter popover for a requirement that intentionally accepts several values |
+| `cliniq-pagination-patterns` | `.claude/skills/cliniq-pagination-patterns/` | Reuses the growing-list pager, including a complete filtered print view |
 
 Write more of these as new CLINIQ-specific rules get established — they encode decisions unique to this project that no public skill will ever have.
 

@@ -2,6 +2,8 @@ import type { FollowUpDueState } from '../../components/status/followUp'
 import type { InventoryFlag } from '../../components/status/inventory'
 import { addDays, diffDays, isWithin } from '../dates'
 import type {
+  AuditActionType,
+  AuditLogEntry,
   BackupLog,
   FollowUp,
   ISODate,
@@ -20,6 +22,93 @@ import type { DbState, RecordReview, SeedStudent } from './types'
  */
 
 export const dateOf = (timestamp: string): ISODate => timestamp.slice(0, 10)
+
+// ---- Audit log ------------------------------------------------------------------------------
+
+export const auditTargetTypes = [
+  'student',
+  'visit',
+  'incident',
+  'inventory',
+  'user',
+  'report',
+  'backup',
+  'follow-up',
+] as const
+
+export type AuditTargetType = (typeof auditTargetTypes)[number]
+
+export interface AuditLogQuery {
+  from: ISODate
+  to: ISODate
+  userId: string
+  actionTypes: ReadonlyArray<AuditActionType>
+  targetTypes: ReadonlyArray<AuditTargetType>
+}
+
+export interface AuditLogRow {
+  id: string
+  timestamp: ISODate
+  dateTime: string
+  userId: string
+  userName: string
+  actionType: AuditActionType
+  target: {
+    type: AuditTargetType
+    id: string
+    label: string
+    studentNumber?: string
+  } | null
+}
+
+export interface AuditLogList {
+  rows: AuditLogRow[]
+  users: Array<{ id: string; name: string }>
+}
+
+function auditTargetType(target: NonNullable<AuditLogEntry['targetRecord']>): AuditTargetType {
+  if (target.type.startsWith('inventory')) return 'inventory'
+  if (target.type === 'followup') return 'follow-up'
+  if (auditTargetTypes.includes(target.type as AuditTargetType)) return target.type as AuditTargetType
+  return 'report'
+}
+
+function auditTargetLabel(state: DbState, target: NonNullable<AuditLogEntry['targetRecord']>) {
+  const type = auditTargetType(target)
+  if (type === 'student') {
+    const student = studentsById(state).get(target.id)
+    return { type, id: target.id, label: student ? `Student ${student.studentNumber}` : 'Student record', studentNumber: student?.studentNumber }
+  }
+  if (type === 'inventory') return { type, id: target.id, label: state.inventoryItems.find((item) => item.id === target.id)?.name ?? 'Inventory record' }
+  if (type === 'user') return { type, id: target.id, label: state.users.find((user) => user.id === target.id)?.name ?? 'User account' }
+  if (type === 'follow-up') {
+    const followUp = state.followUps.find((item) => item.id === target.id)
+    const student = followUp ? studentsById(state).get(followUp.studentId) : undefined
+    return { type, id: target.id, label: student ? `Follow-up for ${student.studentNumber}` : 'Follow-up record' }
+  }
+  return { type, id: target.id, label: `${type[0].toUpperCase()}${type.slice(1)} ${target.id}` }
+}
+
+/** Resolves audit actors and privacy-safe targets before a screen can render them. */
+export function auditLogList(state: DbState, query: AuditLogQuery): AuditLogList {
+  const userNames = new Map(state.users.map((user) => [user.id, user.name]))
+  const rows = state.auditLog
+    .map((entry, index): AuditLogRow => ({
+      id: `${entry.timestamp}|${entry.userId}|${entry.actionType}|${index}`,
+      timestamp: dateOf(entry.timestamp),
+      dateTime: entry.timestamp,
+      userId: entry.userId,
+      userName: userNames.get(entry.userId) ?? 'Unknown user',
+      actionType: entry.actionType,
+      target: entry.targetRecord ? auditTargetLabel(state, entry.targetRecord) : null,
+    }))
+    .filter((row) => row.timestamp >= query.from && row.timestamp <= query.to)
+    .filter((row) => !query.userId || row.userId === query.userId)
+    .filter((row) => query.actionTypes.length === 0 || query.actionTypes.includes(row.actionType))
+    .filter((row) => query.targetTypes.length === 0 || (row.target && query.targetTypes.includes(row.target.type)))
+    .sort((a, b) => b.dateTime.localeCompare(a.dateTime))
+  return { rows, users: state.users.map((user) => ({ id: user.id, name: user.name })).sort((a, b) => a.name.localeCompare(b.name)) }
+}
 
 // ---- Students ------------------------------------------------------------------------------
 

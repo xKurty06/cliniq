@@ -20,6 +20,8 @@ export { frequentVisitorMap } from './status/frequentVisitor'
 export { inventoryFlagMap, type InventoryFlag } from './status/inventory'
 export { ListCard, ListCardSkeleton } from './ui/ListCard'
 export { Select, type SelectOption } from './ui/Select'
+export { MultiSelect, type MultiSelectOption } from './ui/MultiSelect'
+export { Pagination } from './ui/Pagination'
 export { Textarea } from './ui/Textarea'
 export {
   FollowUpPrompt,

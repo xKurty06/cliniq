@@ -82,6 +82,20 @@ describe('App routes', () => {
     expect(screen.getByTestId('path')).toHaveTextContent(/^\/$/)
   })
 
+  it('opens the read-only audit log for Admin/Principal and marks it current', async () => {
+    renderAt('/audit-log', ADMIN)
+
+    expect(await screen.findByRole('heading', { name: 'Audit Log' })).toBeInTheDocument()
+    expect(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('link', { name: 'Audit Log' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('does not allow the PE/Sports Instructor to open the audit log', async () => {
+    renderAt('/audit-log', INSTRUCTOR)
+
+    expect(await screen.findByRole('heading', { name: 'Instructor Lookup' })).toBeInTheDocument()
+    expect(screen.getByTestId('path')).toHaveTextContent('/qr/scan')
+  })
+
   it('sends the PE/Sports Instructor to the read-only QR lookup, with no shell', async () => {
     renderAt('/', INSTRUCTOR)
 

@@ -92,6 +92,7 @@ const IncidentReportPage = page(() => import('../features/emergency-response/Inc
 const UserListPage = page(() => import('../features/user-management/UserListPage'), 'UserListPage')
 const UserFormPage = page(() => import('../features/user-management/UserFormPage'), 'UserFormPage')
 const BackupStatusPage = page(() => import('../features/backup/BackupStatusPage'), 'BackupStatusPage')
+const AuditLogPage = page(() => import('../features/audit-log/AuditLogPage'), 'AuditLogPage')
 
 type Viewer = { viewer: SessionUser }
 
@@ -304,6 +305,7 @@ const APP_ROUTES: AppRoute[] = [
   { path: paths.qrPrint, title: 'Print QR Health IDs', roles: ['staff'], nav: 'qrLookup', shell: true, render: () => <QrPrintPage /> },
   { path: paths.emergencyMobile, title: 'Emergency Response', roles: ['staff'], nav: 'incidents', shell: false, render: () => <EmergencyMobilePage /> },
   { path: paths.reports, title: 'Reports', roles: ['staff', 'admin'], nav: 'reports', shell: true, render: (viewer) => <ReportsPage viewer={viewer} /> },
+  { path: paths.auditLog, title: 'Audit Log', roles: ['staff', 'admin'], nav: 'auditLog', shell: true, render: (viewer) => <AuditLogPage viewer={viewer} /> },
   { path: paths.users, title: 'User Accounts', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserListPage /> },
   { path: paths.userNew, title: 'Add User', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormPage /> },
   { path: '/users/:userId/edit', title: 'Edit User', roles: ['staff'], nav: 'accounts', shell: true, render: () => <UserFormRoute /> },

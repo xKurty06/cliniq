@@ -3348,6 +3348,186 @@
       "actionType": "login",
       "targetRecord": null,
       "timestamp": { "daysAgo": 0, "time": "07:02" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "scan",
+      "targetRecord": { "type": "student", "id": "student-0006" },
+      "timestamp": { "daysAgo": 0, "time": "07:24" }
+    },
+    {
+      "userId": "user-admin-01",
+      "actionType": "login",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 2, "time": "16:12" }
+    },
+    {
+      "userId": "user-admin-01",
+      "actionType": "approve",
+      "targetRecord": { "type": "report", "id": "monthly" },
+      "timestamp": { "daysAgo": 2, "time": "16:20" }
+    },
+    {
+      "userId": "user-admin-01",
+      "actionType": "logout",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 2, "time": "16:43" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "create",
+      "targetRecord": { "type": "follow-up", "id": "followup-0007" },
+      "timestamp": { "daysAgo": 3, "time": "10:18" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "update",
+      "targetRecord": { "type": "inventory-restock", "id": "item-0001" },
+      "timestamp": { "daysAgo": 4, "time": "15:00" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "submit",
+      "targetRecord": { "type": "visit", "id": "visit-0151" },
+      "timestamp": { "daysAgo": 5, "time": "10:54" }
+    },
+    {
+      "userId": "user-instructor-01",
+      "actionType": "login",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 6, "time": "13:40" }
+    },
+    {
+      "userId": "user-instructor-01",
+      "actionType": "scan",
+      "targetRecord": { "type": "student", "id": "student-0004" },
+      "timestamp": { "daysAgo": 6, "time": "13:43" }
+    },
+    {
+      "userId": "user-instructor-01",
+      "actionType": "logout",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 6, "time": "14:02" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "create",
+      "targetRecord": { "type": "student", "id": "student-0001" },
+      "timestamp": { "daysAgo": 7, "time": "08:36" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "archive",
+      "targetRecord": { "type": "student", "id": "student-0009" },
+      "timestamp": { "daysAgo": 8, "time": "16:08" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "submit",
+      "targetRecord": { "type": "incident", "id": "incident-0020" },
+      "timestamp": { "daysAgo": 10, "time": "13:32" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "approve",
+      "targetRecord": { "type": "visit", "id": "visit-0141" },
+      "timestamp": { "daysAgo": 12, "time": "11:23" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "create",
+      "targetRecord": { "type": "inventory", "id": "item-0014" },
+      "timestamp": { "daysAgo": 16, "time": "09:10" }
+    },
+    {
+      "userId": "user-instructor-01",
+      "actionType": "submit",
+      "targetRecord": { "type": "visit", "id": "visit-0149" },
+      "timestamp": { "daysAgo": 18, "time": "14:20" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "update",
+      "targetRecord": { "type": "inventory-dispense", "id": "item-0003" },
+      "timestamp": { "daysAgo": 20, "time": "13:45" }
+    },
+    {
+      "userId": "user-admin-01",
+      "actionType": "login",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 24, "time": "09:04" }
+    },
+    {
+      "userId": "user-admin-01",
+      "actionType": "update",
+      "targetRecord": { "type": "user", "id": "user-instructor-02" },
+      "timestamp": { "daysAgo": 24, "time": "09:18" }
+    },
+    {
+      "userId": "user-admin-01",
+      "actionType": "logout",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 24, "time": "09:22" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "submit",
+      "targetRecord": { "type": "visit", "id": "visit-0137" },
+      "timestamp": { "daysAgo": 30, "time": "08:51" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "delete",
+      "targetRecord": { "type": "user", "id": "user-retired-01" },
+      "timestamp": { "daysAgo": 42, "time": "15:46" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "update",
+      "targetRecord": { "type": "student", "id": "student-0012" },
+      "timestamp": { "daysAgo": 55, "time": "10:12" }
+    },
+    {
+      "userId": "user-admin-01",
+      "actionType": "approve",
+      "targetRecord": { "type": "report", "id": "health_summary" },
+      "timestamp": { "daysAgo": 60, "time": "14:30" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "update",
+      "targetRecord": { "type": "backup", "id": "scheduled-backup" },
+      "timestamp": { "daysAgo": 75, "time": "08:00" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "create",
+      "targetRecord": { "type": "follow-up", "id": "followup-0004" },
+      "timestamp": { "daysAgo": 90, "time": "11:15" }
+    },
+    {
+      "userId": "user-instructor-02",
+      "actionType": "login",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 105, "time": "08:07" }
+    },
+    {
+      "userId": "user-instructor-02",
+      "actionType": "scan",
+      "targetRecord": { "type": "student", "id": "student-0015" },
+      "timestamp": { "daysAgo": 105, "time": "08:10" }
+    },
+    {
+      "userId": "user-instructor-02",
+      "actionType": "logout",
+      "targetRecord": null,
+      "timestamp": { "daysAgo": 105, "time": "08:22" }
+    },
+    {
+      "userId": "user-staff-01",
+      "actionType": "archive",
+      "targetRecord": { "type": "student", "id": "student-0020" },
+      "timestamp": { "daysAgo": 120, "time": "16:20" }
     }
   ],
   "frontendOnly": {
