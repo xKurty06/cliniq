@@ -269,6 +269,7 @@ export function QrMobileHubPage({
           title="Identify student"
           description="Use the camera scanner, demo scan, or manual Student Number fallback."
           onDetected={lookup}
+          onScanStart={() => setStatus((current) => (current === 'not_found' || current === 'error' ? 'idle' : current))}
         />
 
         {status === 'loading' && <LoadingCard />}

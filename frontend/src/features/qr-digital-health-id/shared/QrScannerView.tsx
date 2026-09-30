@@ -8,6 +8,8 @@ export interface QrScannerViewProps {
   title: string
   description: string
   onDetected: (studentNumber: StudentNumber) => void
+  /** Called when the camera starts, so the host can clear a previous lookup's error message. */
+  onScanStart?: () => void
 }
 
 export function normalizeStudentNumber(value: string): StudentNumber {
@@ -19,7 +21,7 @@ export function normalizeStudentNumber(value: string): StudentNumber {
  * Shared QR scanner/manual fallback component. Mobile Staff, mobile Instructor, and later desktop
  * scanner flows all use this same wrapper; only their post-scan behavior differs.
  */
-export function QrScannerView({ title, description, onDetected }: QrScannerViewProps) {
+export function QrScannerView({ title, description, onDetected, onScanStart }: QrScannerViewProps) {
   const [manual, setManual] = useState('')
   const { videoRef, status, error, start, stop } = useQrScanner((value) => onDetected(normalizeStudentNumber(value)))
 
@@ -54,7 +56,11 @@ export function QrScannerView({ title, description, onDetected }: QrScannerViewP
             // Reference 4: the scan action is the dominant, thumb-sized control on phones.
             className="max-md:h-14 max-md:text-base"
             loading={status === 'starting'}
-            onClick={status === 'scanning' ? stop : start}
+            onClick={() => {
+              if (status === 'scanning') return stop()
+              onScanStart?.()
+              return start()
+            }}
           >
             {status === 'scanning' ? 'Stop camera' : 'Scan QR Code'}
           </Button>

@@ -4,7 +4,7 @@ import { Button, Card, CardBody, CardHeader, ErrorState, Icon, Input, Select, Sk
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { getMockSessionUser } from '../../lib/mock-db'
 import type { UserRole } from '../../types/entities'
-import { fetchUser, submitUser } from './api/userApi'
+import { DuplicateUsernameError, fetchUser, submitUser } from './api/userApi'
 
 export function UserFormPage({ userId }: { userId?: string }) {
   const { data: existing, status, reload } = useAsyncData(`user|${userId ?? 'new'}`, () =>
@@ -60,7 +60,13 @@ function UserForm({
     setErrors(nextErrors)
     setSaved(false)
     if (nextErrors.name || nextErrors.username) return
-    await submitUser({ name, username, role }, { userId, actor: getMockSessionUser() })
+    try {
+      await submitUser({ name, username, role }, { userId, actor: getMockSessionUser() })
+    } catch (cause) {
+      if (!(cause instanceof DuplicateUsernameError)) throw cause
+      setErrors({ username: 'Another account already uses this username. Choose a different one.' })
+      return
+    }
     setSaved(true)
   }
   return (

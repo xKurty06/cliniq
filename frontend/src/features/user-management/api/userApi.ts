@@ -1,4 +1,6 @@
-import { getUser, listUsers, saveUser, type SessionUser } from '../../../lib/mock-db'
+import { DuplicateUsernameError, getUser, listUsers, saveUser, type SessionUser } from '../../../lib/mock-db'
+
+export { DuplicateUsernameError }
 import type { User, UserRole } from '../../../types/entities'
 
 export function fetchUsers(): Promise<User[]> {

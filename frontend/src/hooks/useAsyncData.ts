@@ -8,8 +8,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
  * when that decision lands, only this file and the feature `api/` modules need to change.
  *
  * - `key` identifies the request. When it changes, the loader runs again.
- * - Previous data is kept while a new key loads (`isRefetching`), so the page holds its frame
- *   instead of flashing back to skeletons.
+ * - Previous data is kept while a new key loads or `reload()` runs (`isRefetching`), so the page
+ *   holds its frame instead of flashing back to skeletons.
  */
 export type AsyncStatus = 'loading' | 'success' | 'error'
 
@@ -51,8 +51,9 @@ export function useAsyncData<T>(key: string, loader: () => Promise<T>): AsyncDat
     }
   }, [requestKey])
 
+  // Re-running keeps the last good data on screen (isRefetching) instead of flashing back to the
+  // skeleton after a save. A failed request has no data, so "Try again" still shows the skeleton.
   const reload = useCallback(() => {
-    setSettled(undefined)
     setAttempt((n) => n + 1)
   }, [])
 

@@ -88,8 +88,11 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
         {groups.map((group) => {
           const groupId = navGroupId(group.label)
           return (
-            <section
+            // A named group, not a <section>: a labelled section becomes a landmark region, and
+            // "Overview" then collided with page regions of the same name (axe landmark-unique).
+            <div
               key={group.label}
+              role="group"
               aria-labelledby={groupId}
               className={cn('w-full', collapsed ? 'flex justify-center' : '')}
             >
@@ -145,7 +148,7 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
                   )
                 })}
               </ul>
-            </section>
+            </div>
           )
         })}
       </nav>

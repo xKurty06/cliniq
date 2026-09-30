@@ -310,8 +310,22 @@ export interface UserInput {
   role: UserRole
 }
 
+/**
+ * Login matches usernames case-insensitively and takes the first match, so a second account with the
+ * same username could never sign in. Saving one is rejected before anything is written.
+ */
+export class DuplicateUsernameError extends Error {
+  constructor() {
+    super('duplicate_username')
+  }
+}
+
 export function saveUser(input: UserInput, options: { userId?: string; actor?: SessionUser } = {}): Promise<User> {
   return write('save user', (s) => {
+    const username = input.username.trim().toLowerCase()
+    if (s.users.some((u) => u.id !== options.userId && u.username.toLowerCase() === username)) {
+      throw new DuplicateUsernameError()
+    }
     const existing = options.userId ? must(s.users.find((u) => u.id === options.userId), 'User') : null
     const user: User = existing
       ? Object.assign(existing, { name: input.name.trim(), username: input.username.trim(), role: input.role })

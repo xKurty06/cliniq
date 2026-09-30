@@ -60,7 +60,8 @@ describe('Incident Entry', () => {
       'create',
       'create',
     ])
-  })
+    // Types a full Stage 2 form (~2.5 s alone); the default 5 s can be exceeded under full-suite load.
+  }, 15_000)
 
   it('uses a custom-styled complaint select', async () => {
     render(<IncidentEntryPage />)

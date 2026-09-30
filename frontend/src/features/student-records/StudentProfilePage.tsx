@@ -160,7 +160,7 @@ function ProfileHeader({
           deleted: the record, visits, and incidents stay available under "Include archived".
         </p>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
-          <Button variant="neutral" autoFocus onClick={() => setConfirmingArchive(false)}>
+          <Button variant="neutral" data-autofocus onClick={() => setConfirmingArchive(false)}>
             Cancel
           </Button>
           <Button variant="secondary" loading={archiving} onClick={archive}>
