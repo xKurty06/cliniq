@@ -10,7 +10,7 @@
 | Field | Detail |
 |---|---|
 | Document Revision No. | 2.7 |
-| Date of Issue | October 1, 2026 |
+| Date of Issue | September 13, 2026 |
 | Project Manager | Ghenly B. Tinapay |
 | System Analyst | Christian John C. Lugami |
 | Developer / Tester | Zean Kurt G. Balboa |
