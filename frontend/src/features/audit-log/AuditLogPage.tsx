@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import {
   Button,
@@ -63,6 +63,13 @@ const targetLabels: Record<AuditTargetType, string> = {
   'follow-up': 'Follow-up',
 }
 
+interface AuditLogFilters {
+  range: DateRange
+  userId: string
+  actionTypes: AuditActionType[]
+  targetTypes: AuditTargetType[]
+}
+
 function AuditLogSkeleton() {
   return (
     <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
@@ -103,15 +110,15 @@ function targetCell(row: AuditLogRow, viewer: SessionUser) {
 
 export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   const defaultRange = rangeForPreset('all', todayISO())
-  const [range, setRange] = useState<DateRange>(defaultRange)
-  const [userId, setUserId] = useState('')
-  const [actionTypes, setActionTypes] = useState<AuditActionType[]>([])
-  const [targetTypes, setTargetTypes] = useState<AuditTargetType[]>([])
+  const [filters, setFilters] = useState<AuditLogFilters>({ range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
   const [page, setPage] = useState(1)
+  const { range, userId, actionTypes, targetTypes } = filters
   const queryKey = `${range.from}|${range.to}|${userId}|${actionTypes.join(',')}|${targetTypes.join(',')}`
   const { data, status, isRefetching, reload } = useAsyncData(queryKey, () => fetchAuditLog({ from: range.from, to: range.to, userId, actionTypes, targetTypes }))
-
-  useEffect(() => setPage(1), [queryKey])
+  const updateFilters = (changes: Partial<AuditLogFilters>) => {
+    setFilters((current) => ({ ...current, ...changes }))
+    setPage(1)
+  }
 
   if (status === 'error') return <main className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load the audit log." onRetry={reload} /></main>
   if (!data) return <><p className="sr-only" role="status">Loading audit log...</p><AuditLogSkeleton /></>
@@ -126,10 +133,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
     { key: 'target', header: 'Target record', cell: (row) => targetCell(row, viewer) },
   ]
   const clearFilters = () => {
-    setRange(defaultRange)
-    setUserId('')
-    setActionTypes([])
-    setTargetTypes([])
+    updateFilters({ range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
   }
 
   return (
@@ -148,10 +152,10 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
         <CardHeader titleId="audit-log-title" title="Audit entries" description={`${data.rows.length.toLocaleString('en-PH')} entr${data.rows.length === 1 ? 'y' : 'ies'} shown · ${describeRange(range)}`} icon={<Icon name="clipboardList" />} />
         <CardBody className="flex flex-col gap-4">
           <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 xl:grid-cols-4 print:hidden">
-            <DateRangePicker value={range} onChange={setRange} today={defaultRange.to} presets={['today', 'last7', 'thisMonth', 'all', 'custom']} presetLabels={{ last7: 'This week' }} customPopover />
-            <Select label="User" value={userId} options={data.users.map((user) => ({ value: user.id, label: user.name }))} placeholder="All users" onChange={setUserId} />
-            <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => setActionTypes(values as AuditActionType[])} />
-            <MultiSelect label="Target / module" values={targetTypes} options={auditTargetTypes.map((type) => ({ value: type, label: targetLabels[type] }))} allLabel="All targets" onChange={(values) => setTargetTypes(values as AuditTargetType[])} />
+            <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['today', 'last7', 'thisMonth', 'all', 'custom']} presetLabels={{ last7: 'This week' }} customPopover />
+            <Select label="User" value={userId} options={data.users.map((user) => ({ value: user.id, label: user.name }))} placeholder="All users" onChange={(value) => updateFilters({ userId: value })} />
+            <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => updateFilters({ actionTypes: values as AuditActionType[] })} />
+            <MultiSelect label="Target / module" values={targetTypes} options={auditTargetTypes.map((type) => ({ value: type, label: targetLabels[type] }))} allLabel="All targets" onChange={(values) => updateFilters({ targetTypes: values as AuditTargetType[] })} />
           </div>
           <div className="flex justify-end print:hidden"><Button variant="neutral" size="sm" onClick={clearFilters}>Clear filters</Button></div>
           <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>

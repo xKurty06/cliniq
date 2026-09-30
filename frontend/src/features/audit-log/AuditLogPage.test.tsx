@@ -61,6 +61,21 @@ describe('Audit Log', () => {
     expect(screen.getByText(/Showing 11–20 of/)).toBeInTheDocument()
   })
 
+  it('returns to the first page when a filter changes', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('table', { name: 'Filtered audit log' })
+
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(screen.getByText('Page 2 of 4')).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText('User'), 'user-admin-01')
+    await screen.findByText(/7 entries shown/)
+
+    expect(screen.getByText('Page 1 of 1')).toBeInTheDocument()
+    expect(screen.getByText('Showing 1\u20137 of 7 entries')).toBeInTheDocument()
+  })
+
   it('prints the current filtered view without writing another audit event', async () => {
     const user = userEvent.setup()
     const print = vi.spyOn(window, 'print').mockImplementation(() => {})

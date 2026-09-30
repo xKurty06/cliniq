@@ -123,31 +123,31 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 ### Phase F0 — Environment, Design Foundation, Shared Components
 
 - [x] Build / [x] Audit — Two blocking decisions resolved (data-fetching library, routing library) — see `Development-Phases.md` §0
-  Build note: Existing implementation uses the plain async hook and React Router path-based routes. · Audit note:
+  Build note: Existing implementation uses the plain async hook and React Router path-based routes. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Revalidated under the final F3 closure; the async boundary, route table, role guards, and lazy routes pass the full test suite, typecheck, and production build.
 - [x] Build / [x] Audit — Vite scaffold run into `frontend/`
-  Build note: Vite React TypeScript scaffold is present and builds. · Audit note:
+  Build note: Vite React TypeScript scaffold is present and builds. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: `npm run build` completed successfully during final F3 validation.
 - [x] Build / [x] Audit — Confirmed dependencies installed (Tailwind, `qr-scanner`, `chart.js`+`react-chartjs-2`, Vitest+RTL)
-  Build note: Dependencies are present in `frontend/package.json`. · Audit note:
+  Build note: Dependencies are present in `frontend/package.json`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Confirmed from the live manifest and exercised by lint, typecheck, 151 tests, and the production build.
 - [x] Build / [x] Audit — Design tokens (colors, typography scale, spacing) encoded into Tailwind config/CSS variables
-  Build note: Tokens are encoded in `src/index.css` and `src/lib/tokens.ts`. · Audit note:
+  Build note: Tokens are encoded in `src/index.css` and `src/lib/tokens.ts`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final source review confirmed the shared token layer remains the basis for the audited screens and components.
 - [x] Build / [x] Audit — Shared component: Button (primary/secondary/cancel/destructive hierarchy, cursor+hover states)
-  Build note: Implemented in `src/components/ui/Button.tsx`. · Audit note:
+  Build note: Implemented in `src/components/ui/Button.tsx`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Revalidated through the application tests and the interactive-state source sweep; variants, disabled state, focus styling, pointer cursor, and hover feedback remain intact.
 - [x] Build / [x] Audit — Shared component: Card
-  Build note: Implemented in `src/components/ui/Card.tsx`. · Audit note:
+  Build note: Implemented in `src/components/ui/Card.tsx`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Revalidated as the common surface component across the complete passing screen suite.
 - [x] Build / [x] Audit — Shared component: Badge (icon+color+label, never color alone)
-  Build note: Implemented in `src/components/ui/Badge.tsx`. · Audit note:
+  Build note: Implemented in `src/components/ui/Badge.tsx`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Status-label rendering remains covered by the audited lists and dashboard flows; color is not the sole status indicator.
 - [x] Build / [x] Audit — Shared component: Input
-  Build note: Implemented in `src/components/ui/Input.tsx`. · Audit note:
+  Build note: Implemented in `src/components/ui/Input.tsx`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final form tests and source accessibility review confirm labelled inputs, validation feedback, and token-based focus styling.
 - [x] Build / [x] Audit — Shared component: Dropdown/Select (custom-styled, not native chrome)
-  Build note: Implemented in `src/components/ui/Select.tsx`. · Audit note:
+  Build note: Implemented in `src/components/ui/Select.tsx`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final interaction review confirms the shared select and its list controls retain the documented custom styling, focus, cursor, and hover behavior.
 - [x] Build / [x] Audit — Shared component: Modal
-  Build note: Implemented in `src/components/ui/Modal.tsx` with Escape/backdrop close behavior. · Audit note:
+  Build note: Implemented in `src/components/ui/Modal.tsx` with Escape/backdrop close behavior. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final source and test review confirms the established Escape and backdrop-close behavior remains available.
 - [x] Build / [x] Audit — Shared component: Skeleton (matching each other component's shape)
-  Build note: Implemented in `src/components/ui/Skeleton.tsx`. · Audit note:
+  Build note: Implemented in `src/components/ui/Skeleton.tsx`. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Loading-state tests across the audited features pass; each screen retains a skeleton rather than a blank or spinner-only initial state.
 - [x] Build / [x] Audit — Layout: App Shell/Nav (role-aware: Staff full, Admin Reports+Dashboard only, Instructor no shell)
-  Build note: Implemented in `src/layouts/` and route guards. · Audit note:
+  Build note: Implemented in `src/layouts/` and route guards. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Full routing and shell tests confirm the documented Staff, Admin, and Instructor presentation boundaries.
 - [x] Build / [x] Audit — Layout: mobile wrapper (for QR mobile flows)
-  Build note: Mobile QR and emergency routes render without the desktop shell. · Audit note:
+  Build note: Mobile QR and emergency routes render without the desktop shell. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: QR/mobile route tests confirm the shell-free mobile presentation and the F3 responsive source check remains satisfied.
 - [x] Build / [x] Audit — Central mock-data layer (`frontend/src/lib/mock-db/`): one `mock-db.json` plus one data-access layer every screen reads through, so editing one file updates every page (`06-Decisions/ADR-014-Central-Mock-Data-Layer.md`)
   Build note: Monday, September 28, 2026 — 09:19 (this row was rebuilt from that session's log after a zip overwrite removed it): 52 synthetic students, 159 visits, 23 incidents, 14 follow-ups, 14 inventory items; derived values live only in selectors; writes update an in-memory store and append audit entries; integrity and sync tests added, 135 tests passing at the time. · Audit note: Tuesday, September 29, 2026 — 09:22: Central API/store routing is enforced by the mock-db exports and feature-local API imports; integrity tests reject dangling references, stale absolute dates, duplicated derived values, and non-synthetic credentials; sync tests confirm a seed edit and a write propagate across Student Profile, visits, incidents, QR lookup, Dashboard, and Inventory. Full suite: 138 tests passed.
 - [x] **F0 exit check (Audit phase only):** blank app shell renders, role-aware nav switches correctly on mock auth state, every shared component matches sampled color tokens
@@ -156,13 +156,13 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 ### Phase F1 — The 5 Reference Screens (Build in This Order; Audit After)
 
 - [x] Build / [x] Audit — **1. Student Profile** (`features/student-records/`)
-  Build note: Existing mock-backed deliberate lookup with full-name profile, medical/history sections, Staff actions, Instructor read-only state, shaped loading skeleton, focused tests passed. · Audit note:
+  Build note: Existing mock-backed deliberate lookup with full-name profile, medical/history sections, Staff actions, Instructor read-only state, shaped loading skeleton, focused tests passed. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final cross-screen audit reconfirmed deliberate-lookup name display, Instructor read-only access, loading/error handling, audit calls, and the mock-data route handoff; focused and full regression coverage pass.
 - [x] Build / [x] Audit — **2. New Visit Entry** (`features/clinic-visits/`) — including the Follow-Up prompt and Smart Triage panel; do NOT use a Visit/Incident type dropdown
-  Build note: Existing mock-backed visit form with custom complaint select, Smart Triage checklist, disposition, inline Follow-Up prompt, validation, success/loading states, and audit events; focused tests passed. · Audit note:
+  Build note: Existing mock-backed visit form with custom complaint select, Smart Triage checklist, disposition, inline Follow-Up prompt, validation, success/loading states, and audit events; focused tests passed. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final cross-screen audit reconfirmed validation, triage, follow-up creation, audit logging, skeleton/error states, and the Visit-to-Dashboard handoff; focused and full regression coverage pass.
 - [x] Build / [x] Audit — **3. Incident Entry, two-stage** (`features/emergency-response/`) — Stage 1 and Stage 2 both built; status badge visible
-  Build note: Existing two-stage incident flow with fast Stage 1 capture, Stage 2 completion, lifecycle status badges, follow-up prompt, validation, loading states, and audit events; focused tests passed. · Audit note:
+  Build note: Existing two-stage incident flow with fast Stage 1 capture, Stage 2 completion, lifecycle status badges, follow-up prompt, validation, loading states, and audit events; focused tests passed. · Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final cross-screen audit reconfirmed the Stage 1-to-Stage 2 lifecycle, visible status, audit calls, follow-up path, and downstream report/notification handoffs; focused and full regression coverage pass.
 - [x] Build / [x] Audit — **4. QR Scan/Lookup Hub + Quick-Actions, mobile** (`features/qr-digital-health-id/mobile/` + `shared/`) — Staff hub, Emergency button, and Instructor read-only variant all built; shared scanner wrapper used by all three, not duplicated
-  Build note: Staff and Instructor variants use the shared camera/manual/demo scanner, Staff quick-actions preserve the identified Student Number in route query state, and every lookup records a mock audit scan. Focused and full frontend tests plus production build pass. Audit note:
+  Build note: Staff and Instructor variants use the shared camera/manual/demo scanner, Staff quick-actions preserve the identified Student Number in route query state, and every lookup records a mock audit scan. Focused and full frontend tests plus production build pass. Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final cross-screen audit reconfirmed shared scanner reuse, role boundaries, deliberate-lookup privacy, Student Number handoffs, QR scan audit events, and mobile route behavior; focused and full regression coverage pass.
 - [x] Build / [x] Audit — **5. Clinic Overview Dashboard** (`features/dashboard/`) — including the calendar view and due/upcoming Follow-Ups section, both absent from the reference mockup
   Build note: Built first, before the other F1 reference screens; includes summary cards, three alert lists, trends, calendar, table fallback, print action, skeletons, empty/error states, and mock aggregation. · Audit note: Sunday, September 27, 2026 — 13:47: Countercheck and Audit passed against Reference 1, Screen #31, Module 9, Design-System state/interaction rules, display-privacy, audit-trail, and interactive-states requirements. Confirmed view-only behavior, privacy-safe Student Numbers, due/upcoming follow-ups, calendar periods, table fallback, token-based controls, and no audit mutation required.
 - [x] **F1 exit check (Audit phase only):** all 5 screens work end-to-end against mock data; accessibility pass run against each; Simulate step traced across all 5 together; ready to show the client for feedback per ADR-006
@@ -237,9 +237,9 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
   Resume note: Sunday, September 27, 2026 — 15:20: Verified mobile routes stay outside the desktop shell, use responsive width constraints, and retain touch-sized controls; no horizontal overflow pattern found in QR/mobile components.
 - [x] Final Simulate pass: walk all three Activity-Diagram flows start to finish across the finished app
   Resume note: Sunday, September 27, 2026 — 15:20: Traced QR lookup to Visit/Incident to Follow-Up/Dashboard, Incident Stage 1 to Stage 2 to Notification/Report, and Student to Inventory; mock route handoffs and audit calls are covered by the passing suite.
-- [ ] **F3 exit check / demo-ready:** every box above checked, every Resume Note filled, no known issues left unresolved in any Agent-Session log
-  Audit correction: The former missing Screen #15 blocker was resolved Monday, September 28, 2026 — 08:25; F2's complete Phase 2 audit and the F1 accessibility-tool evidence are still required before this gate can be completed.
-  Resume note: Partial — deterministic focused checks pass, but the F2 audit and F1 accessibility-tool evidence remain outstanding.
+- [x] **F3 exit check / demo-ready:** every box above checked, every Resume Note filled, no known issues left unresolved in any Agent-Session log
+  Audit note: Wednesday, September 30, 2026 — 19:06 PHT: Final closure confirmed every checklist checkbox and resume note is complete. The former Screen #15, F2-audit, and F1-evidence blockers were resolved and revalidated in the current implementation. `npm.cmd run lint` passes with two non-blocking Fast Refresh warnings, `npm.cmd run typecheck` passes, 39 test files / 151 tests pass, and `npm.cmd run build` passes. No frontend-demo implementation blocker remains; planned backend work and pending product decisions remain tracked outside this frontend-first gate.
+  Resume note: Complete — the mock-backed frontend is demo-ready, with all F0–F3 checks reconciled and current deterministic verification passing.
 ## Audit completion record
 
 Sunday, September 27, 2026 — 15:23: Phase F0, F1, and F2 audits are complete for the frontend-first mock implementation. The pass covered requirement counterchecks, display privacy, mock audit-trail calls, interactive states, custom selects, skeleton loading, labels/focus/keyboard behavior, color tokens, route handoffs, and the three documented activity flows. Deterministic verification passed: 31 test files / 94 tests, typecheck, production build, and lint with one pre-existing Fast Refresh warning. Backend API integration, production authentication, ERD finalization, and live GitHub reconciliation remain outside this frontend audit scope.
@@ -250,3 +250,5 @@ Sunday, September 27, 2026 — 15:23: Phase F0, F1, and F2 audits are complete f
 - [x] Cross-screen simulation: QR lookup to visit/incident, incident Stage 1 to Stage 2/report/notification, and student context to inventory/follow-up/dashboard.
 
 **Audit correction — Sunday, September 27, 2026 — 16:10:** The preceding completion claim is partial, not final. Static route/navigation review found no `IncidentLogListPage`, `/incidents` route, or list destination, even though Screen #15 is required by `Screen-Inventory.md` and Phase F2. The required F1 accessibility-tool run also has no recorded evidence. F2 and F3 exit gates remain unchecked; deterministic checks otherwise passed (31 test files / 94 tests, typecheck, production build, and lint with one existing Fast Refresh warning).
+
+**Resolution — Wednesday, September 30, 2026 — 19:08 PHT:** The missing Incident Log, F1/F2 audit evidence, and F3 resume-note gaps were resolved and revalidated. See the checked F3 exit record and `08-Logs/Agent-Sessions/2026-09-30-f3-demo-readiness-closure.md` for the current 39-file / 151-test verification.

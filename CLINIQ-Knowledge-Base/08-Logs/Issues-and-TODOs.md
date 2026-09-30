@@ -28,6 +28,7 @@
 
 ## Resolved since last update
 
+- Wednesday, September 30, 2026 — 19:06 PHT — Final F3 validation found and resolved an Audit Log pagination implementation issue: filters now reset pagination as part of their event update rather than synchronously setting state in an effect. Added regression coverage; lint has no errors, and the complete test/typecheck/build verification passes.
 - Wednesday, September 30, 2026 — 17:29 — Completed the remaining F2 audit follow-ups: Student List rows now provide View profile links with stable table geometry; Parent Notification Log shows emergency-contact context; QR manual lookup formats `YYYYNNNNN` as `YYYY-NNNNN`; and relevant Visit/Incident Cancel actions return without submitting.
 
 - Tuesday, September 29, 2026 - 09:34 - F2 authentication screens: Login (#1) and Force Password Change (#2) now exist as frontend-first mock screens. Production Sanctum enforcement, token expiry, and server-side password history remain Phase B2 work.
