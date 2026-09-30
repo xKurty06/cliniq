@@ -181,7 +181,7 @@ Full phase-by-phase detail, dependencies, and the two decisions still blocking P
 | 🔍 | **Christian John C. Lugami** | System Analyst |
 | 💻 | **Zean Kurt G. Balboa** | Developer / Tester |
 
-**Client contact:** Ms. Jenne Baas, School Head Nurse, Mendez Christian Academy
+**Client contact:** Ms. Jennesse Baas, School Clinician, Mendez Christian Academy
 
 <br/>
 
