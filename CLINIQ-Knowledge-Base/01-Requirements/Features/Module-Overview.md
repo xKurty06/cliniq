@@ -305,7 +305,7 @@ These came out of the September 19 meeting as good ideas worth flagging, but the
 
 ## Open Questions (Pending Client Input)
 
-- **Who manages the clinic system when the School Head Nurse is absent?** Currently no role has elevated access beyond Staff, and there is exactly one Staff account holder in the client's own org chart. This is pending a reply from Ms. Jenne Baas — no system design decision should be made here until the client responds.
+- **Who manages the clinic system when the School Head Nurse is absent?** Currently no role has elevated access beyond Staff, and there is exactly one Staff account holder in the client's own org chart. This is pending a reply from Ms. Jennesse Baas — no system design decision should be made here until the client responds.
 
 ---
 

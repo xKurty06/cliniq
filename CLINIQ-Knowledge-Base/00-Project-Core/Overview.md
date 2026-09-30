@@ -11,7 +11,7 @@
 - Christian John C. Lugami — System Analyst
 - Zean Kurt G. Balboa — Developer/Tester
 
-**Client contact:** Ms. Jenne Baas, School Head Nurse, Mendez Christian Academy.
+**Client contact:** Ms. Jennesse Baas, School Head Nurse, Mendez Christian Academy.
 
 **Full detail:** see the Project Plan (`09-References/Canonical-Documents.md`), Section 1.
 

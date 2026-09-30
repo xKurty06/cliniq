@@ -6,7 +6,7 @@
 - **Full school-events calendar** — who would maintain it (Staff, adding workload, vs. Admin/Principal, who has no write access today) is unresolved. Current phase uses lightweight free-text event tagging instead.
 - **Canteen Staff QR access** — designed, not built. No blocker, just not this phase.
 - **Additional backup layer beyond local + external drive** — team is still evaluating what this should be (possibly off-site/cloud). Not yet decided.
-- **Who manages the system when the nurse is absent** — pending a reply from Ms. Jenne Baas.
+- **Who manages the system when the nurse is absent** — pending a reply from Ms. Jennesse Baas.
 
 ## Open design questions — school year handling & grade promotion
 

@@ -9,13 +9,13 @@
 
 | Field | Detail |
 |---|---|
-| Document Revision No. | 2.6 |
-| Date of Issue | September 13, 2026 |
+| Document Revision No. | 2.7 |
+| Date of Issue | October 1, 2026 |
 | Project Manager | Ghenly B. Tinapay |
 | System Analyst | Christian John C. Lugami |
 | Developer / Tester | Zean Kurt G. Balboa |
-| Client Contact | Ms. Jenne Baas, School Head Nurse, Mendez Christian Academy |
-| Reviewed by | Software Engineering II Course Adviser, CvSU–CEIT |
+| Client Contact | Ms. Jennesse Baas, School Head Nurse, Mendez Christian Academy |
+| Reviewed by | Prof. Kryss Coleen Creus, Software Engineering II Course Adviser, CvSU–CEIT |
 
 ---
 
@@ -40,6 +40,7 @@
 | 2.4 | September 26, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Added a Modularity & Scalability non-functional requirement (Section 5.1): each of the 10 modules must be loosely-coupled and independently developable/testable in the actual code, not just at the planning level. Formalizes what the frontend already committed to and extends it to the backend, which previously had no committed code-organization pattern. Full architectural detail in the Obsidian vault (ADR-008, ADR-009). |
 | 2.5 | September 28, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Removed the 15-minute idle session timeout. Every role now has one session lifetime: 1 week, until the login token expires — the same session length the retired QR Viewer role had (Revision 1.5), applied to all logins. Updated Section 5.1's Security & Privacy requirement to match, and Module 1 in Modules & Features. Account lockout after repeated failed logins is unchanged. Trade-offs and reasoning are recorded in the Obsidian vault, ADR-015. |
 | 2.6 | September 30, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Added Module 11: Audit Log Viewer (Screen #35) — Staff and Admin/Principal can view the audit log the system already writes to, filtered by date range, user, action type, and target/module; previously nothing let anyone actually read it back. Updated the Modularity & Scalability NFR's module count. Full reasoning: Obsidian vault, ADR-016. |
+| 2.7 | October 1, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Recorded Prof. Kryss Coleen Creus as the Software Engineering II Course Adviser. |
 
 ---
 
@@ -163,18 +164,19 @@ At the same time, the SWOT analysis identified real opportunities the project ca
 
 | Party | Role in the Project |
 |---|---|
-| Ms. Jenne Baas, School Head Nurse | Primary client contact and product owner; validates requirements, participates in UAT, receives training |
+| Ms. Jennesse Baas, School Head Nurse | Primary client contact and product owner; validates requirements, participates in UAT, receives training |
 | Mendez Christian Academy Administration / Principal | Sponsor of the digitalization effort; consumer of health summary reports |
 | Registrar's Office | Source of authoritative student information used to populate Student Records |
 | PE/Sports Department | Source of injury referrals, logged by Staff; instructors also have direct read-only QR access to a student's profile and injury history (Section 5.3) |
 | School's Outsourced IT Provider | Maintains the existing workstation and network; partner for quarterly backup-recovery testing and major hardware issues |
-| CvSU–CEIT Course Adviser / Panel | Academic oversight, milestone review, and grading |
+| Prof. Kryss Coleen Creus, CvSU–CEIT Course Adviser | Academic oversight, milestone review, and grading |
 
 ### 2.2 Internal Structure
 
 The development team is intentionally small — a structure that mirrors the client's own "insufficient manpower" reality and forces the same discipline the system is meant to bring to the clinic: clear roles, no duplicated effort, and standardized handoffs. All three members report jointly to the client (for requirements and acceptance) and to the course adviser (for academic milestones); there is no separate management layer between developers and the client.
 
 ```
+        Prof. Kryss Coleen Creus
         CvSU–CEIT Course Adviser
                   │
         Ghenly B. Tinapay (Project Manager)
@@ -184,7 +186,7 @@ Christian John C. Lugami   Zean Kurt G. Balboa
 (System Analyst)           (Developer / Tester)
                   │
       Client: Mendez Christian Academy
-      (Ms. Jenne Baas, School Head Nurse)
+      (Ms. Jennesse Baas, School Head Nurse)
 ```
 
 ### 2.3 Roles and Responsibilities
@@ -326,7 +328,7 @@ This stack replaces the original plain HTML/CSS/JS + PHP approach documented in 
 
 ### 5.2 Resources
 
-**Human Resources:** the three-person development team (Section 2.3), Ms. Jenne Baas as primary client validator, the school's outsourced IT provider for network/hardware support, and the CvSU–CEIT adviser for milestone review.
+**Human Resources:** the three-person development team (Section 2.3), Ms. Jennesse Baas as primary client validator, the school's outsourced IT provider for network/hardware support, and the CvSU–CEIT adviser for milestone review.
 
 **Hardware Resources (reused, not purchased):** the client's existing Windows 11 workstation, its existing inkjet/laser printer (for QR ID stickers, reports, and excuse letters), and the existing PLDT Fiber/employee Wi-Fi network. Staff use their **own personal smartphone** to scan QR codes, so no dedicated scanning hardware needs to be purchased. The only genuinely new hardware items are low-cost consumables (see Section 7). Node.js and Composer, needed to build the React frontend and install Laravel's dependencies, run on the **development team's own machines**, not the client's workstation — the client only ever receives the finished, compiled application.
 
@@ -367,7 +369,7 @@ None of these five require new paid infrastructure, additional hardware purchase
 | QR feature exposing more student data than intended | PE/Sports Instructor access reintroduces an external access path (Section 5.3, undeferred September 19, 2026) | Mitigated by scope, not just process: Instructor access is read-only with no operational actions, and every scan and profile view is logged against the signed-in account. Canteen Staff access remains deferred, so this risk stays contained to one well-audited external role rather than several |
 | Bystander seeing a named student tied to a visit/incident pattern on an open screen | Desktop screens showing multi-student logs or dashboards could be glanced at by passersby | The display-privacy rule addresses this directly: the Visit Log List, Incident Log List, and the Dashboard's frequent-visitor flags show Student Number, not name. A single deliberate lookup — QR scan, full profile, search — still shows the full name, since that's a legitimate one-student view, not an ambient pattern |
 | No off-site backup layer beyond local workstation + external drive | Power loss identified at the September 19 meeting as the main operational risk — it can take down the router/server, not just interrupt a save | Open item: the team is still evaluating what an additional backup layer should be. A UPS is recommended (Section 7) to reduce how often this risk is even triggered. Not blocking for this phase, but should be resolved before the system goes fully live |
-| No defined coverage when the School Head Nurse is absent | The client currently has exactly one Staff-level account holder | Pending client input — the team has asked Ms. Jenne Baas and is awaiting a reply on who, if anyone, should be designated a backup Staff account holder. No system change should be made here until the client responds |
+| No defined coverage when the School Head Nurse is absent | The client currently has exactly one Staff-level account holder | Pending client input — the team has asked Ms. Jennesse Baas and is awaiting a reply on who, if anyone, should be designated a backup Staff account holder. No system change should be made here until the client responds |
 | React + Laravel stack is less familiar or harder to hand off to the outsourced IT provider than plain PHP | Team decision to upgrade the tech stack (Section 4.3) | Clear code documentation and a written handover guide at deployment (Section 2.4); Laravel and React are both widely documented, actively maintained frameworks with large support communities, which reduces long-term maintenance risk compared to an undocumented custom PHP codebase |
 
 ---

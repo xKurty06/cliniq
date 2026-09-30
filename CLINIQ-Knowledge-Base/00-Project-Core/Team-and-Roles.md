@@ -10,18 +10,19 @@ Kept in sync with the canonical Project Plan, Section 2. If you edit one, edit b
 
 | Party | Role in the Project |
 |---|---|
-| Ms. Jenne Baas, School Head Nurse | Primary client contact and product owner; validates requirements, participates in UAT, receives training |
+| Ms. Jennesse Baas, School Head Nurse | Primary client contact and product owner; validates requirements, participates in UAT, receives training |
 | Mendez Christian Academy Administration / Principal | Sponsor of the digitalization effort; consumer of health summary reports |
 | Registrar's Office | Source of authoritative student information used to populate Student Records |
 | PE/Sports Department | Source of injury referrals, logged by Staff; instructors also have direct read-only QR access to a student's profile and injury history (Section 5.3) |
 | School's Outsourced IT Provider | Maintains the existing workstation and network; partner for quarterly backup-recovery testing and major hardware issues |
-| CvSU–CEIT Course Adviser / Panel | Academic oversight, milestone review, and grading |
+| Prof. Kryss Coleen Creus, CvSU–CEIT Course Adviser | Academic oversight, milestone review, and grading |
 
 ### 2.2 Internal Structure
 
 The development team is intentionally small — a structure that mirrors the client's own "insufficient manpower" reality and forces the same discipline the system is meant to bring to the clinic: clear roles, no duplicated effort, and standardized handoffs. All three members report jointly to the client (for requirements and acceptance) and to the course adviser (for academic milestones); there is no separate management layer between developers and the client.
 
 ```
+        Prof. Kryss Coleen Creus
         CvSU–CEIT Course Adviser
                   │
         Ghenly B. Tinapay (Project Manager)
@@ -31,7 +32,7 @@ Christian John C. Lugami   Zean Kurt G. Balboa
 (System Analyst)           (Developer / Tester)
                   │
       Client: Mendez Christian Academy
-      (Ms. Jenne Baas, School Head Nurse)
+      (Ms. Jennesse Baas, School Head Nurse)
 ```
 
 ### 2.3 Roles and Responsibilities
@@ -61,4 +62,3 @@ Because the team has only three members, all three are expected to contribute ac
 | Final Defense / Presentation | Week 14 |
 
 ---
-
