@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏥 CLINIQ
+# CLINIQ
 
 ### Intelligent Clinic Tracking and Monitoring System
 
@@ -181,7 +181,7 @@ Full phase-by-phase detail, dependencies, and the two decisions still blocking P
 | 🔍 | **Christian John C. Lugami** | System Analyst |
 | 💻 | **Zean Kurt G. Balboa** | Developer / Tester |
 
-**Client contact:** Ms. Jennesse Baas, School Head Nurse, Mendez Christian Academy
+**Client contact:** Ms. Jennesse Baas, School Clinician, Mendez Christian Academy
 
 <br/>
 
@@ -208,8 +208,8 @@ MIT — see [`LICENSE`](./LICENSE). This was decided directly in the repo (not t
 
 ## 🙏 Acknowledgments
 
-- **Ms. Jennesse Baas** and Mendez Christian Academy, for the trust and the real-world constraints that shaped every design decision in this project
-- **Prof. Kryss Coleen Creus**, Software Engineering II course adviser, CvSU–CEIT
+- **Ms. Jenne Baas** and Mendez Christian Academy, for the trust and the real-world constraints that shaped every design decision in this project
+- **CvSU–CEIT**, Software Engineering II course instruction
 
 <br/>
 
