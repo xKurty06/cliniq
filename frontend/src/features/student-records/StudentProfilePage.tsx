@@ -9,11 +9,13 @@ import {
   ErrorState,
   Icon,
   ListRow,
+  Modal,
   RowList,
   Skeleton,
   StatusBadge,
   type StatusMap,
 } from '../../components'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
@@ -21,7 +23,7 @@ import { formatDate } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { Disposition, Incident, Student, Visit } from '../../types/entities'
 import { paths } from '../../routes/paths'
-import { fetchStudentProfile } from './api/studentProfileApi'
+import { archiveStudentRecord, fetchStudentProfile } from './api/studentProfileApi'
 
 const incidentStageMap = {
   1: { label: 'Needs completion', tone: 'warning', icon: 'alertTriangle', variant: 'soft' },
@@ -85,8 +87,30 @@ function StudentProfileSkeleton() {
   )
 }
 
-function ProfileHeader({ student, viewer }: { student: Student; viewer: SessionUser }) {
+function ProfileHeader({
+  student,
+  viewer,
+  onArchived,
+}: {
+  student: Student
+  viewer: SessionUser
+  onArchived: () => void
+}) {
   const staffCanAct = viewer.role === 'staff'
+  const [confirmingArchive, setConfirmingArchive] = useState(false)
+  const [archiving, setArchiving] = useState(false)
+
+  async function archive() {
+    setArchiving(true)
+    try {
+      await archiveStudentRecord(student.studentNumber, viewer)
+      setConfirmingArchive(false)
+      onArchived()
+    } finally {
+      setArchiving(false)
+    }
+  }
+
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -118,10 +142,32 @@ function ProfileHeader({ student, viewer }: { student: Student; viewer: SessionU
             <Button variant="secondary" icon="printer" onClick={() => window.print()}>
               Print
             </Button>
-            <Button variant="neutral">Archive</Button>
+            {!student.archived && (
+              <Button variant="neutral" onClick={() => setConfirmingArchive(true)}>
+                Archive
+              </Button>
+            )}
           </div>
         )}
       </div>
+      <Modal
+        open={confirmingArchive}
+        title="Archive this student record?"
+        onClose={() => setConfirmingArchive(false)}
+      >
+        <p className="text-sm text-text-secondary">
+          {student.fullName} ({student.studentNumber}) will be hidden from active lists. Nothing is
+          deleted: the record, visits, and incidents stay available under "Include archived".
+        </p>
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
+          <Button variant="neutral" autoFocus onClick={() => setConfirmingArchive(false)}>
+            Cancel
+          </Button>
+          <Button variant="secondary" loading={archiving} onClick={archive}>
+            Archive record
+          </Button>
+        </div>
+      </Modal>
     </Card>
   )
 }
@@ -308,7 +354,7 @@ export function StudentProfilePage({
         viewer.role === 'instructor' && 'min-h-screen bg-surface',
       )}
     >
-      <ProfileHeader student={data.student} viewer={viewer} />
+      <ProfileHeader student={data.student} viewer={viewer} onArchived={reload} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <div className="flex flex-col gap-4">
           <OverviewCard student={data.student} />

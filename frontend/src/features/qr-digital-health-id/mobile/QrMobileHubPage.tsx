@@ -12,7 +12,7 @@ import {
   RowList,
   Skeleton,
 } from '../../../components'
-import { getMockSessionUser, type SessionUser } from '../../../lib/mock-db'
+import { getMockSessionUser, logoutMockSession, type SessionUser } from '../../../lib/mock-db'
 import type { StudentNumber } from '../../../types/entities'
 import { lookupStudentByNumber, type QrLookupResult } from '../api/qrLookupApi'
 import { paths } from '../../../routes/paths'
@@ -110,7 +110,7 @@ function StaffActions({ studentNumber }: { studentNumber: StudentNumber }) {
           </Link>
           <Link
             to={paths.incidentNew(studentNumber)}
-            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-warning bg-warning text-sm font-semibold text-white shadow-card transition-[filter] hover:brightness-90"
+            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-warning bg-warning px-4 text-sm font-semibold text-white shadow-card transition-[filter] hover:brightness-90"
           >
             <Icon name="alertTriangle" />
             Log Emergency
@@ -124,7 +124,7 @@ function StaffActions({ studentNumber }: { studentNumber: StudentNumber }) {
           </Link>
           <Link
             to={paths.inventoryDispense(studentNumber)}
-            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-border bg-background px-4 text-sm font-semibold text-text-primary shadow-card transition-colors hover:bg-surface"
+            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-brand-green bg-background px-4 text-sm font-semibold text-brand-green-dark shadow-card transition-colors hover:bg-surface"
           >
             <Icon name="package" />
             Dispense Medicine
@@ -184,8 +184,27 @@ function InstructorReadOnly({ result }: { result: QrLookupResult }) {
   )
 }
 
-export function QrMobileHubPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
+export function QrMobileHubPage({
+  viewer = getMockSessionUser(),
+  onLogout,
+}: {
+  viewer?: SessionUser
+  /** This screen has no shell, so it carries its own sign-out control (the only one Instructors get). */
+  onLogout?: () => void
+}) {
   const [status, setStatus] = useState<LookupStatus>('idle')
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  async function handleLogout() {
+    if (!onLogout) return
+    setIsLoggingOut(true)
+    try {
+      await logoutMockSession(viewer)
+      onLogout()
+    } catch {
+      setIsLoggingOut(false)
+    }
+  }
   const [result, setResult] = useState<QrLookupResult | null>(null)
 
   async function lookup(studentNumber: StudentNumber) {
@@ -217,9 +236,23 @@ export function QrMobileHubPage({ viewer = getMockSessionUser() }: { viewer?: Se
                 : 'Scan or enter a Student Number for fast clinic actions.'}
             </p>
           </div>
-          <Badge tone={instructor ? 'info' : 'success'} variant="soft" icon="shieldPlus">
-            {instructor ? 'Read-only' : 'Staff'}
-          </Badge>
+          <div className="flex shrink-0 items-center gap-1">
+            <Badge tone={instructor ? 'info' : 'success'} variant="soft" icon="shieldPlus">
+              {instructor ? 'Read-only' : 'Staff'}
+            </Badge>
+            {onLogout && (
+              <button
+                type="button"
+                aria-label={isLoggingOut ? 'Logging out' : 'Log out'}
+                title="Log out"
+                disabled={isLoggingOut}
+                onClick={() => void handleLogout()}
+                className="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md text-error transition-colors hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Icon name="logout" className={isLoggingOut ? 'animate-spin motion-reduce:animate-none' : undefined} />
+              </button>
+            )}
+          </div>
         </header>
 
         {!instructor && (

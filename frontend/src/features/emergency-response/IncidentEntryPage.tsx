@@ -18,11 +18,14 @@ import {
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { addDays, todayISO } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
-import type { HospitalReferral, Incident, ParentNotificationOutcome } from '../../types/entities'
+import type { HospitalReferral, Incident, ParentNotificationOutcome, Student } from '../../types/entities'
+import { normalizeStudentNumber } from '../qr-digital-health-id/shared/QrScannerView'
 import {
   completeStageTwoIncident,
   fetchIncidentEntryContext,
+  findIncidentStudent,
   saveStageOneIncident,
+  type IncidentEntryContext,
 } from './api/incidentEntryApi'
 
 type ScreenStage = 'stage1' | 'stage2'
@@ -47,6 +50,7 @@ const notificationOutcomes = [
 ] satisfies Array<{ value: ParentNotificationOutcome; label: string }>
 
 interface Errors {
+  studentNumber?: string
   complaint?: string
   temperatureC?: string
   pulseBpm?: string
@@ -189,23 +193,63 @@ function validateStageOne(complaint: string, temperatureC: string, pulseBpm: str
 export function IncidentEntryPage({
   viewer = getMockSessionUser(),
   studentNumber,
+  incidentId,
 }: {
   viewer?: SessionUser
   studentNumber?: string
+  /** Reopens this saved incident at Stage 2 (Screen #16b). */
+  incidentId?: string
 }) {
-  const today = todayISO()
-  const { data, status, reload } = useAsyncData(`incident-entry|${studentNumber ?? 'default'}`, () =>
-    fetchIncidentEntryContext(studentNumber),
+  const { data, status, reload } = useAsyncData(
+    `incident-entry|${incidentId ?? ''}|${studentNumber ?? 'unidentified'}`,
+    () => fetchIncidentEntryContext({ studentNumber, incidentId }),
   )
-  const [stage, setStage] = useState<ScreenStage>('stage1')
-  const [incident, setIncident] = useState<Incident | null>(null)
-  const [completed, setCompleted] = useState(false)
-  const [complaint, setComplaint] = useState('')
-  const [temperatureC, setTemperatureC] = useState('')
-  const [pulseBpm, setPulseBpm] = useState('')
-  const [bloodPressure, setBloodPressure] = useState('')
-  const [oxygenSaturation, setOxygenSaturation] = useState('')
-  const [treatmentNotes, setTreatmentNotes] = useState('')
+
+  if (status === 'error') {
+    return (
+      <div className="mx-auto max-w-[1040px] px-4 pt-10 pb-8 sm:px-8">
+        <ErrorState title="Unable to load the incident form." onRetry={reload} />
+      </div>
+    )
+  }
+  if (!data) {
+    return (
+      <>
+        <p className="sr-only" role="status">
+          Loading incident form…
+        </p>
+        <IncidentSkeleton />
+      </>
+    )
+  }
+  return (
+    <IncidentEntryForm
+      key={data.incident?.id ?? data.student?.id ?? 'unidentified'}
+      viewer={viewer}
+      data={data}
+    />
+  )
+}
+
+function vital(incident: Incident | null, key: string): string {
+  const value = incident?.vitals[key]
+  return value === undefined ? '' : String(value)
+}
+
+function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: IncidentEntryContext }) {
+  const today = todayISO()
+  const existing = data.incident
+  const [student, setStudent] = useState<Student | null>(data.student)
+  const [studentNumberInput, setStudentNumberInput] = useState('')
+  const [stage, setStage] = useState<ScreenStage>(existing ? 'stage2' : 'stage1')
+  const [incident, setIncident] = useState<Incident | null>(existing)
+  const [completed, setCompleted] = useState(existing?.stage === 2)
+  const [complaint, setComplaint] = useState(existing?.complaint ?? '')
+  const [temperatureC, setTemperatureC] = useState(vital(existing, 'temperatureC'))
+  const [pulseBpm, setPulseBpm] = useState(vital(existing, 'pulseBpm'))
+  const [bloodPressure, setBloodPressure] = useState(vital(existing, 'bloodPressure'))
+  const [oxygenSaturation, setOxygenSaturation] = useState(vital(existing, 'oxygenSaturation'))
+  const [treatmentNotes, setTreatmentNotes] = useState(vital(existing, 'treatmentNotes'))
   const [referToHospital, setReferToHospital] = useState(false)
   const [referralDestination, setReferralDestination] = useState('')
   const [transportMode, setTransportMode] = useState('')
@@ -227,14 +271,29 @@ export function IncidentEntryPage({
 
   async function onStageOneSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!data) return
+    // Stage 1 is saved once; a second submit would create a duplicate incident.
+    if (incident) return
     const nextErrors = validateStageOne(complaint, temperatureC, pulseBpm)
+    const typedNumber = normalizeStudentNumber(studentNumberInput)
+    if (!student && !/^\d{4}-\d{5}$/.test(typedNumber)) {
+      nextErrors.studentNumber = 'Enter the Student Number (YYYY-NNNNN).'
+    }
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
     setSavingStageOne(true)
     try {
+      let target = student
+      if (!target) {
+        try {
+          target = await findIncidentStudent(typedNumber)
+        } catch {
+          setErrors({ studentNumber: 'No student has this Student Number. Check it and try again.' })
+          return
+        }
+        setStudent(target)
+      }
       const saved = await saveStageOneIncident(
-        { studentId: data.student.id, complaint, temperatureC, pulseBpm },
+        { studentId: target.id, complaint, temperatureC, pulseBpm },
         viewer,
       )
       setIncident(saved)
@@ -278,7 +337,7 @@ export function IncidentEntryPage({
 
   async function onStageTwoSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!data || !incident) return
+    if (!incident || !student) return
     const nextErrors = validateStageTwo()
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
@@ -294,7 +353,7 @@ export function IncidentEntryPage({
       const result = await completeStageTwoIncident(
         {
           incidentId: incident.id,
-          studentId: data.student.id,
+          studentId: student.id,
           complaint,
           temperatureC,
           pulseBpm,
@@ -323,24 +382,6 @@ export function IncidentEntryPage({
     }
   }
 
-  if (status === 'error') {
-    return (
-      <div className="mx-auto max-w-[1040px] px-4 pt-10 pb-8 sm:px-8">
-        <ErrorState title="Unable to load the incident form." onRetry={reload} />
-      </div>
-    )
-  }
-  if (!data) {
-    return (
-      <>
-        <p className="sr-only" role="status">
-          Loading incident form…
-        </p>
-        <IncidentSkeleton />
-      </>
-    )
-  }
-
   return (
     <div className="mx-auto flex max-w-[1040px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
@@ -348,14 +389,16 @@ export function IncidentEntryPage({
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">Incident Entry</h1>
             <p className="mt-1 text-sm text-text-secondary">
-              {data.student.fullName} · {data.student.studentNumber} · {data.student.gradeLevel}
+              {student
+                ? `${student.fullName} · ${student.studentNumber} · ${student.gradeLevel}`
+                : 'Student not identified yet. Enter the Student Number in Stage 1.'}
             </p>
           </div>
           <StatusBadge status={statusValue} map={incidentStatusMap} />
         </div>
       </Card>
 
-      {incident && (
+      {incident && (!existing || completed) && (
         <div
           role="status"
           className="rounded-md border border-warning bg-warning/10 px-4 py-3 text-sm font-semibold text-text-primary"
@@ -387,6 +430,22 @@ export function IncidentEntryPage({
               description="Capture only the essentials now. Stage 2 can be completed after the immediate situation is handled."
             />
             <CardBody className="flex flex-col gap-4">
+              {!student && (
+                <Input
+                  label="Student Number"
+                  value={studentNumberInput}
+                  required
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="YYYY-NNNNN"
+                  hint="No student was identified before this emergency. Type the Student Number."
+                  onChange={(event) => {
+                    setStudentNumberInput(normalizeStudentNumber(event.target.value))
+                    setErrors((current) => ({ ...current, studentNumber: undefined }))
+                  }}
+                  error={errors.studentNumber}
+                />
+              )}
               <FieldSelect
                 label="Complaint"
                 value={complaint}
@@ -428,6 +487,7 @@ export function IncidentEntryPage({
                   type="submit"
                   variant="primary"
                   loading={savingStageOne}
+                  disabled={Boolean(incident)}
                   className="h-11 bg-warning text-white hover:bg-warning hover:brightness-90"
                 >
                   Save Stage 1

@@ -42,7 +42,7 @@ export function ForcePasswordChangePage({ viewer, onComplete }: { viewer: Sessio
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary">Change your password</h1>
           <p className="mt-1 text-sm text-text-secondary">Set a new password before opening CLINIQ for the first time.</p>
         </header>
-        <form className="mt-6 flex flex-col gap-4" onSubmit={submit}>
+        <form className="mt-6 flex flex-col gap-4" onSubmit={submit} noValidate>
           <Input label="New password" type="password" autoComplete="new-password" hint="Use at least 8 characters. Your last 5 passwords cannot be reused." value={nextPassword} onChange={(event) => setNextPassword(event.target.value)} required />
           <Input label="Confirm new password" type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} required />
           {error && <p role="alert" className="text-sm font-semibold text-error">{error}</p>}

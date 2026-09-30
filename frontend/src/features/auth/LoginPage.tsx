@@ -18,11 +18,19 @@ export function LoginPage({ onLogin }: { onLogin: (user: SessionUser) => void })
   const [error, setError] = useState('')
   const [lockedUntil, setLockedUntil] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({})
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError('')
     setLockedUntil(null)
+    // Inline messages like every other CLINIQ form, instead of the browser's native bubble.
+    const nextFieldErrors = {
+      username: username.trim() ? undefined : 'Enter your username.',
+      password: password ? undefined : 'Enter your password.',
+    }
+    setFieldErrors(nextFieldErrors)
+    if (nextFieldErrors.username || nextFieldErrors.password) return
     setLoading(true)
     try {
       const result = await authenticateMockUser(username, password)
@@ -49,9 +57,9 @@ export function LoginPage({ onLogin }: { onLogin: (user: SessionUser) => void })
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary">Sign in</h1>
           <p className="mt-1 text-sm text-text-secondary">Use your assigned clinic account to continue.</p>
         </header>
-        <form className="mt-6 flex flex-col gap-4" onSubmit={submit}>
-          <Input label="Username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required />
-          <Input label="Password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+        <form className="mt-6 flex flex-col gap-4" onSubmit={submit} noValidate>
+          <Input label="Username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} error={fieldErrors.username} required />
+          <Input label="Password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} error={fieldErrors.password} required />
           {error && <p role="alert" className="text-sm font-semibold text-error">{error}</p>}
           {lockMessage && <p className="text-xs text-text-secondary">{lockMessage}</p>}
           <Button type="submit" variant="primary" className="mt-2 w-full" loading={loading}>Sign in</Button>

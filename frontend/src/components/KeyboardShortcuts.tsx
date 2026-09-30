@@ -56,7 +56,7 @@ export function KeyboardShortcuts() {
         type="button"
         aria-label="Show keyboard shortcuts"
         onClick={() => setOpen(true)}
-        className="fixed right-4 bottom-4 z-20 inline-flex min-h-10 cursor-pointer items-center justify-center rounded-md border border-border bg-background px-3 text-sm font-semibold text-text-secondary shadow-card transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark print:hidden"
+        className="fixed right-4 bottom-4 z-20 hidden min-h-10 md:inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-background px-3 text-sm font-semibold text-text-secondary shadow-card transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark print:hidden"
       >
         Shortcuts <span className="ml-1 text-text-muted">?</span>
       </button>

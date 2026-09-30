@@ -120,7 +120,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
     setPage(1)
   }
 
-  if (status === 'error') return <main className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load the audit log." onRetry={reload} /></main>
+  if (status === 'error') return <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load the audit log." onRetry={reload} /></div>
   if (!data) return <><p className="sr-only" role="status">Loading audit log...</p><AuditLogSkeleton /></>
 
   const pageCount = Math.max(1, Math.ceil(data.rows.length / PAGE_SIZE))
@@ -137,7 +137,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   }
 
   return (
-    <main className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5 print:hidden">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -163,6 +163,6 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
           </div>
         </CardBody>
       </Card>
-    </main>
+    </div>
   )
 }

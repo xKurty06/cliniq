@@ -46,7 +46,8 @@ function statusBadge(status: FollowUpStatus) {
           ? 'neutral'
           : 'warning'
   return (
-    <Badge tone={tone} variant="soft">
+    // Neutral has no default icon; Cancelled still gets one so every status is icon + label.
+    <Badge tone={tone} variant="soft" icon={status === 'cancelled' ? 'xCircle' : undefined}>
       {status[0].toUpperCase() + status.slice(1)}
     </Badge>
   )

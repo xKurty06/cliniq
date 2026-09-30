@@ -36,9 +36,9 @@ export function BackupStatusPage() {
 
     if (status === 'error')
         return (
-            <main className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
+            <div className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
                 <ErrorState title="Unable to load backup status." onRetry={reload} />
-            </main>
+            </div>
         )
     if (!data)
         return (
@@ -54,13 +54,13 @@ export function BackupStatusPage() {
     const latest = current.latest
     if (!latest)
         return (
-            <main className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
+            <div className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
                 <EmptyState
                     icon="shieldPlus"
                     title="No backups recorded yet"
                     description="The first scheduled backup will appear here once it has run."
                 />
-            </main>
+            </div>
         )
     const verified = Boolean(latest.verifiedByUserId)
 
@@ -74,7 +74,7 @@ export function BackupStatusPage() {
     }
 
     return (
-        <main className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+        <div className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
             <Card className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -154,6 +154,6 @@ export function BackupStatusPage() {
                     )}
                 </CardBody>
             </Card>
-        </main>
+        </div>
     )
 }

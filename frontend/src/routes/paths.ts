@@ -30,6 +30,8 @@ export const paths = {
   incidents: '/incidents',
   /** `?student=` pre-selects the identified student; the Emergency button opens it without one. */
   incidentNew: (studentNumber?: string) => withStudent('/incidents/new', studentNumber),
+  /** Reopens a saved Stage-1 incident to complete Stage 2 (Screen #16b). */
+  incidentComplete: (incidentId: string) => `/incidents/${seg(incidentId)}/complete`,
   qrScan: '/qr/scan',
   inventory: '/inventory',
   inventoryNew: '/inventory/new',

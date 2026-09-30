@@ -1,4 +1,4 @@
-import { getDemoStudent, getStudent, getStudentHistory } from '../../../lib/mock-db'
+import { archiveStudent, getDemoStudent, getStudent, getStudentHistory, type SessionUser } from '../../../lib/mock-db'
 import type { Incident, Student, Visit } from '../../../types/entities'
 
 /**
@@ -19,4 +19,9 @@ export async function fetchStudentProfile(studentNumber?: string): Promise<Stude
   const student = studentNumber ? await getStudent(studentNumber) : await getDemoStudent({ withHistory: true })
   const history = await getStudentHistory(student.id)
   return { student, ...history }
+}
+
+/** Archive hides the student from active lists without deleting anything; the write is audited. */
+export function archiveStudentRecord(studentNumber: string, actor: SessionUser): Promise<Student> {
+  return archiveStudent(studentNumber, actor)
 }

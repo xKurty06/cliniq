@@ -7,10 +7,15 @@ import type { UserRole } from '../../types/entities'
 import { fetchUser, submitUser } from './api/userApi'
 
 export function UserFormPage({ userId }: { userId?: string }) {
-  const { data: existing, status } = useAsyncData(`user|${userId ?? 'new'}`, () =>
+  const { data: existing, status, reload } = useAsyncData(`user|${userId ?? 'new'}`, () =>
     userId ? fetchUser(userId) : Promise.resolve(null),
   )
-  if (status === 'error') return <ErrorState title="Unable to load this account." />
+  if (status === 'error')
+    return (
+      <div className="mx-auto max-w-[760px] px-4 pt-10 pb-8 sm:px-8">
+        <ErrorState title="Unable to load this account." onRetry={reload} />
+      </div>
+    )
   if (existing === undefined) return <FormSkeleton />
   return <UserForm key={existing?.id ?? 'new'} userId={userId} initial={existing} />
 }
@@ -45,32 +50,45 @@ function UserForm({
   const [username, setUsername] = useState(initial?.username ?? '')
   const [role, setRole] = useState<UserRole>(initial?.role ?? 'staff')
   const [saved, setSaved] = useState(false)
+  const [errors, setErrors] = useState<{ name?: string; username?: string }>({})
   async function submit(event: FormEvent) {
     event.preventDefault()
-    if (!name.trim() || !username.trim()) return
+    const nextErrors = {
+      name: name.trim() ? undefined : "Enter the person's full name.",
+      username: username.trim() ? undefined : 'Enter a username for this account.',
+    }
+    setErrors(nextErrors)
+    setSaved(false)
+    if (nextErrors.name || nextErrors.username) return
     await submitUser({ name, username, role }, { userId, actor: getMockSessionUser() })
     setSaved(true)
   }
   return (
-    <main className="mx-auto flex max-w-[760px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-[760px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+      <Card className="p-5">
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+          {userId ? 'Edit user' : 'Add user'}
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Assign the smallest role needed for the person's work.
+        </p>
+      </Card>
       <Card>
-        <CardHeader
-          title={userId ? 'Edit user' : 'Add user'}
-          description="Assign the smallest role needed for the person's work."
-          icon={<Icon name="userCog" />}
-        />
+        <CardHeader title="Account details" icon={<Icon name="userCog" />} />
         <CardBody>
           <form className="flex flex-col gap-4" onSubmit={submit} noValidate>
             <Input
               label="Full name"
               value={name}
               required
+              error={errors.name}
               onChange={(event) => setName(event.target.value)}
             />
             <Input
               label="Username"
               value={username}
               required
+              error={errors.username}
               onChange={(event) => setUsername(event.target.value)}
             />
             <Select
@@ -106,6 +124,6 @@ function UserForm({
           </form>
         </CardBody>
       </Card>
-    </main>
+    </div>
   )
 }

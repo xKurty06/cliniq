@@ -14,12 +14,12 @@ function InventoryFormSkeleton() {
 export function InventoryFormPage() {
   const [search] = useSearchParams()
   const itemId = search.get('item') ?? undefined
-  const { data, status } = useAsyncData(itemId ?? 'new', () => fetchInventoryForm(itemId))
+  const { data, status, reload } = useAsyncData(itemId ?? 'new', () => fetchInventoryForm(itemId))
   const [values, setValues] = useState<InventoryFormValues | null>(null)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState('')
   const [saving, setSaving] = useState(false)
-  if (status === 'error') return <div className="mx-auto max-w-[760px] px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load inventory item." /></div>
+  if (status === 'error') return <div className="mx-auto max-w-[760px] px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load inventory item." onRetry={reload} /></div>
   if (!data) return <><p className="sr-only" role="status">Loading inventory form...</p><InventoryFormSkeleton /></>
   const initial = values ?? (data.item ? { name: data.item.name, category: data.item.category, currentStock: String(data.item.currentStock), unit: data.item.unit, expirationDate: data.item.expirationDate ?? '', lowStockThreshold: String(data.item.lowStockThreshold) } : EMPTY)
   function setField<K extends keyof InventoryFormValues>(field: K, value: InventoryFormValues[K]) { setValues((current) => ({ ...(current ?? initial), [field]: value })); setError(''); setSaved('') }

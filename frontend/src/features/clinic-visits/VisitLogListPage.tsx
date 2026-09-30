@@ -11,6 +11,7 @@ import {
   ErrorState,
   Icon,
   Input,
+  Pagination,
   SegmentedControl,
   Skeleton,
   type BadgeTone,
@@ -30,6 +31,8 @@ import {
 } from './api/visitLogApi'
 
 type DispositionFilter = Disposition | 'all'
+
+const PAGE_SIZE = 10
 type VisitLogSortKey = 'dateTime' | 'studentNumber' | 'record' | 'disposition'
 
 interface VisitLogSort {
@@ -89,13 +92,30 @@ export function VisitLogListPage() {
   const [search, setSearch] = useState('')
   const [disposition, setDisposition] = useState<DispositionFilter>('all')
   const [sort, setSort] = useState<VisitLogSort>({ key: 'dateTime', direction: 'descending' })
+  const [page, setPage] = useState(1)
 
   const { data, status, isRefetching, reload } = useAsyncData(
     `${range.from}|${range.to}|${search}|${disposition}`,
     () => fetchVisitLog({ from: range.from, to: range.to, search, disposition }),
   )
 
+  // Filters reset to the first page in the same event, so a narrower result never lands on an
+  // empty later page (cliniq-pagination-patterns).
+  function changeRange(next: DateRange) {
+    setRange(next)
+    setPage(1)
+  }
+  function changeSearch(next: string) {
+    setSearch(next)
+    setPage(1)
+  }
+  function changeDisposition(next: DispositionFilter) {
+    setDisposition(next)
+    setPage(1)
+  }
+
   function toggleSort(key: VisitLogSortKey) {
+    setPage(1)
     setSort((current) =>
       current.key === key
         ? { key, direction: current.direction === 'ascending' ? 'descending' : 'ascending' }
@@ -138,6 +158,10 @@ export function VisitLogListPage() {
     const comparison = valueFor(a).localeCompare(valueFor(b), undefined, { numeric: true })
     return sort.direction === 'ascending' ? comparison : -comparison
   })
+
+  const pageCount = Math.max(1, Math.ceil(sortedRows.length / PAGE_SIZE))
+  const currentPage = Math.min(page, pageCount)
+  const pageRows = sortedRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   const sortColumn = (key: VisitLogSortKey, label: string) => ({
     label,
@@ -226,7 +250,7 @@ export function VisitLogListPage() {
             <SegmentedControl
               label="Disposition filter"
               value={disposition}
-              onChange={setDisposition}
+              onChange={changeDisposition}
               options={dispositionOptions}
             />
           }
@@ -237,12 +261,12 @@ export function VisitLogListPage() {
               label="Search"
               value={search}
               placeholder="Student Number, grade, or event"
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => changeSearch(event.target.value)}
               className="min-w-56 flex-1"
             />
             <DateRangePicker
               value={range}
-              onChange={setRange}
+              onChange={changeRange}
               today={defaultRange.to}
               presets={['today', 'last7', 'thisMonth', 'all', 'custom']}
               presetLabels={{ last7: 'This week' }}
@@ -252,12 +276,22 @@ export function VisitLogListPage() {
 
           <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>
             {data.length ? (
-              <DataTable
-                caption="Clinic visit log"
-                columns={columns}
-                rows={sortedRows}
-                rowKey={(row) => row.id}
-              />
+              <>
+                <DataTable
+                  caption="Clinic visit log"
+                  columns={columns}
+                  rows={pageRows}
+                  rowKey={(row) => row.id}
+                />
+                <Pagination
+                  page={currentPage}
+                  pageCount={pageCount}
+                  total={sortedRows.length}
+                  pageSize={PAGE_SIZE}
+                  itemLabel="visits"
+                  onPageChange={setPage}
+                />
+              </>
             ) : (
               <EmptyState
                 icon="clipboardList"

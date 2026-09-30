@@ -1,5 +1,6 @@
 import { listIncidents, listStudents } from '../../../lib/mock-db'
-import { addDays, todayISO } from '../../../lib/dates'
+import { todayISO } from '../../../lib/dates'
+import { rangeForPreset } from '../../../lib/dateRange'
 import type { ISODate, ISODateTime } from '../../../types/entities'
 
 export type IncidentCompletion = 'needs_completion' | 'complete'
@@ -22,7 +23,7 @@ export interface IncidentLogRow {
 }
 
 export function defaultIncidentLogRange(today = todayISO()): { from: ISODate; to: ISODate } {
-  return { from: addDays(today, -30), to: today }
+  return rangeForPreset('all', today)
 }
 
 export async function fetchIncidentLog(query: IncidentLogQuery): Promise<IncidentLogRow[]> {
@@ -59,5 +60,4 @@ export async function fetchIncidentLog(query: IncidentLogQuery): Promise<Inciden
         (row.eventTag?.toLowerCase().includes(search) ?? false)
       )
     })
-    .slice(0, 120)
 }

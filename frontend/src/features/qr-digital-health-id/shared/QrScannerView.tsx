@@ -51,6 +51,8 @@ export function QrScannerView({ title, description, onDetected }: QrScannerViewP
             type="button"
             variant="primary"
             icon="qrCode"
+            // Reference 4: the scan action is the dominant, thumb-sized control on phones.
+            className="max-md:h-14 max-md:text-base"
             loading={status === 'starting'}
             onClick={status === 'scanning' ? stop : start}
           >

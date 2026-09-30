@@ -116,6 +116,11 @@ function IncidentEntryRoute({ viewer }: Viewer) {
   return <IncidentEntryPage viewer={viewer} studentNumber={search.get('student') ?? undefined} />
 }
 
+function IncidentCompleteRoute({ viewer }: Viewer) {
+  const { incidentId } = useParams()
+  return <IncidentEntryPage viewer={viewer} incidentId={incidentId} />
+}
+
 function VisitDetailRoute({ viewer }: Viewer) {
   const { visitId } = useParams()
   return <VisitDetailPage viewer={viewer} visitId={visitId} />
@@ -140,7 +145,8 @@ interface AppRoute {
   /** Sidebar item highlighted while this screen is open. */
   nav: NavKey
   shell: boolean
-  render: (viewer: SessionUser) => ReactNode
+  /** `onLogout` is for shell-free screens, which have no shell header to sign out from. */
+  render: (viewer: SessionUser, onLogout: () => void) => ReactNode
 }
 
 function PageTitle({ children, title }: { children: ReactNode; title: string }) {
@@ -257,6 +263,7 @@ const APP_ROUTES: AppRoute[] = [
     shell: true,
     render: (viewer) => <IncidentEntryRoute viewer={viewer} />,
   },
+  { path: '/incidents/:incidentId/complete', title: 'Complete Incident', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentCompleteRoute viewer={viewer} /> },
   { path: '/incidents/notifications', title: 'Parent Notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
   { path: '/incidents/:incidentId/notifications', title: 'Parent Notifications', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentNotificationRoute viewer={viewer} /> },
   { path: '/incidents/report', title: 'Incident Report', roles: ['staff'], nav: 'incidents', shell: true, render: (viewer) => <IncidentReportRoute viewer={viewer} /> },
@@ -299,7 +306,7 @@ const APP_ROUTES: AppRoute[] = [
     roles: ['staff', 'instructor'],
     nav: 'qrLookup',
     shell: false,
-    render: (viewer) => <QrMobileHubPage viewer={viewer} />,
+    render: (viewer, onLogout) => <QrMobileHubPage viewer={viewer} onLogout={onLogout} />,
   },
   { path: paths.qrDesktop, title: 'QR Health IDs', roles: ['staff'], nav: 'qrLookup', shell: true, render: (viewer) => <QrDesktopHubPage viewer={viewer} /> },
   { path: paths.qrPrint, title: 'Print QR Health IDs', roles: ['staff'], nav: 'qrLookup', shell: true, render: () => <QrPrintPage /> },
@@ -333,7 +340,8 @@ function withShell(
   content: ReactNode,
   onLogout: () => void,
 ) {
-  if (user.role === 'instructor') return content
+  // Instructor has no shell, so the read-only profile needs its own main landmark.
+  if (user.role === 'instructor') return <main id="main-content">{content}</main>
   return (
     <AppShell user={user} active={nav} onLogout={onLogout}>
       {content}
@@ -372,7 +380,7 @@ export function AppRoutes({
         const allowed = route.roles.includes(user.role)
         const content = (
           <PageTitle title={route.title}>
-            <Suspense fallback={<RouteLoading />}>{route.render(user)}</Suspense>
+            <Suspense fallback={<RouteLoading />}>{route.render(user, onLogout)}</Suspense>
           </PageTitle>
         )
         return (

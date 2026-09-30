@@ -156,7 +156,11 @@ export function activeStudents(state: DbState): SeedStudent[] {
 
 export function gradeLevels(state: DbState): string[] {
   const levels = new Set(state.students.map((s) => s.gradeLevel).filter(Boolean))
-  return [...levels].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+  // School order: Kinder comes before Grade 1, not alphabetically after Grade 12.
+  const rank = (level: string) => (level === 'Kinder' ? 0 : 1)
+  return [...levels].sort(
+    (a, b) => rank(a) - rank(b) || a.localeCompare(b, undefined, { numeric: true }),
+  )
 }
 
 /** Next `YYYY-NNNNN` for the current year (ADR-005: system-generated at creation). */

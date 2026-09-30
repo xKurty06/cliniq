@@ -73,6 +73,63 @@ These items were supplied for the frontend backlog. Confirmed implementation gap
 - **Add parent contact information near Parent Notification Log.** Display the selected student's relevant emergency-contact name, relationship, phone number, and verification status near the outcome controls, subject to the single-student privacy rule.
 - **Add an optional General Notes field to Incident Stage 1.** It must remain optional so the fast-capture requirement is not weakened, and must carry forward into Stage 2/report data once the API contract is finalized.
 
+### Interaction-based UI/UX review — Wednesday, September 30, 2026 — 19:55
+
+A live review of the running frontend (`http://localhost:5173`, Vite dev server, mock-data layer) using a real Chromium browser driven by Playwright. Every Screen-Inventory screen was opened and used as Staff, Admin/Principal, and PE/Sports Instructor where the role can reach it. The review clicked each button, opened each dropdown, submitted each form empty and valid, and forced loading/empty/error states with `?mock=slow|empty|error`. It ran at 1440px desktop and at 390px for the QR/mobile flows, and added an axe-core scan of every route. Severity: **broken** (prevents the task) · **inconsistent** (works, but differs from the documented pattern) · **cosmetic** · **judgment call** (awkward placement, not a rule violation). Evidence and fixes: `08-Logs/Agent-Sessions/2026-09-30-interaction-ui-ux-review.md`.
+
+**Fixed in this session (confirmed implementation gaps, now resolved and regression-tested):**
+
+- **Broken — Incident Entry (#16/#25), Staff.** Tapping the mobile Emergency button (or the QR hub's Emergency button before any scan) → Start Stage 1 opened a form already attached to a hardcoded demo student ("Gian Quizon") with no way to change it, so the incident was filed against the wrong student. Stage 1 now shows a required Student Number field when no student was identified.
+- **Broken — Incident Entry Stage 2 (#16b), Staff.** Stage 2 existed only in the same sitting as Stage 1. A "Needs completion" incident in the Incident Log could never be reopened, although #16b and Reference 5 require reopening the same record later. Added `/incidents/:incidentId/complete` and a "Complete Stage 2" row action. Stage 1 also can no longer be submitted twice, which previously created a duplicate incident.
+- **Broken — Student Profile (#7), Staff.** Clicking Archive did nothing; the button had no handler, and the existing `archiveStudent` API was never called. It now archives after a confirmation dialog and shows the Archived badge; the audit entry is written.
+- **Broken — Visit Log (#10) and Incident Log (#15), Staff.** Both lists silently cut results at 120 rows, so 39 of the 159 seed visits were unreachable under "All". The cap was removed.
+- **Broken — Instructor Lookup (#26) and Staff mobile hub (#23), 390px.** The shell-free mobile screen had no sign-out control, so an Instructor could not log out at all. A red, icon-only Log out control matching the desktop header was added.
+- **Inconsistent — Visit Log and Incident Log.** No pagination, against `cliniq-pagination-patterns`. Both now use the shared `Pagination`, and filter changes reset to page 1.
+- **Inconsistent — Incident Log.** Used separate From/To date inputs defaulting to the last 30 days, against `cliniq-date-range-patterns`. It now uses the shared `DateRangePicker` defaulting to All.
+- **Inconsistent — Incident Report (#18).** Vitals were labelled with raw data keys (`temperatureC`, `pulseBpm`, `treatmentNotes`) and the timestamp was ISO. It now shows plain labels with units and the shared date format.
+- **Inconsistent — Incident Report (#18).** "Approve report", an irreversible sign-off, applied on one click. It now asks for confirmation first, like the Excuse Letter's approval gate.
+- **Inconsistent — New Visit Entry (#11).** A successful Save left the form filled, so a second click recorded the visit twice; Reference 2 says success clears the form. It now clears after every successful save, and the confirmation banner stays.
+- **Inconsistent — Add/Edit User (#34).** Submitting empty did nothing and showed nothing. Inline required-field messages were added, along with an `h1` page header; the page had none.
+- **Inconsistent — Edit User (#34) and Edit Inventory Item (#29).** The load-error state had no retry action. "Try again" was added.
+- **Inconsistent — Login (#1) and Force Password Change (#2).** An empty submit showed the browser's native tooltip instead of CLINIQ's inline field errors. They now use inline messages.
+- **Inconsistent — accessibility landmarks.** Nine shell screens (QR desktop, QR print, Reports, Audit Log, Users, Add User, Backup, Parent Notifications, Incident Report) nested a second `<main>` inside the shell's, and the Instructor profile had none (axe `landmark-no-duplicate-main`, `landmark-one-main`). Each screen now has exactly one `main`.
+- **Inconsistent — Follow-Up List (#18c).** The Cancelled status badge had no icon, while every other status badge has one. It now has one.
+- **Inconsistent — QR mobile hub (#23), 390px.** Scan QR Code was desktop-sized (40px) although Reference 4 makes it the dominant, thumb-sized control; it is now 56px on phones. The floating "Shortcuts ?" keyboard-help button covered "Look up student"; it is now hidden below `md`.
+- **Cosmetic — QR quick actions.** "Dispense Medicine" used a grey neutral style unlike its sibling actions, and "Log Emergency" had no horizontal padding. Both now match.
+- **Cosmetic — grade-level dropdowns (Student List, Add/Edit Student).** "Kinder" was sorted after "Grade 12". It now comes first.
+
+**Confirmed gaps logged, not fixed (each needs a product or scope decision first):**
+
+- **Broken — PE/Sports Injury Referral (#14), Staff.** The `/visits/pe-referral` route is linked from nowhere, and it always files the referral against a hardcoded demo student with no way to choose one. Decide the entry point (Visit flow, QR quick-actions, Instructor-initiated?) and how the student is identified. The Audit box was un-checked.
+- **Inconsistent — Visit Log (#10) vs `ADR-010`.** The list shows "Visit recorded" instead of the complaint, and a test asserts no complaint column. ADR-010 (Option A) names the Visit Log as a list where the reason stays visible. This was left as-is because it widens health-data exposure on a shared screen. Decide whether to show the complaint or amend ADR-010. The Audit box was un-checked.
+- **Inconsistent — Follow-Up List (#18c).** Only "Mark completed" exists; there is no way to mark Missed or Cancelled, and no follow-up view/edit (which Screen-Inventory says shows the full name). The Audit box was un-checked.
+- **Inconsistent — Staff Dashboard (#4).** Staff land on the shared Clinic Overview (#31). #4's backup-status widget and quick "New Visit" action are absent, and it shows range totals rather than a "today's visit count" card. No ADR merges #4 into #31, and #4 has no checklist row. Decide whether #4 is folded into #31 (and record it) or built.
+- **Inconsistent — New Visit Entry (#11) without `?student=`.** Opening `/visits/new` directly still uses a hardcoded demo student. Every in-app link passes a student, but Screen-Inventory lists "student lookup" as part of #11. Reuse the Stage-1 Student Number pattern, or redirect to lookup.
+- **Inconsistent — primary-button contrast, all roles.** White 14px semibold labels on `brand-green` (#039935) measure 3.74:1 and fail WCAG AA for normal text. axe flagged this on 15 Staff screens plus Admin Reports and Instructor QR. Design-System.md contradicts itself: the Color System says small white text never goes on `brand-green`, while Button Hierarchy says button labels pass. Decide between a `brand-green-dark` fill and larger/bolder labels, then update Design-System.md.
+- **Inconsistent — date/time formats.** ISO dates appear on Follow-Ups (due date), Inventory (expiration), User List (last login), Parent Notifications (attempts), the Instructor lookup history, the Incident Report selector, and the Incident Archive. Elsewhere the format is "Sep 30, 2026 · 7:48 AM", and the Student Profile and Visit Detail use 24-hour "08:42". The Incident Archive also sorts oldest-first while the Incident Log sorts newest-first. Pick one display format and order.
+- **Inconsistent — Add User accepts a duplicate username** (e.g. `demo.nurse`), unlike Add Student's duplicate check. It needs a frontend check now and a unique constraint in the backend phase.
+- **Inconsistent — no navigation below the `lg` breakpoint.** On shell screens the sidebar is hidden with no menu replacement. This matters for screens opened from mobile QR quick-actions (New Visit, Incident Entry, Dispense, Profile), where only browser Back leaves the screen. Decide whether mobile shell navigation is in scope.
+- **Inconsistent — the shared `Modal` doesn't move or trap focus.** This session's dialogs set `autoFocus` on Cancel as a workaround. Add focus management to the shared component.
+- **Cosmetic — Parent Notifications.** Adding an attempt reloads the page and swaps the whole screen for the skeleton for about 1–2 seconds, because `reload()` clears data.
+- **Cosmetic — QR lookup.** A previous "Student not found" message stays visible after a new camera scan starts.
+- **Cosmetic — Student Profile.** The "Overview" card and the sidebar "Overview" group share an accessible name (axe `landmark-unique`).
+- **Cosmetic — capitalization.** It's inconsistent across titles and buttons: "Add Student" vs "Add inventory item" vs "Add user"; "Save Student" vs "Save changes" vs "Create user"; "Mark Reviewed" vs "Mark completed" vs "Mark as verified". This needs a sentence-case or title-case rule.
+
+**Judgment calls, for a visual/product decision (not rule violations):**
+
+- **Page titles read like spec labels:** "Visit Log List", "Incident Log List", "Visit Detail/Edit" (with a slash), "Incomplete Records Review Queue", "QR Code Print View".
+- **Page structure varies.** The Dashboard header is uncarded while every other screen uses a header card. Content widths vary (1180/1120/1040/960/900/760px), so Backup and Add User look noticeably narrower and off-center compared with neighbouring screens.
+- **The desktop "Shortcuts ?" floating button** sits over the bottom-right of long tables at 1440×900. On Follow-Ups it lands beside the last row's "Mark completed".
+- **Internal record IDs are shown to users:** the Excuse Letter reads "source visit visit-0001", including on the printed letter, and the Audit Log shows "Incident incident-0022".
+- **The Incident Report** is a single-record sign-off screen but embeds a dropdown of every incident, so switching records there risks approving the wrong one. Its "generated summary" also omits hospital referral and parent-notification outcomes.
+- **"Use PE Defaults"** sits in the PE Referral page header, far from the fields it fills, and fills only 2 of the 5 required fields.
+- **The mobile Emergency button** is labelled literally "Emergency button".
+- **No confirmation on two irreversible actions.** "Mark completed" (Follow-Ups) can't be undone from the UI, and "Mark as verified" (Backup) records permanently. Decide whether these routine actions warrant a confirmation.
+- **Small text for a low-vision audience.** Sidebar group labels (10–11px uppercase), the brand subtitle (10px), and calendar event tags (11px) are small for the audience Design-System.md describes.
+- **Dashboard low-stock list** truncates item details ("9 tablets in …") when an item name wraps at 1440px.
+- **The Follow-Ups Status select** stretches to about 320px, much wider than its content, unlike the other filter controls.
+- **Privacy classification to confirm:** the Incomplete Records Review Queue (#9) lists full names in a multi-student view. It looks like a masterlist-style roster (no medical fields), but `cliniq-display-privacy` says to ask when a screen doesn't cleanly fit either case.
+
 ## Open product decisions from the mock-data layer — Monday, September 28, 2026 — 09:19
 
 *(This entry was lost when a zip overwrote the file and was rebuilt from `ADR-014` and that session's log.)*

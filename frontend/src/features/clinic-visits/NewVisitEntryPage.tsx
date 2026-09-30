@@ -224,7 +224,8 @@ export function NewVisitEntryPage({
   const [followUpNotes, setFollowUpNotes] = useState('')
   const [errors, setErrors] = useState<Errors>({})
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  /** Set after a successful save; records whether that save created a follow-up. */
+  const [saved, setSaved] = useState<null | { withFollowUp: boolean }>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const saveAndNewRef = useRef(false)
 
@@ -285,20 +286,19 @@ export function NewVisitEntryPage({
         },
         viewer,
       )
-      if (saveAndNewRef.current) {
-        setComplaint('')
-        setTreatment('')
-        setDisposition('returned_to_class')
-        setTriageSteps([])
-        setNeedsFollowUp(false)
-        setFollowUpReason('')
-        setFollowUpNotes('')
-        setErrors({})
-        saveAndNewRef.current = false
-        setSaved(true)
-      } else {
-        setSaved(true)
-      }
+      // Reference 2: a successful save confirms and clears the form, so a second click can't
+      // record the same visit twice. The Save-and-new shortcut takes the same path.
+      setSaved({ withFollowUp: needsFollowUp })
+      setComplaint('')
+      setTreatment('')
+      setDisposition('returned_to_class')
+      setTriageSteps([])
+      setNeedsFollowUp(false)
+      setFollowUpDate(addDays(today, 1))
+      setFollowUpReason('')
+      setFollowUpNotes('')
+      setErrors({})
+      saveAndNewRef.current = false
     } finally {
       setSaving(false)
     }
@@ -344,7 +344,7 @@ export function NewVisitEntryPage({
           role="status"
           className="rounded-md border border-success bg-success/10 px-4 py-3 text-sm font-semibold text-text-primary"
         >
-          Visit saved. {needsFollowUp ? 'A pending follow-up was created.' : 'No follow-up was created.'}
+          Visit saved. {saved.withFollowUp ? 'A pending follow-up was created.' : 'No follow-up was created.'}
         </div>
       )}
 

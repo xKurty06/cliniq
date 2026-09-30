@@ -1,8 +1,9 @@
 import {
   completeIncidentStageTwo,
-  getDemoStudent,
+  getIncident,
   getIncidentComplaintTypes,
   getStudent,
+  getStudentById,
   saveIncidentStageOne,
   type SessionUser,
 } from '../../../lib/mock-db'
@@ -15,9 +16,15 @@ import type {
 } from '../../../types/entities'
 
 export interface IncidentEntryContext {
-  student: Student
+  /**
+   * `null` when the Emergency button opened Stage 1 before anyone identified the student; Stage 1
+   * then asks for the Student Number instead of silently attaching a default student.
+   */
+  student: Student | null
   /** Incident complaint options (mock-only vocabulary; see mock-db.json). */
   complaintTypes: string[]
+  /** Set when an existing incident is reopened to complete Stage 2 (Screen #16b). */
+  incident: Incident | null
 }
 
 export interface StageOneIncidentInput {
@@ -42,13 +49,29 @@ export interface StageTwoIncidentInput {
   followUp: null | Pick<FollowUp, 'followUpDate' | 'reason' | 'notes'>
 }
 
-/** `studentNumber` is the route's `?student=` pre-selection; without one a demo student is used. */
-export async function fetchIncidentEntryContext(studentNumber?: string): Promise<IncidentEntryContext> {
-  const [student, complaintTypes] = await Promise.all([
-    studentNumber ? getStudent(studentNumber) : getDemoStudent(),
-    getIncidentComplaintTypes(),
+/**
+ * `studentNumber` is the route's `?student=` pre-selection; `incidentId` reopens a saved incident for
+ * Stage 2. With neither, no student is attached until Stage 1 identifies one.
+ */
+export async function fetchIncidentEntryContext(
+  options: { studentNumber?: string; incidentId?: string } = {},
+): Promise<IncidentEntryContext> {
+  const complaintTypes = getIncidentComplaintTypes()
+  if (options.incidentId) {
+    const incident = await getIncident(options.incidentId)
+    const [student, types] = await Promise.all([getStudentById(incident.studentId), complaintTypes])
+    return { student, complaintTypes: types, incident }
+  }
+  const [student, types] = await Promise.all([
+    options.studentNumber ? getStudent(options.studentNumber) : Promise.resolve(null),
+    complaintTypes,
   ])
-  return { student, complaintTypes }
+  return { student, complaintTypes: types, incident: null }
+}
+
+/** Resolves the Student Number typed on Stage 1 when the student wasn't identified beforehand. */
+export function findIncidentStudent(studentNumber: string): Promise<Student> {
+  return getStudent(studentNumber)
 }
 
 /** Stage 1 saves with only complaint + immediate vitals; the layer logs it as its own event. */

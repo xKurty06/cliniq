@@ -47,7 +47,7 @@ switch back explicitly.
 
 | Parameter | Used on | Accepted value | Effect | Example |
 |---|---|---|---|---|
-| `student` | New Visit, New Incident, Dispense Item | A Student Number | Preselects or links the identified student. | `/visits/new?student=2026-00001` |
+| `student` | New Visit, New Incident, Dispense Item | A Student Number | Preselects or links the identified student. Without it, New Incident's Stage 1 asks for the Student Number (the Emergency button path). | `/visits/new?student=2026-00001` |
 | `item` | Add/Edit Inventory Item | An inventory item ID | Opens the inventory form in edit mode for that item. Without it, the form is for a new item. | `/inventory/new?item=item-0015` |
 | `user` | Force Password Change | A user ID | Selects the account whose password-change flow is being completed. Without it, the current viewer is used. | `/force-password-change?user=user-staff-01` |
 | `focus` | Student List | `search` | Automatically focuses the student search field. | `/students?focus=search` |

@@ -68,9 +68,9 @@ export function UserListPage() {
   const { data: users, status, reload } = useAsyncData('users', fetchUsers)
   if (status === 'error')
     return (
-      <main className="mx-auto max-w-[1100px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-[1100px] px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load user accounts." onRetry={reload} />
-      </main>
+      </div>
     )
   if (!users)
     return (
@@ -82,7 +82,7 @@ export function UserListPage() {
       </>
     )
   return (
-    <main className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -117,6 +117,6 @@ export function UserListPage() {
           )}
         </CardBody>
       </Card>
-    </main>
+    </div>
   )
 }

@@ -60,5 +60,4 @@ export async function fetchVisitLog(query: VisitLogQuery): Promise<VisitLogRow[]
         (row.eventTag?.toLowerCase().includes(search) ?? false)
       )
     })
-    .slice(0, 120)
 }
