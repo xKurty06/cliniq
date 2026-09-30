@@ -109,6 +109,19 @@ const columns: Array<DataTableColumn<Student>> = [
       </div>
     ),
   },
+  {
+    key: 'actions',
+    header: 'Actions',
+    align: 'right',
+    cell: (student) => (
+      <a
+        href={`/students/${encodeURIComponent(student.studentNumber)}`}
+        className="inline-flex min-h-8 cursor-pointer items-center justify-center rounded-md border border-border px-2.5 text-xs font-semibold text-brand-green-dark transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
+      >
+        View profile
+      </a>
+    ),
+  },
 ]
 
 /**

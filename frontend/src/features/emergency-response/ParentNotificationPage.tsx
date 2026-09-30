@@ -43,6 +43,17 @@ export function ParentNotificationPage({ viewer = getMockSessionUser(), incident
   return <main className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
     <Card className="p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-2xl font-bold tracking-tight text-text-primary">Parent Notification Log</h1><p className="mt-1 text-sm text-text-secondary">{student.fullName} · {student.studentNumber} · {incident.complaint}</p></div><Badge tone={incident.stage === 1 ? 'warning' : 'success'} variant="soft">{incident.stage === 1 ? 'Needs completion' : 'Complete'}</Badge></div></Card>
     <Card aria-labelledby="notification-title"><CardHeader titleId="notification-title" title="Record a notification attempt" icon={<Icon name="activity" />} description="Keep every attempt tied to this incident with its real timestamp." /><CardBody className="flex flex-col gap-4">
+      <div className="rounded-md border border-border bg-surface p-3" aria-label="Emergency contact details">
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Emergency contact</p>
+        {student.emergencyContact ? (
+          <div className="mt-2 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <div><p className="text-xs text-text-secondary">Name</p><p className="font-semibold text-text-primary">{student.emergencyContact.name}</p></div>
+            <div><p className="text-xs text-text-secondary">Relationship</p><p className="font-semibold text-text-primary">{student.emergencyContact.relationship}</p></div>
+            <div><p className="text-xs text-text-secondary">Phone</p><p className="font-semibold text-text-primary">{student.emergencyContact.phone}</p></div>
+            <div><p className="text-xs text-text-secondary">Verification</p><p className="font-semibold text-text-primary">{student.emergencyContact.verified ? 'Verified' : 'Not verified'}</p></div>
+          </div>
+        ) : <p className="mt-1 text-sm text-text-secondary">No emergency contact is recorded for this student.</p>}
+      </div>
       <div className="grid gap-3 sm:grid-cols-[14rem_minmax(0,1fr)_auto] sm:items-end"><Select label="Outcome" value={outcome} options={outcomes} onChange={(value) => setOutcome(value as ParentNotificationOutcome)} /><Input label="Attempt note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Optional context" /><Button variant="primary" onClick={addAttempt} loading={saving}>Add attempt</Button></div>
       {saved && <p role="status" className="rounded-md border border-success bg-success/10 px-3 py-2 text-sm font-semibold text-text-primary">Notification attempt saved with an audit entry.</p>}
       {attempts.length ? <ol className="divide-y divide-border rounded-md border border-border">{attempts.map((attempt, index) => <li key={`${attempt.timestamp}-${index}`} className="flex flex-wrap items-center justify-between gap-2 p-3"><span className="font-semibold text-text-primary">{outcomes.find((item) => item.value === attempt.outcome)?.label}</span><span className="text-sm text-text-secondary">{notes[attempt.timestamp] ? `${notes[attempt.timestamp]} · ` : ''}{attempt.timestamp.slice(0, 16).replace('T', ' ')}</span></li>)}</ol> : <p className="text-sm text-text-secondary">No notification attempts have been logged for this incident yet.</p>}

@@ -10,8 +10,9 @@ export interface QrScannerViewProps {
   onDetected: (studentNumber: StudentNumber) => void
 }
 
-function normalize(value: string): StudentNumber {
-  return value.trim().toUpperCase()
+export function normalizeStudentNumber(value: string): StudentNumber {
+  const compact = value.toUpperCase().replace(/[^0-9]/g, '').slice(0, 9)
+  return compact.length > 4 ? `${compact.slice(0, 4)}-${compact.slice(4)}` : compact
 }
 
 /**
@@ -20,11 +21,11 @@ function normalize(value: string): StudentNumber {
  */
 export function QrScannerView({ title, description, onDetected }: QrScannerViewProps) {
   const [manual, setManual] = useState('')
-  const { videoRef, status, error, start, stop } = useQrScanner((value) => onDetected(normalize(value)))
+  const { videoRef, status, error, start, stop } = useQrScanner((value) => onDetected(normalizeStudentNumber(value)))
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (manual.trim()) onDetected(normalize(manual))
+    if (manual.trim()) onDetected(normalizeStudentNumber(manual))
   }
 
   return (
@@ -63,8 +64,9 @@ export function QrScannerView({ title, description, onDetected }: QrScannerViewP
           <Input
             label="Enter Student Number manually"
             value={manual}
+            hint="Optional. Numbers are formatted as YYYY-NNNNN."
             placeholder="2026-00001"
-            onChange={(event) => setManual(event.target.value)}
+            onChange={(event) => setManual(normalizeStudentNumber(event.target.value))}
           />
           <Button type="submit" variant="secondary">
             Look up student

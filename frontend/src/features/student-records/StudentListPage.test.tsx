@@ -12,6 +12,8 @@ describe('Student List', () => {
     expect(screen.getByRole('columnheader', { name: 'Full name' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Student Number' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Record status' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Actions' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'View profile' }).length).toBeGreaterThan(0)
     expect(screen.queryByRole('columnheader', { name: /allergies/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: /medical conditions/i })).not.toBeInTheDocument()
     expect(screen.queryByText('Peanuts')).not.toBeInTheDocument()
@@ -33,6 +35,10 @@ describe('Student List', () => {
     expect(await screen.findByText('1 result shown')).toBeInTheDocument()
     expect(screen.getByRole('rowheader', { name: student.fullName })).toBeInTheDocument()
     expect(screen.getByRole('cell', { name: student.studentNumber })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'View profile' })).toHaveAttribute(
+      'href',
+      `/students/${student.studentNumber}`,
+    )
   })
 
   it('keeps archived records hidden until requested', async () => {

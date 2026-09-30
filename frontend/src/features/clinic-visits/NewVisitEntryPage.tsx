@@ -457,7 +457,7 @@ export function NewVisitEntryPage({
             </fieldset>
 
             <div className="flex flex-wrap justify-end gap-2 pt-2">
-              <Button variant="neutral">Cancel</Button>
+              <Button type="button" variant="neutral" onClick={() => window.history.back()}>Cancel</Button>
               <Button type="submit" variant="primary" loading={saving}>
                 Save Visit
               </Button>
