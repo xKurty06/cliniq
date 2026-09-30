@@ -18,7 +18,7 @@ import { fetchGradeLevels, fetchStudentList } from './api/studentListApi'
 
 function StudentListSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-48 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -118,7 +118,7 @@ const columns: Array<DataTableColumn<Student>> = [
         href={`/students/${encodeURIComponent(student.studentNumber)}`}
         className="inline-flex min-h-8 cursor-pointer items-center justify-center rounded-md border border-border px-2.5 text-xs font-semibold text-brand-green-dark transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
       >
-        View profile
+        View Profile
       </a>
     ),
   },
@@ -146,7 +146,7 @@ export function StudentListPage() {
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load student records." onRetry={reload} />
       </div>
     )
@@ -164,7 +164,7 @@ export function StudentListPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Student List</h1>
         <p className="mt-1 text-sm text-text-secondary">

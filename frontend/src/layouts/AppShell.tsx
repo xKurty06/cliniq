@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Icon } from '../components'
 import { cn } from '../lib/cn'
 import { logoutMockSession, ROLE_LABELS, type SessionUser } from '../lib/mock-db'
+import { showKeyboardShortcuts } from '../lib/shortcuts'
 import { BrandLogo, Sidebar } from './Sidebar'
 import type { NavKey } from './navigation'
 
@@ -65,6 +66,15 @@ export function AppShell({ user, active, children, onLogout }: AppShellProps) {
             <BrandLogo />
           </div>
           <div className="ml-auto flex items-center gap-2.5">
+            {/* Keyboard help belongs to the desktop workstation; it has no use on a touch screen. */}
+            <button
+              type="button"
+              aria-label="Show keyboard shortcuts"
+              onClick={showKeyboardShortcuts}
+              className="mr-1 hidden h-8 cursor-pointer items-center justify-center rounded-md border border-border bg-background px-3 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none md:inline-flex"
+            >
+              Shortcuts <span className="ml-1" aria-hidden="true">?</span>
+            </button>
             <span
               aria-hidden="true"
               className="flex size-9 items-center justify-center rounded-full bg-brand-green-light text-xs font-bold text-text-primary ring-2 ring-background"

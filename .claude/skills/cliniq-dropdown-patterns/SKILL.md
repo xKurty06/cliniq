@@ -19,9 +19,11 @@ Use this alongside `cliniq-interactive-states` whenever a dropdown's trigger or 
 - Keep `whitespace-nowrap` on option labels so the intrinsic width reflects the complete option.
 - Constrain panels on small screens with `max-w-[calc(100vw-2rem)]`; do not allow a long option to create horizontal page overflow.
 - Do not reserve width for a removed selection icon.
+- Size a select's trigger to its content too: a filter select takes its natural width (`sm:w-auto`), not a fixed wide one.
 
 ## Implementation boundary
 
 - Reuse or update the nearest shared dropdown component before creating a one-off pattern. `DateRangePicker` is the shared pattern for date-range menus.
+- When a record moves to one of several equal outcomes (a follow-up becoming Completed, Missed, or Cancelled), use **one** status select on the row, not a button per outcome. The shared `Select` has `size="sm"` and `hideLabel` for a compact control inside a table row; keep a full accessible label that names the row.
 - Keep keyboard behavior, focus restoration, `aria-expanded`, and `role="listbox"` / `role="option"` semantics intact when a custom menu is used.
 - A native `<select>` cannot control the operating system's open-menu selection indicator or its content width. Use a custom accessible listbox only when this visual behavior is required; otherwise retain the native control's existing accessibility and styling.

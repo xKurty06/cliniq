@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { formatDateTime } from '../../lib/dates'
 import {
   Badge,
   Card,
@@ -33,7 +34,7 @@ const columns: Array<DataTableColumn<User>> = [
   {
     key: 'lastLogin',
     header: 'Last login',
-    cell: (user) => user.lastLogin?.slice(0, 16).replace('T', ' ') ?? 'Never',
+    cell: (user) => (user.lastLogin ? formatDateTime(user.lastLogin) : 'Never'),
   },
   {
     key: 'actions',
@@ -50,7 +51,7 @@ const columns: Array<DataTableColumn<User>> = [
 ]
 function UserListSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-56" />
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
@@ -68,7 +69,7 @@ export function UserListPage() {
   const { data: users, status, reload } = useAsyncData('users', fetchUsers)
   if (status === 'error')
     return (
-      <div className="mx-auto max-w-[1100px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load user accounts." onRetry={reload} />
       </div>
     )
@@ -82,7 +83,7 @@ export function UserListPage() {
       </>
     )
   return (
-    <div className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -93,7 +94,7 @@ export function UserListPage() {
           </div>
           <Link className={buttonClassName({ variant: 'primary' })} to={paths.userNew}>
             <Icon name="userCog" />
-            Add user
+            Add User
           </Link>
         </div>
       </Card>

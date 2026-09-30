@@ -739,6 +739,18 @@ export function addParentNotification(
   })
 }
 
+/**
+ * Incident reports already signed off. There is no approval field on the §5 Incident shape, so the
+ * audit trail is the record of it (each approval writes an `approve` entry for `incident-report`).
+ */
+export function listApprovedIncidentReportIds(): Promise<string[]> {
+  return read('approved incident reports', (s) =>
+    s.auditLog
+      .filter((entry) => entry.actionType === 'approve' && entry.targetRecord?.type === 'incident-report')
+      .map((entry) => entry.targetRecord!.id),
+  )
+}
+
 export function approveIncidentReport(incidentId: string, actor?: SessionUser): Promise<void> {
   return write('approve incident report', (s) => {
     must(s.incidents.find((i) => i.id === incidentId), 'Incident')

@@ -78,7 +78,7 @@ describe('editing mock-db.json changes every screen consistently', () => {
     for (const row of incidentRows) expect(row.gradeLevel).toBe(EDITED_GRADE)
 
     // New Visit Entry pre-fill (QR quick-action → Record Visit).
-    expect((await fetchNewVisitContext(student.studentNumber)).student.fullName).toBe(EDITED_NAME)
+    expect((await fetchNewVisitContext(student.studentNumber)).student?.fullName).toBe(EDITED_NAME)
 
     // Dashboard: they're a frequent visitor, shown by Student Number only (ADR-004).
     const dash = await fetchDashboardSummary({ range: rangeForPreset('last30', todayISO()), trendGranularity: 'week' })

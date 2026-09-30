@@ -19,7 +19,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
-import { formatDate } from '../../lib/dates'
+import { formatDateTime } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { Disposition, Incident, Student, Visit } from '../../types/entities'
 import { paths } from '../../routes/paths'
@@ -34,10 +34,6 @@ const dispositionLabel: Record<Disposition, string> = {
   returned_to_class: 'Returned to class',
   sent_home: 'Sent home',
   referred_to_hospital: 'Referred to hospital',
-}
-
-function formatDateTime(value: string): string {
-  return `${formatDate(value.slice(0, 10))} · ${value.slice(11, 16)}`
 }
 
 function tagList(items: string[], empty: string) {
@@ -57,7 +53,7 @@ function tagList(items: string[], empty: string) {
 
 function StudentProfileSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-2">
@@ -71,7 +67,7 @@ function StudentProfileSkeleton() {
           </div>
         </div>
       </Card>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+      <div className="grid grid-cols-1 gap-4">
         {Array.from({ length: 4 }, (_, index) => (
           <Card key={index} className="p-5">
             <Skeleton className="h-5 w-40" />
@@ -164,7 +160,7 @@ function ProfileHeader({
             Cancel
           </Button>
           <Button variant="secondary" loading={archiving} onClick={archive}>
-            Archive record
+            Archive Record
           </Button>
         </div>
       </Modal>
@@ -330,7 +326,7 @@ export function StudentProfilePage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1120px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load the student profile." onRetry={reload} />
       </div>
     )
@@ -350,12 +346,12 @@ export function StudentProfilePage({
   return (
     <div
       className={cn(
-        'mx-auto flex max-w-[1120px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8',
+        'mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8',
         viewer.role === 'instructor' && 'min-h-screen bg-surface',
       )}
     >
       <ProfileHeader student={data.student} viewer={viewer} onArchived={reload} />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+      <div className="grid grid-cols-1 gap-4">
         <div className="flex flex-col gap-4">
           <OverviewCard student={data.student} />
           <MedicalHistoryCard student={data.student} />

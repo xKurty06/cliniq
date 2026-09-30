@@ -12,7 +12,7 @@ export function UserFormPage({ userId }: { userId?: string }) {
   )
   if (status === 'error')
     return (
-      <div className="mx-auto max-w-[760px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load this account." onRetry={reload} />
       </div>
     )
@@ -26,7 +26,7 @@ function FormSkeleton() {
       <p className="sr-only" role="status">
         Loading account...
       </p>
-      <div aria-hidden="true" className="mx-auto max-w-[760px] px-4 pt-10 pb-8 sm:px-8">
+      <div aria-hidden="true" className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <Card className="p-5">
           <Skeleton className="h-7 w-40" />
           {Array.from({ length: 3 }, (_, index) => (
@@ -70,10 +70,10 @@ function UserForm({
     setSaved(true)
   }
   return (
-    <div className="mx-auto flex max-w-[760px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-          {userId ? 'Edit user' : 'Add user'}
+          {userId ? 'Edit User' : 'Add User'}
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
           Assign the smallest role needed for the person's work.
@@ -116,7 +116,7 @@ function UserForm({
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
-                {userId ? 'Save changes' : 'Create user'}
+                {userId ? 'Save Changes' : 'Create User'}
               </Button>
             </div>
             {saved && (

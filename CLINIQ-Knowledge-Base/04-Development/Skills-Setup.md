@@ -15,6 +15,7 @@ This is a substantially expanded pass over the first one — that version only c
 | `cliniq-interactive-states` | `.claude/skills/cliniq-interactive-states/` | Enforces cursor states, hover feedback, and custom-styled dropdowns on every interactive element — added after the first Dashboard build shipped without any of these |
 | `cliniq-multi-select-patterns` | `.claude/skills/cliniq-multi-select-patterns/` | Reuses the accessible checkbox filter popover for a requirement that intentionally accepts several values |
 | `cliniq-pagination-patterns` | `.claude/skills/cliniq-pagination-patterns/` | Reuses the growing-list pager, including a complete filtered print view |
+| `cliniq-modal-patterns` | `.claude/skills/cliniq-modal-patterns/` | Decides which actions need a confirmation (irreversible ones; not the expected routine outcome) and keeps every dialog on the shared, keyboard-safe `Modal` — added Wednesday, September 30, 2026, once confirmations were in use on five screens |
 
 Write more of these as new CLINIQ-specific rules get established — they encode decisions unique to this project that no public skill will ever have.
 

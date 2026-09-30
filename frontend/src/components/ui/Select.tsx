@@ -8,7 +8,7 @@ export interface SelectOption {
 }
 
 export interface SelectProps
-  extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id' | 'onChange' | 'value'> {
+  extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id' | 'onChange' | 'value' | 'size'> {
   label: string
   value: string
   options: ReadonlyArray<SelectOption>
@@ -21,6 +21,10 @@ export interface SelectProps
   className?: string
   /** Places the label beside the control from the small breakpoint upward. */
   inline?: boolean
+  /** Keeps the label for screen readers only, e.g. a per-row control whose column header names it. */
+  hideLabel?: boolean
+  /** `sm` matches small buttons inside table rows. */
+  size?: 'sm' | 'md'
 }
 
 /**
@@ -40,6 +44,8 @@ export function Select({
   required,
   className,
   inline = false,
+  hideLabel = false,
+  size = 'md',
   ...rest
 }: SelectProps) {
   const autoId = useId()
@@ -56,7 +62,7 @@ export function Select({
     >
       <label
         htmlFor={selectId}
-        className={cn('text-xs font-semibold text-text-primary', inline && 'sm:shrink-0')}
+        className={cn('text-xs font-semibold text-text-primary', inline && 'sm:shrink-0', hideLabel && 'sr-only')}
       >
         {label}
         {required && (
@@ -76,7 +82,8 @@ export function Select({
           aria-describedby={cn(hintId, errorId) || undefined}
           onChange={(event) => onChange(event.target.value)}
           className={cn(
-            'h-10 w-full cursor-pointer appearance-none rounded-md border bg-background px-3 pr-9 text-sm text-text-primary shadow-card',
+            size === 'sm' ? 'h-8' : 'h-10',
+            'w-full cursor-pointer appearance-none rounded-md border bg-background px-3 pr-9 text-sm text-text-primary shadow-card',
             'transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none',
             'disabled:cursor-not-allowed disabled:opacity-50',
             error ? 'border-error' : 'border-border',

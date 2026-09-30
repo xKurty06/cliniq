@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react'
-import { Navigate, Route, Routes, useParams, useSearchParams } from 'react-router'
+import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router'
 import { AppShell } from '../layouts/AppShell'
 import type { NavKey } from '../layouts/navigation'
 import type { SessionUser } from '../lib/mock-db'
@@ -106,6 +106,11 @@ function StudentEditRoute({ viewer }: Viewer) {
   return <StudentFormPage viewer={viewer} studentNumber={studentNumber} />
 }
 
+function PeReferralRoute({ viewer }: Viewer) {
+  const [search] = useSearchParams()
+  return <PeSportsReferralPage viewer={viewer} studentNumber={search.get('student') ?? undefined} />
+}
+
 function NewVisitRoute({ viewer }: Viewer) {
   const [search] = useSearchParams()
   return <NewVisitEntryPage viewer={viewer} studentNumber={search.get('student') ?? undefined} />
@@ -133,8 +138,13 @@ function ExcuseLetterRoute({ viewer }: Viewer) {
 function IncidentNotificationRoute({ viewer }: Viewer) { const { incidentId } = useParams(); return <ParentNotificationPage viewer={viewer} incidentId={incidentId} /> }
 function IncidentReportRoute({ viewer }: Viewer) { const { incidentId } = useParams(); return <IncidentReportPage viewer={viewer} incidentId={incidentId} /> }
 function UserFormRoute() { const { userId } = useParams(); return <UserFormPage userId={userId} /> }
-function ForcePasswordChangeRoute({ viewer, onComplete }: Viewer & { onComplete: (user: SessionUser) => void }) {
-  return <ForcePasswordChangePage viewer={viewer} onComplete={onComplete} />
+/**
+ * Every app route requires a signed-in account (ADR-002, security clarification). Without one the
+ * visitor goes to Login, which returns them here afterwards — so a QR scan can only happen after Login.
+ */
+function RequireLogin() {
+  const location = useLocation()
+  return <Navigate to={paths.login} replace state={{ from: `${location.pathname}${location.search}` }} />
 }
 
 interface AppRoute {
@@ -224,12 +234,12 @@ const APP_ROUTES: AppRoute[] = [
     render: (viewer) => <NewVisitRoute viewer={viewer} />,
   },
   {
-    path: paths.peReferral,
+    path: '/visits/pe-referral',
     title: 'PE/Sports Referrals',
     roles: ['staff'],
     nav: 'visits',
     shell: true,
-    render: (viewer) => <PeSportsReferralPage viewer={viewer} />,
+    render: (viewer) => <PeReferralRoute viewer={viewer} />,
   },
   {
     path: '/visits/:visitId',
@@ -326,7 +336,7 @@ function homePathFor(role: UserRole): string {
 
 function RouteLoading() {
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8" aria-busy="true">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8" aria-busy="true">
       <p className="sr-only" role="status">Loading screen…</p>
       <Card className="p-5"><Skeleton className="h-7 w-56 max-w-full" /><Skeleton className="mt-2 h-4 w-96 max-w-full" /></Card>
       <Card className="p-5"><Skeleton className="h-10 w-full" /><Skeleton className="mt-4 h-40 w-full" /></Card>
@@ -354,7 +364,8 @@ export function AppRoutes({
   onLogout,
   onLogin = () => {},
 }: {
-  user: SessionUser
+  /** `null` until someone signs in; every route except Login and Force Password Change then redirects to Login. */
+  user: SessionUser | null
   onLogout: () => void
   onLogin?: (user: SessionUser) => void
 }) {
@@ -363,7 +374,7 @@ export function AppRoutes({
       <Route
         path={paths.login}
         element={
-          <PageTitle title="Sign in">
+          <PageTitle title="Sign In">
             <LoginPage onLogin={onLogin} />
           </PageTitle>
         }
@@ -372,11 +383,12 @@ export function AppRoutes({
         path={paths.forcePasswordChange}
         element={
           <PageTitle title="Change Password">
-            <ForcePasswordChangeRoute viewer={user} onComplete={onLogin} />
+            <ForcePasswordChangePage onComplete={onLogin} />
           </PageTitle>
         }
       />
       {APP_ROUTES.map((route) => {
+        if (!user) return <Route key={route.path} path={route.path} element={<RequireLogin />} />
         const allowed = route.roles.includes(user.role)
         const content = (
           <PageTitle title={route.title}>
@@ -401,12 +413,18 @@ export function AppRoutes({
       })}
       <Route
         path="*"
-        element={withShell(
-          user,
-          null,
-          <PageTitle title="Page Not Found"><NotFoundPage home={homePathFor(user.role)} /></PageTitle>,
-          onLogout,
-        )}
+        element={
+          user ? (
+            withShell(
+              user,
+              null,
+              <PageTitle title="Page Not Found"><NotFoundPage home={homePathFor(user.role)} /></PageTitle>,
+              onLogout,
+            )
+          ) : (
+            <RequireLogin />
+          )
+        }
       />
     </Routes>
   )

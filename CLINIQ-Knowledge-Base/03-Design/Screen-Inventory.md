@@ -14,7 +14,7 @@ Give the agent this full list — it maps directly to the two module groups (bas
 3. **App Shell/Nav** — role-aware sidebar or nav; Staff sees all modules, Admin sees only Reports + Dashboard, Instructor sees only the mobile scan/lookup screen (no shell/nav needed for that one). The desktop header shows the signed-in user's name and role with a red, icon-only Log out control carrying an accessible label.
 
 ### Dashboard
-4. **Staff Dashboard** — today's visit count, low-stock alerts, expiring-medicine alerts, backup status widget, quick "New Visit" action
+4. **Staff Dashboard** — today's visit count, low-stock alerts, expiring-medicine alerts, backup status widget, quick "New Visit" action. Delivered on the shared Clinic Overview (#31): Staff get a strip under the header with the "New Visit" action and a backup-status indicator (status + last-backup date) linking to #32
 5. **Admin Dashboard** — summary cards linking into Reports and the Clinic Overview Dashboard (no edit actions)
 
 ### Student Records
@@ -39,7 +39,7 @@ Give the agent this full list — it maps directly to the two module groups (bas
 
 ### Follow-Up Handling (feature spanning Clinic Visit Monitoring + Emergency Response)
 18b. **Follow-Up Prompt (Staff)** — appears inline at the end of saving #11 (New Visit Entry) or #16 (Incident Entry, Stage 1): "Does this student need a follow-up?" If yes, capture follow-up date, reason/instruction, and optional notes in the same flow — not a separate screen Staff has to remember to visit afterward
-18c. **Follow-Up List View (Staff)** — all follow-ups, filterable by status (Pending / Completed / Missed / Cancelled); action to mark a follow-up's status. Shows **Student Number**, not full name, in the list itself, per the display-privacy rule (multi-student list) — opening one follow-up to view/edit it shows the full name, same logic as the Visit/Incident detail screens
+18c. **Follow-Up List View (Staff)** — all follow-ups, filterable by status (Pending / Completed / Missed / Cancelled); each pending row has one status control to mark it Completed, Missed, or Cancelled (Missed and Cancelled ask for confirmation; Completed, the expected outcome, does not). Shows **Student Number**, not full name, per the display-privacy rule (multi-student list). There is no separate follow-up detail screen
 
 ### Reports Generation
 19. **Monthly Report View/Generate**
@@ -50,7 +50,7 @@ Give the agent this full list — it maps directly to the two module groups (bas
 ### QR Digital Health ID (enhancement) — computer (Staff) + mobile (Staff and PE/Sports Instructor)
 22. **QR Code Print View** — generates/prints a QR sticker per student, encoding their Student Number (Staff only, computer)
 23. **Scan/Lookup Hub (Staff, computer or mobile)** — two ways to identify a student: "Scan QR Code" (camera) or "Enter Student Number" (manual text fallback); once identified, shows the student's full name and details normally — this is a deliberate single-student lookup, not a glanceable list (see the display-privacy rule)
-24. **Student Quick-Actions (Staff)** — appears once a student is identified: **Record Visit** (→ #11, pre-filled), **Log Emergency** (→ #16, Stage 1, pre-filled), **View Full Profile** (→ #7), **Dispense Medicine** (→ #30, pre-linkable to the visit)
+24. **Student Quick-Actions (Staff)** — appears once a student is identified: **Record Visit** (→ #11, pre-filled), **Log Emergency** (→ #16, Stage 1, pre-filled), **View Full Profile** (→ #7), **Dispense Medicine** (→ #30, pre-linkable to the visit), **PE/Sports Referral** (→ #14, pre-filled — this is #14's entry point)
 25. **Emergency Button (Staff, mobile)** — separate, faster entry point than the quick-actions above; jumps straight to #16 (Stage 1) rather than routing through student identification first if a scan already happened
 26. **Instructor Scan/Lookup (PE/Sports Instructor, mobile only)** — scan or enter a Student Number; opens a **read-only** view of that student's full profile plus visit/incident history. No buttons for any action — this screen only displays data
 

@@ -21,7 +21,8 @@ export interface DashboardHeaderProps {
 /**
  * Page header, following the reference: title/greeting on the left, and the period selector plus
  * the one page action (Print) on the right. Staff get a greeting in the supporting line; Admin gets
- * the same page title without Staff-specific warmth. No "New Visit" button until #11 exists.
+ * the same page title without Staff-specific warmth. The "New Visit" shortcut lives in
+ * `StaffShortcuts`, directly under this header.
  */
 export function DashboardHeader({
   viewer,

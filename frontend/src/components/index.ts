@@ -29,3 +29,4 @@ export {
   type FollowUpDraft,
   type FollowUpErrors,
 } from './forms/FollowUpPrompt'
+export { StudentNumberField } from './forms/StudentNumberField'

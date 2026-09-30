@@ -78,8 +78,8 @@ In the browser console (dev builds): `cliniqMockDb.reset()`, `cliniqMockDb.setTo
 
 One account per role, plus `demo.pe2`, which has `mustChangePassword: true` for the Force Password
 Change screen (#2). Passwords are in `frontendOnly.devAccounts` and are deliberately fake
-(`demo-…` / `dev-only-…`). The mock session (`session.ts`, `?role=staff|admin|instructor`) signs in as the
-first account of each role that doesn't need a password change.
+(`demo-…` / `dev-only-…`). The mock session (`session.ts`) exists only after a successful Login with one of
+these accounts. It lasts one week, like the planned Sanctum token, and Log out ends it.
 
 | Role | Username | Password | Password change required |
 |---|---|---|---|
@@ -88,9 +88,11 @@ first account of each role that doesn't need a password change.
 | PE/Sports Instructor | `demo.pe` | `demo-pe` | No |
 | PE/Sports Instructor (password-change scenario) | `demo.pe2` | `demo-change` | Yes |
 
-These are synthetic development fixtures only, not production credentials. The current mock session
-still supports selecting a role from the URL, and the Login screen displays these accounts for local
-demo purposes. Force Password Change is exercised by signing in as `demo.pe2`.
+These are synthetic development fixtures only, not production credentials. The Login screen displays
+these accounts for local demo purposes. There is no URL role override and no default account: every
+screen redirects to Login until someone signs in (ADR-002, security clarification), so each audited
+action is attributable to a real sign-in. Force Password Change is exercised by signing in as
+`demo.pe2`; that account gets no session until its password is changed.
 
 ## Writing a new screen
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, ErrorState, Icon, Skeleton } from '../../components'
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, ErrorState, Icon, Modal, Skeleton } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { formatDateTime } from '../../lib/dates'
 import { getMockSessionUser } from '../../lib/mock-db'
@@ -11,7 +11,7 @@ function formatSize(bytes: number): string {
 
 function BackupSkeleton() {
     return (
-        <div aria-hidden="true" className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+        <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
             <Card className="p-5">
                 <Skeleton className="h-7 w-56" />
                 <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -33,10 +33,11 @@ export function BackupStatusPage() {
     const { data, status, reload } = useAsyncData('backup-status', fetchBackupStatus)
     const [updated, setUpdated] = useState<BackupStatusView | null>(null)
     const [saving, setSaving] = useState(false)
+    const [confirming, setConfirming] = useState(false)
 
     if (status === 'error')
         return (
-            <div className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
+            <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
                 <ErrorState title="Unable to load backup status." onRetry={reload} />
             </div>
         )
@@ -54,7 +55,7 @@ export function BackupStatusPage() {
     const latest = current.latest
     if (!latest)
         return (
-            <div className="mx-auto max-w-[900px] px-4 pt-10 pb-8 sm:px-8">
+            <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
                 <EmptyState
                     icon="shieldPlus"
                     title="No backups recorded yet"
@@ -68,13 +69,14 @@ export function BackupStatusPage() {
         setSaving(true)
         try {
             setUpdated(await verifyBackup(viewer))
+            setConfirming(false)
         } finally {
             setSaving(false)
         }
     }
 
     return (
-        <div className="mx-auto flex max-w-[900px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+        <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
             <Card className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -136,14 +138,32 @@ export function BackupStatusPage() {
                     <div className="flex justify-end">
                         <Button
                             variant="primary"
-                            onClick={verify}
+                            onClick={() => setConfirming(true)}
                             icon="checkCircle"
-                            loading={saving}
                             disabled={verified || latest.status === 'failed'}
                         >
-                            {verified ? 'Verified' : 'Mark as verified'}
+                            {verified ? 'Verified' : 'Mark as Verified'}
                         </Button>
                     </div>
+                    <Modal
+                        open={confirming}
+                        title="Mark this backup as verified?"
+                        onClose={() => setConfirming(false)}
+                    >
+                        <p className="text-sm text-text-secondary">
+                            This records, under your name, that you checked the backup from{' '}
+                            {formatDateTime(latest.lastRun)} on the external drive. The verification is
+                            permanent in the audit trail and can't be undone.
+                        </p>
+                        <div className="mt-5 flex flex-wrap justify-end gap-2">
+                            <Button variant="neutral" data-autofocus onClick={() => setConfirming(false)}>
+                                Cancel
+                            </Button>
+                            <Button variant="primary" loading={saving} onClick={verify}>
+                                Mark as Verified
+                            </Button>
+                        </div>
+                    </Modal>
                     {updated && (
                         <p
                             role="status"

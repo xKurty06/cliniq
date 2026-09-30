@@ -1,6 +1,6 @@
 import type { FollowUpDueState } from '../../components/status/followUp'
 import type { InventoryFlag } from '../../components/status/inventory'
-import { addDays, diffDays, isWithin } from '../dates'
+import { addDays, diffDays, formatDateTime, isWithin } from '../dates'
 import type {
   AuditActionType,
   AuditLogEntry,
@@ -86,7 +86,44 @@ function auditTargetLabel(state: DbState, target: NonNullable<AuditLogEntry['tar
     const student = followUp ? studentsById(state).get(followUp.studentId) : undefined
     return { type, id: target.id, label: student ? `Follow-up for ${student.studentNumber}` : 'Follow-up record' }
   }
-  return { type, id: target.id, label: `${type[0].toUpperCase()}${type.slice(1)} ${target.id}` }
+  return { type, id: target.id, label: describeAuditRecord(state, target) }
+}
+
+const AUDIT_RECORD_NAMES: Record<string, string> = {
+  visit: 'Visit',
+  incident: 'Incident',
+  'incident-report': 'Incident report',
+  'incident-escalation': 'Incident escalation',
+  'excuse-letter': 'Excuse letter',
+  'pe-sports-referral': 'PE/Sports referral',
+  'inventory-dispensation': 'Inventory dispensation',
+  backup: 'Backup',
+  report: 'Report',
+}
+
+const REPORT_NAMES: Record<string, string> = {
+  monthly: 'Monthly report',
+  incident: 'Incident report archive',
+  health_summary: 'Health summary',
+}
+
+/**
+ * A readable description of an audited record. Internal ids (`visit-0001`) never reach the screen:
+ * a visit or incident is described by its Student Number and time, which is what Staff recognise.
+ * A human-facing reference number is a backend-phase follow-up (Issues-and-TODOs.md).
+ */
+function describeAuditRecord(state: DbState, target: NonNullable<AuditLogEntry['targetRecord']>): string {
+  const name = AUDIT_RECORD_NAMES[target.type] ?? 'Record'
+  if (target.type === 'report') return REPORT_NAMES[target.id] ?? name
+  const visit = target.type === 'visit' ? state.visits.find((item) => item.id === target.id) : undefined
+  const incident =
+    target.type === 'incident' || target.type === 'incident-report'
+      ? state.incidents.find((item) => item.id === target.id)
+      : undefined
+  const record = visit ? { studentId: visit.studentId, when: visit.dateTime } : incident ? { studentId: incident.studentId, when: incident.time } : undefined
+  if (!record) return name
+  const student = studentsById(state).get(record.studentId)
+  return [name, student?.studentNumber, formatDateTime(record.when)].filter(Boolean).join(' · ')
 }
 
 /** Resolves audit actors and privacy-safe targets before a screen can render them. */

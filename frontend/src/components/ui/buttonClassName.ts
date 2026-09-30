@@ -4,7 +4,8 @@ import { cn } from '../../lib/cn'
  * Button hierarchy (Design-System.md, "Button Hierarchy & Color"):
  * - primary: the one likely action. Filled brand-green-dark with white text. Button labels are
  *   14px, which counts as *small* text, and the contrast rules only allow small white text on
- *   brand-green-dark (9.19:1), not brand-green (3.74:1).
+ *   brand-green-dark (9.19:1), not brand-green (3.74:1). Hover lightens the fill slightly (still
+ *   about 6.9:1), since there is no darker brand token to step down to.
  * - secondary: quieter outline with brand-green-dark text (brand-green text is only 3.74:1).
  * - neutral: cancel / go back. Visible, never competing.
  * - destructive: filled error red, reserved for genuinely irreversible actions only.
@@ -14,7 +15,7 @@ export type ButtonSize = 'sm' | 'md'
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-brand-green text-white border border-brand-green shadow-raised hover:bg-brand-green-dark hover:border-brand-green-dark',
+    'bg-brand-green-dark text-white border border-brand-green-dark shadow-raised hover:brightness-125',
   secondary:
     'bg-background text-brand-green-dark border border-brand-green shadow-card hover:bg-surface',
   neutral:
@@ -29,7 +30,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 
 /**
  * The Button look as a class string, for a router `<Link>` that navigates but should read as a
- * button (e.g. "View Detail", "Edit"). Real navigation stays a link for middle-click/open-in-tab.
+ * button (e.g. "View Details", "Edit"). Real navigation stays a link for middle-click/open-in-tab.
  */
 export function buttonClassName({
   variant = 'secondary',
@@ -38,7 +39,7 @@ export function buttonClassName({
 }: { variant?: ButtonVariant; size?: ButtonSize; className?: string } = {}): string {
   return cn(
     'inline-flex items-center justify-center rounded-md font-semibold whitespace-nowrap',
-    'transition-colors duration-150 motion-reduce:transition-none',
+    'transition-[color,background-color,border-color,filter] duration-150 motion-reduce:transition-none',
     'cursor-pointer disabled:cursor-not-allowed disabled:opacity-50',
     variantClasses[variant],
     sizeClasses[size],

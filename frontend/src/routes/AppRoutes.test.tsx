@@ -48,7 +48,7 @@ describe('App routes', () => {
 
     await user.click(screen.getByRole('link', { name: 'Visits' }))
 
-    expect(await screen.findByRole('heading', { name: 'Visit Log List' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Visit Log' })).toBeInTheDocument()
     expect(screen.getByTestId('path')).toHaveTextContent('/visits')
     expect(document.title).toBe('CLINIQ — Visit Log')
   })
@@ -58,7 +58,7 @@ describe('App routes', () => {
     renderAt('/students')
     await screen.findByRole('heading', { name: 'Student List' })
     await user.click(screen.getByRole('link', { name: 'Incidents' }))
-    expect(await screen.findByRole('heading', { name: 'Incident Log List' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Incident Log' })).toBeInTheDocument()
     expect(screen.getByTestId('path')).toHaveTextContent('/incidents')
   })
 
@@ -108,6 +108,6 @@ describe('App routes', () => {
     renderAt('/nope')
 
     expect(screen.getByText("This page doesn't exist.")).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Go to home screen' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Go to Home Screen' })).toHaveAttribute('href', '/')
   })
 })

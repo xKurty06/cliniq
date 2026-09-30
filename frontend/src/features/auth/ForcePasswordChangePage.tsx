@@ -1,14 +1,24 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { Navigate, useNavigate } from 'react-router'
 import { Button, Card, Input } from '../../components'
-import { changeMockPassword, getUser, type SessionUser } from '../../lib/mock-db'
+import { changeMockPassword, getPendingPasswordChangeUser, getUser, type SessionUser } from '../../lib/mock-db'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { paths } from '../../routes/paths'
 
-export function ForcePasswordChangePage({ viewer, onComplete }: { viewer: SessionUser; onComplete: (user: SessionUser) => void }) {
+/**
+ * Reachable only right after Login verified an account that must change its password: the account
+ * comes from that verified step, never from the URL, so no one can set another account's password.
+ */
+export function ForcePasswordChangePage({ onComplete }: { onComplete: (user: SessionUser) => void }) {
+  // Read once: completing the change starts the session and clears the pending marker, and this
+  // screen must not bounce to Login in the moment before it navigates on.
+  const [pending] = useState(() => getPendingPasswordChangeUser())
+  if (!pending) return <Navigate to={paths.login} replace />
+  return <ForcePasswordChangeForm userId={pending.id} onComplete={onComplete} />
+}
+
+function ForcePasswordChangeForm({ userId, onComplete }: { userId: string; onComplete: (user: SessionUser) => void }) {
   const navigate = useNavigate()
-  const [search] = useSearchParams()
-  const userId = search.get('user') ?? viewer.id
   const { data: account, status } = useAsyncData(`force-password-user:${userId}`, () => getUser(userId))
   const [nextPassword, setNextPassword] = useState('')
   const [confirmation, setConfirmation] = useState('')
@@ -23,7 +33,7 @@ export function ForcePasswordChangePage({ viewer, onComplete }: { viewer: Sessio
     setSaving(true)
     try {
       await changeMockPassword(userId, nextPassword)
-      const user = account ?? viewer
+      const user = account ?? (await getUser(userId))
       onComplete({ id: user.id, name: user.name, role: user.role })
       navigate(user.role === 'instructor' ? paths.qrScan : paths.dashboard, { replace: true })
     } catch (cause) {
@@ -39,7 +49,7 @@ export function ForcePasswordChangePage({ viewer, onComplete }: { viewer: Sessio
       <Card className="w-full max-w-md p-6">
         <header>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-green-dark">Account setup</p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary">Change your password</h1>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary">Change Your Password</h1>
           <p className="mt-1 text-sm text-text-secondary">Set a new password before opening CLINIQ for the first time.</p>
         </header>
         <form className="mt-6 flex flex-col gap-4" onSubmit={submit} noValidate>
@@ -47,8 +57,8 @@ export function ForcePasswordChangePage({ viewer, onComplete }: { viewer: Sessio
           <Input label="Confirm new password" type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} required />
           {error && <p role="alert" className="text-sm font-semibold text-error">{error}</p>}
           <div className="mt-2 flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="neutral" onClick={() => navigate(paths.login)}>Back to sign in</Button>
-            <Button type="submit" variant="primary" loading={saving}>Save password</Button>
+            <Button type="button" variant="neutral" onClick={() => navigate(paths.login)}>Back to Sign In</Button>
+            <Button type="submit" variant="primary" loading={saving}>Save Password</Button>
           </div>
         </form>
       </Card>

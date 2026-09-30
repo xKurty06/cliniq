@@ -2,12 +2,34 @@ import { act, renderHook, screen, waitFor, within } from '@testing-library/react
 import { useState } from 'react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+// jsdom has no Web Worker, which the real scanner needs. A camera that fails to start is exactly the
+// case under test here ("Camera scan is unavailable").
+vi.mock('qr-scanner', () => ({
+  default: class {
+    start() {
+      return Promise.reject(new Error('Camera unavailable in tests'))
+    }
+    stop() {}
+    destroy() {}
+  },
+}))
+
+// jsdom has no canvas. Replace the chart with a stub that keeps its accessible label.
+vi.mock('react-chartjs-2', () => {
+  const Stub = (props: { 'aria-label'?: string }) => <div role="img" aria-label={props['aria-label']} />
+  return { Bar: Stub, Line: Stub }
+})
 import { renderWithRouter } from '../test/renderWithRouter'
 import { getGradeLevels, getRecordedAuditEntries, getStudent, listIncidents, listVisits, resetMockDb } from '../lib/mock-db'
 import { StudentProfilePage } from './student-records/StudentProfilePage'
 import { IncidentReportPage } from './emergency-response/IncidentReportPage'
 import { UserFormPage } from './user-management/UserFormPage'
 import { VisitLogListPage } from './clinic-visits/VisitLogListPage'
+import { NewVisitEntryPage } from './clinic-visits/NewVisitEntryPage'
+import { AuditLogPage } from './audit-log/AuditLogPage'
+import { BackupStatusPage } from './backup/BackupStatusPage'
+import { DashboardPage } from './dashboard/DashboardPage'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { QrMobileHubPage } from './qr-digital-health-id/mobile/QrMobileHubPage'
 import { Button, Modal } from '../components'
@@ -28,7 +50,7 @@ describe('UI/UX review regressions', () => {
     const dialog = screen.getByRole('dialog', { name: 'Archive this student record?' })
     expect(getRecordedAuditEntries()).toEqual([])
 
-    await user.click(within(dialog).getByRole('button', { name: 'Archive record' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Archive Record' }))
     expect(await screen.findByText('Archived')).toBeInTheDocument()
     expect((await getStudent('2026-00001')).archived).toBe(true)
     expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['archive'])
@@ -44,20 +66,31 @@ describe('UI/UX review regressions', () => {
     expect(screen.getByText('Temperature')).toBeInTheDocument()
     expect(screen.queryByText('temperatureC')).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Approve report' }))
+    // The summary carries the referral and parent-notification detail, not just a count.
+    expect(screen.getByRole('heading', { name: 'Hospital referral' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Parent notification attempts' })).toBeInTheDocument()
+    const picker = screen.getByLabelText('Report pending sign-off')
+    const pendingBefore = within(picker).getAllByRole('option').length
+
+    await user.click(screen.getByRole('button', { name: 'Approve Report' }))
     const dialog = screen.getByRole('dialog', { name: 'Approve this incident report?' })
     expect(getRecordedAuditEntries()).toEqual([])
-    await user.click(within(dialog).getByRole('button', { name: 'Approve report' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Approve Report' }))
     expect(await screen.findByText('Report approved and logged.')).toBeInTheDocument()
     expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['approve'])
+
+    // Signed off: it can't be approved again, and only it is marked approved in the picker.
+    expect(screen.getByRole('button', { name: 'Approved' })).toBeDisabled()
+    await waitFor(() => expect(within(picker).getAllByRole('option', { name: /\(approved\)/ })).toHaveLength(1))
+    expect(within(picker).getAllByRole('option')).toHaveLength(pendingBefore)
   })
 
   it('explains empty required fields on the user form instead of ignoring the submit', async () => {
     const user = userEvent.setup()
     renderWithRouter(<UserFormPage />)
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Add user' })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Create user' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Add User' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Create User' }))
     expect(screen.getByText("Enter the person's full name.")).toBeInTheDocument()
     expect(screen.getByText('Enter a username for this account.')).toBeInTheDocument()
     expect(getRecordedAuditEntries()).toEqual([])
@@ -125,10 +158,10 @@ describe('UI/UX review follow-up fixes', () => {
     const user = userEvent.setup()
     renderWithRouter(<UserFormPage />)
 
-    await screen.findByRole('heading', { level: 1, name: 'Add user' })
+    await screen.findByRole('heading', { level: 1, name: 'Add User' })
     await user.type(screen.getByLabelText(/full name/i), 'Test Person')
     await user.type(screen.getByLabelText(/username/i), 'Demo.Nurse')
-    await user.click(screen.getByRole('button', { name: 'Create user' }))
+    await user.click(screen.getByRole('button', { name: 'Create User' }))
 
     expect(await screen.findByText('Another account already uses this username. Choose a different one.')).toBeInTheDocument()
     expect(screen.queryByText('User saved and audit event recorded.')).not.toBeInTheDocument()
@@ -158,7 +191,7 @@ describe('UI/UX review follow-up fixes', () => {
     renderWithRouter(<QrMobileHubPage />)
 
     await user.type(screen.getByLabelText(/enter student number manually/i), '209999999')
-    await user.click(screen.getByRole('button', { name: 'Look up student' }))
+    await user.click(screen.getByRole('button', { name: 'Look Up Student' }))
     expect(await screen.findByText('Student not found.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Scan QR Code' }))
@@ -174,5 +207,70 @@ describe('UI/UX review follow-up fixes', () => {
     const nav = screen.getByRole('navigation', { name: 'Main' })
     expect(within(nav).queryAllByRole('region')).toHaveLength(0)
     expect(within(nav).getByRole('group', { name: 'Overview' })).toBeInTheDocument()
+  })
+})
+
+/** Group B decisions from the UI/UX review, applied Wednesday, September 30, 2026. */
+describe('UI/UX review Group B decisions', () => {
+  beforeEach(() => resetMockDb())
+
+  it('gives Staff a New Visit shortcut and backup indicator on the Dashboard, and Admin neither', async () => {
+    const staff = renderWithRouter(<DashboardPage viewer={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }} />)
+    const strip = await screen.findByRole('region', { name: 'Staff shortcuts' })
+    expect(within(strip).getByRole('link', { name: 'New Visit' })).toHaveAttribute('href', '/visits/new')
+    expect(await within(strip).findByText(/^Last backup \w{3} \d{1,2}, \d{4} · \d{1,2}:\d{2} [AP]M$/)).toBeInTheDocument()
+    expect(within(strip).getByRole('link', { name: /backup status/i })).toHaveAttribute('href', '/backup')
+    staff.unmount()
+
+    renderWithRouter(<DashboardPage viewer={{ id: 'user-admin-01', name: 'Gilan Avelida', role: 'admin' }} />)
+    await screen.findByRole('heading', { name: 'Clinic Overview' })
+    expect(screen.queryByRole('region', { name: 'Staff shortcuts' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'New Visit' })).not.toBeInTheDocument()
+  })
+
+  it('asks for the Student Number on New Visit instead of using a default student', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<NewVisitEntryPage />)
+
+    await screen.findByRole('heading', { name: 'New Visit' })
+    expect(screen.getByText(/student not identified yet/i)).toBeInTheDocument()
+    await user.selectOptions(screen.getByLabelText(/complaint/i), 'Headache')
+    await user.type(screen.getByLabelText(/treatment/i), 'Rested in clinic.')
+    await user.click(screen.getByRole('button', { name: 'Save Visit' }))
+    expect(screen.getByText('Enter the Student Number (YYYY-NNNNN).')).toBeInTheDocument()
+    expect(getRecordedAuditEntries()).toEqual([])
+
+    await user.type(screen.getByLabelText(/student number/i), '202600001')
+    await user.click(screen.getByRole('button', { name: 'Save Visit' }))
+    expect(await screen.findByText(/visit saved/i)).toBeInTheDocument()
+    const student = await getStudent('2026-00001')
+    const visits = await listVisits()
+    expect(visits.some((visit) => visit.studentId === student.id && visit.treatment === 'Rested in clinic.')).toBe(true)
+    // Ready for the next student: the field is back and empty.
+    expect(screen.getByLabelText(/student number/i)).toHaveValue('')
+  })
+
+  it('confirms before recording a backup verification', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<BackupStatusPage />)
+
+    await user.click(await screen.findByRole('button', { name: 'Mark as Verified' }))
+    const dialog = screen.getByRole('dialog', { name: 'Mark this backup as verified?' })
+    expect(getRecordedAuditEntries()).toEqual([])
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+    expect(getRecordedAuditEntries()).toEqual([])
+
+    await user.click(screen.getByRole('button', { name: 'Mark as Verified' }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Mark as Verified' }))
+    expect(await screen.findByText('Verification recorded in the audit trail.')).toBeInTheDocument()
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['update'])
+  })
+
+  it('never shows an internal record id in the Audit Log', async () => {
+    renderWithRouter(<AuditLogPage viewer={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }} />)
+
+    const table = await screen.findByRole('table', { name: 'Filtered audit log' })
+    expect(table.textContent).not.toMatch(/\b(visit|incident|item|student|user|followup)-(staff-|admin-|instructor-)?\d{2,4}\b/)
+    expect(table.textContent).toMatch(/(Visit|Incident) · \d{4}-\d{5} · \w{3} \d{1,2}, \d{4} · \d{1,2}:\d{2} [AP]M/)
   })
 })

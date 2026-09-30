@@ -10,12 +10,15 @@ import {
   Input,
   SegmentedControl,
   Skeleton,
+  StudentNumberField,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
+import { useIdentifiedStudent } from '../../hooks/useIdentifiedStudent'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { Disposition } from '../../types/entities'
 import {
   fetchPeReferralContext,
+  findReferralStudent,
   submitPeReferral,
   type PeReferralValues,
 } from './api/peReferralApi'
@@ -36,7 +39,7 @@ interface Errors {
 
 function ReferralSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-72 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -101,8 +104,17 @@ function validate(values: PeReferralValues): Errors {
   return errors
 }
 
-export function PeSportsReferralPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
-  const { data, status, reload } = useAsyncData('pe-referral', fetchPeReferralContext)
+export function PeSportsReferralPage({
+  viewer = getMockSessionUser(),
+  studentNumber,
+}: {
+  viewer?: SessionUser
+  studentNumber?: string
+}) {
+  const { data, status, reload } = useAsyncData(`pe-referral|${studentNumber ?? 'unidentified'}`, () =>
+    fetchPeReferralContext(studentNumber),
+  )
+  const identified = useIdentifiedStudent(data?.student, findReferralStudent)
   const [values, setValues] = useState<PeReferralValues>({
     referredBy: '',
     activity: '',
@@ -123,22 +135,30 @@ export function PeSportsReferralPage({ viewer = getMockSessionUser() }: { viewer
 
   function loadDefaults() {
     if (!data) return
+    // Fills every empty field; anything already typed is kept.
     setValues((current) => ({
       ...current,
-      referredBy: current.referredBy || data.referredBy,
-      activity: current.activity || data.activity,
+      referredBy: current.referredBy || data.defaults.referredBy,
+      activity: current.activity || data.defaults.activity,
+      injurySummary: current.injurySummary || data.defaults.injurySummary,
+      clinicalAssessment: current.clinicalAssessment || data.defaults.clinicalAssessment,
+      treatment: current.treatment || data.defaults.treatment,
     }))
+    setErrors({})
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!data) return
     const nextErrors = validate(values)
+    const studentOk = identified.validate()
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length) return
+    if (Object.keys(nextErrors).length || !studentOk) return
     setSaving(true)
     try {
-      await submitPeReferral(values, data.student)
+      const student = await identified.resolve()
+      if (!student) return
+      await submitPeReferral(values, student, viewer)
       setSaved(true)
     } finally {
       setSaving(false)
@@ -147,7 +167,7 @@ export function PeSportsReferralPage({ viewer = getMockSessionUser() }: { viewer
 
   if (viewer.role !== 'staff') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Staff access required." />
       </div>
     )
@@ -155,7 +175,7 @@ export function PeSportsReferralPage({ viewer = getMockSessionUser() }: { viewer
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load PE/Sports referral." onRetry={reload} />
       </div>
     )
@@ -175,20 +195,19 @@ export function PeSportsReferralPage({ viewer = getMockSessionUser() }: { viewer
   const needsEmergency = values.disposition === 'referred_to_hospital'
 
   return (
-    <div className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              PE/Sports Injury Referral Form
+              PE/Sports Injury Referral
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
-              {data.student.fullName} · {data.student.studentNumber} · {data.student.gradeLevel}
+              {identified.student
+                ? `${identified.student.fullName} · ${identified.student.studentNumber} · ${identified.student.gradeLevel}`
+                : 'Student not identified yet. Enter the Student Number below.'}
             </p>
           </div>
-          <Button variant="secondary" icon="refresh" onClick={loadDefaults}>
-            Use PE Defaults
-          </Button>
         </div>
       </Card>
 
@@ -209,8 +228,20 @@ export function PeSportsReferralPage({ viewer = getMockSessionUser() }: { viewer
             title="Referral details"
             description="Log the referral source, clinical assessment, and disposition."
             icon={<Icon name="activity" />}
+            actions={
+              <Button variant="secondary" size="sm" icon="refresh" onClick={loadDefaults}>
+                Use PE Defaults
+              </Button>
+            }
           />
           <CardBody className="flex flex-col gap-4">
+            {identified.needsStudentNumber && (
+              <StudentNumberField
+                value={identified.input}
+                error={identified.error}
+                onChange={identified.setInput}
+              />
+            )}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Input
                 label="Referred by"

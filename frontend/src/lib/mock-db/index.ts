@@ -5,7 +5,15 @@
  */
 export * from './api'
 export type { SessionUser } from './session'
-export { getMockSessionUser, ROLE_LABELS, selectMockSessionUser } from './session'
+export {
+  beginPasswordChange,
+  clearMockSession,
+  getAuthenticatedUser,
+  getMockSessionUser,
+  getPendingPasswordChangeUser,
+  ROLE_LABELS,
+  startMockSession,
+} from './session'
 export type {
   ComplaintType,
   ExcuseLetterApproval,

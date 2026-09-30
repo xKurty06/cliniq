@@ -11,7 +11,7 @@ import {
   Skeleton,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import { formatDate } from '../../lib/dates'
+import { formatDate, formatDateTime } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import {
   approveExcuseLetter,
@@ -21,12 +21,12 @@ import {
 
 function LetterSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-72 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
       </Card>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid grid-cols-1 gap-4">
         <Card className="p-5">
           <Skeleton className="h-5 w-44" />
           <Skeleton className="mt-4 h-10 w-full" />
@@ -75,7 +75,7 @@ function PrintableLetter({
         <div className="rounded-md border border-border bg-surface px-3 py-2 text-xs print:bg-transparent">
           Student: {context.student.fullName} · {context.student.studentNumber}
           <br />
-          Source visit: {context.visit.id} · {formatDate(context.visit.dateTime.slice(0, 10))}
+          Clinic visit: {formatDateTime(context.visit.dateTime)}
           <br />
           Storage status: {approved ? 'Approved and stored in student record' : 'Draft, not stored'}
         </div>
@@ -102,16 +102,16 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-[1120px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8 print:max-w-none print:px-0 print:py-0">
+    <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8 print:max-w-none print:px-0 print:py-0">
       <Card className="p-5 print:hidden">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              Excuse Letter Generator
+              Excuse Letter
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
-              {context.student.fullName} · {context.student.studentNumber} · source visit{' '}
-              {context.visit.id}
+              {context.student.fullName} · {context.student.studentNumber} · visit on{' '}
+              {formatDateTime(context.visit.dateTime)}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -134,7 +134,7 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1.2fr] print:block">
+      <div className="grid grid-cols-1 gap-4 print:block">
         <Card aria-labelledby="letter-controls-title" className="print:hidden">
           <CardHeader
             titleId="letter-controls-title"
@@ -221,7 +221,7 @@ export function ExcuseLetterPage({
 
   if (viewer.role !== 'staff') {
     return (
-      <div className="mx-auto max-w-[1120px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Staff access required." />
       </div>
     )
@@ -229,7 +229,7 @@ export function ExcuseLetterPage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1120px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load excuse letter." onRetry={reload} />
       </div>
     )

@@ -5,14 +5,14 @@ import { getMockSessionUser, getRecordedAuditEntries, resetMockDb } from '../../
 import { IncompleteRecordsQueuePage } from './IncompleteRecordsQueuePage'
 import { fetchIncompleteRecords } from './api/incompleteRecordsApi'
 
-describe('Incomplete Records Review Queue', () => {
+describe('Incomplete Records', () => {
   beforeEach(() => resetMockDb())
 
   it('renders incomplete student records without inline medical values', async () => {
     render(<IncompleteRecordsQueuePage />)
 
     expect(
-      await screen.findByRole('heading', { name: 'Incomplete Records Review Queue' }),
+      await screen.findByRole('heading', { name: 'Incomplete Records' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Student' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Missing fields' })).toBeInTheDocument()
@@ -26,7 +26,7 @@ describe('Incomplete Records Review Queue', () => {
     const [record] = await fetchIncompleteRecords()
     render(<IncompleteRecordsQueuePage />)
 
-    await screen.findByRole('heading', { name: 'Incomplete Records Review Queue' })
+    await screen.findByRole('heading', { name: 'Incomplete Records' })
     await user.type(screen.getByLabelText('Search'), record.studentNumber)
 
     expect(await screen.findByText('1 record shown')).toBeInTheDocument()
@@ -39,7 +39,7 @@ describe('Incomplete Records Review Queue', () => {
     const [record] = await fetchIncompleteRecords()
     render(<IncompleteRecordsQueuePage />)
 
-    await screen.findByRole('heading', { name: 'Incomplete Records Review Queue' })
+    await screen.findByRole('heading', { name: 'Incomplete Records' })
     await user.type(screen.getByLabelText('Search'), record.studentNumber)
     const row = await screen.findByRole('row', { name: new RegExp(record.studentNumber) })
     await user.click(within(row).getByRole('button', { name: 'Mark Reviewed' }))
@@ -56,7 +56,7 @@ describe('Incomplete Records Review Queue', () => {
     const [record] = await fetchIncompleteRecords()
     render(<IncompleteRecordsQueuePage />)
 
-    await screen.findByRole('heading', { name: 'Incomplete Records Review Queue' })
+    await screen.findByRole('heading', { name: 'Incomplete Records' })
     await user.type(screen.getByLabelText('Search'), record.studentNumber)
     await user.click(screen.getByRole('button', { name: 'Mark Reviewed' }))
 

@@ -64,7 +64,7 @@ function valuesFromStudent(student: Student | null): StudentFormValues {
 
 function StudentFormSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-56 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -274,7 +274,7 @@ function StudentFormEditor({
   }
 
   return (
-    <div className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -430,7 +430,7 @@ export function StudentFormPage({
 
   if (viewer.role !== 'staff') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Staff access required." />
       </div>
     )
@@ -438,7 +438,7 @@ export function StudentFormPage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load student form." onRetry={reload} />
       </div>
     )

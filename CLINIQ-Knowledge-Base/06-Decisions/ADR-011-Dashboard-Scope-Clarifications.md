@@ -20,5 +20,6 @@ Both chosen by the project owner when asked directly during the Dashboard build 
 - Reference 1's four cards only (drops Module 9's active-students count), or four cards with low-stock moved to the alert list header only.
 
 ## Consequences
-- Staff and Admin render the identical Dashboard component. There's no role-conditional code on this screen.
+- Staff and Admin render the identical Dashboard component. There's no role-conditional code on this screen. *(Amended below.)*
+- **Amendment, Wednesday, September 30, 2026 — 22:52 (project owner):** Staff additionally get a strip under the header with a quick "New Visit" action and a minimal backup-status indicator linking to the Backup screen (Screen #4's content). It is the one role-conditional part of this screen, shown to Staff only because Admin/Principal can open neither destination. Both are navigation, so decision 1 is unchanged: the Dashboard remains view-only for both roles and still writes no audit entries.
 - **Canonical documents need a matching update**: *Frontend Design Reference* Reference 1 should drop the implication that Staff has resolve/complete actions and list five cards. `03-Design/Reference-Screens.md` should change in the same edit, since it mirrors that document.

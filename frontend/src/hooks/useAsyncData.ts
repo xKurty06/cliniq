@@ -52,7 +52,7 @@ export function useAsyncData<T>(key: string, loader: () => Promise<T>): AsyncDat
   }, [requestKey])
 
   // Re-running keeps the last good data on screen (isRefetching) instead of flashing back to the
-  // skeleton after a save. A failed request has no data, so "Try again" still shows the skeleton.
+  // skeleton after a save. A failed request has no data, so "Try Again" still shows the skeleton.
   const reload = useCallback(() => {
     setAttempt((n) => n + 1)
   }, [])

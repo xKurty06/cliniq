@@ -13,7 +13,7 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
-import { formatDate } from '../../lib/dates'
+import { formatDateTime } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { Disposition } from '../../types/entities'
 import {
@@ -41,19 +41,14 @@ interface Errors {
   treatment?: string
 }
 
-function formatDateTime(value: string): string {
-  const [date, time] = value.split('T')
-  return `${formatDate(date)} · ${time.slice(0, 5)}`
-}
-
 function VisitDetailSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-64 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
       </Card>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid grid-cols-1 gap-4">
         {Array.from({ length: 3 }, (_, index) => (
           <Card key={index} className="p-5">
             <Skeleton className="h-5 w-40" />
@@ -154,12 +149,12 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              Visit Detail/Edit
+              Visit Details
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
               {visit.student.fullName} · {visit.student.studentNumber} · {visit.student.gradeLevel}
@@ -187,14 +182,14 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid grid-cols-1 gap-4">
         <Card aria-labelledby="visit-context-title">
           <CardHeader
             titleId="visit-context-title"
             title="Visit context"
             icon={<Icon name="stethoscope" />}
           />
-          <CardBody className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <CardBody className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <p className="text-xs font-semibold text-text-secondary">Student</p>
               <p className="text-sm font-semibold text-text-primary">{visit.student.fullName}</p>
@@ -310,7 +305,7 @@ export function VisitDetailPage({
 
   if (viewer.role !== 'staff') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Staff access required." />
       </div>
     )
@@ -318,7 +313,7 @@ export function VisitDetailPage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load visit detail." onRetry={reload} />
       </div>
     )

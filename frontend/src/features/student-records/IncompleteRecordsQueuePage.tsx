@@ -32,7 +32,7 @@ interface ResolvedRecord {
 
 function QueueSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-80 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -189,7 +189,7 @@ export function IncompleteRecordsQueuePage({
 
   if (viewer.role !== 'staff') {
     return (
-      <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Staff access required." />
       </div>
     )
@@ -197,7 +197,7 @@ export function IncompleteRecordsQueuePage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load incomplete records." onRetry={reload} />
       </div>
     )
@@ -218,12 +218,12 @@ export function IncompleteRecordsQueuePage({
   const resolvedCount = data.length - openCount
 
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              Incomplete Records Review Queue
+              Incomplete Records
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
               Review Registrar-imported student records that still need required-field completion.

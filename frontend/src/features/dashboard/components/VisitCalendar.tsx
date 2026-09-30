@@ -70,7 +70,7 @@ function EventTags({ tags, className }: { tags: string[]; className?: string }) 
       {tags.map((tag) => (
         <li
           key={tag}
-          className="max-w-full truncate rounded-sm border border-brand-yellow-dark bg-brand-yellow px-1.5 py-0.5 text-[0.6875rem] leading-tight font-semibold text-text-primary"
+          className="max-w-full truncate rounded-sm border border-brand-yellow-dark bg-brand-yellow px-1.5 py-0.5 text-xs leading-tight font-semibold text-text-primary"
           title={tag}
         >
           <span className="sr-only">Event: </span>
@@ -455,6 +455,8 @@ function CalendarSkeleton({ view, periodFrom }: { view: CalendarView; periodFrom
 }
 
 const viewNoun: Record<CalendarView, string> = { week: 'week', month: 'month', year: 'year' }
+/** Button labels are Title Case (Design-System.md): "Previous Month", "Next Year". */
+const viewNounTitle: Record<CalendarView, string> = { week: 'Week', month: 'Month', year: 'Year' }
 
 export interface VisitCalendarProps {
   today: ISODate
@@ -533,7 +535,7 @@ export function VisitCalendar({ today, initialAnchor }: VisitCalendarProps) {
               icon="chevronLeft"
               onClick={() => setAnchor(shiftAnchor(view, anchor, -1))}
             >
-              Previous<span className="sr-only"> {viewNoun[view]}</span>
+              Previous<span className="sr-only"> {viewNounTitle[view]}</span>
             </Button>
             <Button size="sm" variant="neutral" onClick={() => setAnchor(today)}>
               Today
@@ -544,7 +546,7 @@ export function VisitCalendar({ today, initialAnchor }: VisitCalendarProps) {
               disabled={nextDisabled}
               onClick={() => setAnchor(shiftAnchor(view, anchor, 1))}
             >
-              Next<span className="sr-only"> {viewNoun[view]}</span>
+              Next<span className="sr-only"> {viewNounTitle[view]}</span>
               <Icon name="chevronRight" />
             </Button>
           </div>

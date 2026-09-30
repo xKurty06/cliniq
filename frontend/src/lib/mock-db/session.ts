@@ -2,20 +2,38 @@ import type { User, UserRole } from '../../types/entities'
 import { db } from './store'
 
 /**
- * MOCK SESSION: stands in for Sanctum auth until Phase B2 lands. Defaults to Staff; add `?role=admin`
- * or `?role=instructor` to the URL to preview role-conditional frontend states. The previewed role
- * is kept for the browser tab (sessionStorage) so in-app navigation, which drops the query string,
- * doesn't silently switch back to Staff; `?role=staff` switches back.
+ * MOCK SESSION: stands in for Sanctum auth until Phase B2 lands.
  *
- * The signed-in user for each role is the first account of that role in `mock-db.json` that doesn't
- * still need a password change. Every account there is fictional (see the file's `meta.notice`).
+ * A session exists only after a successful Login (`startMockSession`). Every route requires one, so
+ * each audited action — including every QR scan — is attributable to the account that signed in
+ * (ADR-002, security clarification). There is deliberately no URL parameter or role picker that
+ * creates a session. Like the planned Sanctum token, it lasts one week with no idle timeout
+ * (Module 1), and Log out ends it.
+ *
+ * Every account in `mock-db.json` is fictional (see the file's `meta.notice`).
  */
 export type SessionUser = Pick<User, 'id' | 'name' | 'role'>
 
-const ROLE_STORAGE_KEY = 'cliniq.mockRole'
+const SESSION_KEY = 'cliniq.session'
+const PENDING_PASSWORD_KEY = 'cliniq.pendingPasswordChange'
+const SESSION_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000
 
-function isRole(value: string | null): value is UserRole {
-  return value === 'staff' || value === 'admin' || value === 'instructor'
+interface StoredSession {
+  userId: string
+  expiresAt: number
+}
+
+function storage(): Storage | null {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage
+  } catch {
+    return null
+  }
+}
+
+function sessionUserById(id: string): SessionUser | null {
+  const user = db().users.find((u) => u.id === id)
+  return user ? { id: user.id, name: user.name, role: user.role } : null
 }
 
 function userForRole(role: UserRole): SessionUser {
@@ -30,48 +48,59 @@ function userForRole(role: UserRole): SessionUser {
   return { id: user.id, name: user.name, role: user.role }
 }
 
+/** The signed-in account, or `null` when nobody has logged in (or the week-long session expired). */
+export function getAuthenticatedUser(): SessionUser | null {
+  const raw = storage()?.getItem(SESSION_KEY)
+  if (!raw) return null
+  try {
+    const session = JSON.parse(raw) as StoredSession
+    if (!session.userId || !(session.expiresAt > Date.now())) {
+      clearMockSession()
+      return null
+    }
+    return sessionUserById(session.userId)
+  } catch {
+    clearMockSession()
+    return null
+  }
+}
+
+/** Called only after Login verified the credentials (and any forced password change is done). */
+export function startMockSession(user: SessionUser): void {
+  const session: StoredSession = { userId: user.id, expiresAt: Date.now() + SESSION_LIFETIME_MS }
+  storage()?.removeItem(PENDING_PASSWORD_KEY)
+  storage()?.setItem(SESSION_KEY, JSON.stringify(session))
+}
+
+/**
+ * Login verified the credentials of an account that must change its password first. The account id
+ * is held here — never taken from the URL — so only that account's password can be changed.
+ */
+export function beginPasswordChange(userId: string): void {
+  storage()?.setItem(PENDING_PASSWORD_KEY, userId)
+}
+
+export function getPendingPasswordChangeUser(): SessionUser | null {
+  const userId = storage()?.getItem(PENDING_PASSWORD_KEY)
+  return userId ? sessionUserById(userId) : null
+}
+
+/**
+ * The account an action is attributed to. In the app this is always the signed-in user, since no
+ * screen renders without Login. Only the test runner, which renders screens directly, falls back to
+ * the first Staff account; outside tests a missing session is an error rather than a silent default.
+ */
 export function getMockSessionUser(): SessionUser {
-  if (typeof window === 'undefined') return userForRole('staff')
-  const fromUrl = new URLSearchParams(window.location.search).get('role')
-  try {
-    if (isRole(fromUrl)) {
-      window.sessionStorage.setItem(ROLE_STORAGE_KEY, fromUrl)
-      return userForRole(fromUrl)
-    }
-    const stored = window.sessionStorage.getItem(ROLE_STORAGE_KEY)
-    return userForRole(isRole(stored) ? stored : 'staff')
-  } catch {
-    // Storage can be blocked (private mode, previews); fall back to the URL alone.
-    return userForRole(isRole(fromUrl) ? fromUrl : 'staff')
-  }
+  const user = getAuthenticatedUser()
+  if (user) return user
+  if (import.meta.env.MODE === 'test') return userForRole('staff')
+  throw new Error('No signed-in user: every CLINIQ screen requires Login.')
 }
 
-/**
- * Client-demo-only role picker. It selects the same synthetic account used by the `?role=` preview
- * and lets the logged-out prototype return to the app without implying real authentication exists.
- */
-export function selectMockSessionUser(role: UserRole): SessionUser {
-  if (typeof window !== 'undefined') {
-    try {
-      window.sessionStorage.setItem(ROLE_STORAGE_KEY, role)
-    } catch {
-      // The chosen role can still be used for this render when browser storage is unavailable.
-    }
-  }
-  return userForRole(role)
-}
-
-/**
- * Ends the development-only role preview. The real Sanctum logout endpoint will replace this
- * when authentication is implemented in Phase B2.
- */
-export function clearMockSession() {
-  if (typeof window === 'undefined') return
-  try {
-    window.sessionStorage.removeItem(ROLE_STORAGE_KEY)
-  } catch {
-    // Storage can be blocked; the app still moves to its signed-out view.
-  }
+/** Ends the session. The real Sanctum logout endpoint replaces this in Phase B2. */
+export function clearMockSession(): void {
+  storage()?.removeItem(SESSION_KEY)
+  storage()?.removeItem(PENDING_PASSWORD_KEY)
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {

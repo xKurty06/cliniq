@@ -14,11 +14,11 @@ describe('QR Mobile Hub', () => {
     renderWithRouter(<QrMobileHubPage />)
 
     expect(screen.getByRole('heading', { name: 'QR Scan / Lookup' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /emergency button/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Emergency' })).toHaveAttribute(
       'href',
       '/incidents/new',
     )
-    await user.click(screen.getByRole('button', { name: 'Use demo scan' }))
+    await user.click(screen.getByRole('button', { name: 'Use Demo Scan' }))
 
     expect(await screen.findByRole('heading', { name: /quick actions/i })).toBeInTheDocument()
     const studentNumber = await demoStudentNumber()
@@ -46,8 +46,8 @@ describe('QR Mobile Hub', () => {
     renderWithRouter(<QrMobileHubPage viewer={{ id: 'usr-pe', name: 'PE Instructor', role: 'instructor' }} />)
 
     expect(screen.getByRole('heading', { name: 'Instructor Lookup' })).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /emergency button/i })).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Use demo scan' }))
+    expect(screen.queryByRole('link', { name: 'Emergency' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Use Demo Scan' }))
 
     expect(await screen.findByRole('heading', { name: 'Read-only health history' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Record Visit' })).not.toBeInTheDocument()

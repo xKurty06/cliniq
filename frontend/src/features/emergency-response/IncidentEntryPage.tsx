@@ -13,13 +13,14 @@ import {
   SegmentedControl,
   Skeleton,
   StatusBadge,
+  StudentNumberField,
   type StatusMap,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
+import { useIdentifiedStudent } from '../../hooks/useIdentifiedStudent'
 import { addDays, todayISO } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
-import type { HospitalReferral, Incident, ParentNotificationOutcome, Student } from '../../types/entities'
-import { normalizeStudentNumber } from '../qr-digital-health-id/shared/QrScannerView'
+import type { HospitalReferral, Incident, ParentNotificationOutcome } from '../../types/entities'
 import {
   completeStageTwoIncident,
   fetchIncidentEntryContext,
@@ -50,7 +51,6 @@ const notificationOutcomes = [
 ] satisfies Array<{ value: ParentNotificationOutcome; label: string }>
 
 interface Errors {
-  studentNumber?: string
   complaint?: string
   temperatureC?: string
   pulseBpm?: string
@@ -64,7 +64,7 @@ interface Errors {
 
 function IncidentSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1040px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-64 max-w-full" />
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
@@ -207,7 +207,7 @@ export function IncidentEntryPage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1040px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load the incident form." onRetry={reload} />
       </div>
     )
@@ -239,8 +239,8 @@ function vital(incident: Incident | null, key: string): string {
 function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: IncidentEntryContext }) {
   const today = todayISO()
   const existing = data.incident
-  const [student, setStudent] = useState<Student | null>(data.student)
-  const [studentNumberInput, setStudentNumberInput] = useState('')
+  const identified = useIdentifiedStudent(data.student, findIncidentStudent)
+  const student = identified.student
   const [stage, setStage] = useState<ScreenStage>(existing ? 'stage2' : 'stage1')
   const [incident, setIncident] = useState<Incident | null>(existing)
   const [completed, setCompleted] = useState(existing?.stage === 2)
@@ -274,24 +274,13 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
     // Stage 1 is saved once; a second submit would create a duplicate incident.
     if (incident) return
     const nextErrors = validateStageOne(complaint, temperatureC, pulseBpm)
-    const typedNumber = normalizeStudentNumber(studentNumberInput)
-    if (!student && !/^\d{4}-\d{5}$/.test(typedNumber)) {
-      nextErrors.studentNumber = 'Enter the Student Number (YYYY-NNNNN).'
-    }
+    const studentOk = identified.validate()
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length) return
+    if (Object.keys(nextErrors).length || !studentOk) return
     setSavingStageOne(true)
     try {
-      let target = student
-      if (!target) {
-        try {
-          target = await findIncidentStudent(typedNumber)
-        } catch {
-          setErrors({ studentNumber: 'No student has this Student Number. Check it and try again.' })
-          return
-        }
-        setStudent(target)
-      }
+      const target = await identified.resolve()
+      if (!target) return
       const saved = await saveStageOneIncident(
         { studentId: target.id, complaint, temperatureC, pulseBpm },
         viewer,
@@ -383,11 +372,13 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
   }
 
   return (
-    <div className="mx-auto flex max-w-[1040px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Incident Entry</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              {existing ? 'Complete Incident Record' : 'Report Incident'}
+            </h1>
             <p className="mt-1 text-sm text-text-secondary">
               {student
                 ? `${student.fullName} · ${student.studentNumber} · ${student.gradeLevel}`
@@ -430,20 +421,12 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
               description="Capture only the essentials now. Stage 2 can be completed after the immediate situation is handled."
             />
             <CardBody className="flex flex-col gap-4">
-              {!student && (
-                <Input
-                  label="Student Number"
-                  value={studentNumberInput}
-                  required
-                  inputMode="numeric"
-                  autoComplete="off"
-                  placeholder="YYYY-NNNNN"
+              {identified.needsStudentNumber && (
+                <StudentNumberField
+                  value={identified.input}
+                  error={identified.error}
+                  onChange={identified.setInput}
                   hint="No student was identified before this emergency. Type the Student Number."
-                  onChange={(event) => {
-                    setStudentNumberInput(normalizeStudentNumber(event.target.value))
-                    setErrors((current) => ({ ...current, studentNumber: undefined }))
-                  }}
-                  error={errors.studentNumber}
                 />
               )}
               <FieldSelect
@@ -625,7 +608,7 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                         className="self-end"
                         onClick={addNotification}
                       >
-                        Add attempt
+                        Add Attempt
                       </Button>
                     </div>
                     {notifications.length ? (

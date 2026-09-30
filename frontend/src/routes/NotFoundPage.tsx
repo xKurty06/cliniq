@@ -4,8 +4,8 @@ import { buttonClassName, Card, EmptyState } from '../components'
 /** Shown for any URL that isn't a screen. Offers one way back, to the viewer's home screen. */
 export function NotFoundPage({ home }: { home: string }) {
   return (
-    <div className="mx-auto max-w-[1120px] px-4 pt-10 pb-8 sm:px-8">
-      <h1 className="sr-only">Page not found</h1>
+    <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
+      <h1 className="sr-only">Page Not Found</h1>
       <Card>
         <EmptyState
           icon="alertTriangle"
@@ -14,7 +14,7 @@ export function NotFoundPage({ home }: { home: string }) {
         />
         <div className="flex justify-center pb-6">
           <Link to={home} className={buttonClassName({ variant: 'primary' })}>
-            Go to home screen
+            Go to Home Screen
           </Link>
         </div>
       </Card>

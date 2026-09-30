@@ -41,7 +41,8 @@ export function ListRow({
     >
       <div className="min-w-0 flex-1">
         <div className="text-sm font-semibold text-text-primary">{primary}</div>
-        {secondary && <div className="truncate text-xs text-text-secondary">{secondary}</div>}
+        {/* Wraps instead of truncating: a list must not hide part of an item's detail. */}
+        {secondary && <div className="text-xs break-words text-text-secondary">{secondary}</div>}
       </div>
       {(meta || trailing) && (
         <div className="flex shrink-0 flex-col items-end gap-1 text-right">

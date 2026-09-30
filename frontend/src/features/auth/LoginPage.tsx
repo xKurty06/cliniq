@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { formatTime } from '../../lib/dates'
+import { useLocation, useNavigate } from 'react-router'
 import { Button, Card, Input } from '../../components'
-import { authenticateMockUser, MockAuthError, type SessionUser } from '../../lib/mock-db'
+import { authenticateMockUser, beginPasswordChange, MockAuthError, type SessionUser } from '../../lib/mock-db'
 import { paths } from '../../routes/paths'
 
 const DEMO_ACCOUNTS = [
@@ -11,8 +12,15 @@ const DEMO_ACCOUNTS = [
   { role: 'PE/Sports Instructor', username: 'demo.pe2', password: 'demo-change', note: 'Force Password Change scenario' },
 ]
 
+/** Only an in-app path is a safe place to return to after Login (never another origin). */
+function returnPath(state: unknown): string | null {
+  const from = (state as { from?: unknown } | null)?.from
+  return typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') ? from : null
+}
+
 export function LoginPage({ onLogin }: { onLogin: (user: SessionUser) => void }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -34,8 +42,14 @@ export function LoginPage({ onLogin }: { onLogin: (user: SessionUser) => void })
     setLoading(true)
     try {
       const result = await authenticateMockUser(username, password)
+      if (result.mustChangePassword) {
+        // No session yet: the account must set a new password before it can open any screen.
+        beginPasswordChange(result.user.id)
+        navigate(paths.forcePasswordChange, { replace: true })
+        return
+      }
       onLogin(result.user)
-      navigate(result.mustChangePassword ? `${paths.forcePasswordChange}?user=${encodeURIComponent(result.user.id)}` : paths.dashboard, { replace: true })
+      navigate(returnPath(location.state) ?? paths.dashboard, { replace: true })
     } catch (cause) {
       if (cause instanceof MockAuthError && cause.reason === 'locked') {
         setLockedUntil(cause.lockedUntil ?? null)
@@ -48,13 +62,13 @@ export function LoginPage({ onLogin }: { onLogin: (user: SessionUser) => void })
     }
   }
 
-  const lockMessage = lockedUntil ? `Locked until ${new Date(lockedUntil).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.` : null
+  const lockMessage = lockedUntil ? `Locked until ${formatTime(lockedUntil)}.` : null
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface px-4 py-8">
       <Card className="w-full max-w-md p-6">
         <header>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-green-dark">CLINIQ</p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary">Sign in</h1>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-text-primary">Sign In</h1>
           <p className="mt-1 text-sm text-text-secondary">Use your assigned clinic account to continue.</p>
         </header>
         <form className="mt-6 flex flex-col gap-4" onSubmit={submit} noValidate>
@@ -62,7 +76,7 @@ export function LoginPage({ onLogin }: { onLogin: (user: SessionUser) => void })
           <Input label="Password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} error={fieldErrors.password} required />
           {error && <p role="alert" className="text-sm font-semibold text-error">{error}</p>}
           {lockMessage && <p className="text-xs text-text-secondary">{lockMessage}</p>}
-          <Button type="submit" variant="primary" className="mt-2 w-full" loading={loading}>Sign in</Button>
+          <Button type="submit" variant="primary" className="mt-2 w-full" loading={loading}>Sign In</Button>
         </form>
         <aside className="mt-6 border-t border-border pt-4" aria-labelledby="demo-accounts-title">
           <h2 id="demo-accounts-title" className="text-sm font-semibold text-text-primary">Sample accounts for this demo</h2>

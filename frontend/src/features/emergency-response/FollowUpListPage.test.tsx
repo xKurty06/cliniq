@@ -1,24 +1,59 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
-import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
-import { listFollowUps } from '../../lib/mock-db'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { getRecordedAuditEntries, listFollowUps, resetMockDb } from '../../lib/mock-db'
 import { FollowUpListPage } from './FollowUpListPage'
 
+const followUpUpdate = expect.objectContaining({
+  actionType: 'update',
+  targetRecord: expect.objectContaining({ type: 'follow-up' }),
+})
+
 describe('FollowUpListPage', () => {
-  it('uses the linked Student Number and records completion as an audited update', async () => {
-    resetMockDb()
+  beforeEach(() => resetMockDb())
+
+  async function renderList() {
     const user = userEvent.setup()
     render(<FollowUpListPage />)
-
     const [firstFollowUp] = await listFollowUps()
     expect((await screen.findAllByText(firstFollowUp.studentNumber)).length).toBeGreaterThan(0)
-    await user.click(screen.getAllByRole('button', { name: 'Mark completed' })[0])
+    return user
+  }
 
-    expect(getRecordedAuditEntries()).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ actionType: 'update', targetRecord: expect.objectContaining({ type: 'follow-up' }) }),
-      ]),
+  it('uses the linked Student Number and records completion as an audited update, with no extra step', async () => {
+    const user = await renderList()
+    const pendingBefore = screen.getAllByRole('combobox', { name: /update status for/i }).length
+
+    await user.selectOptions(screen.getAllByRole('combobox', { name: /update status for/i })[0], 'Completed')
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('combobox', { name: /update status for/i })).toHaveLength(pendingBefore - 1)
+    expect(getRecordedAuditEntries()).toEqual([followUpUpdate])
+  })
+
+  it.each([
+    ['Missed', 'Mark this follow-up as Missed?', 'Mark as Missed', 'missed'],
+    ['Cancelled', 'Cancel this follow-up?', 'Cancel Follow-Up', 'cancelled'],
+  ])('asks before marking a follow-up %s', async (option, title, confirmLabel, status) => {
+    const user = await renderList()
+    const select = screen.getAllByRole('combobox', { name: /update status for/i })[0]
+    const pendingBefore = (await listFollowUps({ status: 'pending' })).length
+
+    await user.selectOptions(select, option)
+    const dialog = screen.getByRole('dialog', { name: title })
+    expect(getRecordedAuditEntries()).toEqual([])
+
+    await user.click(within(dialog).getByRole('button', { name: 'Keep Pending' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(getRecordedAuditEntries()).toEqual([])
+    expect(await listFollowUps({ status: 'pending' })).toHaveLength(pendingBefore)
+
+    await user.selectOptions(screen.getAllByRole('combobox', { name: /update status for/i })[0], option)
+    await user.click(within(screen.getByRole('dialog', { name: title })).getByRole('button', { name: confirmLabel }))
+    expect(getRecordedAuditEntries()).toEqual([followUpUpdate])
+    expect(await listFollowUps({ status: status as 'missed' | 'cancelled' })).toEqual(
+      expect.arrayContaining([expect.objectContaining({ status })]),
     )
+    expect(await listFollowUps({ status: 'pending' })).toHaveLength(pendingBefore - 1)
   })
 })

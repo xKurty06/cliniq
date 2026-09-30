@@ -15,6 +15,7 @@ import {
 } from './components/AlertLists'
 import { ComplaintTrends, ComplaintTrendsSkeleton } from './components/ComplaintTrends'
 import { DashboardHeader } from './components/DashboardHeader'
+import { StaffShortcuts } from './components/StaffShortcuts'
 import { StatCardRow, StatCardRowSkeleton } from './components/StatCardRow'
 import { VisitCalendar } from './components/VisitCalendar'
 import type { TrendGranularity } from '../../types/dashboard'
@@ -36,10 +37,11 @@ function DashboardSkeleton() {
 
 /**
  * Clinic Overview Dashboard (Screen Inventory #31, Reference 1, Module 9).
- * Staff and Admin/Principal see the same layout (only the header greeting differs). It's view-only for both: no create, update,
- * or delete happens here, so there are no audit-log writes (ADR-011).
+ * Staff and Admin/Principal see the same layout, except the header greeting and a Staff-only strip
+ * with the "New Visit" shortcut and backup-status indicator (Screen #4; ADR-011 amendment). It's
+ * view-only for both: no create, update, or delete happens here, so there are no audit-log writes.
  *
- * Top to bottom: header → date-range filter → stat cards → three alert groups → complaint trends →
+ * Top to bottom: header → date-range filter → Staff shortcuts → stat cards → three alert groups → complaint trends →
  * calendar. The export/print button sits in the header. Every data section shows a skeleton shaped
  * like itself on first load; later refetches keep the previous render dimmed instead.
  */
@@ -54,7 +56,7 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
   )
 
   return (
-    <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-6 px-4 pt-10 pb-8 sm:px-8">
       <DashboardHeader
         viewer={viewer}
         today={today}
@@ -63,6 +65,8 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
         isRefetching={isRefetching}
         onPrint={() => window.print()}
       />
+
+      {viewer.role === 'staff' && <StaffShortcuts />}
 
       {status === 'error' ? (
         <ErrorState title="Unable to load the clinic overview." onRetry={reload} />

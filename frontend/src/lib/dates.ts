@@ -106,10 +106,43 @@ export function formatDateRange(from: ISODate, to: ISODate): string {
   return `${start} – ${formatDate(to)}`
 }
 
-/** Date + time for a full timestamp, e.g. "Sep 27, 2026 · 9:05 AM", in the viewer's local time. */
+/** The clinic's wall clock. Timestamps display in Philippine time whatever the viewing device is set to. */
+const CLINIC_TIME_ZONE = 'Asia/Manila'
+
+/**
+ * THE display format for a timestamp (Design-System.md, "Dates & Times"): "Sep 27, 2026 · 9:05 AM",
+ * 12-hour, Philippine time. Date-only values use `formatDate` ("Sep 27, 2026"). Screens must not
+ * format dates themselves or show raw ISO strings.
+ */
 export function formatDateTime(value: ISODateTime): string {
-  const d = new Date(value)
+  if (!value.includes('T')) return formatDate(value)
+  // A timestamp stored without an offset was recorded on the clinic's clock.
+  const zoned = /(Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value}+08:00`
+  const d = new Date(zoned)
   if (Number.isNaN(d.getTime())) return value
-  const time = d.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })
-  return `${formatDate(toISODate(d))} · ${time}`
+  const date = d.toLocaleDateString(locale, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: CLINIC_TIME_ZONE,
+  })
+  const time = d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: CLINIC_TIME_ZONE,
+  })
+  return `${date} · ${time}`
+}
+
+/** Time of day only, e.g. "9:05 AM" (12-hour, Philippine time). */
+export function formatTime(value: ISODateTime | number): string {
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return String(value)
+  return d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: CLINIC_TIME_ZONE,
+  })
 }

@@ -1,4 +1,5 @@
-import { render, screen, within } from '@testing-library/react'
+import { renderWithRouter } from '../../test/renderWithRouter'
+import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { DashboardPage } from './DashboardPage'
 
@@ -6,6 +7,7 @@ import { DashboardPage } from './DashboardPage'
 vi.mock('./api/dashboardApi', () => ({
   fetchDashboardSummary: () => new Promise(() => {}),
   fetchCalendarDays: () => new Promise(() => {}),
+  fetchBackupIndicator: () => new Promise(() => {}),
 }))
 vi.mock('react-chartjs-2', () => ({ Bar: () => null, Line: () => null }))
 
@@ -15,7 +17,7 @@ vi.mock('react-chartjs-2', () => ({ Bar: () => null, Line: () => null }))
  */
 describe('Clinic Overview Dashboard: first-load skeletons', () => {
   it('shows a shaped skeleton for every data section', () => {
-    const { container } = render(<DashboardPage />)
+    const { container } = renderWithRouter(<DashboardPage />)
     const q = (name: string) => container.querySelectorAll(`[data-skeleton="${name}"]`)
 
     // Stat card row: five card-shaped placeholders with their real labels.

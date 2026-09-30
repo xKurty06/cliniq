@@ -23,12 +23,18 @@ Ask one question: **does this screen show one specific student the user has alre
 - One student, deliberately opened → name.
 - Multiple students, glanceable → Student Number.
 
-If you're building something that doesn't cleanly fit either case, don't guess — flag it and ask, the same way the open question about visit-reason visibility in list rows was flagged rather than resolved unilaterally (see `CLINIQ-Knowledge-Base/03-Design/Design-Audit-Reference-Mockup.md`).
+If you're building something that doesn't cleanly fit either case, don't guess — flag it and ask. The two cases below were flagged that way and are now decided; apply them, don't re-open them.
 
-## Known open question — read before adding a "reason" or "description" column
+## Decided: reasons and complaints stay visible in list rows (ADR-010)
 
-The rule as written only covers **names**. It does not yet have a resolved answer for whether a visit's complaint or an incident's description should also be hidden/truncated in multi-student list views (a Student Number is still identifiable to anyone who can connect it to a person). If your task involves adding or exposing a reason/description field in a list view, **stop and ask** rather than assuming Option A, B, or C from the design audit — this is explicitly unresolved.
+The rule hides **names**, not reasons. In a multi-student list the visit's complaint, the incident's description, and the follow-up's reason stay visible next to the Student Number (`06-Decisions/ADR-010-Reason-Visibility-in-List-Rows.md`, Option A). This applies to the Visit Log List, Incident Log List, Follow-Up List, and the Dashboard alert lists. Do not genericize a complaint to "Visit recorded".
+
+## Decided edge case: the Incomplete Records queue shows full names
+
+The Incomplete Records queue (Screen #9) lists several students at once and still shows **full names**. It is a missing-paperwork queue, not a health-information screen: each row says which registration field is missing (an emergency contact, a phone number), never anything about a visit, complaint, allergy, or condition. That puts it next to the masterlist in sensitivity, and Staff need the name to chase the paperwork. Decided by the project owner on Wednesday, September 30, 2026.
+
+Use the same test for a similar screen: a multi-student list may show names only when it carries **no medical or visit information at all**. The moment a row shows anything diagnostic, it takes the Student Number.
 
 ## Where this has already been applied correctly
 
-Reference these as the working pattern: the Visit Log List, Incident Log List, and Dashboard frequent-visitor section (Student Number); the Student Profile, QR scan result, and masterlist (full name). See `CLINIQ-Knowledge-Base/01-Requirements/User-Roles-and-Permissions.md` for the full rule text.
+Reference these as the working pattern: the Visit Log List, Incident Log List, Follow-Up List, Audit Log, and Dashboard alert lists (Student Number, with the reason visible); the Student Profile, QR scan result, masterlist, and Incomplete Records queue (full name). See `CLINIQ-Knowledge-Base/01-Requirements/User-Roles-and-Permissions.md` for the full rule text.

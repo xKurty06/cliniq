@@ -41,7 +41,7 @@ Give the agent this full list — it maps directly to the two module groups (bas
 3. **App Shell/Nav** — role-aware sidebar or nav; Staff sees all modules, Admin sees only Reports + Dashboard, Instructor sees only the mobile scan/lookup screen (no shell/nav needed for that one). The desktop header shows the signed-in user's name and role with a red, icon-only Log out control carrying an accessible label.
 
 ### Dashboard
-4. **Staff Dashboard** — today's visit count, low-stock alerts, expiring-medicine alerts, backup status widget, quick "New Visit" action
+4. **Staff Dashboard** — today's visit count, low-stock alerts, expiring-medicine alerts, backup status widget, quick "New Visit" action. Delivered on the shared Clinic Overview (#31): Staff get a strip under the header with the "New Visit" action and a backup-status indicator (status + last-backup date) linking to #32
 5. **Admin Dashboard** — summary cards linking into Reports and the Clinic Overview Dashboard (no edit actions)
 
 ### Student Records
@@ -66,7 +66,7 @@ Give the agent this full list — it maps directly to the two module groups (bas
 
 ### Follow-Up Handling (feature spanning Clinic Visit Monitoring + Emergency Response)
 18b. **Follow-Up Prompt (Staff)** — appears inline at the end of saving #11 (New Visit Entry) or #16 (Incident Entry, Stage 1): "Does this student need a follow-up?" If yes, capture follow-up date, reason/instruction, and optional notes in the same flow — not a separate screen Staff has to remember to visit afterward
-18c. **Follow-Up List View (Staff)** — all follow-ups, filterable by status (Pending / Completed / Missed / Cancelled); action to mark a follow-up's status. Shows **Student Number**, not full name, in the list itself, per the display-privacy rule (multi-student list) — opening one follow-up to view/edit it shows the full name, same logic as the Visit/Incident detail screens
+18c. **Follow-Up List View (Staff)** — all follow-ups, filterable by status (Pending / Completed / Missed / Cancelled); each pending row has one status control to mark it Completed, Missed, or Cancelled (Missed and Cancelled ask for confirmation; Completed, the expected outcome, does not). Shows **Student Number**, not full name, per the display-privacy rule (multi-student list). There is no separate follow-up detail screen
 
 ### Reports Generation
 19. **Monthly Report View/Generate**
@@ -77,7 +77,7 @@ Give the agent this full list — it maps directly to the two module groups (bas
 ### QR Digital Health ID (enhancement) — computer (Staff) + mobile (Staff and PE/Sports Instructor)
 22. **QR Code Print View** — generates/prints a QR sticker per student, encoding their Student Number (Staff only, computer)
 23. **Scan/Lookup Hub (Staff, computer or mobile)** — two ways to identify a student: "Scan QR Code" (camera) or "Enter Student Number" (manual text fallback); once identified, shows the student's full name and details normally — this is a deliberate single-student lookup, not a glanceable list (see the display-privacy rule)
-24. **Student Quick-Actions (Staff)** — appears once a student is identified: **Record Visit** (→ #11, pre-filled), **Log Emergency** (→ #16, Stage 1, pre-filled), **View Full Profile** (→ #7), **Dispense Medicine** (→ #30, pre-linkable to the visit)
+24. **Student Quick-Actions (Staff)** — appears once a student is identified: **Record Visit** (→ #11, pre-filled), **Log Emergency** (→ #16, Stage 1, pre-filled), **View Full Profile** (→ #7), **Dispense Medicine** (→ #30, pre-linkable to the visit), **PE/Sports Referral** (→ #14, pre-filled — this is #14's entry point)
 25. **Emergency Button (Staff, mobile)** — separate, faster entry point than the quick-actions above; jumps straight to #16 (Stage 1) rather than routing through student identification first if a scan already happened
 26. **Instructor Scan/Lookup (PE/Sports Instructor, mobile only)** — scan or enter a Student Number; opens a **read-only** view of that student's full profile plus visit/incident history. No buttons for any action — this screen only displays data
 
@@ -138,18 +138,20 @@ Modern, minimalist, clean, professional, approachable, consistent, easy to scan,
 ### Typography
 Small-to-medium sizing throughout — not so small it strains readability, not so large it wastes screen space. Build hierarchy through font weight, spacing, and placement rather than simply bumping font size. Keep body text comfortable to read, and keep headings, labels, body text, supporting text, and important/status information clearly distinct from each other. The overall feel should be compact and information-efficient while still comfortable to read.
 
+**Minimum size: no rendered text below 12px (`text-xs`).** This covers sidebar group labels, the brand subtitle, badges, and calendar event tags. The stated audience includes non-technical and possibly older users who have difficulty reading small text, so this is a floor, not a style preference. Build compactness with weight and spacing, never with a smaller size.
+
 ### Buttons, Controls & Shape Language
 Small-to-medium, easy to identify, consistent throughout, clearly differentiated by purpose, comfortable to interact with. Use slightly rounded corners — softened modern UI, not sharp squares, but not pill-shaped or playfully rounded either. Apply this same restrained corner-radius logic consistently across buttons, inputs, cards, dialogs, and containers, using one consistent set of radius values system-wide.
 
 **Every interactive element needs a cursor and a hover state — no exceptions, checked per element, not assumed.** This applies to buttons, links, dropdown/select triggers, icon-only actions, and any list row or card that navigates on click:
 - **Cursor:** `cursor: pointer` on hover for anything clickable. Anything *not* clickable keeps the default cursor.
-- **Hover color, not just a cursor change:** primary buttons darken to `brand-green-dark` on hover; secondary/outlined buttons pick up a light `surface` background tint; destructive buttons darken their `error` fill the same way; plain list rows that navigate get a subtle `surface` background tint on hover.
+- **Hover color, not just a cursor change:** primary buttons (filled `brand-green-dark`) lighten slightly on hover, never to a fill that drops their white label below 4.5:1; secondary/outlined buttons pick up a light `surface` background tint; destructive buttons darken their `error` fill the same way; plain list rows that navigate get a subtle `surface` background tint on hover.
 - **Dropdowns/selects must be styled to match the design system, not left as native browser/OS chrome.** A native `<select>` renders with the OS's own default appearance unless overridden — never matches `brand-green` or this system's border-radius. At minimum: `appearance: none`, a custom chevron icon, and the same border/background/border-radius/focus-ring as a text input. Reach for a headless component (Radix UI, Headless UI) only if richer interaction is genuinely needed — not just to fix basic styling.
 
 ### Button Hierarchy & Color
 When multiple buttons appear together, use visual weight to guide the user toward the likely action: primary actions get stronger emphasis, secondary actions stay visually quieter, cancel/neutral actions remain visible without competing, destructive actions get an appropriate warning treatment. Not every button should be equally prominent. The interface should suggest "this is probably the action you want" through hierarchy, contrast, and placement — not intrusive prompts. Never rely on color alone; pair it with labels, icons, or positioning.
 
-Concretely, with the tokens defined below: **primary** = filled `brand-green`, white text (button-label-sized text passes as large text/UI at this contrast level — see the Color System contrast rules below for exactly where the line is); **secondary** = outlined or `surface`-filled with `brand-green` text, no heavy fill; **cancel/neutral** = plain text or a quiet gray outline; **destructive** = filled `error` red, reserved only for genuinely irreversible actions (per the Modals & Confirmation guidance below) — never used for routine negative actions like "cancel" or "go back."
+Concretely, with the tokens defined below: **primary** = filled `brand-green-dark`, white text. A button label is 14px text, which is *small* text under the Color System contrast rules below, and those rules allow small white text only on `brand-green-dark` (9.19:1) — never on `brand-green` (3.74:1, fails WCAG AA). `brand-green` stays for borders, icons, and focus rings; **secondary** = outlined or `surface`-filled with `brand-green` text, no heavy fill; **cancel/neutral** = plain text or a quiet gray outline; **destructive** = filled `error` red, reserved only for genuinely irreversible actions (per the Modals & Confirmation guidance below) — never used for routine negative actions like "cancel" or "go back."
 
 ### Color System
 Restrained, cohesive palette. Prioritize strong text/background contrast, consistent semantic colors, and a clear, consistent distinction between normal, primary, warning, error, success, and disabled states. Keep highly saturated colors limited and accent-color usage consistent. Don't introduce a color just for decoration — every color should communicate the same thing everywhere it appears.
@@ -158,7 +160,7 @@ Restrained, cohesive palette. Prioritize strong text/background contrast, consis
 
 | Token | Hex (sampled) | Use |
 |---|---|---|
-| `brand-green` | `#039935` | Primary brand color — buttons, active nav, headers. **Large text/UI only when paired with white** (contrast 3.74:1 — passes the 3.0 threshold for large text and UI components, fails the 4.5 threshold for normal body text) |
+| `brand-green` | `#039935` | Primary brand color — outlines, icons, focus rings, large headings. Not a button fill (button labels are small text). **Large text/non-text UI only when paired with white** (contrast 3.74:1 — passes the 3.0 threshold for large text and UI components, fails the 4.5 threshold for normal body text) |
 | `brand-green-dark` | `#035419` | Sampled from the seal's shield outline. Safe for white text **at any size** (9.19:1) — use this, not `brand-green`, anywhere white text needs to be small (nav labels, dense buttons) |
 | `brand-green-light` | `#8CCC7E` | The sage-green from the logo's circular badges. Background/surface tint only — pairs well with dark text (9.16:1) but is unusable with white (1.90:1) |
 | `brand-yellow` | `#EAEA09` | Secondary/accent — highlights, non-critical CTAs, badges. **Never pair with white text (1.29:1, unusable)** — always `text-primary` or `brand-green-dark` (13.49:1, excellent) |
@@ -183,12 +185,21 @@ Restrained, cohesive palette. Prioritize strong text/background contrast, consis
 
 **Contrast rules, stated plainly:**
 - Small white text: only ever on `brand-green-dark`, `success`, `warning`, `error`, or `info` — never on `brand-green`, `brand-yellow`, `brand-yellow-dark`, `brand-green-light`, `success-light`, or `warning-light`.
-- Large text (≈18pt+, or 14pt+ bold) and UI components like button fills and icons: `brand-green` becomes usable with white on top of the above list.
+- Large text (≈18pt+, or 14pt+ bold) and non-text UI such as icons and borders: `brand-green` becomes usable with white on top of the above list. A button's label is text, not a UI component, so a button fill follows the small-text rule above: primary buttons are `brand-green-dark`.
 - The `-light` variants and `brand-green-light` exist specifically for badge/accent backgrounds — always pair them with `text-primary`, never white.
 - Per the Accessibility guidance already in this document: pair every semantic color with an icon or label, never color alone — this matters even more here since `brand-green` is both the brand's primary identity color *and* the family `success` is drawn from.
 
 ### Layout & Spacing
 Clean, organized, compact, comfortable, uncluttered — avoid both extremes: crowded/hard-to-interact-with, and so much whitespace the system feels inefficient. Use consistent spacing and alignment to show relationships between elements; group related information and visually separate unrelated information.
+
+**Two page containers, and only two** — both are real tokens in `frontend/src/index.css`, centered in the content area:
+
+| Token | Width | Use |
+|---|---|---|
+| `--container-page-wide` (`max-w-page-wide`) | 1200px | Lists, tables, reports, and dashboards |
+| `--container-page-narrow` (`max-w-page-narrow`) | 720px | Single-record forms and detail views, stacked in one column |
+
+Don't introduce a third width for one screen. The only exception is the mobile-first QR screens (Scan/Lookup hub, Emergency), which keep a phone-width column because they are designed for a phone held in one hand.
 
 ### Forms
 Should be especially intuitive for non-technical users. Use real labels, not placeholder-text-only. Group related fields, clearly mark required fields, explain a confusing field when necessary, and give understandable validation messages rather than exposing raw technical errors. Preserve entered data when validation fails, where possible. A user should always be able to answer: *What do I enter? → Why am I entering it? → What happens next?*
@@ -207,11 +218,19 @@ Clearly communicate what's happening: loading, saving, success, error, warning, 
 ### Modals & Confirmation
 Use only when they add real value — don't interrupt users with confirmations for harmless, reversible actions. For destructive or irreversible actions: clearly explain what will happen, visually distinguish the destructive action from the cancel option, and never make a destructive and a safe action look visually identical.
 
+**Which actions confirm.** An action that can't be undone from the screen it's on asks first: archiving a student, approving an incident report or excuse letter, marking a backup verified, and closing a follow-up as Missed or Cancelled. The expected, routine outcome doesn't: marking a follow-up Completed applies at once, because adding friction to the normal path costs the nurse time on every record. Every confirmation uses the shared `Modal`, names the record it affects, and opens with focus on the safe choice.
+
 ### Animation & Microinteractions
 Subtle, and only when it improves usability — communicating state changes, feedback, transitions, loading, or interaction responses. No bouncing effects, unnecessary transitions, or decorative motion. The system should feel smooth and responsive, not flashy. (This also serves the 4GB RAM performance constraint below — lightweight motion is both a UX and a hardware requirement here.)
 
 ### Consistency
 Reuse established typography, font weights, spacing, colors, button styles, input styles, border radii, shadows, icons, and status/component states rather than creating a visually different one-off for a similar problem. In this stack, that means leaning on Tailwind's design tokens (spacing scale, color palette, radius scale) as the single source of truth, not ad hoc utility combinations per component.
+
+### Labels, Titles, Dates & Times
+- **Button labels are Title Case**, always: "Save Changes", "Add Item", "Mark as Verified", "Look Up Student". Short joining words (a, an, and, as, of, or, the, to) stay lowercase unless they come first. This applies to every button and every link styled as a button.
+- **Page titles say what a nurse would call the screen**, in Title Case, not the internal spec label: "Visit Log" (not "Visit Log List"), "Visit Details" (not "Visit Detail/Edit"), "Incident Log", "Incomplete Records", "New Visit". The page title matches the browser-tab title.
+- **One date and time format everywhere:** `Sep 27, 2026 · 9:05 AM` — short month, 12-hour clock, Philippine time. A date with no time is `Sep 27, 2026`. Never show a raw ISO string (`2026-09-27`) or a 24-hour time (`13:46`). Use `formatDateTime` and `formatDate` from `frontend/src/lib/dates.ts`; screens don't format dates themselves.
+- **Never show an internal record id** (`visit-0001`, `incident-0022`) on anything a user sees or prints. Describe the record by what Staff recognise — Student Number and time. A human-facing reference number for printed documents is a backend-phase item.
 
 ### Visual Hierarchy
 Every page should let the user quickly answer: Where am I? What is this page for? What information matters? What actions are available? Which action is most relevant? What happened after I acted? Build this with size, weight, spacing, position, and contrast — not by making everything large, bold, or colorful.

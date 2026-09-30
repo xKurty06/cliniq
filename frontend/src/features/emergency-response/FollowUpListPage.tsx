@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatDate } from '../../lib/dates'
 import {
   Badge,
   Button,
@@ -8,6 +9,7 @@ import {
   EmptyState,
   ErrorState,
   Icon,
+  Modal,
   Select,
   Skeleton,
   DataTable,
@@ -22,7 +24,7 @@ function FollowUpSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8"
+      className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8"
     >
       <Card className="p-5">
         <Skeleton className="h-7 w-52" />
@@ -53,13 +55,21 @@ function statusBadge(status: FollowUpStatus) {
   )
 }
 
+/** Pending → one of three equal outcomes (Module-Overview: "Mark a follow-up Completed, Missed, or Cancelled"). */
+const OUTCOME_OPTIONS = [
+  { value: 'completed', label: 'Completed' },
+  { value: 'missed', label: 'Missed' },
+  { value: 'cancelled', label: 'Cancelled' },
+]
+
 export function FollowUpListPage() {
   const [statusFilter, setStatusFilter] = useState<'' | FollowUpStatus>('')
   const [statusOverrides, setStatusOverrides] = useState<Record<string, FollowUpStatus>>({})
+  const [confirming, setConfirming] = useState<null | { item: FollowUpRow; status: 'missed' | 'cancelled' }>(null)
   const { data, status, reload } = useAsyncData(statusFilter, () => fetchFollowUps(statusFilter))
   if (status === 'error')
     return (
-      <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load follow-ups." onRetry={reload} />
       </div>
     )
@@ -73,10 +83,17 @@ export function FollowUpListPage() {
       </>
     )
   const rows = data.map((item) => ({ ...item, status: statusOverrides[item.id] ?? item.status }))
-  async function markComplete(item: FollowUpRow) {
+  async function applyStatus(item: FollowUpRow, next: FollowUpStatus) {
     // Optimistic: the row flips immediately; the data layer writes the status and its audit entry.
-    setStatusOverrides((current) => ({ ...current, [item.id]: 'completed' }))
-    await updateFollowUpStatus(item.id, 'completed', getMockSessionUser())
+    setStatusOverrides((current) => ({ ...current, [item.id]: next }))
+    setConfirming(null)
+    await updateFollowUpStatus(item.id, next, getMockSessionUser())
+  }
+  function chooseStatus(item: FollowUpRow, next: string) {
+    // Completed is the expected outcome and applies at once. Missed and Cancelled close the
+    // follow-up without the student being seen, so they ask first.
+    if (next === 'completed') void applyStatus(item, 'completed')
+    else if (next === 'missed' || next === 'cancelled') setConfirming({ item, status: next })
   }
   const columns: Array<DataTableColumn<FollowUpRow>> = [
     {
@@ -86,23 +103,30 @@ export function FollowUpListPage() {
       cell: (item) => item.studentNumber,
     },
     { key: 'reason', header: 'Reason', cell: (item) => item.reason },
-    { key: 'due', header: 'Due date', cell: (item) => item.followUpDate },
+    { key: 'due', header: 'Due date', cell: (item) => formatDate(item.followUpDate) },
     { key: 'status', header: 'Status', cell: (item) => statusBadge(item.status) },
     {
       key: 'actions',
       header: 'Actions',
       cell: (item) =>
         item.status === 'pending' ? (
-          <Button size="sm" variant="secondary" onClick={() => markComplete(item)}>
-            Mark completed
-          </Button>
+          <Select
+            className="w-44"
+            size="sm"
+            hideLabel
+            label={`Update status for ${item.studentNumber}, ${item.reason}`}
+            value=""
+            placeholder="Update status"
+            options={OUTCOME_OPTIONS}
+            onChange={(value) => chooseStatus(item, value)}
+          />
         ) : (
           '—'
         ),
     },
   ]
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Follow-Ups</h1>
         <p className="mt-1 text-sm text-text-secondary">
@@ -117,7 +141,7 @@ export function FollowUpListPage() {
           icon={<Icon name="calendarClock" />}
           actions={
             <Select
-              className="w-full sm:w-[23rem]"
+              className="w-full sm:w-auto"
               label="Status"
               inline
               value={statusFilter}
@@ -149,6 +173,31 @@ export function FollowUpListPage() {
           )}
         </CardBody>
       </Card>
+      <Modal
+        open={confirming !== null}
+        title={confirming?.status === 'missed' ? 'Mark this follow-up as Missed?' : 'Cancel this follow-up?'}
+        onClose={() => setConfirming(null)}
+      >
+        {confirming && (
+          <>
+            <p className="text-sm text-text-secondary">
+              {confirming.item.studentNumber} · {confirming.item.reason} · due {formatDate(confirming.item.followUpDate)}.{' '}
+              {confirming.status === 'missed'
+                ? 'The student did not return for this follow-up.'
+                : 'This follow-up is no longer needed.'}{' '}
+              It can't be changed back from this screen.
+            </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <Button variant="neutral" data-autofocus onClick={() => setConfirming(null)}>
+                Keep Pending
+              </Button>
+              <Button variant="primary" onClick={() => void applyStatus(confirming.item, confirming.status)}>
+                {confirming.status === 'missed' ? 'Mark as Missed' : 'Cancel Follow-Up'}
+              </Button>
+            </div>
+          </>
+        )}
+      </Modal>
     </div>
   )
 }

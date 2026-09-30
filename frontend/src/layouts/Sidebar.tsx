@@ -18,7 +18,7 @@ export function BrandLogo() {
       />
       <span className="flex flex-col leading-tight">
         <span className="text-xl font-bold tracking-tight text-brand-green-dark">CLINIQ</span>
-        <span className="text-[0.625rem] font-medium text-text-secondary">Mendez Christian Academy</span>
+        <span className="text-xs font-medium tracking-tight whitespace-nowrap text-text-secondary">Mendez Christian Academy</span>
       </span>
     </span>
   )
@@ -99,7 +99,7 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
               <h2
                 id={groupId}
                 className={cn(
-                  'px-1.5 pb-1 text-left text-[0.6875rem] font-medium uppercase text-text-secondary',
+                  'px-1.5 pb-1 text-left text-xs font-medium uppercase text-text-secondary',
                   labelVisibility,
                 )}
               >

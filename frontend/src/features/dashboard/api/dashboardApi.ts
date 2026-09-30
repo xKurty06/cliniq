@@ -1,4 +1,4 @@
-import { getCalendarDays, getDashboardSummary } from '../../../lib/mock-db'
+import { getBackupStatus, getCalendarDays, getDashboardSummary, type BackupStatusView } from '../../../lib/mock-db'
 import type { ISODate } from '../../../types/entities'
 import type { CalendarDay, DashboardQuery, DashboardSummary } from '../../../types/dashboard'
 
@@ -19,4 +19,11 @@ export function fetchDashboardSummary(query: DashboardQuery): Promise<DashboardS
 
 export function fetchCalendarDays(from: ISODate, to: ISODate): Promise<CalendarDay[]> {
   return getCalendarDays(from, to)
+}
+
+/** What the Staff Dashboard's backup indicator needs: the latest run and whether it still needs checking. */
+export type BackupIndicator = Pick<BackupStatusView, 'latest' | 'needsVerification'>
+
+export function fetchBackupIndicator(): Promise<BackupIndicator> {
+  return getBackupStatus()
 }

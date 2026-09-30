@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeStudentNumber } from './QrScannerView'
+import { normalizeStudentNumber } from '../../../lib/studentNumber'
 
 describe('normalizeStudentNumber', () => {
   it('inserts the Student Number dash for manual entry and scanner values', () => {

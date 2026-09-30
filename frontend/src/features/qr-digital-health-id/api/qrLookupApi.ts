@@ -12,7 +12,7 @@ export interface QrLookupResult {
   incidents: Incident[]
 }
 
-/** The "Use demo scan" button's Student Number: a real record from the seed, never hardcoded. */
+/** The "Use Demo Scan" button's Student Number: a real record from the seed, never hardcoded. */
 export async function demoStudentNumber(): Promise<StudentNumber> {
   return (await getDemoStudent()).studentNumber
 }

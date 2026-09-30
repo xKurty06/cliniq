@@ -5,11 +5,11 @@ import { renderWithRouter } from '../../test/renderWithRouter'
 import { IncidentLogListPage } from './IncidentLogListPage'
 import { defaultIncidentLogRange, fetchIncidentLog } from './api/incidentLogApi'
 
-describe('Incident Log List', () => {
+describe('Incident Log', () => {
   it('renders a privacy-safe multi-student incident list with completion statuses', async () => {
     renderWithRouter(<IncidentLogListPage />)
 
-    expect(await screen.findByRole('heading', { name: 'Incident Log List' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Incident Log' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Student Number' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Reason / description' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Status' })).toBeInTheDocument()
@@ -22,7 +22,7 @@ describe('Incident Log List', () => {
     const [incident] = all
     const expected = all.filter((row) => row.studentNumber === incident.studentNumber).length
     renderWithRouter(<IncidentLogListPage />)
-    await screen.findByRole('heading', { name: 'Incident Log List' })
+    await screen.findByRole('heading', { name: 'Incident Log' })
     await user.type(screen.getByLabelText('Search'), incident.studentNumber)
     expect(await screen.findByText(`${expected} record${expected === 1 ? '' : 's'} shown`)).toBeInTheDocument()
     expect(screen.getAllByText(incident.studentNumber)).toHaveLength(expected)
@@ -31,7 +31,7 @@ describe('Incident Log List', () => {
   it('filters by completion state', async () => {
     const user = userEvent.setup()
     renderWithRouter(<IncidentLogListPage />)
-    await screen.findByRole('heading', { name: 'Incident Log List' })
+    await screen.findByRole('heading', { name: 'Incident Log' })
     await user.click(screen.getByRole('radio', { name: 'Needs completion' }))
     await waitFor(() => expect(screen.getAllByText('Needs completion').length).toBeGreaterThan(0))
   })

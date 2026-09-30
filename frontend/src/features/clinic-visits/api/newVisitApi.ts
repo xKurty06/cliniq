@@ -1,5 +1,4 @@
 import {
-  getDemoStudent,
   getStudent,
   getVisitComplaintTypes,
   recordVisit,
@@ -9,7 +8,8 @@ import {
 import type { Disposition, FollowUp, Student, Visit } from '../../../types/entities'
 
 export interface NewVisitContext {
-  student: Student
+  /** `null` when the form was opened without an identified student; it then asks for the Student Number. */
+  student: Student | null
   /** Complaint options + their Smart Triage checklists (mock-only content; see mock-db.json). */
   complaintTypes: ComplaintType[]
 }
@@ -28,13 +28,18 @@ export interface NewVisitResult {
   followUp: FollowUp | null
 }
 
-/** `studentNumber` is the route's `?student=` pre-selection; without one a demo student is used. */
+/** `studentNumber` is the route's `?student=` pre-selection; without one no student is attached. */
 export async function fetchNewVisitContext(studentNumber?: string): Promise<NewVisitContext> {
   const [student, complaintTypes] = await Promise.all([
-    studentNumber ? getStudent(studentNumber) : getDemoStudent(),
+    studentNumber ? getStudent(studentNumber) : Promise.resolve(null),
     getVisitComplaintTypes(),
   ])
   return { student, complaintTypes }
+}
+
+/** Resolves the Student Number typed on the form when the student wasn't identified beforehand. */
+export function findVisitStudent(studentNumber: string): Promise<Student> {
+  return getStudent(studentNumber)
 }
 
 /**

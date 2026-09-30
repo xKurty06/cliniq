@@ -30,7 +30,7 @@ export function ErrorState({
       <p className="text-xs text-text-secondary">{description}</p>
       {onRetry && (
         <Button variant="primary" size="sm" icon="refresh" onClick={onRetry}>
-          Try again
+          Try Again
         </Button>
       )}
     </div>

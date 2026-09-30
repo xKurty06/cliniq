@@ -5,14 +5,14 @@ import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { VisitDetailPage } from './VisitDetailPage'
 import { fetchVisitDetail } from './api/visitDetailApi'
 
-describe('Visit Detail/Edit', () => {
+describe('Visit Details', () => {
   beforeEach(() => resetMockDb())
 
   it('shows full student and clinical details for a deliberately opened visit', async () => {
     const detail = await fetchVisitDetail()
     render(<VisitDetailPage />)
 
-    expect(await screen.findByRole('heading', { name: 'Visit Detail/Edit' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Visit Details' })).toBeInTheDocument()
     expect(screen.getByText(detail.student.fullName)).toBeInTheDocument()
     expect(screen.getAllByText(detail.student.studentNumber).length).toBeGreaterThan(0)
     expect(screen.getByText(detail.complaint)).toBeInTheDocument()
@@ -23,7 +23,7 @@ describe('Visit Detail/Edit', () => {
     const user = userEvent.setup()
     render(<VisitDetailPage />)
 
-    await screen.findByRole('heading', { name: 'Visit Detail/Edit' })
+    await screen.findByRole('heading', { name: 'Visit Details' })
     await user.click(screen.getByRole('button', { name: 'Edit' }))
     await user.clear(screen.getByLabelText(/complaint/i))
     await user.clear(screen.getByLabelText(/treatment/i))
@@ -37,7 +37,7 @@ describe('Visit Detail/Edit', () => {
     const user = userEvent.setup()
     render(<VisitDetailPage />)
 
-    await screen.findByRole('heading', { name: 'Visit Detail/Edit' })
+    await screen.findByRole('heading', { name: 'Visit Details' })
     await user.click(screen.getByRole('button', { name: 'Edit' }))
     await user.clear(screen.getByLabelText(/treatment/i))
     await user.type(screen.getByLabelText(/treatment/i), 'Observed in clinic and released.')

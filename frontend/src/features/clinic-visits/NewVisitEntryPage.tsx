@@ -11,13 +11,15 @@ import {
   Input,
   SegmentedControl,
   Skeleton,
+  StudentNumberField,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
+import { useIdentifiedStudent } from '../../hooks/useIdentifiedStudent'
 import { cn } from '../../lib/cn'
 import { addDays, todayISO } from '../../lib/dates'
 import { getMockSessionUser, type ComplaintType, type SessionUser } from '../../lib/mock-db'
 import type { Disposition } from '../../types/entities'
-import { fetchNewVisitContext, submitNewVisit } from './api/newVisitApi'
+import { fetchNewVisitContext, findVisitStudent, submitNewVisit } from './api/newVisitApi'
 
 
 const dispositionOptions = [
@@ -35,7 +37,7 @@ interface Errors {
 
 function VisitSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-56 max-w-full" />
         <Skeleton className="mt-2 h-4 w-80 max-w-full" />
@@ -211,9 +213,10 @@ export function NewVisitEntryPage({
   studentNumber?: string
 }) {
   const today = todayISO()
-  const { data, status, reload } = useAsyncData(`new-visit|${studentNumber ?? 'default'}`, () =>
+  const { data, status, reload } = useAsyncData(`new-visit|${studentNumber ?? 'unidentified'}`, () =>
     fetchNewVisitContext(studentNumber),
   )
+  const identified = useIdentifiedStudent(data?.student, findVisitStudent)
   const [complaint, setComplaint] = useState('')
   const [treatment, setTreatment] = useState('')
   const [disposition, setDisposition] = useState<Disposition>('returned_to_class')
@@ -265,13 +268,16 @@ export function NewVisitEntryPage({
     event.preventDefault()
     if (!data) return
     const nextErrors = validate()
+    const studentOk = identified.validate()
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length) return
+    if (Object.keys(nextErrors).length || !studentOk) return
     setSaving(true)
     try {
+      const student = await identified.resolve()
+      if (!student) return
       await submitNewVisit(
         {
-          studentId: data.student.id,
+          studentId: student.id,
           complaint,
           treatment: treatment.trim(),
           disposition,
@@ -298,6 +304,7 @@ export function NewVisitEntryPage({
       setFollowUpReason('')
       setFollowUpNotes('')
       setErrors({})
+      identified.reset()
       saveAndNewRef.current = false
     } finally {
       setSaving(false)
@@ -306,7 +313,7 @@ export function NewVisitEntryPage({
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[960px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-narrow px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load the visit form." onRetry={reload} />
       </div>
     )
@@ -324,13 +331,15 @@ export function NewVisitEntryPage({
   }
 
   return (
-    <div className="mx-auto flex max-w-[960px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">New Visit Entry</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">New Visit</h1>
             <p className="mt-1 text-sm text-text-secondary">
-              {data.student.fullName} · {data.student.studentNumber} · {data.student.gradeLevel}
+              {identified.student
+                ? `${identified.student.fullName} · ${identified.student.studentNumber} · ${identified.student.gradeLevel}`
+                : 'Student not identified yet. Enter the Student Number below.'}
             </p>
           </div>
           <Badge tone="info" variant="soft" icon="stethoscope">
@@ -354,9 +363,20 @@ export function NewVisitEntryPage({
             titleId="visit-form-title"
             title="Visit details"
             icon={<Icon name="stethoscope" />}
-            description="Required fields are marked. The student is already identified from lookup/scan."
+            description={
+              identified.needsStudentNumber
+                ? 'Required fields are marked. Enter the Student Number to identify the student.'
+                : 'Required fields are marked. The student is already identified from lookup/scan.'
+            }
           />
           <CardBody className="flex flex-col gap-4">
+            {identified.needsStudentNumber && (
+              <StudentNumberField
+                value={identified.input}
+                error={identified.error}
+                onChange={identified.setInput}
+              />
+            )}
             <SelectField
               label="Complaint"
               value={complaint}

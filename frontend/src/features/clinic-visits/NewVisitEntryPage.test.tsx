@@ -4,14 +4,14 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { NewVisitEntryPage } from './NewVisitEntryPage'
 
-describe('New Visit Entry', () => {
+describe('New Visit', () => {
   beforeEach(() => resetMockDb())
 
   it('shows the identified student and reveals Smart Triage after complaint selection', async () => {
     const user = userEvent.setup()
-    render(<NewVisitEntryPage />)
+    render(<NewVisitEntryPage studentNumber="2026-00001" />)
 
-    expect(await screen.findByRole('heading', { name: 'New Visit Entry' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'New Visit' })).toBeInTheDocument()
     expect(screen.getByText(/\d{4}-\d{5}/)).toBeInTheDocument()
     await user.selectOptions(screen.getByLabelText(/complaint/i), 'Fever')
     expect(screen.getByRole('heading', { name: /suggested first-aid steps for: Fever/i })).toBeInTheDocument()
@@ -20,9 +20,9 @@ describe('New Visit Entry', () => {
 
   it('validates required fields inline', async () => {
     const user = userEvent.setup()
-    render(<NewVisitEntryPage />)
+    render(<NewVisitEntryPage studentNumber="2026-00001" />)
 
-    await screen.findByRole('heading', { name: 'New Visit Entry' })
+    await screen.findByRole('heading', { name: 'New Visit' })
     await user.click(screen.getByRole('button', { name: 'Save Visit' }))
     expect(screen.getByText('Select the complaint for this visit.')).toBeInTheDocument()
     expect(screen.getByText('Enter the treatment or care given.')).toBeInTheDocument()
@@ -30,9 +30,9 @@ describe('New Visit Entry', () => {
 
   it('creates audit entries for visit submission and follow-up creation', async () => {
     const user = userEvent.setup()
-    render(<NewVisitEntryPage />)
+    render(<NewVisitEntryPage studentNumber="2026-00001" />)
 
-    await screen.findByRole('heading', { name: 'New Visit Entry' })
+    await screen.findByRole('heading', { name: 'New Visit' })
     await user.selectOptions(screen.getByLabelText(/complaint/i), 'Headache')
     await user.click(screen.getByLabelText('Check temperature'))
     await user.type(screen.getByLabelText(/treatment/i), 'Rested in clinic and hydrated.')
@@ -46,9 +46,9 @@ describe('New Visit Entry', () => {
   })
 
   it('uses a custom-styled complaint select instead of an unstyled native control', async () => {
-    render(<NewVisitEntryPage />)
+    render(<NewVisitEntryPage studentNumber="2026-00001" />)
 
-    await screen.findByRole('heading', { name: 'New Visit Entry' })
+    await screen.findByRole('heading', { name: 'New Visit' })
     const field = screen.getByLabelText(/complaint/i)
     expect(field).toHaveClass('appearance-none')
     expect(field).toHaveClass('cursor-pointer')

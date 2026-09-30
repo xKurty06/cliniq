@@ -4,12 +4,13 @@ import { PeSportsReferralPage } from './PeSportsReferralPage'
 
 vi.mock('./api/peReferralApi', () => ({
   fetchPeReferralContext: () => new Promise(() => {}),
+  findReferralStudent: vi.fn(),
   submitPeReferral: vi.fn(),
 }))
 
 describe('PE/Sports Injury Referral Form: first-load skeleton', () => {
   it('announces loading and shows shaped placeholders', () => {
-    const { container } = render(<PeSportsReferralPage />)
+    const { container } = render(<PeSportsReferralPage studentNumber="2026-00001" />)
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading PE/Sports referral...')
     expect(container.querySelectorAll('[aria-hidden="true"] .animate-pulse').length).toBeGreaterThan(6)

@@ -20,7 +20,7 @@ import {
 } from '../../components'
 import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import { formatDate } from '../../lib/dates'
+import { formatDateTime } from '../../lib/dates'
 import { describeRange, type DateRange } from '../../lib/dateRange'
 import { paths } from '../../routes/paths'
 import type { Disposition } from '../../types/entities'
@@ -53,18 +53,9 @@ const dispositionMeta: Record<Disposition, { label: string; tone: BadgeTone }> =
   referred_to_hospital: { label: 'Referred to hospital', tone: 'error' },
 }
 
-function formatDateTime(value: string): string {
-  const [date, time] = value.split('T')
-  const [hour, minute] = time.slice(0, 5).split(':')
-  const parsedHour = Number(hour)
-  const suffix = parsedHour >= 12 ? 'PM' : 'AM'
-  const displayHour = parsedHour % 12 || 12
-  return `${formatDate(date)} · ${displayHour}:${minute} ${suffix}`
-}
-
 function VisitLogSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <Skeleton className="h-7 w-48 max-w-full" />
         <Skeleton className="mt-2 h-4 w-96 max-w-full" />
@@ -125,7 +116,7 @@ export function VisitLogListPage() {
 
   if (status === 'error') {
     return (
-      <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8">
+      <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8">
         <ErrorState title="Unable to load visit log." onRetry={reload} />
       </div>
     )
@@ -150,7 +141,7 @@ export function VisitLogListPage() {
         case 'studentNumber':
           return row.studentNumber
         case 'record':
-          return row.eventTag ?? 'Visit recorded'
+          return row.complaint
         case 'disposition':
           return dispositionMeta[row.disposition].label
       }
@@ -190,11 +181,11 @@ export function VisitLogListPage() {
     },
     {
       key: 'summary',
-      header: 'Record',
-      sort: sortColumn('record', 'Record'),
+      header: 'Complaint',
+      sort: sortColumn('record', 'Complaint'),
       cell: (row) => (
         <div>
-          <p>Visit recorded</p>
+          <p>{row.complaint}</p>
           {row.eventTag && <p className="text-xs text-text-secondary">{row.eventTag}</p>}
         </div>
       ),
@@ -215,22 +206,22 @@ export function VisitLogListPage() {
       cell: (row) => (
         <Link to={paths.visitDetail(row.id)} className={buttonClassName({ size: 'sm' })}>
           <Icon name="fileText" />
-          View Detail
+          View Details
         </Link>
       ),
     },
   ]
 
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              Visit Log List
+              Visit Log
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
-              Review daily clinic visits by Student Number. Complaint and treatment details open
+              Review daily clinic visits by Student Number and complaint. Treatment details open
               from the individual record.
             </p>
           </div>
@@ -260,7 +251,7 @@ export function VisitLogListPage() {
             <Input
               label="Search"
               value={search}
-              placeholder="Student Number, grade, or event"
+              placeholder="Student Number, grade, complaint, or event"
               onChange={(event) => changeSearch(event.target.value)}
               className="min-w-56 flex-1"
             />

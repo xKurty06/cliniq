@@ -6,13 +6,13 @@ import { IncidentEntryPage } from './IncidentEntryPage'
 
 const STUDENT = '2026-00001'
 
-describe('Incident Entry', () => {
+describe('Report Incident', () => {
   beforeEach(() => resetMockDb())
 
   it('starts as Stage 1 fast capture with visible status', async () => {
     render(<IncidentEntryPage studentNumber={STUDENT} />)
 
-    expect(await screen.findByRole('heading', { name: 'Incident Entry' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Report Incident' })).toBeInTheDocument()
     expect(screen.getByText('Needs completion')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Stage 1 fast capture' })).toBeInTheDocument()
     expect(screen.getByText(/\d{4}-\d{5}/)).toBeInTheDocument()
@@ -22,7 +22,7 @@ describe('Incident Entry', () => {
     const user = userEvent.setup()
     render(<IncidentEntryPage />)
 
-    await screen.findByRole('heading', { name: 'Incident Entry' })
+    await screen.findByRole('heading', { name: 'Report Incident' })
     await user.click(screen.getByRole('button', { name: 'Save Stage 1' }))
     expect(screen.getByText('Select the emergency complaint.')).toBeInTheDocument()
     expect(screen.getByText('Enter the temperature.')).toBeInTheDocument()
@@ -33,7 +33,7 @@ describe('Incident Entry', () => {
     const user = userEvent.setup()
     render(<IncidentEntryPage studentNumber={STUDENT} />)
 
-    await screen.findByRole('heading', { name: 'Incident Entry' })
+    await screen.findByRole('heading', { name: 'Report Incident' })
     await user.selectOptions(screen.getByLabelText(/complaint/i), 'Fainting')
     await user.type(screen.getByLabelText(/temperature/i), '37.2')
     await user.type(screen.getByLabelText(/pulse/i), '92')
@@ -47,7 +47,7 @@ describe('Incident Entry', () => {
     await user.type(screen.getByLabelText(/oxygen saturation/i), '98%')
     await user.type(screen.getByLabelText(/treatment notes/i), 'Student observed and stabilized.')
     await user.type(screen.getByLabelText(/attempt note/i), 'Guardian answered and will arrive.')
-    await user.click(screen.getByRole('button', { name: 'Add attempt' }))
+    await user.click(screen.getByRole('button', { name: 'Add Attempt' }))
     await user.click(screen.getByLabelText(/this incident needs a follow-up/i))
     await user.type(screen.getByLabelText(/reason/i), 'Check after rest period')
     await user.click(screen.getByRole('button', { name: 'Complete Incident' }))
@@ -66,7 +66,7 @@ describe('Incident Entry', () => {
   it('uses a custom-styled complaint select', async () => {
     render(<IncidentEntryPage />)
 
-    await screen.findByRole('heading', { name: 'Incident Entry' })
+    await screen.findByRole('heading', { name: 'Report Incident' })
     const field = screen.getByLabelText(/complaint/i)
     expect(field).toHaveClass('appearance-none')
     expect(field).toHaveClass('cursor-pointer')
@@ -77,7 +77,7 @@ describe('Incident Entry', () => {
     const user = userEvent.setup()
     render(<IncidentEntryPage />)
 
-    await screen.findByRole('heading', { name: 'Incident Entry' })
+    await screen.findByRole('heading', { name: 'Report Incident' })
     expect(screen.getByText(/student not identified yet/i)).toBeInTheDocument()
     await user.selectOptions(screen.getByLabelText(/complaint/i), 'Fainting')
     await user.type(screen.getByLabelText(/temperature/i), '37.2')

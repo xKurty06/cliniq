@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Modal } from './ui/Modal'
 import { Button } from './ui/Button'
+import { SHOW_SHORTCUTS_EVENT } from '../lib/shortcuts'
 
 const SHORTCUTS = [
   ['Alt + N', 'Open New Visit'],
@@ -46,20 +47,19 @@ export function KeyboardShortcuts() {
         }
       }
     }
+    // The shell header's Shortcuts button asks for the list; it isn't a floating button any more,
+    // because that covered the last rows of long tables.
+    const onShow = () => setOpen(true)
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener(SHOW_SHORTCUTS_EVENT, onShow)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener(SHOW_SHORTCUTS_EVENT, onShow)
+    }
   }, [location.pathname, navigate])
 
   return (
     <>
-      <button
-        type="button"
-        aria-label="Show keyboard shortcuts"
-        onClick={() => setOpen(true)}
-        className="fixed right-4 bottom-4 z-20 hidden min-h-10 md:inline-flex cursor-pointer items-center justify-center rounded-md border border-border bg-background px-3 text-sm font-semibold text-text-secondary shadow-card transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark print:hidden"
-      >
-        Shortcuts <span className="ml-1 text-text-muted">?</span>
-      </button>
       <Modal open={open} title="Keyboard shortcuts" onClose={() => setOpen(false)}>
         <p className="text-sm text-text-secondary">Shortcuts work anywhere in the desktop app. They never replace the visible navigation.</p>
         <dl className="mt-4 divide-y divide-border rounded-md border border-border">

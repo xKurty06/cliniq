@@ -15,6 +15,7 @@ Design these five in full detail first. Everything else in the system should be 
 
 **Layout, top to bottom:**
 1. **Header** — page title, current date, a date-range filter control
+   - **Staff shortcuts (Staff only, directly under the header):** a quick **New Visit** action and a minimal **backup-status indicator** (status + last-backup date) that links to the full Backup screen. Both are navigation, not edits, so the Dashboard stays view-only. Admin/Principal doesn't see this strip, since that role can open neither destination.
 2. **Stat card row** — 3–4 cards: today's visit count, incident count, pending/incomplete records count, low-stock item count. Each: icon, large number, label, optional small trend indicator
 3. **Alerts section** — three compact list groups, each row using the list-row pattern (Student Number, not name, per the display-privacy rule):
    - Due/upcoming follow-ups (student number, reason, due date, status badge)

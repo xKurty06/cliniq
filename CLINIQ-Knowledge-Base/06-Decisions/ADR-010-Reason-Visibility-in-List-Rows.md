@@ -21,5 +21,6 @@ Chosen by the project owner when asked directly during the Dashboard build (Satu
 ## Consequences
 - Applies system-wide, to every list screen that follows the Reference 1 list-row pattern: the Dashboard alert lists, Visit Log List (#10), Incident Log List (#15), and Follow-Up List (#18c). The mockup's reason/description columns in the Visits List and Incident Log are therefore acceptable as drawn.
 - Names are still never shown in these lists. That part of ADR-004 is untouched.
+- **Implementation note, Wednesday, September 30, 2026 — 22:52:** the Visit Log List (#10) had been built showing a generic "Visit recorded" with a test asserting no complaint column, contrary to this ADR. The project owner confirmed this ADR stands; the Visit Log now shows the complaint beside the Student Number and the test asserts that.
 - `.claude/skills/cliniq-display-privacy/SKILL.md` and `03-Design/Design-Audit-Reference-Mockup.md` were updated so they no longer describe this as open.
 - **Canonical documents need a matching update** (per AGENTS.md "After you finish" step 5): the display-privacy rule text in *CLINIQ Modules & Features* and the *Frontend Context Brief* §3 should gain a sentence saying reasons/descriptions stay visible in list rows. Until then, this ADR is the authority (Source-of-Truth hierarchy, level 2).

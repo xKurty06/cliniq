@@ -5,7 +5,7 @@ import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
 import { ExcuseLetterPage } from './ExcuseLetterPage'
 import { fetchExcuseLetterContext } from './api/excuseLetterApi'
 
-describe('Excuse Letter Generator', () => {
+describe('Excuse Letter', () => {
   beforeEach(() => {
     resetMockDb()
     vi.restoreAllMocks()
@@ -16,7 +16,7 @@ describe('Excuse Letter Generator', () => {
     render(<ExcuseLetterPage />)
 
     expect(
-      await screen.findByRole('heading', { name: 'Excuse Letter Generator' }),
+      await screen.findByRole('heading', { name: 'Excuse Letter' }),
     ).toBeInTheDocument()
     expect(screen.getAllByText(new RegExp(context.student.fullName)).length).toBeGreaterThan(0)
     expect(screen.getByRole('heading', { name: 'Clinic Excuse Letter' })).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('Excuse Letter Generator', () => {
     const print = vi.spyOn(window, 'print').mockImplementation(() => {})
     render(<ExcuseLetterPage />)
 
-    await screen.findByRole('heading', { name: 'Excuse Letter Generator' })
+    await screen.findByRole('heading', { name: 'Excuse Letter' })
     await user.click(screen.getByRole('button', { name: 'Print' }))
 
     expect(print).toHaveBeenCalledOnce()
@@ -39,7 +39,7 @@ describe('Excuse Letter Generator', () => {
     const user = userEvent.setup()
     render(<ExcuseLetterPage />)
 
-    await screen.findByRole('heading', { name: 'Excuse Letter Generator' })
+    await screen.findByRole('heading', { name: 'Excuse Letter' })
     expect(screen.getByRole('button', { name: 'Approve and Store' })).toBeDisabled()
 
     await user.click(

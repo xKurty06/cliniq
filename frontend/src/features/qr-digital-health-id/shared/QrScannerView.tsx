@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Button, Card, CardBody, CardHeader, Icon, Input } from '../../../components'
 import type { StudentNumber } from '../../../types/entities'
+import { normalizeStudentNumber } from '../../../lib/studentNumber'
 import { demoStudentNumber } from '../api/qrLookupApi'
 import { useQrScanner } from './useQrScanner'
 
@@ -10,11 +11,6 @@ export interface QrScannerViewProps {
   onDetected: (studentNumber: StudentNumber) => void
   /** Called when the camera starts, so the host can clear a previous lookup's error message. */
   onScanStart?: () => void
-}
-
-export function normalizeStudentNumber(value: string): StudentNumber {
-  const compact = value.toUpperCase().replace(/[^0-9]/g, '').slice(0, 9)
-  return compact.length > 4 ? `${compact.slice(0, 4)}-${compact.slice(4)}` : compact
 }
 
 /**
@@ -62,10 +58,10 @@ export function QrScannerView({ title, description, onDetected, onScanStart }: Q
               return start()
             }}
           >
-            {status === 'scanning' ? 'Stop camera' : 'Scan QR Code'}
+            {status === 'scanning' ? 'Stop Camera' : 'Scan QR Code'}
           </Button>
           <Button type="button" variant="secondary" onClick={async () => onDetected(await demoStudentNumber())}>
-            Use demo scan
+            Use Demo Scan
           </Button>
         </div>
         <form className="flex flex-col gap-2" onSubmit={onSubmit}>
@@ -77,7 +73,7 @@ export function QrScannerView({ title, description, onDetected, onScanStart }: Q
             onChange={(event) => setManual(normalizeStudentNumber(event.target.value))}
           />
           <Button type="submit" variant="secondary">
-            Look up student
+            Look Up Student
           </Button>
         </form>
       </CardBody>

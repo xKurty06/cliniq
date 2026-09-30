@@ -12,7 +12,7 @@ This skill exists because the first real build (the Dashboard) shipped without c
 **Anything clickable gets `cursor: pointer` on hover. Anything not clickable doesn't.** Buttons, links, dropdown/select triggers, icon-only actions, table/list rows that navigate on click — all of these. Don't add pointer cursor to static text or non-interactive containers just because they're near something clickable.
 
 **Every interactive element needs a real hover color, not just a cursor change:**
-- Primary buttons (`brand-green` fill) → darken to `brand-green-dark` on hover
+- Primary buttons (`brand-green-dark` fill, white label) → lighten slightly on hover (`hover:brightness-125`). Never use a `brand-green` fill under a white label: button labels are small text, and that pairing is only 3.74:1
 - Secondary/outlined buttons → pick up a light `surface` background tint on hover
 - Destructive buttons (`error` fill) → darken the same way
 - Plain list rows/cards that navigate → subtle `surface` background tint on hover, so the whole row visibly responds

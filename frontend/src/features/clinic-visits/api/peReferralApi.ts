@@ -1,5 +1,5 @@
 import {
-  getDemoStudent,
+  getStudent,
   listUsers,
   submitPeReferral as submitToLayer,
   type SessionUser,
@@ -7,9 +7,10 @@ import {
 import type { Disposition, Student } from '../../../types/entities'
 
 export interface PeReferralContext {
-  student: Student
-  referredBy: string
-  activity: string
+  /** `null` when the form was opened without an identified student; it then asks for the Student Number. */
+  student: Student | null
+  /** Starter text for "Use PE Defaults". Every field stays editable before saving. */
+  defaults: Pick<PeReferralValues, 'referredBy' | 'activity' | 'injurySummary' | 'clinicalAssessment' | 'treatment'>
 }
 
 export interface PeReferralValues {
@@ -21,14 +22,37 @@ export interface PeReferralValues {
   disposition: Disposition
 }
 
-export async function fetchPeReferralContext(): Promise<PeReferralContext> {
-  const [student, users] = await Promise.all([getDemoStudent(), listUsers()])
+/**
+ * PLACEHOLDER WORDING. The three clinical defaults are neutral starter text for the nurse to edit,
+ * not findings. No requirement specifies them; the School Head Nurse should confirm or replace them
+ * (tracked in Issues-and-TODOs.md).
+ */
+const CLINICAL_DEFAULTS = {
+  injurySummary: 'Injury reported during PE/Sports activity. Area affected: ',
+  clinicalAssessment: 'Assessed in the clinic. Findings: ',
+  treatment: 'First aid given: ',
+}
+
+/** `studentNumber` is the route's `?student=` pre-selection (the QR quick-action passes it). */
+export async function fetchPeReferralContext(studentNumber?: string): Promise<PeReferralContext> {
+  const [student, users] = await Promise.all([
+    studentNumber ? getStudent(studentNumber) : Promise.resolve(null),
+    listUsers(),
+  ])
   const instructor = users.find((user) => user.role === 'instructor')
   return {
     student,
-    referredBy: instructor?.name ?? '',
-    activity: 'Physical Education class',
+    defaults: {
+      referredBy: instructor?.name ?? '',
+      activity: 'Physical Education class',
+      ...CLINICAL_DEFAULTS,
+    },
   }
+}
+
+/** Resolves the Student Number typed on the form when the student wasn't identified beforehand. */
+export function findReferralStudent(studentNumber: string): Promise<Student> {
+  return getStudent(studentNumber)
 }
 
 /**

@@ -23,16 +23,16 @@ describe('Reports', () => {
     vi.spyOn(window, 'print').mockImplementation(() => {})
     render(<ReportsPage viewer={{ id: 'usr-nurse', name: 'Nurse', role: 'staff' }} />)
     expect(await screen.findByRole('heading', { name: 'Monthly Report' })).toBeInTheDocument()
-    await user.click(screen.getByRole('tab', { name: 'Incident archive' }))
+    await user.click(screen.getByRole('tab', { name: 'Incident Archive' }))
     expect(screen.getByRole('heading', { name: 'Incident Report Archive' })).toBeInTheDocument()
-    await user.click(screen.getByRole('tab', { name: 'Health summaries' }))
+    await user.click(screen.getByRole('tab', { name: 'Health Summaries' }))
     expect(screen.getByRole('heading', { name: 'Health Summaries' })).toBeInTheDocument()
   })
 
   it('uses the linked student’s actual Student Number in the incident archive', async () => {
     const user = userEvent.setup()
     render(<ReportsPage viewer={{ id: 'usr-nurse', name: 'Nurse', role: 'staff' }} />)
-    await user.click(screen.getByRole('tab', { name: 'Incident archive' }))
+    await user.click(screen.getByRole('tab', { name: 'Incident Archive' }))
     const [incident] = (await thisMonth()).incidents
     const archive = await screen.findByRole('table', { name: 'Incident report archive' })
     expect(within(archive).getAllByText(incident.studentNumber).length).toBeGreaterThan(0)
@@ -41,7 +41,7 @@ describe('Reports', () => {
   it('shows the health summary as a sorted bar chart by default, with a table view', async () => {
     const user = userEvent.setup()
     render(<ReportsPage viewer={STAFF} />)
-    await user.click(screen.getByRole('tab', { name: 'Health summaries' }))
+    await user.click(screen.getByRole('tab', { name: 'Health Summaries' }))
 
     const rows = (await thisMonth()).complaintCounts
     const chart = await screen.findByRole('img', { name: /clinic visits by complaint/i })
@@ -63,7 +63,7 @@ describe('Reports', () => {
   it('keeps both the chart and the table in the page so both print', async () => {
     const user = userEvent.setup()
     const { container } = render(<ReportsPage viewer={STAFF} />)
-    await user.click(screen.getByRole('tab', { name: 'Health summaries' }))
+    await user.click(screen.getByRole('tab', { name: 'Health Summaries' }))
     await screen.findByRole('img', { name: /clinic visits by complaint/i })
 
     // Chart view: the table is hidden on screen but printed.
@@ -79,7 +79,7 @@ describe('Reports', () => {
   it('shows an empty state instead of a blank chart for a month with no visits', async () => {
     const user = userEvent.setup()
     render(<ReportsPage viewer={STAFF} />)
-    await user.click(screen.getByRole('tab', { name: 'Health summaries' }))
+    await user.click(screen.getByRole('tab', { name: 'Health Summaries' }))
     fireEvent.change(screen.getByLabelText('Report month'), { target: { value: '2000-01' } })
 
     expect(await screen.findByText('No clinic visits recorded this month')).toBeInTheDocument()

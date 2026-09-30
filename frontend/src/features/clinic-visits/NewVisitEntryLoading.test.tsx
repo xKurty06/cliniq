@@ -4,11 +4,13 @@ import { NewVisitEntryPage } from './NewVisitEntryPage'
 
 vi.mock('./api/newVisitApi', () => ({
   fetchNewVisitContext: () => new Promise(() => {}),
+  findVisitStudent: vi.fn(),
+  submitNewVisit: vi.fn(),
 }))
 
 describe('New Visit Entry: first-load skeleton', () => {
   it('announces loading and shows shaped placeholders', () => {
-    const { container } = render(<NewVisitEntryPage />)
+    const { container } = render(<NewVisitEntryPage studentNumber="2026-00001" />)
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading visit form…')
     expect(container.querySelectorAll('[aria-hidden="true"] .animate-pulse').length).toBeGreaterThan(5)

@@ -13,16 +13,13 @@ import {
   Skeleton,
 } from '../../../components'
 import { getMockSessionUser, logoutMockSession, type SessionUser } from '../../../lib/mock-db'
+import { formatDateTime } from '../../../lib/dates'
 import type { StudentNumber } from '../../../types/entities'
 import { lookupStudentByNumber, type QrLookupResult } from '../api/qrLookupApi'
 import { paths } from '../../../routes/paths'
 import { QrScannerView } from '../shared/QrScannerView'
 
 type LookupStatus = 'idle' | 'loading' | 'success' | 'error' | 'not_found'
-
-function formatDateTime(value: string): string {
-  return `${value.slice(0, 10)} · ${value.slice(11, 16)}`
-}
 
 function LoadingCard() {
   return (
@@ -128,6 +125,13 @@ function StaffActions({ studentNumber }: { studentNumber: StudentNumber }) {
           >
             <Icon name="package" />
             Dispense Medicine
+          </Link>
+          <Link
+            to={paths.peReferral(studentNumber)}
+            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-md border border-brand-green bg-background px-4 text-sm font-semibold text-brand-green-dark shadow-card transition-colors hover:bg-surface"
+          >
+            <Icon name="activity" />
+            PE/Sports Referral
           </Link>
         </div>
       </CardBody>
@@ -258,10 +262,10 @@ export function QrMobileHubPage({
         {!instructor && (
           <Link
             to={paths.incidentNew()}
-            className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-md bg-warning px-4 text-sm font-bold text-white shadow-raised transition-[filter] hover:brightness-90"
+            className="flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-md bg-warning px-4 text-base font-bold text-white shadow-raised transition-[filter] hover:brightness-90"
           >
             <Icon name="alertTriangle" />
-            Emergency button
+            Emergency
           </Link>
         )}
 

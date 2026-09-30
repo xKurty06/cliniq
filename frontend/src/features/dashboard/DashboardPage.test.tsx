@@ -1,4 +1,5 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { renderWithRouter } from '../../test/renderWithRouter'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getMockSessionUser, listStudents } from '../../lib/mock-db'
@@ -14,7 +15,7 @@ vi.mock('react-chartjs-2', () => {
 
 async function renderLoaded() {
   const user = userEvent.setup()
-  render(<DashboardPage />)
+  renderWithRouter(<DashboardPage />)
   await screen.findByRole('heading', { name: /due & upcoming follow-ups/i })
   return user
 }
@@ -178,7 +179,7 @@ describe('Clinic Overview Dashboard', () => {
   })
 
   it('shows the plain "Clinic Overview" title for Admin/Principal, with the same sections', async () => {
-    render(<DashboardPage viewer={{ id: 'a', name: 'Principal', role: 'admin' }} />)
+    renderWithRouter(<DashboardPage viewer={{ id: 'a', name: 'Principal', role: 'admin' }} />)
     await screen.findByRole('heading', { name: /due & upcoming follow-ups/i })
     expect(screen.getByRole('heading', { level: 1, name: 'Clinic Overview' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /visits trend/i })).toBeInTheDocument()
@@ -186,7 +187,7 @@ describe('Clinic Overview Dashboard', () => {
 
   it('shows an error state with a retry action when loading fails', async () => {
     window.history.replaceState(null, '', '/?mock=error')
-    render(<DashboardPage />)
+    renderWithRouter(<DashboardPage />)
     expect(await screen.findByText('Unable to load the clinic overview.')).toBeInTheDocument()
     // The calendar is an independent data source, so it reports and retries its own failure.
     expect(await screen.findByText('Unable to load the calendar.')).toBeInTheDocument()
@@ -195,7 +196,7 @@ describe('Clinic Overview Dashboard', () => {
 
   it('shows calm empty states when there is no data', async () => {
     window.history.replaceState(null, '', '/?mock=empty')
-    render(<DashboardPage />)
+    renderWithRouter(<DashboardPage />)
     expect(await screen.findByText('No follow-ups due')).toBeInTheDocument()
     expect(screen.getByText('No frequent-visitor warnings')).toBeInTheDocument()
     expect(screen.getByText('No inventory alerts')).toBeInTheDocument()

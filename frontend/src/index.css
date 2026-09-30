@@ -10,7 +10,8 @@
  *
  * Contrast rules (Design-System.md, "Contrast rules, stated plainly"):
  * - Small white text ONLY on brand-green-dark, success, warning, error, info.
- * - brand-green + white is for large text / UI fills only (3.74:1).
+ * - brand-green + white is for large text / non-text UI only (3.74:1). Button labels are small text:
+ *   primary buttons are filled brand-green-dark.
  * - brand-green-light, brand-yellow(-dark), success-light, warning-light always take text-primary.
  * - text-muted is 2.68:1 on white: use it for disabled/decorative only, never readable info text.
  */
@@ -66,6 +67,11 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+
+  /* Two page containers only (Design-System.md, Layout & Spacing): `max-w-page-wide` for lists,
+     tables, reports, and dashboards; `max-w-page-narrow` for single-record forms and detail views. */
+  --container-page-wide: 75rem; /* 1200px */
+  --container-page-narrow: 45rem; /* 720px */
 
   /* Elevation, reference-mockup style: cards separate from the page by a soft shadow, not an outline.
      Neutral near-black at low alpha (no new hue). */

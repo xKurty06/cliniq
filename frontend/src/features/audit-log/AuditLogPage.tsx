@@ -72,7 +72,7 @@ interface AuditLogFilters {
 
 function AuditLogSkeleton() {
   return (
-    <div aria-hidden="true" className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div aria-hidden="true" className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5"><Skeleton className="h-7 w-48 max-w-full" /><Skeleton className="mt-2 h-4 w-96 max-w-full" /></Card>
       <Card className="p-5"><div className="grid grid-cols-1 gap-3 md:grid-cols-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div><div className="mt-5 flex flex-col gap-2">{Array.from({ length: 10 }, (_, index) => <Skeleton key={index} className="h-9 w-full" />)}</div></Card>
     </div>
@@ -120,7 +120,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
     setPage(1)
   }
 
-  if (status === 'error') return <div className="mx-auto max-w-[1180px] px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load the audit log." onRetry={reload} /></div>
+  if (status === 'error') return <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load the audit log." onRetry={reload} /></div>
   if (!data) return <><p className="sr-only" role="status">Loading audit log...</p><AuditLogSkeleton /></>
 
   const pageCount = Math.max(1, Math.ceil(data.rows.length / PAGE_SIZE))
@@ -137,7 +137,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
+    <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5 print:hidden">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -157,7 +157,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
             <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => updateFilters({ actionTypes: values as AuditActionType[] })} />
             <MultiSelect label="Target / module" values={targetTypes} options={auditTargetTypes.map((type) => ({ value: type, label: targetLabels[type] }))} allLabel="All targets" onChange={(values) => updateFilters({ targetTypes: values as AuditTargetType[] })} />
           </div>
-          <div className="flex justify-end print:hidden"><Button variant="neutral" size="sm" onClick={clearFilters}>Clear filters</Button></div>
+          <div className="flex justify-end print:hidden"><Button variant="neutral" size="sm" onClick={clearFilters}>Clear Filters</Button></div>
           <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>
             {data.rows.length ? <><DataTable caption="Filtered audit log" columns={columns} rows={pageRows} rowKey={(row) => row.id} className="print:hidden" /><div aria-hidden="true" className="hidden print:block"><DataTable caption="Filtered audit log" columns={columns} rows={data.rows} rowKey={(row) => row.id} /></div><Pagination page={currentPage} pageCount={pageCount} total={data.rows.length} pageSize={PAGE_SIZE} itemLabel="entries" onPageChange={setPage} /></> : <EmptyState icon="clipboardList" title="No audit entries found" description="Try another date range, user, action type, or target/module filter." />}
           </div>

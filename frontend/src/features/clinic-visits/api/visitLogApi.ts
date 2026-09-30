@@ -15,6 +15,8 @@ export interface VisitLogRow {
   studentNumber: string
   gradeLevel: string
   dateTime: ISODateTime
+  /** Shown beside the Student Number in the list (ADR-010, Option A). */
+  complaint: string
   disposition: Disposition
   eventTag: string | null
   loggedBy: string
@@ -45,6 +47,7 @@ export async function fetchVisitLog(query: VisitLogQuery): Promise<VisitLogRow[]
               studentNumber: student.studentNumber,
               gradeLevel: student.gradeLevel,
               dateTime: visit.dateTime,
+              complaint: visit.complaint,
               disposition: visit.disposition,
               eventTag: visit.eventTag,
               loggedBy: userNames.get(visit.loggedByUserId) ?? 'Unknown user',
@@ -57,6 +60,7 @@ export async function fetchVisitLog(query: VisitLogQuery): Promise<VisitLogRow[]
       return (
         row.studentNumber.toLowerCase().includes(search) ||
         row.gradeLevel.toLowerCase().includes(search) ||
+        row.complaint.toLowerCase().includes(search) ||
         (row.eventTag?.toLowerCase().includes(search) ?? false)
       )
     })

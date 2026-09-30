@@ -24,7 +24,8 @@ export const paths = {
   visits: '/visits',
   /** `?student=` pre-selects the identified student (e.g. from a QR lookup). */
   visitNew: (studentNumber?: string) => withStudent('/visits/new', studentNumber),
-  peReferral: '/visits/pe-referral',
+  /** `?student=` pre-selects the identified student (the QR quick-action passes it). */
+  peReferral: (studentNumber?: string) => withStudent('/visits/pe-referral', studentNumber),
   visitDetail: (visitId: string) => `/visits/${seg(visitId)}`,
   excuseLetter: (visitId: string) => `/visits/${seg(visitId)}/excuse-letter`,
   incidents: '/incidents',

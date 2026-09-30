@@ -5,25 +5,25 @@ import { getRecordedAuditEntries, listUsers, resetMockDb } from '../../lib/mock-
 import { PeSportsReferralPage } from './PeSportsReferralPage'
 import { fetchPeReferralContext } from './api/peReferralApi'
 
-describe('PE/Sports Injury Referral Form', () => {
+describe('PE/Sports Injury Referral', () => {
   beforeEach(() => resetMockDb())
 
   it('renders a deliberate single-student referral form', async () => {
-    const context = await fetchPeReferralContext()
-    render(<PeSportsReferralPage />)
+    const context = await fetchPeReferralContext('2026-00001')
+    render(<PeSportsReferralPage studentNumber="2026-00001" />)
 
     expect(
-      await screen.findByRole('heading', { name: 'PE/Sports Injury Referral Form' }),
+      await screen.findByRole('heading', { name: 'PE/Sports Injury Referral' }),
     ).toBeInTheDocument()
-    expect(screen.getByText(new RegExp(context.student.fullName))).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(context.student!.fullName))).toBeInTheDocument()
     expect(screen.getByText(/Emergency escalation not selected/)).toBeInTheDocument()
   })
 
   it('validates required fields inline', async () => {
     const user = userEvent.setup()
-    render(<PeSportsReferralPage />)
+    render(<PeSportsReferralPage studentNumber="2026-00001" />)
 
-    await screen.findByRole('heading', { name: 'PE/Sports Injury Referral Form' })
+    await screen.findByRole('heading', { name: 'PE/Sports Injury Referral' })
     await user.click(screen.getByRole('button', { name: 'Save Referral' }))
 
     expect(screen.getByText('Enter who submitted the referral.')).toBeInTheDocument()
@@ -33,12 +33,16 @@ describe('PE/Sports Injury Referral Form', () => {
 
   it('loads PE defaults and saves a non-hospital referral audit entry', async () => {
     const user = userEvent.setup()
-    render(<PeSportsReferralPage />)
+    render(<PeSportsReferralPage studentNumber="2026-00001" />)
 
-    await screen.findByRole('heading', { name: 'PE/Sports Injury Referral Form' })
+    await screen.findByRole('heading', { name: 'PE/Sports Injury Referral' })
     await user.click(screen.getByRole('button', { name: 'Use PE Defaults' }))
     const instructor = (await listUsers()).find((u) => u.role === 'instructor')!
     expect(screen.getByDisplayValue(instructor.name)).toBeInTheDocument()
+    // All five fields get starter text, not just the first two.
+    for (const label of [/activity or setting/i, /injury summary/i, /clinical assessment/i, /treatment or action taken/i]) {
+      expect(screen.getByLabelText(label)).not.toHaveValue('')
+    }
 
     await user.type(screen.getByLabelText(/injury summary/i), 'Ankle twist during drills.')
     await user.type(screen.getByLabelText(/clinical assessment/i), 'Mild swelling, able to stand.')
@@ -51,9 +55,9 @@ describe('PE/Sports Injury Referral Form', () => {
 
   it('queues Emergency Response escalation when hospital referral is selected', async () => {
     const user = userEvent.setup()
-    render(<PeSportsReferralPage />)
+    render(<PeSportsReferralPage studentNumber="2026-00001" />)
 
-    await screen.findByRole('heading', { name: 'PE/Sports Injury Referral Form' })
+    await screen.findByRole('heading', { name: 'PE/Sports Injury Referral' })
     await user.click(screen.getByRole('button', { name: 'Use PE Defaults' }))
     await user.type(screen.getByLabelText(/injury summary/i), 'Head impact during basketball.')
     await user.type(screen.getByLabelText(/clinical assessment/i), 'Dizzy and needs referral.')
@@ -65,5 +69,22 @@ describe('PE/Sports Injury Referral Form', () => {
 
     expect(await screen.findByText(/Emergency Response escalation was queued/)).toBeInTheDocument()
     expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['submit', 'create'])
+  })
+
+  it('asks for the Student Number instead of using a default student', async () => {
+    const user = userEvent.setup()
+    render(<PeSportsReferralPage />)
+
+    await screen.findByRole('heading', { name: 'PE/Sports Injury Referral' })
+    expect(screen.getByText(/student not identified yet/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Use PE Defaults' }))
+    await user.click(screen.getByRole('button', { name: 'Save Referral' }))
+    expect(screen.getByText('Enter the Student Number (YYYY-NNNNN).')).toBeInTheDocument()
+    expect(getRecordedAuditEntries()).toEqual([])
+
+    await user.type(screen.getByLabelText(/student number/i), '202600001')
+    await user.click(screen.getByRole('button', { name: 'Save Referral' }))
+    expect(await screen.findByText('PE/Sports referral saved.')).toBeInTheDocument()
+    expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['submit'])
   })
 })

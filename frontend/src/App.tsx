@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter, useNavigate } from 'react-router'
-import { getMockSessionUser, type SessionUser } from './lib/mock-db'
+import { getAuthenticatedUser, startMockSession, type SessionUser } from './lib/mock-db'
 import { AppRoutes } from './routes/AppRoutes'
 import { KeyboardShortcuts } from './components/KeyboardShortcuts'
 import { paths } from './routes/paths'
@@ -12,10 +12,18 @@ import { paths } from './routes/paths'
  */
 function AppContent() {
   const navigate = useNavigate()
-  const [user, setUser] = useState<SessionUser>(() => getMockSessionUser())
+  // Nobody is signed in until Login succeeds; there is no default account (ADR-002 clarification).
+  const [user, setUser] = useState<SessionUser | null>(() => getAuthenticatedUser())
 
   function signIn(nextUser: SessionUser) {
+    startMockSession(nextUser)
     setUser(nextUser)
+  }
+
+  // The shell's Log out control has already audited the logout and cleared the stored session.
+  function signOut() {
+    setUser(null)
+    navigate(paths.login, { replace: true })
   }
 
   return (
@@ -23,7 +31,7 @@ function AppContent() {
       <AppRoutes
         user={user}
         onLogin={signIn}
-        onLogout={() => navigate(paths.login, { replace: true })}
+        onLogout={signOut}
       />
       <KeyboardShortcuts />
     </>
