@@ -162,6 +162,21 @@ Left open by the session that applied the review's Group B decisions (`08-Logs/A
 - **Cosmetic — Dashboard at 390px, Staff.** axe reports `scrollable-region-focusable` on a horizontally scrolling region (not keyboard-focusable). The Dashboard is a desktop screen, so this is low priority.
 - **Inconsistent — Add/Edit Student's duplicate-record dialog is hand-built** instead of using the shared `Modal`, so it lacks the focus handling `cliniq-modal-patterns` now requires.
 
+### Open after the dropdown consistency pass — Wednesday, September 30, 2026 — 23:22
+
+Left open by the session that made every dropdown match the Dashboard's date-range control (`08-Logs/Agent-Sessions/2026-09-30-dropdown-consistency.md`).
+
+**Choices made while implementing, for the owner to confirm or reverse:**
+
+- **Dropdowns and text inputs now differ more visibly inside forms.** A dropdown's value is semibold with a light `border-border` and a soft shadow (the reference's look); an `Input` beside it has regular-weight text and the darker `border-text-secondary`. Aligning them means changing `Input`, which was out of scope.
+- **Filter rows pair a 32px search `Input` with a 40px dropdown.** Visit Log and Incident Log now match Student List and Inventory in this. One height for both needs a decision on `Input`.
+- **A placeholder stays in the option list as its first row** ("Update status", "Select complaint"), as it did in the native control. Choosing it changes nothing.
+
+**New findings from this session's live verification:**
+
+- **Cosmetic — top bar at 390px.** With a visible vertical scrollbar (375px usable width), the account area in the top bar overflows the page by 7px, on every shell screen. Not caused by the dropdown work.
+- **Cosmetic — long option labels at 390px.** On Dispense Item the option text ("Salbutamol Nebule 2.5mg — 14 nebules available") is cut at the panel's right edge. The panel itself stays inside the viewport.
+
 ## Open product decisions from the mock-data layer — Monday, September 28, 2026 — 09:19
 
 *(This entry was lost when a zip overwrote the file and was rebuilt from `ADR-014` and that session's log.)*

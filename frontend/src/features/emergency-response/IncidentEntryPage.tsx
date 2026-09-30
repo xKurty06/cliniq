@@ -11,6 +11,7 @@ import {
   ListRow,
   RowList,
   SegmentedControl,
+  Select,
   Skeleton,
   StatusBadge,
   StudentNumberField,
@@ -76,59 +77,6 @@ function IncidentSkeleton() {
           <Skeleton className="h-10 w-56 max-w-full" />
         </div>
       </Card>
-    </div>
-  )
-}
-
-function FieldSelect({
-  label,
-  value,
-  onChange,
-  options,
-  error,
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  options: readonly string[]
-  error?: string
-}) {
-  const id = useId()
-  const errorId = error ? `${id}-error` : undefined
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-xs font-semibold text-text-primary">
-        {label} <span className="text-error">*</span>
-      </label>
-      <div className="relative">
-        <select
-          id={id}
-          required
-          value={value}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={errorId}
-          onChange={(event) => onChange(event.target.value)}
-          className={`h-10 w-full cursor-pointer appearance-none rounded-md border bg-background px-3 pr-9 text-sm text-text-primary shadow-card transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none ${
-            error ? 'border-error' : 'border-border'
-          }`}
-        >
-          <option value="">Select complaint</option>
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <Icon
-          name="chevronDown"
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-brand-green-dark"
-        />
-      </div>
-      {error && (
-        <p id={errorId} role="alert" className="text-xs font-semibold text-error">
-          {error}
-        </p>
-      )}
     </div>
   )
 }
@@ -429,14 +377,16 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                   hint="No student was identified before this emergency. Type the Student Number."
                 />
               )}
-              <FieldSelect
+              <Select
                 label="Complaint"
+                required
                 value={complaint}
+                placeholder="Select complaint"
                 onChange={(value) => {
                   setComplaint(value)
                   setErrors((current) => ({ ...current, complaint: undefined }))
                 }}
-                options={data.complaintTypes}
+                options={data.complaintTypes.map((type) => ({ value: type, label: type }))}
                 error={errors.complaint}
               />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

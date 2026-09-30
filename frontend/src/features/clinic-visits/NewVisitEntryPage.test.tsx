@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
+import { selectOption } from '../../test/selectOption'
 import { NewVisitEntryPage } from './NewVisitEntryPage'
 
 describe('New Visit', () => {
@@ -13,7 +14,7 @@ describe('New Visit', () => {
 
     expect(await screen.findByRole('heading', { name: 'New Visit' })).toBeInTheDocument()
     expect(screen.getByText(/\d{4}-\d{5}/)).toBeInTheDocument()
-    await user.selectOptions(screen.getByLabelText(/complaint/i), 'Fever')
+    await selectOption(user, screen.getByLabelText(/complaint/i), 'Fever')
     expect(screen.getByRole('heading', { name: /suggested first-aid steps for: Fever/i })).toBeInTheDocument()
     expect(screen.getByLabelText('Check temperature')).toBeInTheDocument()
   })
@@ -33,7 +34,7 @@ describe('New Visit', () => {
     render(<NewVisitEntryPage studentNumber="2026-00001" />)
 
     await screen.findByRole('heading', { name: 'New Visit' })
-    await user.selectOptions(screen.getByLabelText(/complaint/i), 'Headache')
+    await selectOption(user, screen.getByLabelText(/complaint/i), 'Headache')
     await user.click(screen.getByLabelText('Check temperature'))
     await user.type(screen.getByLabelText(/treatment/i), 'Rested in clinic and hydrated.')
     await user.click(screen.getByLabelText(/this student needs a follow-up/i))
@@ -45,12 +46,12 @@ describe('New Visit', () => {
     expect(getRecordedAuditEntries().map((entry) => entry.actionType)).toEqual(['submit', 'create'])
   })
 
-  it('uses a custom-styled complaint select instead of an unstyled native control', async () => {
+  it('uses the themed complaint dropdown instead of a native select', async () => {
     render(<NewVisitEntryPage studentNumber="2026-00001" />)
 
     await screen.findByRole('heading', { name: 'New Visit' })
     const field = screen.getByLabelText(/complaint/i)
-    expect(field).toHaveClass('appearance-none')
+    expect(field).toHaveAttribute('aria-haspopup', 'listbox')
     expect(field).toHaveClass('cursor-pointer')
     expect(field.parentElement?.querySelector('svg')).toBeTruthy()
   })

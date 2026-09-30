@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { getRecordedAuditEntries, listStudents } from '../../lib/mock-db'
+import { selectOption } from '../../test/selectOption'
 import { AuditLogPage } from './AuditLogPage'
 
 const STAFF = { id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' } as const
@@ -28,7 +29,7 @@ describe('Audit Log', () => {
     renderPage()
     await screen.findByRole('table', { name: 'Filtered audit log' })
 
-    await user.selectOptions(screen.getByLabelText('User'), 'user-admin-01')
+    await selectOption(user, screen.getByLabelText('User'), 'user-admin-01')
 
     await screen.findByText(/7 entries shown/)
     const [table] = screen.getAllByRole('table', { name: 'Filtered audit log' })
@@ -69,7 +70,7 @@ describe('Audit Log', () => {
     await user.click(screen.getByRole('button', { name: 'Next' }))
     expect(screen.getByText('Page 2 of 4')).toBeInTheDocument()
 
-    await user.selectOptions(screen.getByLabelText('User'), 'user-admin-01')
+    await selectOption(user, screen.getByLabelText('User'), 'user-admin-01')
     await screen.findByText(/7 entries shown/)
 
     expect(screen.getByText('Page 1 of 1')).toBeInTheDocument()

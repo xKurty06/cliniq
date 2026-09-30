@@ -9,6 +9,13 @@ import {
 import type { ISODate } from '../../types/entities'
 import { Icon } from '../icons/Icon'
 import { Button } from './Button'
+import {
+  DROPDOWN_CHEVRON_SIZE,
+  DROPDOWN_PANEL,
+  dropdownChevronClassName,
+  dropdownOptionClassName,
+  dropdownTriggerClassName,
+} from './dropdownClassName'
 import { Input } from './Input'
 
 export interface DateRangePickerProps {
@@ -24,6 +31,8 @@ export interface DateRangePickerProps {
   presetLabels?: Partial<Record<DateRangePreset, string>>
   /** Float the custom dates below this control instead of changing the surrounding layout. */
   customPopover?: boolean
+  /** Stretch the trigger across its container, for a grid of equal-width filters. */
+  fullWidth?: boolean
   className?: string
 }
 
@@ -42,6 +51,7 @@ export function DateRangePicker({
   presets = defaultPresetOrder,
   presetLabels,
   customPopover = false,
+  fullWidth = false,
   className,
 }: DateRangePickerProps) {
   const selectId = useId()
@@ -158,12 +168,14 @@ export function DateRangePicker({
       ref={rootRef}
       className={cn(
         compact || customPopover
-          ? 'relative flex justify-end'
+          ? cn('relative flex', !fullWidth && 'justify-end')
           : 'flex flex-wrap items-end gap-3',
         className,
       )}
     >
-      <div className={cn('flex', compact ? 'items-center gap-2' : 'flex-col gap-1')}>
+      <div
+        className={cn('flex', compact ? 'items-center gap-2' : 'flex-col gap-1', fullWidth && 'w-full')}
+      >
         <label
           htmlFor={selectId}
           className={cn(
@@ -173,7 +185,7 @@ export function DateRangePicker({
         >
           Date range
         </label>
-        <div className="relative inline-flex">
+        <div className={cn('relative', fullWidth ? 'flex' : 'inline-flex')}>
           <button
             ref={triggerRef}
             id={selectId}
@@ -184,11 +196,7 @@ export function DateRangePicker({
             aria-controls={open ? listboxId : undefined}
             onClick={() => setOpen((next) => !next)}
             onKeyDown={onTriggerKeyDown}
-            className={cn(
-              'inline-flex items-center rounded-md border border-border bg-background text-sm font-semibold text-text-primary shadow-card',
-              'cursor-pointer transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none',
-              compact ? 'h-10 min-w-40 pr-8 pl-3' : 'h-8 min-w-36 pr-8 pl-2',
-            )}
+            className={dropdownTriggerClassName({ className: fullWidth ? 'w-full' : 'min-w-40' })}
           >
             <span className="mr-2 inline-flex size-5 items-center justify-center text-brand-green-dark">
               <Icon name="calendar" size={14} />
@@ -197,18 +205,15 @@ export function DateRangePicker({
           </button>
           <Icon
             name="chevronDown"
-            size={14}
-            className={cn(
-              'pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-brand-green-dark transition-transform duration-150 motion-reduce:transition-none',
-              open && 'rotate-180',
-            )}
+            size={DROPDOWN_CHEVRON_SIZE}
+            className={dropdownChevronClassName(open)}
           />
           {open && (
             <div
               id={listboxId}
               role="listbox"
               aria-label="Date range presets"
-              className="absolute top-full right-0 z-30 mt-1.5 min-w-full w-max max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border border-border bg-background p-1 shadow-raised"
+              className={cn(DROPDOWN_PANEL, 'absolute top-full right-0 mt-1.5 min-w-full overflow-hidden')}
             >
               {presets.map((preset, index) => {
                 const selected = preset === value.preset
@@ -223,14 +228,9 @@ export function DateRangePicker({
                     aria-selected={selected}
                     onClick={() => onPresetChange(preset)}
                     onKeyDown={(event) => onOptionKeyDown(event, index)}
-                    className={cn(
-                      'flex w-full cursor-pointer whitespace-nowrap rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors duration-150 motion-reduce:transition-none',
-                      selected
-                        ? 'bg-surface font-semibold text-brand-green-dark'
-                        : 'text-text-primary hover:bg-surface',
-                    )}
+                    className={dropdownOptionClassName(selected)}
                   >
-                    <span>{labelForPreset(preset)}</span>
+                    {labelForPreset(preset)}
                   </button>
                 )
               })}

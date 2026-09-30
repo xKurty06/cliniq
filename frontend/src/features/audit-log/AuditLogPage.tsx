@@ -152,7 +152,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
         <CardHeader titleId="audit-log-title" title="Audit entries" description={`${data.rows.length.toLocaleString('en-PH')} entr${data.rows.length === 1 ? 'y' : 'ies'} shown · ${describeRange(range)}`} icon={<Icon name="clipboardList" />} />
         <CardBody className="flex flex-col gap-4">
           <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 xl:grid-cols-4 print:hidden">
-            <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['today', 'last7', 'thisMonth', 'all', 'custom']} presetLabels={{ last7: 'This week' }} customPopover />
+            <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['today', 'last7', 'thisMonth', 'all', 'custom']} presetLabels={{ last7: 'This week' }} customPopover fullWidth />
             <Select label="User" value={userId} options={data.users.map((user) => ({ value: user.id, label: user.name }))} placeholder="All users" onChange={(value) => updateFilters({ userId: value })} />
             <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => updateFilters({ actionTypes: values as AuditActionType[] })} />
             <MultiSelect label="Target / module" values={targetTypes} options={auditTargetTypes.map((type) => ({ value: type, label: targetLabels[type] }))} allLabel="All targets" onChange={(values) => updateFilters({ targetTypes: values as AuditTargetType[] })} />

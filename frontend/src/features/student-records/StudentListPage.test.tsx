@@ -64,8 +64,8 @@ describe('Student List', () => {
     render(<StudentListPage />)
 
     await screen.findByRole('heading', { name: 'Student List' })
-    await screen.findByRole('option', { name: 'Grade 12' }) // grade options load from the data layer
-    await user.selectOptions(screen.getByLabelText('Grade level'), 'Grade 12')
+    await user.click(screen.getByLabelText('Grade level'))
+    await user.click(await screen.findByRole('option', { name: 'Grade 12' })) // grade options load from the data layer
 
     await waitFor(() => {
       expect(screen.getByText(/results? shown/)).toBeInTheDocument()

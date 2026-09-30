@@ -12,6 +12,7 @@ Use this with `cliniq-dropdown-patterns` and `cliniq-interactive-states` wheneve
 - Reuse `frontend/src/components/ui/DateRangePicker.tsx`; do not build a second date-range menu or separate From/To filter pattern.
 - For visit-log-like operational lists, configure the presets as Today, This week, This month, All, and Custom range. Use `presetLabels` when the underlying seven-day preset needs the user-facing label “This week”.
 - Start this operational-list pattern on All, so opening the list does not hide historical records behind an arbitrary time window.
+- The trigger is the same 40px control on every screen. Pass `fullWidth` when the picker sits in a grid of equal-width filters, so it fills its cell like the selects beside it.
 
 ## Custom range
 

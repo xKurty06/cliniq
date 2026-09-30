@@ -10,6 +10,7 @@ import {
   Icon,
   Input,
   SegmentedControl,
+  Select,
   Skeleton,
   StudentNumberField,
 } from '../../components'
@@ -50,61 +51,6 @@ function VisitSkeleton() {
           <Skeleton className="h-10 w-72 max-w-full" />
         </div>
       </Card>
-    </div>
-  )
-}
-
-function SelectField({
-  label,
-  value,
-  options,
-  onChange,
-  error,
-}: {
-  label: string
-  value: string
-  options: ComplaintType[]
-  onChange: (value: string) => void
-  error?: string
-}) {
-  const id = useId()
-  const errorId = error ? `${id}-error` : undefined
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-xs font-semibold text-text-primary">
-        {label} <span className="text-error">*</span>
-      </label>
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          required
-          aria-invalid={error ? true : undefined}
-          aria-describedby={errorId}
-          onChange={(event) => onChange(event.target.value)}
-          className={cn(
-            'h-10 w-full cursor-pointer appearance-none rounded-md border bg-background px-3 pr-9 text-sm text-text-primary shadow-card',
-            'transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none',
-            error ? 'border-error' : 'border-border',
-          )}
-        >
-          <option value="">Select complaint</option>
-          {options.map((complaint) => (
-            <option key={complaint.label} value={complaint.label}>
-              {complaint.label}
-            </option>
-          ))}
-        </select>
-        <Icon
-          name="chevronDown"
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-brand-green-dark"
-        />
-      </div>
-      {error && (
-        <p id={errorId} role="alert" className="text-xs font-semibold text-error">
-          {error}
-        </p>
-      )}
     </div>
   )
 }
@@ -377,10 +323,12 @@ export function NewVisitEntryPage({
                 onChange={identified.setInput}
               />
             )}
-            <SelectField
+            <Select
               label="Complaint"
+              required
               value={complaint}
-              options={data.complaintTypes}
+              placeholder="Select complaint"
+              options={data.complaintTypes.map((type) => ({ value: type.label, label: type.label }))}
               onChange={updateComplaint}
               error={errors.complaint}
             />

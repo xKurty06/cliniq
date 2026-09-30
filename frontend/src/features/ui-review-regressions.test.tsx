@@ -21,6 +21,7 @@ vi.mock('react-chartjs-2', () => {
   return { Bar: Stub, Line: Stub }
 })
 import { renderWithRouter } from '../test/renderWithRouter'
+import { selectOption } from '../test/selectOption'
 import { getGradeLevels, getRecordedAuditEntries, getStudent, listIncidents, listVisits, resetMockDb } from '../lib/mock-db'
 import { StudentProfilePage } from './student-records/StudentProfilePage'
 import { IncidentReportPage } from './emergency-response/IncidentReportPage'
@@ -70,7 +71,9 @@ describe('UI/UX review regressions', () => {
     expect(screen.getByRole('heading', { name: 'Hospital referral' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Parent notification attempts' })).toBeInTheDocument()
     const picker = screen.getByLabelText('Report pending sign-off')
-    const pendingBefore = within(picker).getAllByRole('option').length
+    await user.click(picker)
+    const pendingBefore = screen.getAllByRole('option').length
+    await user.keyboard('{Escape}')
 
     await user.click(screen.getByRole('button', { name: 'Approve Report' }))
     const dialog = screen.getByRole('dialog', { name: 'Approve this incident report?' })
@@ -81,8 +84,9 @@ describe('UI/UX review regressions', () => {
 
     // Signed off: it can't be approved again, and only it is marked approved in the picker.
     expect(screen.getByRole('button', { name: 'Approved' })).toBeDisabled()
-    await waitFor(() => expect(within(picker).getAllByRole('option', { name: /\(approved\)/ })).toHaveLength(1))
-    expect(within(picker).getAllByRole('option')).toHaveLength(pendingBefore)
+    await user.click(screen.getByLabelText('Report pending sign-off'))
+    await waitFor(() => expect(screen.getAllByRole('option', { name: /\(approved\)/ })).toHaveLength(1))
+    expect(screen.getAllByRole('option')).toHaveLength(pendingBefore)
   })
 
   it('explains empty required fields on the user form instead of ignoring the submit', async () => {
@@ -234,7 +238,7 @@ describe('UI/UX review Group B decisions', () => {
 
     await screen.findByRole('heading', { name: 'New Visit' })
     expect(screen.getByText(/student not identified yet/i)).toBeInTheDocument()
-    await user.selectOptions(screen.getByLabelText(/complaint/i), 'Headache')
+    await selectOption(user, screen.getByLabelText(/complaint/i), 'Headache')
     await user.type(screen.getByLabelText(/treatment/i), 'Rested in clinic.')
     await user.click(screen.getByRole('button', { name: 'Save Visit' }))
     expect(screen.getByText('Enter the Student Number (YYYY-NNNNN).')).toBeInTheDocument()

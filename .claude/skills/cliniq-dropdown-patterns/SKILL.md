@@ -1,11 +1,18 @@
 ---
 name: cliniq-dropdown-patterns
-description: Apply when building or changing a CLINIQ dropdown, select, listbox, or menu of mutually exclusive options. Keeps selection feedback compact, icon-free, accessible, and sized to its content.
+description: Apply when building or changing a CLINIQ dropdown, select, listbox, or menu of mutually exclusive options. Keeps every dropdown on the one shared look (the Dashboard's date-range control), with selection feedback that is compact, icon-free, accessible, and sized to its content.
 ---
 
 # CLINIQ Dropdown Patterns
 
 Use this alongside `cliniq-interactive-states` whenever a dropdown's trigger or option list is created or changed.
+
+## One look: the Dashboard's date-range control
+
+- The Dashboard's date-range dropdown is the reference. Every dropdown matches its trigger, panel, and option rows.
+- The look lives in `frontend/src/components/ui/dropdownClassName.ts`. `DateRangePicker`, `Select`, and `MultiSelect` all build on it; change the look there, never in one component or on one page.
+- Trigger: 40px tall (`md`), `text-sm font-semibold`, `border-border`, `shadow-card`, and a 14px `brand-green-dark` chevron that flips while the panel is open. Use `size="sm"` (32px) only beside 32px inputs in a form grid or inside a table row.
+- A leading icon belongs only to a dropdown whose type calls for one (the calendar on a date range). Don't add one to an ordinary select.
 
 ## Selected option
 
@@ -23,7 +30,9 @@ Use this alongside `cliniq-interactive-states` whenever a dropdown's trigger or 
 
 ## Implementation boundary
 
-- Reuse or update the nearest shared dropdown component before creating a one-off pattern. `DateRangePicker` is the shared pattern for date-range menus.
+- Reuse or update the nearest shared dropdown component before creating a one-off pattern: `Select` for one choice, `DateRangePicker` for date ranges, `MultiSelect` for several values (`cliniq-multi-select-patterns`).
+- Do not use a native `<select>` or a page-local select wrapper. A native control's open menu is operating-system chrome, which can't match the reference. The shared `Select` is a themed trigger with an accessible listbox.
+- `Select` pins its panel to the trigger in viewport coordinates, so a scrolling table can't clip it; it opens upward when there is more room above and scrolls past 256px. Keep that when changing it.
+- In tests, pick an option with `selectOption(user, trigger, valueOrLabel)` from `frontend/src/test/selectOption.ts`.
 - When a record moves to one of several equal outcomes (a follow-up becoming Completed, Missed, or Cancelled), use **one** status select on the row, not a button per outcome. The shared `Select` has `size="sm"` and `hideLabel` for a compact control inside a table row; keep a full accessible label that names the row.
-- Keep keyboard behavior, focus restoration, `aria-expanded`, and `role="listbox"` / `role="option"` semantics intact when a custom menu is used.
-- A native `<select>` cannot control the operating system's open-menu selection indicator or its content width. Use a custom accessible listbox only when this visual behavior is required; otherwise retain the native control's existing accessibility and styling.
+- Keep keyboard behavior (arrow keys, Home/End, typing to jump, Enter, Escape), focus restoration, `aria-expanded`, and `role="listbox"` / `role="option"` semantics intact.

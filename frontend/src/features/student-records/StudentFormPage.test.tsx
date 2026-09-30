@@ -2,13 +2,14 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
+import { selectOption } from '../../test/selectOption'
 import { StudentFormPage } from './StudentFormPage'
 import { fetchStudentList } from './api/studentListApi'
 
 async function fillRequiredStudentFields() {
   const user = userEvent.setup()
   await user.type(screen.getByLabelText(/full name/i), 'Lara Santos')
-  await user.selectOptions(screen.getByLabelText(/grade level/i), 'Grade 6')
+  await selectOption(user, screen.getByLabelText(/grade level/i), 'Grade 6')
   await user.type(screen.getByLabelText(/student contact information/i), '09XX-111-2222')
   await user.type(screen.getByLabelText(/contact name/i), 'Marisol Santos')
   await user.type(screen.getByLabelText(/relationship/i), 'Mother')
@@ -55,7 +56,7 @@ describe('Student Form', () => {
 
     await screen.findByRole('heading', { name: 'Add Student' })
     await user.type(screen.getByLabelText(/full name/i), existing.fullName)
-    await user.selectOptions(screen.getByLabelText(/grade level/i), existing.gradeLevel)
+    await selectOption(user, screen.getByLabelText(/grade level/i), existing.gradeLevel)
     await user.type(screen.getByLabelText(/student contact information/i), '09XX-111-2222')
     await user.type(screen.getByLabelText(/contact name/i), 'Parent Guardian')
     await user.type(screen.getByLabelText(/relationship/i), 'Parent')

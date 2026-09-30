@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getRecordedAuditEntries, getStudent, listIncidents, resetMockDb } from '../../lib/mock-db'
+import { selectOption } from '../../test/selectOption'
 import { IncidentEntryPage } from './IncidentEntryPage'
 
 const STUDENT = '2026-00001'
@@ -34,7 +35,7 @@ describe('Report Incident', () => {
     render(<IncidentEntryPage studentNumber={STUDENT} />)
 
     await screen.findByRole('heading', { name: 'Report Incident' })
-    await user.selectOptions(screen.getByLabelText(/complaint/i), 'Fainting')
+    await selectOption(user, screen.getByLabelText(/complaint/i), 'Fainting')
     await user.type(screen.getByLabelText(/temperature/i), '37.2')
     await user.type(screen.getByLabelText(/pulse/i), '92')
     await user.click(screen.getByRole('button', { name: 'Save Stage 1' }))
@@ -63,12 +64,12 @@ describe('Report Incident', () => {
     // Types a full Stage 2 form (~2.5 s alone); the default 5 s can be exceeded under full-suite load.
   }, 15_000)
 
-  it('uses a custom-styled complaint select', async () => {
+  it('uses the themed complaint dropdown instead of a native select', async () => {
     render(<IncidentEntryPage />)
 
     await screen.findByRole('heading', { name: 'Report Incident' })
     const field = screen.getByLabelText(/complaint/i)
-    expect(field).toHaveClass('appearance-none')
+    expect(field).toHaveAttribute('aria-haspopup', 'listbox')
     expect(field).toHaveClass('cursor-pointer')
     expect(field.parentElement?.querySelector('svg')).toBeTruthy()
   })
@@ -79,7 +80,7 @@ describe('Report Incident', () => {
 
     await screen.findByRole('heading', { name: 'Report Incident' })
     expect(screen.getByText(/student not identified yet/i)).toBeInTheDocument()
-    await user.selectOptions(screen.getByLabelText(/complaint/i), 'Fainting')
+    await selectOption(user, screen.getByLabelText(/complaint/i), 'Fainting')
     await user.type(screen.getByLabelText(/temperature/i), '37.2')
     await user.type(screen.getByLabelText(/pulse/i), '92')
     await user.click(screen.getByRole('button', { name: 'Save Stage 1' }))

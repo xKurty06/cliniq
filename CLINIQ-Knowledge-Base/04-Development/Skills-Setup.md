@@ -9,7 +9,7 @@ This is a substantially expanded pass over the first one — that version only c
 | Skill | Location | Purpose |
 |---|---|---|
 | `cliniq-sidebar-patterns` | `.claude/skills/cliniq-sidebar-patterns/` | Keeps the shared sidebar's Healware system mark, favicon pairing, expanded academy label, and plain collapsed-logo treatment consistent |
-| `cliniq-dropdown-patterns` | `.claude/skills/cliniq-dropdown-patterns/` | Keeps dropdown selection feedback icon-free, compact, keyboard-accessible, and sized to the longest option |
+| `cliniq-dropdown-patterns` | `.claude/skills/cliniq-dropdown-patterns/` | Keeps every dropdown on one shared look (the Dashboard's date-range control) through the shared `Select`/`DateRangePicker`/`MultiSelect`, with selection feedback that is icon-free, compact, keyboard-accessible, and sized to the longest option — updated Wednesday, September 30, 2026 — 23:20: no native `<select>` |
 | `cliniq-display-privacy` | `.claude/skills/cliniq-display-privacy/` | Enforces the Student Number vs full name rule on every new screen |
 | `cliniq-audit-trail` | `.claude/skills/cliniq-audit-trail/` | Ensures every mutating action gets logged per RA 10173 |
 | `cliniq-interactive-states` | `.claude/skills/cliniq-interactive-states/` | Enforces cursor states, hover feedback, and custom-styled dropdowns on every interactive element — added after the first Dashboard build shipped without any of these |

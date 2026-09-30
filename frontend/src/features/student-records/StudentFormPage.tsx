@@ -1,4 +1,4 @@
-import { useId, useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import {
   Badge,
   Button,
@@ -8,10 +8,10 @@ import {
   ErrorState,
   Icon,
   Input,
+  Select,
   Skeleton,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import { cn } from '../../lib/cn'
 import type { SessionUser } from '../../lib/mock-db'
 import { getMockSessionUser } from '../../lib/mock-db'
 import type { Student } from '../../types/entities'
@@ -77,59 +77,6 @@ function StudentFormSkeleton() {
         </div>
         <Skeleton className="mt-5 h-10 w-48" />
       </Card>
-    </div>
-  )
-}
-
-function GradeSelect({
-  value,
-  options,
-  error,
-  onChange,
-}: {
-  value: string
-  options: string[]
-  error?: string
-  onChange: (value: string) => void
-}) {
-  const id = useId()
-  const errorId = error ? `${id}-error` : undefined
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-xs font-semibold text-text-primary">
-        Grade level <span className="text-error">*</span>
-      </label>
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          required
-          aria-invalid={error ? true : undefined}
-          aria-describedby={errorId}
-          onChange={(event) => onChange(event.target.value)}
-          className={cn(
-            'h-8 w-full cursor-pointer appearance-none rounded-md border bg-background px-2 pr-9 text-sm text-text-primary',
-            'transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none',
-            error ? 'border-error' : 'border-text-secondary',
-          )}
-        >
-          <option value="">Select grade level</option>
-          {options.map((grade) => (
-            <option key={grade} value={grade}>
-              {grade}
-            </option>
-          ))}
-        </select>
-        <Icon
-          name="chevronDown"
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-brand-green-dark"
-        />
-      </div>
-      {error && (
-        <p id={errorId} role="alert" className="text-xs font-semibold text-error">
-          {error}
-        </p>
-      )}
     </div>
   )
 }
@@ -324,9 +271,13 @@ function StudentFormEditor({
                 error={errors.fullName}
                 onChange={(event) => setField('fullName', event.target.value)}
               />
-              <GradeSelect
+              <Select
+                label="Grade level"
+                required
+                size="sm"
                 value={values.gradeLevel}
-                options={data.gradeLevels}
+                placeholder="Select grade level"
+                options={data.gradeLevels.map((grade) => ({ value: grade, label: grade }))}
                 error={errors.gradeLevel}
                 onChange={(value) => setField('gradeLevel', value)}
               />

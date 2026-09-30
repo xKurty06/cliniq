@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Badge,
   Card,
@@ -9,6 +9,7 @@ import {
   ErrorState,
   Icon,
   Input,
+  Select,
   Skeleton,
   type DataTableColumn,
 } from '../../components'
@@ -46,33 +47,15 @@ function GradeSelect({
   value: string
   onChange: (value: string) => void
 }) {
-  const id = useId()
   const { data: gradeLevels = [] } = useAsyncData('grade-levels', fetchGradeLevels)
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-xs font-semibold text-text-primary">
-        Grade level
-      </label>
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-full cursor-pointer appearance-none rounded-md border border-border bg-background px-3 pr-9 text-sm text-text-primary shadow-card transition-colors duration-150 hover:border-brand-green hover:bg-surface motion-reduce:transition-none"
-        >
-          <option value="">All grade levels</option>
-          {gradeLevels.map((level) => (
-            <option key={level} value={level}>
-              {level}
-            </option>
-          ))}
-        </select>
-        <Icon
-          name="chevronDown"
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-brand-green-dark"
-        />
-      </div>
-    </div>
+    <Select
+      label="Grade level"
+      value={value}
+      placeholder="All grade levels"
+      options={gradeLevels.map((level) => ({ value: level, label: level }))}
+      onChange={onChange}
+    />
   )
 }
 

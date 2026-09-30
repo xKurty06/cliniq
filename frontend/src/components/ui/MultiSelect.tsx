@@ -1,6 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { cn } from '../../lib/cn'
 import { Icon } from '../icons/Icon'
+import {
+  DROPDOWN_CHECK_ROW,
+  DROPDOWN_CHEVRON_SIZE,
+  DROPDOWN_PANEL,
+  dropdownChevronClassName,
+  dropdownTriggerClassName,
+} from './dropdownClassName'
 
 export interface MultiSelectOption {
   value: string
@@ -68,10 +75,16 @@ export function MultiSelect({
             triggerRef.current?.focus()
           }
         }}
-        className="relative h-10 w-full cursor-pointer rounded-md border border-border bg-background px-3 pr-9 text-left text-sm text-text-primary shadow-card transition-colors duration-150 hover:border-brand-green hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
+        className={dropdownTriggerClassName({ className: 'relative w-full' })}
       >
-        <span id={`${id}-summary`}>{summary}</span>
-        <Icon name="chevronDown" className={cn('pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-brand-green-dark transition-transform duration-150 motion-reduce:transition-none', open && 'rotate-180')} />
+        <span id={`${id}-summary`} className="min-w-0 flex-1 truncate text-left">
+          {summary}
+        </span>
+        <Icon
+          name="chevronDown"
+          size={DROPDOWN_CHEVRON_SIZE}
+          className={dropdownChevronClassName(open)}
+        />
       </button>
       {open && (
         <div
@@ -83,15 +96,15 @@ export function MultiSelect({
               triggerRef.current?.focus()
             }
           }}
-          className="absolute top-full z-30 mt-1.5 min-w-full w-max max-w-[calc(100vw-2rem)] rounded-md border border-border bg-background p-2 shadow-raised"
+          className={cn(DROPDOWN_PANEL, 'absolute top-full mt-1.5 min-w-full')}
         >
           <fieldset>
             <legend className="sr-only">{label}</legend>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col">
               {options.map((option) => {
                 const optionId = `${id}-${option.value}`
                 return (
-                  <label key={option.value} htmlFor={optionId} className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-text-primary transition-colors duration-150 hover:bg-surface motion-reduce:transition-none">
+                  <label key={option.value} htmlFor={optionId} className={DROPDOWN_CHECK_ROW}>
                     <input
                       id={optionId}
                       type="checkbox"
