@@ -43,7 +43,10 @@ export function DataTable<Row>({
   className,
 }: DataTableProps<Row>) {
   return (
-    <div className={cn('relative overflow-x-auto', className)}>
+    <div
+      tabIndex={0}
+      className={cn('relative overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green', className)}
+    >
       <table className="w-full border-collapse text-sm">
         <caption
           className={cn('pb-2 text-left text-xs text-text-secondary', hideCaption && 'sr-only')}

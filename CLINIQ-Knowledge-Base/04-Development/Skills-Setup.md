@@ -8,6 +8,7 @@ This is a substantially expanded pass over the first one — that version only c
 
 | Skill | Location | Purpose |
 |---|---|---|
+| `cliniq-input-patterns` | `.claude/skills/cliniq-input-patterns/` | Keeps shared text inputs at the same 40px, semibold, lightly elevated treatment as standard selects |
 | `cliniq-sidebar-patterns` | `.claude/skills/cliniq-sidebar-patterns/` | Keeps the shared sidebar's Healware system mark, favicon pairing, expanded academy label, and plain collapsed-logo treatment consistent |
 | `cliniq-dropdown-patterns` | `.claude/skills/cliniq-dropdown-patterns/` | Keeps every dropdown on one shared look (the Dashboard's date-range control) through the shared `Select`/`DateRangePicker`/`MultiSelect`, with selection feedback that is icon-free, compact, keyboard-accessible, and sized to the longest option — updated Wednesday, September 30, 2026 — 23:20: no native `<select>` |
 | `cliniq-display-privacy` | `.claude/skills/cliniq-display-privacy/` | Enforces the Student Number vs full name rule on every new screen |

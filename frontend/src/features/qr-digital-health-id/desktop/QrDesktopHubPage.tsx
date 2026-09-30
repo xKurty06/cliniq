@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { Card, CardBody, CardHeader, ErrorState, Icon, Skeleton, buttonClassName } from '../../../components'
+import { Card, CardBody, CardHeader, EmptyState, ErrorState, Icon, buttonClassName } from '../../../components'
 import type { SessionUser } from '../../../lib/mock-db'
 import type { StudentNumber } from '../../../types/entities'
 import { paths } from '../../../routes/paths'
@@ -16,5 +16,5 @@ export function QrDesktopHubPage({ viewer }: { viewer: SessionUser }) {
   const [result, setResult] = useState<QrLookupResult | null>(null)
   const [error, setError] = useState('')
   async function lookup(studentNumber: StudentNumber) { setError(''); setResult(null); try { setResult(await lookupStudentByNumber(studentNumber, viewer)) } catch (caught) { setError(caught instanceof Error ? caught.message : 'Unable to complete lookup.') } }
-  return <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8"><header><h1 className="text-2xl font-bold tracking-tight text-text-primary">QR Scan / Lookup</h1><p className="mt-1 text-sm text-text-secondary">Identify one student from the Staff workstation, then continue to a pre-filled action.</p></header><QrScannerView title="Identify student" description="Scan with a webcam or enter the Student Number manually." onDetected={lookup} onScanStart={() => setError('')} />{error && <ErrorState title={error === 'Student not found' ? 'Student not found.' : 'Unable to complete lookup.'} description="Check the Student Number and try again." />}{result ? <DesktopResult result={result} /> : !error && <Card aria-hidden="true" className="p-5"><Skeleton className="h-6 w-64" /><Skeleton className="mt-2 h-4 w-96 max-w-full" /></Card>}</div>
+  return <div className="mx-auto flex max-w-page-narrow flex-col gap-4 px-4 pt-10 pb-8 sm:px-8"><header><h1 className="text-2xl font-bold tracking-tight text-text-primary">QR Scan / Lookup</h1><p className="mt-1 text-sm text-text-secondary">Identify one student from the Staff workstation, then continue to a pre-filled action.</p></header><QrScannerView title="Identify student" description="Scan with a webcam or enter the Student Number manually." onDetected={lookup} onScanStart={() => setError('')} />{error && <ErrorState title={error === 'Student not found' ? 'Student not found.' : 'Unable to complete lookup.'} description="Check the Student Number and try again." />}{result ? <DesktopResult result={result} /> : !error && <EmptyState icon="qrCode" title="Ready to identify a student" description="Scan a QR code or enter a Student Number to see the student's available actions." />}</div>
 }

@@ -61,6 +61,8 @@ Small-to-medium, consistent, comfortable to tap/click. Slightly rounded corners 
 
 **Hierarchy, using the tokens above:** primary = filled `brand-green`, white text (button-label text counts as large/UI text at this contrast level — see the contrast rules above for exactly where that line is). Secondary = outlined or `surface`-filled, `brand-green` text, no heavy fill. Cancel/neutral = plain text or quiet gray outline. Destructive = filled `error` red, reserved only for genuinely irreversible actions — never for routine "cancel" or "go back."
 
+**Text input standard:** the shared `Input` matches the standard 40px dropdown control: `border-border`, light card shadow, semibold 14px values, and `brand-green` hover/focus treatment. Do not shrink a filter input below its paired standard dropdown.
+
 ### Layout & Spacing
 Clean, organized, compact, uncluttered — avoid both crowding and excessive whitespace. Consistent spacing/alignment to show relationships; group related information, separate unrelated information visually.
 

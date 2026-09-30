@@ -8,6 +8,7 @@ import {
   ErrorState,
   Icon,
   Input,
+  Modal,
   Select,
   Skeleton,
 } from '../../components'
@@ -93,20 +94,11 @@ function DuplicateDialog({
   saving: boolean
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="duplicate-title"
-        className="w-full max-w-lg rounded-md border border-border bg-background p-5 shadow-raised"
-      >
+    <Modal open title="Possible duplicate record" onClose={onCancel}>
         <div className="flex items-start gap-3">
           <Icon name="alertTriangle" className="mt-1 shrink-0 text-warning" />
           <div>
-            <h2 id="duplicate-title" className="text-lg font-bold text-text-primary">
-              Possible duplicate record
-            </h2>
-            <p className="mt-1 text-sm text-text-secondary">
+            <p className="text-sm text-text-secondary">
               A student with the same full name and grade level already exists. Confirm only if
               this is a different student.
             </p>
@@ -123,15 +115,14 @@ function DuplicateDialog({
           ))}
         </ul>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
-          <Button variant="neutral" onClick={onCancel}>
+          <Button variant="neutral" data-autofocus onClick={onCancel}>
             Cancel
           </Button>
           <Button variant="primary" icon="checkCircle" loading={saving} onClick={onConfirm}>
             Confirm Create
           </Button>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }
 

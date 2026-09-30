@@ -906,7 +906,7 @@ export function getMonthlyReport(month: string): Promise<MonthlyReportData> {
       counts: monthlyCounts(s, month),
       incidents: s.incidents
         .filter((i) => i.time.startsWith(month))
-        .sort((a, b) => a.time.localeCompare(b.time))
+        .sort((a, b) => b.time.localeCompare(a.time))
         .map((i) => ({ ...i, studentNumber: byId.get(i.studentId)?.studentNumber ?? 'Unknown student' })),
       complaintCounts: complaintCounts(s.visits.filter((v) => v.dateTime.startsWith(month))),
     }

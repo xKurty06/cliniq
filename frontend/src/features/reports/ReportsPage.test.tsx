@@ -38,6 +38,17 @@ describe('Reports', () => {
     expect(within(archive).getAllByText(incident.studentNumber).length).toBeGreaterThan(0)
   })
 
+  it('lists the newest incidents first, matching the Incident Log', async () => {
+    const user = userEvent.setup()
+    render(<ReportsPage viewer={STAFF} />)
+    await user.click(screen.getByRole('tab', { name: 'Incident Archive' }))
+
+    const rows = (await thisMonth()).incidents
+    expect(rows.map((incident) => incident.time)).toEqual(
+      [...rows.map((incident) => incident.time)].sort((a, b) => b.localeCompare(a)),
+    )
+  })
+
   it('shows the health summary as a sorted bar chart by default, with a table view', async () => {
     const user = userEvent.setup()
     render(<ReportsPage viewer={STAFF} />)

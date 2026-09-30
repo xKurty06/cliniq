@@ -1,5 +1,5 @@
 import { renderWithRouter } from '../test/renderWithRouter'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { getRecordedAuditEntries } from '../lib/mock-db'
@@ -43,6 +43,28 @@ describe('App Shell / Navigation', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Log out' })).toHaveClass('text-error')
+  })
+
+  it('offers the role-aware navigation from the mobile header', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(
+      <AppShell
+        user={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }}
+        active="dashboard"
+        onLogout={() => {}}
+      >
+        <div>Screen</div>
+      </AppShell>,
+    )
+
+    const opener = screen.getByRole('button', { name: 'Open navigation' })
+    await user.click(opener)
+    const menu = screen.getByRole('navigation', { name: 'Mobile navigation' })
+    expect(within(menu).getByRole('link', { name: 'Inventory' })).toHaveAttribute('href', '/inventory')
+
+    await user.click(within(menu).getByRole('link', { name: 'Students' }))
+    expect(screen.queryByRole('navigation', { name: 'Mobile navigation' })).not.toBeInTheDocument()
+    expect(opener).toHaveFocus()
   })
 
   it('audits logout before ending the current session', async () => {

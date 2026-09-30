@@ -177,6 +177,10 @@ Left open by the session that made every dropdown match the Dashboard's date-ran
 - **Cosmetic — top bar at 390px.** With a visible vertical scrollbar (375px usable width), the account area in the top bar overflows the page by 7px, on every shell screen. Not caused by the dropdown work.
 - **Cosmetic — long option labels at 390px.** On Dispense Item the option text ("Salbutamol Nebule 2.5mg — 14 nebules available") is cut at the panel's right edge. The panel itself stays inside the viewport.
 
+## Resolved since last update
+
+- **Thursday, October 1, 2026 — 00:04 PHT — Resolved remaining actionable frontend review findings.** The shared shell now provides role-aware mobile navigation below `lg`, with compact header identity treatment to prevent the 390px overflow. The Dashboard header now uses the shared Card surface; the Incident Archive now sorts newest-first; the desktop QR hub shows an instructional empty state rather than an idle skeleton; and all shared horizontally scrollable DataTables are keyboard-focusable with a visible focus ring. Add/Edit Student now uses the shared keyboard-safe Modal. Shared text inputs now match standard selects (40px, `border-border`, semibold, light shadow), and Dispense Item uses a concise mobile-safe stock option label. The completed follow-up/PE-default/stage-1 sign-off items remain product decisions, not implementation defects.
+
 ## Open product decisions from the mock-data layer — Monday, September 28, 2026 — 09:19
 
 *(This entry was lost when a zip overwrote the file and was rebuilt from `ADR-014` and that session's log.)*

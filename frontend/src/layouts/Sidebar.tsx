@@ -8,7 +8,7 @@ function navGroupId(label: string): string {
   return `nav-group-${label.toLowerCase().replace(/\s+/g, '-')}`
 }
 
-export function BrandLogo() {
+export function BrandLogo({ compact = false }: { compact?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
       <img
@@ -16,7 +16,7 @@ export function BrandLogo() {
         alt="Healware logo"
         className="size-9 shrink-0 object-contain"
       />
-      <span className="flex flex-col leading-tight">
+      <span className={cn('flex flex-col leading-tight', compact && 'max-sm:hidden')}>
         <span className="text-xl font-bold tracking-tight text-brand-green-dark">CLINIQ</span>
         <span className="text-xs font-medium tracking-tight whitespace-nowrap text-text-secondary">Mendez Christian Academy</span>
       </span>

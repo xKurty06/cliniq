@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ErrorState } from '../../components'
+import { Card, ErrorState } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { todayISO } from '../../lib/dates'
@@ -57,14 +57,16 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
 
   return (
     <div className="mx-auto flex max-w-page-wide flex-col gap-6 px-4 pt-10 pb-8 sm:px-8">
-      <DashboardHeader
-        viewer={viewer}
-        today={today}
-        range={range}
-        onRangeChange={setRange}
-        isRefetching={isRefetching}
-        onPrint={() => window.print()}
-      />
+      <Card className="p-5">
+        <DashboardHeader
+          viewer={viewer}
+          today={today}
+          range={range}
+          onRangeChange={setRange}
+          isRefetching={isRefetching}
+          onPrint={() => window.print()}
+        />
+      </Card>
 
       {viewer.role === 'staff' && <StaffShortcuts />}
 
