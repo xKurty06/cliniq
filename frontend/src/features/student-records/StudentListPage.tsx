@@ -63,22 +63,26 @@ const columns: Array<DataTableColumn<Student>> = [
   {
     key: 'name',
     header: 'Full name',
+    width: '27%',
     rowHeader: true,
     cell: (student) => student.fullName,
   },
   {
     key: 'number',
     header: 'Student Number',
+    width: '20%',
     cell: (student) => student.studentNumber,
   },
   {
     key: 'grade',
     header: 'Grade level',
+    width: '15%',
     cell: (student) => student.gradeLevel,
   },
   {
     key: 'status',
     header: 'Record status',
+    width: '23%',
     cell: (student) => (
       <div className="flex flex-wrap gap-1">
         <Badge tone={student.recordComplete ? 'success' : 'warning'} variant="soft">
@@ -95,6 +99,7 @@ const columns: Array<DataTableColumn<Student>> = [
   {
     key: 'actions',
     header: 'Actions',
+    width: '15%',
     align: 'right',
     cell: (student) => (
       <a
@@ -191,6 +196,7 @@ export function StudentListPage() {
                 columns={columns}
                 rows={data}
                 rowKey={(student) => student.id}
+                fixedLayout
               />
             ) : (
               <EmptyState

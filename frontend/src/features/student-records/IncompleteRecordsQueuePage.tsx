@@ -275,6 +275,7 @@ export function IncompleteRecordsQueuePage({
                 columns={columns}
                 rows={visibleRows}
                 rowKey={(record) => record.id}
+                fixedLayout
               />
             ) : (
               <EmptyState

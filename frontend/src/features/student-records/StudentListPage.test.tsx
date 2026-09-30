@@ -14,6 +14,16 @@ describe('Student List', () => {
     expect(screen.getByRole('columnheader', { name: 'Record status' })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Actions' })).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: 'View Profile' }).length).toBeGreaterThan(0)
+    const table = screen.getByRole('table', { name: 'Student masterlist' })
+    expect(table).toHaveClass('table-fixed')
+    expect(table.querySelector('caption')).toHaveClass('sr-only')
+    expect(Array.from(table.querySelectorAll('col')).map((column) => column.style.width)).toEqual([
+      '27%',
+      '20%',
+      '15%',
+      '23%',
+      '15%',
+    ])
     expect(screen.queryByRole('columnheader', { name: /allergies/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: /medical conditions/i })).not.toBeInTheDocument()
     expect(screen.queryByText('Peanuts')).not.toBeInTheDocument()

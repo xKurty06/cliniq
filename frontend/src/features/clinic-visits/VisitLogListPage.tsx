@@ -273,6 +273,7 @@ export function VisitLogListPage() {
                   columns={columns}
                   rows={pageRows}
                   rowKey={(row) => row.id}
+                  fixedLayout
                 />
                 <Pagination
                   page={currentPage}

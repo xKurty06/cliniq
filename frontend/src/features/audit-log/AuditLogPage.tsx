@@ -159,7 +159,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
           </div>
           <div className="flex justify-end print:hidden"><Button variant="neutral" size="sm" onClick={clearFilters}>Clear Filters</Button></div>
           <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>
-            {data.rows.length ? <><DataTable caption="Filtered audit log" columns={columns} rows={pageRows} rowKey={(row) => row.id} className="print:hidden" /><div aria-hidden="true" className="hidden print:block"><DataTable caption="Filtered audit log" columns={columns} rows={data.rows} rowKey={(row) => row.id} /></div><Pagination page={currentPage} pageCount={pageCount} total={data.rows.length} pageSize={PAGE_SIZE} itemLabel="entries" onPageChange={setPage} /></> : <EmptyState icon="clipboardList" title="No audit entries found" description="Try another date range, user, action type, or target/module filter." />}
+            {data.rows.length ? <><DataTable caption="Filtered audit log" columns={columns} rows={pageRows} rowKey={(row) => row.id} className="print:hidden" fixedLayout /><div aria-hidden="true" className="hidden print:block"><DataTable caption="Filtered audit log" columns={columns} rows={data.rows} rowKey={(row) => row.id} fixedLayout /></div><Pagination page={currentPage} pageCount={pageCount} total={data.rows.length} pageSize={PAGE_SIZE} itemLabel="entries" onPageChange={setPage} /></> : <EmptyState icon="clipboardList" title="No audit entries found" description="Try another date range, user, action type, or target/module filter." />}
           </div>
         </CardBody>
       </Card>

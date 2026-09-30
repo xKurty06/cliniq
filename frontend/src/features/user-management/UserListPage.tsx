@@ -112,6 +112,7 @@ export function UserListPage() {
               columns={columns}
               rows={users}
               rowKey={(user) => user.id}
+              fixedLayout
             />
           ) : (
             <EmptyState icon="userCog" title="No user accounts" description="Add the first account." />

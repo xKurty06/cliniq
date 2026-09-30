@@ -228,6 +228,7 @@ function TrendTable({ trends }: { trends: Trends }) {
       columns={columns}
       rows={rows}
       rowKey={(r) => r.complaint}
+      fixedLayout
     />
   )
 }

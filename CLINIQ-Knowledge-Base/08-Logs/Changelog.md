@@ -2,6 +2,8 @@
 
 | Date | Summary | Detail |
 |---|---|---|
+| Thursday, October 1, 2026 — 07:38 PHT | Added the missing `cliniq-table-patterns` skill for stable filtered-table layouts, deliberate column widths, and visually hidden but accessible captions; registered it in Skills-Setup. | `08-Logs/Agent-Sessions/2026-10-01-create-table-pattern-skill.md`, `.claude/skills/cliniq-table-patterns/` |
+| Thursday, October 1, 2026 — 07:33 PHT | Stabilized all shared data tables against filter-driven column movement, calibrated Student List widths, and hid visible table captions while retaining accessible names. | `08-Logs/Agent-Sessions/2026-10-01-stabilize-filtered-table-layouts.md` |
 | Thursday, October 1, 2026 — 00:39 PHT | Reapplied the Prof. Kryss Coleen Creus acknowledgment to the README after a merge restored its prior generic course-instruction text. | `08-Logs/Agent-Sessions/2026-10-01-reapply-course-adviser-readme.md` |
 | Thursday, October 1, 2026 — 00:34 PHT | Recorded Prof. Kryss Coleen Creus as the Software Engineering II Course Adviser in the canonical project plan, synchronized team summary, and README acknowledgment. | `08-Logs/Agent-Sessions/2026-10-01-course-adviser-name.md` |
 | Thursday, October 1, 2026 — 00:07 PHT | Resolved the remaining actionable UI/UX issue-log findings: role-aware mobile shell navigation and non-overflowing compact header; QR desktop ready state; shared Card dashboard header; newest-first incident archive; keyboard-focusable table scrollers; shared duplicate-record Modal; aligned 40px Input/Select treatment; and concise Dispense labels. Added `cliniq-input-patterns` and regression coverage. | `08-Logs/Agent-Sessions/2026-10-01-resolve-unresolved-issues.md`, `08-Logs/Issues-and-TODOs.md` |

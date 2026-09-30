@@ -318,6 +318,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
         columns={columns}
         rows={rows}
         rowKey={(r) => r.key}
+        fixedLayout
       />
     )
   }
@@ -340,6 +341,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       columns={columns}
       rows={rows}
       rowKey={(d) => d.date}
+      fixedLayout
     />
   ) : (
     <p className="text-sm text-text-secondary">No clinic activity recorded in this period.</p>

@@ -8,6 +8,8 @@ export interface DataTableColumn<Row> {
   key: string
   header: ReactNode
   cell: (row: Row) => ReactNode
+  /** Fixed column width used when the table opts into `fixedLayout`. */
+  width?: string
   align?: 'left' | 'right'
   /** Marks the column that names each row (rendered as a row header, `<th scope="row">`). */
   rowHeader?: boolean
@@ -26,6 +28,8 @@ export interface DataTableProps<Row> {
   columns: ReadonlyArray<DataTableColumn<Row>>
   rows: ReadonlyArray<Row>
   rowKey: (row: Row) => string
+  /** Prevent filtered row content from redistributing column positions. */
+  fixedLayout?: boolean
   className?: string
 }
 
@@ -36,10 +40,11 @@ export interface DataTableProps<Row> {
  */
 export function DataTable<Row>({
   caption,
-  hideCaption = false,
+  hideCaption = true,
   columns,
   rows,
   rowKey,
+  fixedLayout = false,
   className,
 }: DataTableProps<Row>) {
   return (
@@ -47,7 +52,14 @@ export function DataTable<Row>({
       tabIndex={0}
       className={cn('relative overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green', className)}
     >
-      <table className="w-full border-collapse text-sm">
+      <table className={cn('w-full border-collapse text-sm', fixedLayout && 'table-fixed')}>
+        {fixedLayout && (
+          <colgroup>
+            {columns.map((col) => (
+              <col key={col.key} style={col.width ? { width: col.width } : undefined} />
+            ))}
+          </colgroup>
+        )}
         <caption
           className={cn('pb-2 text-left text-xs text-text-secondary', hideCaption && 'sr-only')}
         >

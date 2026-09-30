@@ -151,6 +151,7 @@ export function HealthSummary({ rows }: { rows: ComplaintCount[] }) {
           columns={columns}
           rows={rows}
           rowKey={(r) => r.complaint}
+          fixedLayout
         />
       </div>
 

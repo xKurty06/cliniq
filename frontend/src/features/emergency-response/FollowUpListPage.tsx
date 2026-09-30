@@ -159,10 +159,11 @@ export function FollowUpListPage() {
         <CardBody>
           {rows.length ? (
             <DataTable
-              caption=""
+              caption="Follow-up tasks"
               columns={columns}
               rows={rows}
               rowKey={(item) => item.id}
+              fixedLayout
             />
           ) : (
             <EmptyState
