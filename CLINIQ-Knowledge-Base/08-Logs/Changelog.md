@@ -1,5 +1,7 @@
 # Changelog
 
+| Wednesday, September 30, 2026 — 15:05 | Added `URL-Parameters.md`, a single reference for all active frontend query parameters plus retired `?screen`/`?mode=edit` history; linked it from the root README | `URL-Parameters.md`, `README.md`, `08-Logs/Agent-Sessions/2026-09-30-url-parameters-reference.md` |
+
 One line per entry. Full detail for planning-level changes lives in the Project Plan's own revision table (Section, "Document Change Control"); this changelog covers vault/implementation-level activity going forward, cross-referencing the Project Plan revision number where relevant.
 
 **Timestamp rule (applies from the start of actual coding onward):** every new entry gets a real day-of-week + date + time, pulled from the agent's actual system clock — see `AGENTS.md` at the repo root, "Timestamps" section. The rows below, from the planning phase before any code existed, are date-only because that's what was genuinely available at the time — they aren't being back-filled with invented times.
