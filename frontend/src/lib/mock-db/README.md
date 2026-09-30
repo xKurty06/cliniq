@@ -78,18 +78,19 @@ In the browser console (dev builds): `cliniqMockDb.reset()`, `cliniqMockDb.setTo
 
 One account per role, plus `demo.pe2`, which has `mustChangePassword: true` for the Force Password
 Change screen (#2). Passwords are in `frontendOnly.devAccounts` and are deliberately fake
-(`dev-only-…`). The mock session (`session.ts`, `?role=staff|admin|instructor`) signs in as the
+(`demo-…` / `dev-only-…`). The mock session (`session.ts`, `?role=staff|admin|instructor`) signs in as the
 first account of each role that doesn't need a password change.
 
 | Role | Username | Password | Password change required |
 |---|---|---|---|
-| School Clinician | `demo.nurse` | `dev-only-not-a-real-password-1` | No |
-| Admin / Principal | `demo.principal` | `dev-only-not-a-real-password-2` | No |
-| PE/Sports Instructor | `demo.pe` | `dev-only-not-a-real-password-3` | No |
-| PE/Sports Instructor (password-change scenario) | `demo.pe2` | `dev-only-not-a-real-password-4` | Yes |
+| School Clinician | `demo.nurse` | `demo-nurse` | No |
+| Admin / Principal | `demo.principal` | `demo-admin` | No |
+| PE/Sports Instructor | `demo.pe` | `demo-pe` | No |
+| PE/Sports Instructor (password-change scenario) | `demo.pe2` | `demo-change` | Yes |
 
 These are synthetic development fixtures only, not production credentials. The current mock session
-selects a role from the URL; Login and Force Password Change screens have not yet been implemented.
+still supports selecting a role from the URL, and the Login screen displays these accounts for local
+demo purposes. Force Password Change is exercised by signing in as `demo.pe2`.
 
 ## Writing a new screen
 

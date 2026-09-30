@@ -28,6 +28,8 @@
 
 ## Resolved since last update
 
+- Tuesday, September 29, 2026 - 09:34 - F2 authentication screens: Login (#1) and Force Password Change (#2) now exist as frontend-first mock screens. Production Sanctum enforcement, token expiry, and server-side password history remain Phase B2 work.
+
 - ~~Monday, September 28, 2026 — 08:40 — F2 audit finding: Follow-Up List generated a pseudo Student Number from its internal ID and offered no way to update a pending follow-up.~~ Resolved Monday, September 28, 2026 — 08:40: the list now resolves the actual linked Student Number, exposes an audited “Mark completed” action, and has regression coverage.
 - ~~Sunday, September 27, 2026 — 16:10 — F2 audit blocker: Screen #15 Incident Log List is missing.~~ Resolved Monday, September 28, 2026 — 08:25: added the Staff Incident Log List, `/incidents` route and navigation destination, privacy-safe Student Number rows, ADR-010-approved reason/description context, and Needs Completion/Complete status badges.
 - ~~Monday, September 28, 2026 — 08:12 — F2 audit finding: Incident Report Archive displays a fabricated Student Number.~~ Resolved Monday, September 28, 2026 — 08:25: the archive now maps each incident's `studentId` to the linked `Student.studentNumber`, with regression coverage.
@@ -74,7 +76,10 @@ These items were supplied for the frontend backlog. Confirmed implementation gap
 
 - **Config values now in `mock-db.json`, carried over from the Dashboard mock — not requirements, they need a team or nurse decision:** `frequentVisitorMinVisits` (3), `frequentVisitorWindowDays` (30; the Dashboard uses its selected range instead), `upcomingFollowUpDays` (7), `expiryWarningDays` (30), `clusterMinCount` (8), `clusterRatio` (2), `topComplaints` (5). Also open: whether stock *at* the threshold counts as low (currently strictly below).
 - **`frontendOnly` data to review when the ERD is designed:** `devAccounts` (credentials, `mustChangePassword`), `visitComplaintTypes` (incl. Smart Triage steps), `incidentComplaintTypes`, `inventoryTransactions`, `recordReviews`, `excuseLetterApprovals`, `peReferrals`.
-- **Login (#1) and Force Password Change (#2) do not exist in the frontend yet** (verified against tip c7eac45, Monday, September 28, 2026 — 23:33 PHT). Only a prototype role picker for client demos exists after logout — explicitly not authentication, no passwords. Both screens are tracked in the Phase F2 checklist.
+
+## Resolved since last update
+
+- **Tuesday, September 29, 2026 — 09:34 — F2 authentication screens:** Login (#1) and Force Password Change (#2) now exist as frontend-first mock screens. Login covers generic failures, five-attempt/30-minute lockout, role-aware redirects, and login audit calls; Force Password Change covers the 8-character minimum, recent-password reuse check, first-login completion, and update audit call. Production Sanctum enforcement, token expiry, and server-side password history remain Phase B2 work.
 
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.

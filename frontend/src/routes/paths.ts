@@ -13,6 +13,8 @@ function withStudent(path: string, studentNumber?: string): string {
 }
 
 export const paths = {
+  login: '/login',
+  forcePasswordChange: '/force-password-change',
   dashboard: '/',
   students: '/students',
   studentNew: '/students/new',

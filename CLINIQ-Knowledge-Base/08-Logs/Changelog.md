@@ -6,6 +6,11 @@ One line per entry. Full detail for planning-level changes lives in the Project 
 
 | Date | Summary | Detail |
 |---|---|---|
+| Wednesday, September 30, 2026 — 12:49 | Replaced the post-logout demo picker with a redirect to the Login route. | `frontend/src/App.tsx`, `frontend/src/App.test.tsx`, `Agent-Sessions/2026-09-30-logout-redirects-to-login.md` |
+| Wednesday, September 30, 2026 — 12:44 | Simplified the four frontend demo passwords while retaining the integrity guard that only accepts clearly synthetic `demo-` or `dev-only-` credentials. | `frontend/src/lib/mock-db/mock-db.json`, `frontend/src/features/auth/LoginPage.tsx`, `frontend/src/lib/mock-db/README.md`, `Agent-Sessions/2026-09-30-simpler-demo-passwords.md` |
+| Tuesday, September 29, 2026 — 09:41 | Added the four synthetic sample accounts to the Login screen for local demo purposes, with an explicit non-production warning. | `frontend/src/features/auth/LoginPage.tsx`, `frontend/src/lib/mock-db/README.md`, `Agent-Sessions/2026-09-29-login-sample-accounts.md` |
+| Tuesday, September 29, 2026 — 09:34 | Started Phase F2 by building the Login and Force Password Change reference screens as an explicitly frontend-only mock authentication flow. | `frontend/src/features/auth/`, `frontend/src/lib/mock-db/api.ts`, `Frontend-Loop-Engineering.md`, `Agent-Sessions/2026-09-29-f2-authentication-build.md` |
+| Tuesday, September 29, 2026 — 09:22 | Finished the remaining Phase F0/F1 checklist gates after verifying the current frontend implementation. | `Frontend-Loop-Engineering.md`, `Agent-Sessions/2026-09-29-f0-f1-completion.md` |
 | Tuesday, September 29, 2026 — 07:42 | Standardized screen-level spacing to `pt-10 pb-8` across the Dashboard and other content wrappers. | `frontend/src/features/`, `frontend/src/routes/`, `Agent-Sessions/2026-09-29-dashboard-top-spacing.md` |
 | Tuesday, September 29, 2026 — 00:07 | Narrowed component-skill creation to patterns expected to recur across many pages; isolated or merely shared components no longer trigger a new skill. | `Agent-Sessions/2026-09-29-component-skill-threshold.md` |
 | Tuesday, September 29, 2026 — 00:03 | Unified the system and browser branding on Healware_Logo.png; added the shared sidebar branding skill to retain the pairing. | `Agent-Sessions/2026-09-29-healware-system-logo.md` |

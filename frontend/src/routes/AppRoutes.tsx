@@ -7,6 +7,8 @@ import type { UserRole } from '../types/entities'
 import { NotFoundPage } from './NotFoundPage'
 import { paths } from './paths'
 import { Card, Skeleton } from '../components'
+import { LoginPage } from '../features/auth/LoginPage'
+import { ForcePasswordChangePage } from '../features/auth/ForcePasswordChangePage'
 
 /**
  * The route table (Development-Phases.md §0: path-based routes, React Router).
@@ -125,6 +127,9 @@ function ExcuseLetterRoute({ viewer }: Viewer) {
 function IncidentNotificationRoute({ viewer }: Viewer) { const { incidentId } = useParams(); return <ParentNotificationPage viewer={viewer} incidentId={incidentId} /> }
 function IncidentReportRoute({ viewer }: Viewer) { const { incidentId } = useParams(); return <IncidentReportPage viewer={viewer} incidentId={incidentId} /> }
 function UserFormRoute() { const { userId } = useParams(); return <UserFormPage userId={userId} /> }
+function ForcePasswordChangeRoute({ viewer, onComplete }: Viewer & { onComplete: (user: SessionUser) => void }) {
+  return <ForcePasswordChangePage viewer={viewer} onComplete={onComplete} />
+}
 
 interface AppRoute {
   path: string
@@ -334,9 +339,33 @@ function withShell(
   )
 }
 
-export function AppRoutes({ user, onLogout }: { user: SessionUser; onLogout: () => void }) {
+export function AppRoutes({
+  user,
+  onLogout,
+  onLogin = () => {},
+}: {
+  user: SessionUser
+  onLogout: () => void
+  onLogin?: (user: SessionUser) => void
+}) {
   return (
     <Routes>
+      <Route
+        path={paths.login}
+        element={
+          <PageTitle title="Sign in">
+            <LoginPage onLogin={onLogin} />
+          </PageTitle>
+        }
+      />
+      <Route
+        path={paths.forcePasswordChange}
+        element={
+          <PageTitle title="Change Password">
+            <ForcePasswordChangeRoute viewer={user} onComplete={onLogin} />
+          </PageTitle>
+        }
+      />
       {APP_ROUTES.map((route) => {
         const allowed = route.roles.includes(user.role)
         const content = (

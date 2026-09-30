@@ -14,16 +14,12 @@ vi.mock('./routes/AppRoutes', () => ({
 
 vi.mock('./components/KeyboardShortcuts', () => ({ KeyboardShortcuts: () => null }))
 
-describe('demo sign-in prototype', () => {
-  it('lets the presenter choose a mock user after logging out', async () => {
+describe('app logout flow', () => {
+  it('redirects to the Login screen after logging out', async () => {
     const user = userEvent.setup()
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: 'Log out' }))
-    expect(screen.getByRole('heading', { name: 'You have logged out' })).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'Continue as Admin / Principal' }))
-
-    expect(screen.getByText('Signed in as admin')).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/login')
   })
 })

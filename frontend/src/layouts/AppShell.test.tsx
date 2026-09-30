@@ -10,7 +10,7 @@ describe('App Shell / Navigation', () => {
   it('shows Staff navigation groups across modules', () => {
     renderWithRouter(
       <AppShell
-        user={{ id: 'user-staff-01', name: 'Liza Manalastas', role: 'staff' }}
+        user={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }}
         active="dashboard"
         onLogout={() => {}}
       >
@@ -34,7 +34,7 @@ describe('App Shell / Navigation', () => {
   it('puts an icon-only red logout action beside the signed-in user', () => {
     renderWithRouter(
       <AppShell
-        user={{ id: 'user-staff-01', name: 'Liza Manalastas', role: 'staff' }}
+        user={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }}
         active="dashboard"
         onLogout={() => {}}
       >
@@ -50,7 +50,7 @@ describe('App Shell / Navigation', () => {
     const user = userEvent.setup()
     renderWithRouter(
       <AppShell
-        user={{ id: 'user-staff-01', name: 'Liza Manalastas', role: 'staff' }}
+        user={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }}
         active="dashboard"
         onLogout={onLogout}
       >

@@ -19,7 +19,7 @@
   "users": [
     {
       "id": "user-staff-01",
-      "name": "Liza Manalastas",
+      "name": "Jennesse Baas",
       "username": "demo.nurse",
       "role": "staff",
       "lastLogin": { "daysAgo": 0, "time": "07:02" }
@@ -3355,22 +3355,22 @@
     "devAccounts": [
       {
         "userId": "user-staff-01",
-        "password": "dev-only-not-a-real-password-1",
+        "password": "demo-nurse",
         "mustChangePassword": false
       },
       {
         "userId": "user-admin-01",
-        "password": "dev-only-not-a-real-password-2",
+        "password": "demo-admin",
         "mustChangePassword": false
       },
       {
         "userId": "user-instructor-01",
-        "password": "dev-only-not-a-real-password-3",
+        "password": "demo-pe",
         "mustChangePassword": false
       },
       {
         "userId": "user-instructor-02",
-        "password": "dev-only-not-a-real-password-4",
+        "password": "demo-change",
         "mustChangePassword": true
       }
     ],

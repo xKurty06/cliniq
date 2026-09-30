@@ -257,8 +257,8 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
   accounts.forEach((d, i) => userRef(`frontendOnly.devAccounts[${i}].userId`, d.userId))
   if (!accounts.some((d) => d.mustChangePassword === true))
     fail('frontendOnly.devAccounts: need one account with mustChangePassword: true (Force Password Change, #2)')
-  if (accounts.some((d) => !/dev-only/i.test(String(d.password))))
-    fail('frontendOnly.devAccounts: passwords must be obviously fake (contain "dev-only")')
+  if (accounts.some((d) => !/^(?:dev-only-|demo-)/i.test(String(d.password))))
+    fail('frontendOnly.devAccounts: passwords must be obviously fake (start with "dev-only-" or "demo-")')
   ;((fo.inventoryTransactions ?? []) as Rec[]).forEach((t, i) => {
     const w = `frontendOnly.inventoryTransactions[${i}]`
     if (!ids.inventoryItems?.has(String(t.itemId))) fail(`${w}.itemId: "${String(t.itemId)}" doesn't exist`)

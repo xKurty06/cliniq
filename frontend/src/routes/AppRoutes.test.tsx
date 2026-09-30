@@ -14,7 +14,7 @@ vi.mock('react-chartjs-2', () => {
   return { Bar: Stub, Line: Stub }
 })
 
-const STAFF: SessionUser = { id: 'user-staff-01', name: 'Liza Manalastas', role: 'staff' }
+const STAFF: SessionUser = { id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }
 const ADMIN: SessionUser = { id: 'usr-principal', name: 'Principal', role: 'admin' }
 const INSTRUCTOR: SessionUser = { id: 'usr-pe', name: 'PE Instructor', role: 'instructor' }
 

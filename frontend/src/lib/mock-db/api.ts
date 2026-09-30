@@ -152,6 +152,122 @@ export async function logoutMockSession(actor: SessionUser): Promise<void> {
   clearMockSession()
 }
 
+// ---- authentication (frontend-first mock only) --------------------------------------------
+
+export interface MockAuthResult {
+  user: SessionUser
+  mustChangePassword: boolean
+}
+
+export type MockAuthFailure = 'invalid_credentials' | 'locked'
+
+export class MockAuthError extends Error {
+  readonly reason: MockAuthFailure
+  readonly lockedUntil?: number
+
+  constructor(reason: MockAuthFailure, lockedUntil?: number) {
+    super(reason)
+    this.reason = reason
+    this.lockedUntil = lockedUntil
+  }
+}
+
+interface LoginAttemptState {
+  failures: number
+  lockedUntil: number | null
+}
+
+const loginAttempts = new Map<string, LoginAttemptState>()
+const passwordHistory = new Map<string, string[]>()
+const changedPasswordUsers = new Set<string>()
+
+/** Test/demo reset for the frontend-only authentication state. The backend will own this later. */
+export function resetMockAuth() {
+  loginAttempts.clear()
+  passwordHistory.clear()
+  changedPasswordUsers.clear()
+}
+
+function attemptFor(username: string): LoginAttemptState {
+  const current = loginAttempts.get(username)
+  if (current) return current
+  const created = { failures: 0, lockedUntil: null }
+  loginAttempts.set(username, created)
+  return created
+}
+
+function fakePasswordHistory(state: DbState, userId: string): string[] {
+  const existing = passwordHistory.get(userId)
+  if (existing) return existing
+  const current = state.frontendOnly.devAccounts.find((account) => account.userId === userId)?.password
+  const history = current ? [current] : []
+  passwordHistory.set(userId, history)
+  return history
+}
+
+/**
+ * Development stand-in for the future Sanctum login endpoint. It intentionally never returns a
+ * password or token. Lockout and password history live in memory until the real backend exists.
+ */
+export async function authenticateMockUser(username: string, password: string): Promise<MockAuthResult> {
+  await simulateRequest('login')
+  const normalized = username.trim().toLowerCase()
+  const attempt = attemptFor(normalized)
+  if (attempt.lockedUntil && attempt.lockedUntil > Date.now()) {
+    throw new MockAuthError('locked', attempt.lockedUntil)
+  }
+  if (attempt.lockedUntil && attempt.lockedUntil <= Date.now()) {
+    attempt.failures = 0
+    attempt.lockedUntil = null
+  }
+
+  const state = view()
+  const user = state.users.find((candidate) => candidate.username.toLowerCase() === normalized)
+  const account = user && state.frontendOnly.devAccounts.find((candidate) => candidate.userId === user.id)
+  const currentPassword = account ? fakePasswordHistory(state, user.id)[0] : null
+  if (!user || !account || currentPassword !== password) {
+    attempt.failures += 1
+    if (attempt.failures >= 5) {
+      attempt.failures = 0
+      attempt.lockedUntil = Date.now() + 30 * 60 * 1000
+      throw new MockAuthError('locked', attempt.lockedUntil)
+    }
+    throw new MockAuthError('invalid_credentials')
+  }
+
+  attempt.failures = 0
+  attempt.lockedUntil = null
+  const actor = { id: user.id, name: user.name, role: user.role }
+  await write('login', (current) => {
+    audit(current, actor, 'login', { type: 'user', id: user.id })
+    return actor
+  })
+  return {
+    user: actor,
+    mustChangePassword: Boolean(account.mustChangePassword && !changedPasswordUsers.has(user.id)),
+  }
+}
+
+export async function changeMockPassword(userId: string, nextPassword: string): Promise<void> {
+  const trimmed = nextPassword.trim()
+  await write('change password', (state) => {
+    const user = must(state.users.find((candidate) => candidate.id === userId), 'User')
+    must(
+      state.frontendOnly.devAccounts.find((candidate) => candidate.userId === userId),
+      'Development account',
+    )
+    const history = fakePasswordHistory(state, userId)
+    if (trimmed.length < 8) throw new Error('Password must be at least 8 characters.')
+    if (history.includes(trimmed)) throw new Error('Choose a password that was not used recently.')
+    passwordHistory.set(userId, [trimmed, ...history].slice(0, 5))
+    changedPasswordUsers.add(userId)
+    audit(state, { id: user.id, name: user.name, role: user.role }, 'update', {
+      type: 'user',
+      id: userId,
+    })
+  })
+}
+
 function userName(state: DbState, id: string | null): string | null {
   if (!id) return null
   return state.users.find((u) => u.id === id)?.name ?? 'Unknown user'
