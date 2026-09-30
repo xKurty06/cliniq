@@ -220,6 +220,9 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [x] Audit — #32 Backup Status Screen — Build note: Staff backup status and guided recovery checklist with verification audit action are implemented. · Audit note: Wednesday, September 30, 2026 — 17:29: Countercheck, display-privacy, audit-trail, interactive-state, skeleton, token, accessibility-source, and cross-screen simulation checks passed; focused regression coverage and full frontend verification passed.
 
 - [x] **F2 exit check (Audit phase only):** every screen above matches its reference pattern (`Reference-Screens.md` §5 mapping table), display-privacy rule verified per screen, no orphaned mock-data dependencies left unresolved
+
+**Audit Log (Module 11 — `ADR-016`, added Wednesday, September 30, 2026, after the F2 exit check above was already verified).** Not covered by that check; needs its own Build and Audit pass before F2 can be considered fully closed again.
+- [ ] Build / [ ] Audit — #35 Audit Log — Staff and Admin/Principal, view-only; filters for date range, user, action type, and target/module; Student Number not name for student-related rows (display-privacy rule); export/print; no edit or delete, ever. Reads through the existing `frontend/src/lib/mock-db/` layer (ADR-014) — Build note: · Audit note:
   Audit note: Wednesday, September 30, 2026 — 17:29: F2 audit completed across all listed screens. The prior gaps in Student List, Parent Notification context, and desktop QR lookup were resolved in this session; the full source/test/build evidence is recorded in `08-Logs/Agent-Sessions/2026-09-30-f2-completion.md`.
 
 ### Phase F3 — Polish & Client Demo Prep

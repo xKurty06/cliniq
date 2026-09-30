@@ -70,7 +70,7 @@ Every feature in this project — down to individual UI decisions like *which sc
 </tr>
 </table>
 
-> 📋 Full breakdown of all 10 modules, every operation, and exactly who can access what: [`CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md`](./CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md)
+> 📋 Full breakdown of all 11 modules, every operation, and exactly who can access what: [`CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md`](./CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md)
 
 <br/>
 

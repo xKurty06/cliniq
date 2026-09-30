@@ -249,6 +249,17 @@ Broadened from complaint trends alone into an overall operational snapshot, per 
 
 ---
 
+### 11. Audit Log Viewer — *Access: Staff (view); Admin/Principal (view); PE/Sports Instructor — none*
+
+A dedicated screen to review the Audit Trail (below), not just write to it — added by `ADR-016` after the write side existed with no way to actually read it back.
+
+- View the audit log, filtered by date range, user, action type (login/logout/scan/submit/approve/create/update/delete/archive), and target/module type — *Staff, Admin/Principal*
+- Each entry: timestamp, who, action type, and the target record (Student Number, not name, when the target is a student — per the display-privacy rule) — *Staff, Admin/Principal*
+- Export/print a filtered view, for handing to a DPO or during a compliance review — *Staff, Admin/Principal*
+- **No role can edit or delete an entry.** The log is read-only by design; that's what makes it a log.
+
+---
+
 ## Audit Trail (Cross-Cutting — Expanded Per September 19 Meeting)
 Applies to every module above, not just QR. Every one of the following gets logged with **who** performed it and **when**:
 - Login and logout (Module 1)
@@ -256,7 +267,7 @@ Applies to every module above, not just QR. Every one of the following gets logg
 - Every form submission (new visit, new incident, inventory dispense/restock, etc.)
 - Every approval (excuse letter sign-off, incident report sign-off)
 - Every create/update/delete/archive action on a record
-This satisfies RA 10173 (Data Privacy Act) alignment and is the mechanism that makes the PE/Sports Instructor's read-only access accountable — every profile they open is attributable to their account and timestamped.
+This satisfies RA 10173 (Data Privacy Act) alignment and is the mechanism that makes the PE/Sports Instructor's read-only access accountable — every profile they open is attributable to their account and timestamped. **Module 11, Audit Log Viewer, is the read side of this same requirement** — see `ADR-016`.
 
 ---
 
@@ -274,6 +285,7 @@ This satisfies RA 10173 (Data Privacy Act) alignment and is the mechanism that m
 | 8. Medicine & Supply Inventory Tracker | Full | — | — |
 | 9. Clinic Overview Dashboard | View | View | — |
 | 10. Backup Verification Assistant | Full | — | — |
+| 11. Audit Log Viewer | View | View | — |
 
 ---
 

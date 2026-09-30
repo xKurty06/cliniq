@@ -9,7 +9,7 @@
 
 | Field | Detail |
 |---|---|
-| Document Revision No. | 2.5 |
+| Document Revision No. | 2.6 |
 | Date of Issue | September 13, 2026 |
 | Project Manager | Ghenly B. Tinapay |
 | System Analyst | Christian John C. Lugami |
@@ -39,6 +39,7 @@
 | 2.3 | September 25, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Consistency fix: Section 5.1's Security & Privacy requirement still named "Laravel's built-in authentication" after Revision 2.2 had already confirmed Laravel Sanctum specifically — updated to match. Caught while expanding the Obsidian knowledge base to full detail. |
 | 2.4 | September 26, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Added a Modularity & Scalability non-functional requirement (Section 5.1): each of the 10 modules must be loosely-coupled and independently developable/testable in the actual code, not just at the planning level. Formalizes what the frontend already committed to and extends it to the backend, which previously had no committed code-organization pattern. Full architectural detail in the Obsidian vault (ADR-008, ADR-009). |
 | 2.5 | September 28, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Removed the 15-minute idle session timeout. Every role now has one session lifetime: 1 week, until the login token expires — the same session length the retired QR Viewer role had (Revision 1.5), applied to all logins. Updated Section 5.1's Security & Privacy requirement to match, and Module 1 in Modules & Features. Account lockout after repeated failed logins is unchanged. Trade-offs and reasoning are recorded in the Obsidian vault, ADR-015. |
+| 2.6 | September 30, 2026 | Ghenly B. Tinapay, Christian John C. Lugami, Zean Kurt G. Balboa | Added Module 11: Audit Log Viewer (Screen #35) — Staff and Admin/Principal can view the audit log the system already writes to, filtered by date range, user, action type, and target/module; previously nothing let anyone actually read it back. Updated the Modularity & Scalability NFR's module count. Full reasoning: Obsidian vault, ADR-016. |
 
 ---
 
@@ -321,7 +322,7 @@ This stack replaces the original plain HTML/CSS/JS + PHP approach documented in 
 - **Availability:** must function fully offline from the public internet, over the school's employee-tier intranet only
 - **Usability:** must be learnable by non-technical clinic staff within a single training session
 - **Maintainability:** codebase and database schema documented clearly enough for the school's outsourced IT provider to support after the team's academic involvement ends
-- **Modularity & Scalability:** each of the 10 modules must be a loosely-coupled, independently developable and testable unit in the actual code, not just at the planning level — reduces cross-module breakage with 3 developers (and AI agents) working concurrently, and lets the system grow without a structural rewrite. Full architectural detail: Obsidian vault, `06-Decisions/ADR-008` (frontend) and `ADR-009` (backend)
+- **Modularity & Scalability:** each of the 11 modules must be a loosely-coupled, independently developable and testable unit in the actual code, not just at the planning level — reduces cross-module breakage with 3 developers (and AI agents) working concurrently, and lets the system grow without a structural rewrite. Full architectural detail: Obsidian vault, `06-Decisions/ADR-008` (frontend) and `ADR-009` (backend)
 
 ### 5.2 Resources
 

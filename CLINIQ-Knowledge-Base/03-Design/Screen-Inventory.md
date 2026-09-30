@@ -74,4 +74,7 @@ No separate login screen for Staff here — the computer and mobile Staff flows 
 33. **User List** — Staff only; Staff, Admin/Principal, and PE/Sports Instructor accounts
 34. **Add/Edit User & Role Assignment**
 
-**Total: ~35 screens/views** (accounting for the two-stage incident entry and the new Instructor and Emergency-button screens), several of which (Excuse Letter, Incident Report, Monthly Report, QR print) also need a distinct print layout — call that out to the agent explicitly since print CSS is easy to forget.
+### Audit Log Viewer
+35. **Audit Log** — Staff and Admin/Principal, view-only; filterable by date range, user, action type, and target/module (`ADR-016`); Student Number not name for student-related entries, per the display-privacy rule
+
+**Total: ~36 screens/views** (accounting for the two-stage incident entry and the new Instructor and Emergency-button screens), several of which (Excuse Letter, Incident Report, Monthly Report, QR print) also need a distinct print layout — call that out to the agent explicitly since print CSS is easy to forget.
