@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏥 CLINIQ
+# CLINIQ
 
 ### Intelligent Clinic Tracking and Monitoring System
 
