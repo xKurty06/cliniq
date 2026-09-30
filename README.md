@@ -208,7 +208,7 @@ MIT — see [`LICENSE`](./LICENSE). This was decided directly in the repo (not t
 
 ## 🙏 Acknowledgments
 
-- **Ms. Jenne Baas** and Mendez Christian Academy, for the trust and the real-world constraints that shaped every design decision in this project
+- **Ms. Jennesse Baas** and Mendez Christian Academy, for the trust and the real-world constraints that shaped every design decision in this project
 - **CvSU–CEIT**, Software Engineering II course instruction
 
 <br/>
