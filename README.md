@@ -175,6 +175,8 @@ Full phase-by-phase detail, dependencies, and the two decisions still blocking P
 
 ## 👥 Team
 
+**HealWare** is the team behind CLINIQ; its mark is already used as the app's system logo and favicon (see `.claude/skills/cliniq-sidebar-patterns/SKILL.md`).
+
 | | Name | Role |
 |---|---|---|
 | 🧭 | **Ghenly B. Tinapay** | Project Manager |

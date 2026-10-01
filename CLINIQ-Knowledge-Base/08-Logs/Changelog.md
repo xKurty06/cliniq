@@ -1,5 +1,9 @@
 # Changelog
 
+| Thursday, October 01, 2026 — 08:31 PHT | Fixed the Dashboard complaint-trend table collapsing its period columns into overlapping text by giving the fixed table deliberate column widths and an intrinsic minimum width so it scrolls inside the card. Added regression coverage. | `frontend/src/features/dashboard/components/ComplaintTrends.tsx`, `frontend/src/features/dashboard/DashboardPage.test.tsx`, `08-Logs/Agent-Sessions/2026-10-01-dashboard-table-layout-fix.md` |
+
+| Thursday, October 01, 2026 — 08:24 PHT | Added the HealWare team credit, Screen #36 Privacy Policy with the Sidebar Footer / Legal checklist entry and updated ~37-screen count, and the verbatim draft privacy policy reference. | `README.md`, `03-Design/Screen-Inventory.md`, `04-Development/Frontend-Loop-Engineering.md`, `09-References/Privacy-Policy.md`, `09-References/Canonical-Documents.md`, `08-Logs/Agent-Sessions/2026-10-01-privacy-policy-healware-credit.md` |
+
 | Thursday, October 01, 2026 — 08:20 | Inventory now opens sorted by Staff attention status: critical expired/below-zero items, nearing expiration, low stock, then normal inventory. | `frontend/src/features/inventory/InventoryListPage.tsx`, `frontend/src/features/inventory/inventoryStatusSort.ts`, `08-Logs/Agent-Sessions/2026-10-01-inventory-status-default-sort.md` |
 
 | Date | Summary | Detail |

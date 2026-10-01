@@ -28,6 +28,8 @@
 
 ## Resolved since last update
 
+- **Thursday, October 1, 2026 — 08:31 PHT — Dashboard trend-table overflow.** The fixed layout applied to the complaint-trend fallback table made its many period columns divide the card width, so headers and values overlapped. Resolved by assigning deliberate widths to the complaint, period, and total columns and setting an intrinsic minimum table width so the existing focused horizontal scroller is used.
+
 - **Thursday, October 1, 2026 — 07:33 PHT — Filter-driven table movement.** Changing grade levels or other filters could redistribute columns because the shared tables used browser auto-layout. All current DataTables now opt into a fixed layout; Student List columns have explicit widths, and visible table captions are hidden while remaining available to screen readers.
 
 - **Wednesday, September 30, 2026 — 22:55 — Security/accountability gap found and fixed: the app required no Login.** A never-signed-in browser could open every route, including the QR hubs, Emergency, Incident Stage 1, and Reports; `?role=instructor` impersonated any role; Log out did not block the next visit; and `/force-password-change?user=<id>` could set any account's password. Now a session exists only after Login, every route redirects to Login without one (and returns the user afterwards), a first-login account has no session until its password is changed, and Log out ends access. Recorded in `06-Decisions/ADR-002-QR-Staff-Only-Redesign.md` (security clarification). The backend must enforce the same rule in Phase B2.

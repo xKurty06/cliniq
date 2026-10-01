@@ -211,11 +211,19 @@ function TrendTable({ trends }: { trends: Trends }) {
     onSort: () => setSort((current) => toggleTableSort(current, key)),
   })
   const columns: Array<DataTableColumn<ComplaintSeries>> = [
-    { key: 'complaint', header: 'Complaint', cell: (r) => r.complaint, rowHeader: true, sort: sortColumn('complaint', 'Complaint') },
+    {
+      key: 'complaint',
+      header: 'Complaint',
+      cell: (r) => r.complaint,
+      rowHeader: true,
+      width: '14rem',
+      sort: sortColumn('complaint', 'Complaint'),
+    },
     ...trends.buckets.map((b, i) => ({
       key: b.key,
       header: bucketName(b, trends.granularity),
       align: 'right' as const,
+      width: '8rem',
       sort: sortColumn(b.key, bucketName(b, trends.granularity)),
       cell: (r: ComplaintSeries) =>
         r.clusterBuckets.includes(i) ? (
@@ -228,7 +236,14 @@ function TrendTable({ trends }: { trends: Trends }) {
           r.counts[i]
         ),
     })),
-    { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (r) => <strong>{r.total}</strong> },
+    {
+      key: 'total',
+      header: 'Total',
+      align: 'right',
+      width: '5rem',
+      sort: sortColumn('total', 'Total'),
+      cell: (r) => <strong>{r.total}</strong>,
+    },
   ]
   const sortedRows = sortTableRows(rows, sort, (row, key) => {
     if (key === 'complaint') return row.complaint
@@ -243,6 +258,7 @@ function TrendTable({ trends }: { trends: Trends }) {
       rows={sortedRows}
       rowKey={(r) => r.complaint}
       fixedLayout
+      className="[&_table]:min-w-max"
     />
   )
 }

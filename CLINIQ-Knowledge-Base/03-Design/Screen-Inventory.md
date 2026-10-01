@@ -77,4 +77,7 @@ No separate login screen for Staff here — the computer and mobile Staff flows 
 ### Audit Log Viewer
 35. **Audit Log** — Staff and Admin/Principal, view-only; filterable by date range, user, action type, and target/module (`ADR-016`); Student Number not name for student-related entries, per the display-privacy rule
 
-**Total: ~36 screens/views** (accounting for the two-stage incident entry and the new Instructor and Emergency-button screens), several of which (Excuse Letter, Incident Report, Monthly Report, QR print) also need a distinct print layout — call that out to the agent explicitly since print CSS is easy to forget.
+### Sidebar Footer / Legal
+36. **Privacy Policy** — accessible to every role (Staff, Admin/Principal, PE/Sports Instructor), reached via a link in the sidebar footer; static content, no student data rendered on the page itself. Draft content: `09-References/Privacy-Policy.md`.
+
+**Total: ~37 screens/views** (accounting for the two-stage incident entry and the new Instructor and Emergency-button screens), several of which (Excuse Letter, Incident Report, Monthly Report, QR print) also need a distinct print layout — call that out to the agent explicitly since print CSS is easy to forget.

@@ -226,6 +226,9 @@ Each screen now gets **two checkboxes** — Build and Audit — since the two ph
 - [x] Build / [x] Audit — #35 Audit Log — Staff and Admin/Principal, view-only; filters for date range, user, action type, and target/module; Student Number not name for student-related rows (display-privacy rule); export/print; no edit or delete, ever. Reads through the existing `frontend/src/lib/mock-db/` layer (ADR-014) — Build note: Read-only Audit Log feature, route/navigation, resolved mock-data selector, date/user/action/target filters, newest-first paging, target links, and full filtered print view are implemented. · Audit note: Wednesday, September 30, 2026 — 17:58: Countercheck against ADR-016 and Module 11, role-boundary, display-privacy, no-view-audit exception, interactive-state, semantic/accessibility-source, loading/empty/error, and filtered-print checks passed; focused regression coverage plus lint, typecheck, full tests, and production build passed.
   Audit note: Wednesday, September 30, 2026 — 17:29: F2 audit completed across all listed screens. The prior gaps in Student List, Parent Notification context, and desktop QR lookup were resolved in this session; the full source/test/build evidence is recorded in `08-Logs/Agent-Sessions/2026-09-30-f2-completion.md`.
 
+**Sidebar Footer / Legal**
+- [ ] Build / [ ] Audit — #36 Privacy Policy — static page, every role can view it, linked from the sidebar footer; content comes from `09-References/Privacy-Policy.md` as-is (don't edit the policy text as part of a frontend task — flag anything that looks wrong instead). The Contact section is a placeholder; render it exactly as written, don't invent a contact — Build note: · Audit note:
+
 ### Phase F3 — Polish & Client Demo Prep
 
 *(This phase has no separate Build/Audit split — it's inherently a post-build pass.)*

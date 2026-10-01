@@ -147,7 +147,14 @@ describe('Clinic Overview Dashboard', () => {
         name: /table/i,
       }),
     )
-    expect(screen.getByRole('table', { name: /complaint counts per period/i })).toBeInTheDocument()
+    const table = screen.getByRole('table', { name: /complaint counts per period/i })
+    expect(table).toBeInTheDocument()
+    expect(table).toHaveClass('table-fixed')
+    expect(table.parentElement).toHaveClass('[&_table]:min-w-max')
+    const columns = table.querySelectorAll('col')
+    expect(columns[0]).toHaveAttribute('style', 'width: 14rem;')
+    expect(columns[1]).toHaveAttribute('style', 'width: 8rem;')
+    expect(columns[columns.length - 1]).toHaveAttribute('style', 'width: 5rem;')
   })
 
   it('explains an invalid custom date range instead of applying it', async () => {
