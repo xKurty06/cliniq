@@ -38,7 +38,7 @@ export function ListCard({
 }: ListCardProps) {
   const headingId = useId()
   return (
-    <Card aria-labelledby={headingId} className={cn('flex flex-col', className)}>
+    <Card aria-labelledby={headingId} className={cn('flex h-full min-h-0 flex-col', className)}>
       <CardHeader
         titleId={headingId}
         title={
@@ -61,7 +61,7 @@ export function ListCard({
           role="region"
           aria-label={`${title} (scrollable list)`}
           className={cn(
-            'relative overflow-y-auto print:max-h-none print:overflow-visible',
+            'relative min-h-0 flex-1 overflow-y-auto print:max-h-none print:overflow-visible',
             maxHeightClass,
           )}
         >
@@ -97,7 +97,7 @@ export function ListCardSkeleton({
     <div
       aria-hidden="true"
       data-skeleton="list-card"
-      className={cn(CARD_SURFACE, 'flex flex-col', className)}
+      className={cn(CARD_SURFACE, 'flex h-full min-h-0 flex-col', className)}
     >
       <div className="flex items-start gap-2.5 px-5 pt-5 pb-3">
         <span className="mt-0.5 shrink-0 text-brand-green-dark">
@@ -114,7 +114,7 @@ export function ListCardSkeleton({
       </div>
       <ul
         className={cn(
-          'divide-y divide-border overflow-hidden border-t border-border',
+          'min-h-0 flex-1 divide-y divide-border overflow-hidden border-t border-border',
           maxHeightClass,
         )}
       >

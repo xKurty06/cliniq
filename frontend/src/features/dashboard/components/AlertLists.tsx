@@ -28,14 +28,19 @@ const LISTS = {
   inventory: { title: 'Low-stock & expiring items', icon: 'package' },
 } as const
 
-export const ALERT_GRID = 'grid grid-cols-1 gap-4 lg:grid-cols-3'
+export const ALERT_GRID = 'grid grid-cols-1 items-stretch gap-4 lg:auto-rows-[26rem] lg:grid-cols-3'
+const ALERT_LIST_HEIGHT = 'max-h-80 lg:max-h-none'
 
 export function AlertListsSkeleton() {
   return (
     <div aria-hidden="true" className={ALERT_GRID}>
-      <ListCardSkeleton {...LISTS.followUps} />
-      <ListCardSkeleton {...LISTS.frequent} withSecondary={false} />
-      <ListCardSkeleton {...LISTS.inventory} />
+      <ListCardSkeleton {...LISTS.followUps} maxHeightClass={ALERT_LIST_HEIGHT} />
+      <ListCardSkeleton
+        {...LISTS.frequent}
+        withSecondary={false}
+        maxHeightClass={ALERT_LIST_HEIGHT}
+      />
+      <ListCardSkeleton {...LISTS.inventory} maxHeightClass={ALERT_LIST_HEIGHT} />
     </div>
   )
 }
@@ -57,6 +62,7 @@ export function FollowUpsAlert({ summary }: { summary: DashboardSummary }) {
       title={LISTS.followUps.title}
       icon={LISTS.followUps.icon}
       count={rows.length}
+      maxHeightClass={ALERT_LIST_HEIGHT}
       description={`Overdue, due today, or due in the next ${summary.upcomingWindowDays} days. Counted from today.`}
       empty={{
         title: 'No follow-ups due',
@@ -90,6 +96,7 @@ export function FrequentVisitorsAlert({
       title={LISTS.frequent.title}
       icon={LISTS.frequent.icon}
       count={rows.length}
+      maxHeightClass={ALERT_LIST_HEIGHT}
       description={`${summary.frequentVisitorMinVisits}+ visits (${scope}). A warning only, not a diagnosis.`}
       empty={{
         title: 'No frequent-visitor warnings',
@@ -125,6 +132,7 @@ export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
       icon={LISTS.inventory.icon}
       count={rows.length}
       className="@container"
+      maxHeightClass={ALERT_LIST_HEIGHT}
       description="Current stock. Low stock and expiry are separate flags."
       empty={{
         title: 'No inventory alerts',

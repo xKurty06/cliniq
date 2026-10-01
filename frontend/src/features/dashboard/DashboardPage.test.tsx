@@ -144,6 +144,21 @@ describe('Clinic Overview Dashboard', () => {
     )
   })
 
+  it('keeps all alert cards on one shared height track', async () => {
+    await renderLoaded()
+    const alertCards = within(screen.getByRole('region', { name: 'Alerts' })).getAllByRole(
+      'region',
+      { name: /scrollable list/i },
+    )
+
+    expect(alertCards).toHaveLength(3)
+    expect(screen.getByRole('region', { name: 'Alerts' })).toHaveClass('lg:auto-rows-[26rem]')
+    for (const list of alertCards) {
+      expect(list).toHaveClass('min-h-0', 'flex-1', 'lg:max-h-none')
+      expect(list.parentElement).toHaveClass('h-full', 'min-h-0')
+    }
+  })
+
   it('switches calendar views with the keyboard (radiogroup arrow keys)', async () => {
     const user = await renderLoaded()
     const group = screen.getByRole('radiogroup', { name: 'Calendar period' })
