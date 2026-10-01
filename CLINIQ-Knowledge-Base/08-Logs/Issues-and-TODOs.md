@@ -210,5 +210,11 @@ Left open by the session that made every dropdown match the Dashboard's date-ran
 
 - **Tuesday, September 29, 2026 — 09:34 — F2 authentication screens:** Login (#1) and Force Password Change (#2) now exist as frontend-first mock screens. Login covers generic failures, five-attempt/30-minute lockout, role-aware redirects, and login audit calls; Force Password Change covers the 8-character minimum, recent-password reuse check, first-login completion, and update audit call. Production Sanctum enforcement, token expiry, and server-side password history remain Phase B2 work.
 
+## Resolved since last update
+
+- **Thursday, October 01, 2026 — 22:33:50 PHT — Logout icon animation:** Removed the misleading `animate-spin` state from the desktop shell and shell-free mobile logout controls. The controls still disable repeat clicks and preserve the logout audit/session flow.
+
+- **Thursday, October 01, 2026 — 22:42:14 PHT — Calendar card clarity:** Dashboard day cards now show compact short-month dates and labelled visit totals; their heatmap colors, detailed tooltips, and event tags are unchanged.
+
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.

@@ -10,7 +10,13 @@ function navGroupId(label: string): string {
   return `nav-group-${label.toLowerCase().replace(/\s+/g, '-')}`
 }
 
-export function BrandLogo({ compact = false }: { compact?: boolean }) {
+export function BrandLogo({
+  compact = false,
+  showAttribution = false,
+}: {
+  compact?: boolean
+  showAttribution?: boolean
+}) {
   return (
     <span className="flex items-center gap-2.5">
       <img
@@ -20,9 +26,12 @@ export function BrandLogo({ compact = false }: { compact?: boolean }) {
       />
       <span className={cn('flex flex-col leading-tight', compact && 'max-sm:hidden')}>
         <span className="text-xl font-bold tracking-tight text-brand-green-dark">CLINIQ</span>
-        <span className="text-xs font-medium tracking-tight whitespace-nowrap text-text-secondary">
+        <span className="text-[11px] font-medium tracking-tight whitespace-nowrap text-text-secondary">
           Mendez Christian Academy
         </span>
+        {showAttribution && (
+          <span className="text-[9px] leading-3 text-text-muted">Powered by HealWare™</span>
+        )}
       </span>
     </span>
   )
@@ -36,7 +45,13 @@ interface SidebarProps {
   user: SessionUser
 }
 
-export function Sidebar({ active, collapsed, onCollapsedChange, onReportIssue, user }: SidebarProps) {
+export function Sidebar({
+  active,
+  collapsed,
+  onCollapsedChange,
+  onReportIssue,
+  user,
+}: SidebarProps) {
   const groups = navGroupsFor(user.role)
   const labelVisibility = collapsed ? 'sr-only' : ''
   const location = useLocation()
@@ -45,7 +60,7 @@ export function Sidebar({ active, collapsed, onCollapsedChange, onReportIssue, u
   return (
     <aside
       className={cn(
-        'sticky top-0 hidden h-screen w-full flex-col border-r border-border bg-background py-5 lg:flex print:hidden',
+        'sticky top-0 hidden h-screen w-full flex-col border-r border-border bg-background pt-5 pb-2 lg:flex print:hidden',
         collapsed ? 'items-center gap-5 px-3' : 'gap-6 px-4',
       )}
     >
@@ -79,7 +94,7 @@ export function Sidebar({ active, collapsed, onCollapsedChange, onReportIssue, u
           </button>
         ) : (
           <>
-            <BrandLogo />
+            <BrandLogo showAttribution />
             <button
               type="button"
               aria-label="Collapse sidebar"
@@ -168,16 +183,11 @@ export function Sidebar({ active, collapsed, onCollapsedChange, onReportIssue, u
         })}
       </nav>
 
-      <div
-        className={cn(
-          'mt-auto w-full pt-3',
-          collapsed ? 'flex flex-col items-center' : '',
-        )}
-      >
+      <div className={cn('mt-auto w-full pt-3', collapsed ? 'flex flex-col items-center' : '')}>
         <div
           className={cn(
-            'flex flex-wrap items-center gap-x-3 gap-y-1',
-            collapsed ? 'flex-col items-center' : 'px-1',
+            'flex items-center',
+            collapsed ? 'flex-col gap-1 items-center' : 'flex-nowrap gap-x-1 px-1',
           )}
         >
           <Link
@@ -186,16 +196,25 @@ export function Sidebar({ active, collapsed, onCollapsedChange, onReportIssue, u
             aria-current={privacyPolicyActive ? 'page' : undefined}
             title={collapsed ? 'Privacy Policy' : undefined}
             className={cn(
-              'flex min-h-10 cursor-pointer items-center rounded-sm text-[11px] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
-              collapsed ? 'w-10 justify-center' : 'px-0',
+              'cursor-pointer rounded-sm text-[11px] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
+              collapsed ? 'flex size-10 items-center justify-center' : 'inline',
+              collapsed && !privacyPolicyActive && 'hover:text-text-primary',
               privacyPolicyActive
                 ? 'font-medium text-text-primary underline decoration-brand-green-dark underline-offset-4'
-                : 'text-text-secondary hover:text-text-primary hover:underline',
+                : 'text-text-secondary',
             )}
           >
             {collapsed && <Icon name="fileText" />}
-            <span className={labelVisibility}>Privacy Policy</span>
+            <span
+              className={cn(
+                labelVisibility,
+                !privacyPolicyActive && 'hover:text-text-primary hover:underline',
+              )}
+            >
+              Privacy Policy
+            </span>
           </Link>
+          {!collapsed && <span aria-hidden="true" className="text-[10px] text-text-muted">·</span>}
           <button
             type="button"
             aria-label={collapsed ? 'Report an Issue' : undefined}
@@ -203,18 +222,19 @@ export function Sidebar({ active, collapsed, onCollapsedChange, onReportIssue, u
             title={collapsed ? 'Report an Issue' : undefined}
             onClick={onReportIssue}
             className={cn(
-              'flex min-h-10 cursor-pointer items-center rounded-sm text-[11px] text-text-secondary transition-colors duration-150 hover:text-text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
-              collapsed ? 'w-10 justify-center' : 'px-0',
+              'cursor-pointer rounded-sm text-[11px] text-text-secondary transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
+              collapsed ? 'flex size-10 items-center justify-center' : 'inline',
+              collapsed && 'hover:text-text-primary',
             )}
           >
             {collapsed && <Icon name="info" />}
-            <span className={labelVisibility}>Report an Issue</span>
+            <span className={cn(labelVisibility, 'hover:text-text-primary hover:underline')}>
+              Report an Issue
+            </span>
           </button>
+          {!collapsed && <span aria-hidden="true" className="text-[10px] text-text-muted">·</span>}
           <span className="whitespace-nowrap text-[10px] leading-4 text-text-secondary">
             v{APP_VERSION}
-          </span>
-          <span className="whitespace-nowrap text-[10px] leading-4 text-text-secondary">
-            Powered by HealWare™
           </span>
         </div>
       </div>

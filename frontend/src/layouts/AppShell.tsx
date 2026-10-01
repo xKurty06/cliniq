@@ -112,7 +112,7 @@ export function AppShell({ user, active, children, onLogout }: AppShellProps) {
               onClick={() => void handleLogout()}
               className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-error transition-colors hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <Icon name="logout" className={isLoggingOut ? 'animate-spin motion-reduce:animate-none' : undefined} />
+              <Icon name="logout" />
             </button>
           </div>
         </header>

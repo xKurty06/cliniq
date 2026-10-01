@@ -29,7 +29,19 @@ describe('App Shell / Navigation', () => {
     expect(privacyPolicyLink).toHaveAttribute('href', '/privacy-policy')
     expect(privacyPolicyLink).toHaveClass('text-[11px]', 'text-text-secondary')
     expect(privacyPolicyLink).not.toHaveClass('bg-brand-green-dark')
+    expect(privacyPolicyLink).toHaveClass('inline')
+    expect(privacyPolicyLink).not.toHaveClass('min-h-10')
+    expect(privacyPolicyLink).not.toHaveClass('hover:text-text-primary', 'hover:underline')
+    expect(screen.getByText('Privacy Policy')).toHaveClass('hover:text-text-primary', 'hover:underline')
     expect(screen.getByRole('button', { name: 'Report an Issue' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Report an Issue' })).not.toHaveClass(
+      'hover:text-text-primary',
+      'hover:underline',
+    )
+    expect(screen.getByRole('button', { name: 'Report an Issue' })).toHaveClass('inline')
+    expect(screen.getByRole('button', { name: 'Report an Issue' })).not.toHaveClass('min-h-10')
+    expect(screen.getByText('Report an Issue')).toHaveClass('hover:text-text-primary', 'hover:underline')
+    expect(screen.getAllByText('·')).toHaveLength(2)
     expect(screen.getByText('v0.1.0')).toBeInTheDocument()
     expect(screen.getByText('Powered by HealWare™')).toBeInTheDocument()
     expect(screen.getAllByAltText('Healware logo')).toHaveLength(2)
@@ -141,6 +153,25 @@ describe('App Shell / Navigation', () => {
         targetRecord: null,
       }),
     ])
+  })
+
+  it('does not spin the logout icon while ending the session', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(
+      <AppShell
+        user={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }}
+        active="dashboard"
+        onLogout={() => {}}
+      >
+        <div>Screen</div>
+      </AppShell>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Log out' }))
+
+    expect(screen.getByRole('button', { name: 'Logging out' }).querySelector('svg')).not.toHaveClass(
+      'animate-spin',
+    )
   })
 
   it('limits Admin/Principal navigation to Dashboard, Reports, and Audit Log', () => {

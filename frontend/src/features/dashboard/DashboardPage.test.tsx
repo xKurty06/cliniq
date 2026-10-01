@@ -61,6 +61,12 @@ describe('Clinic Overview Dashboard', () => {
     expect(screen.getByRole('button', { name: /print \/ save as pdf/i })).toBeInTheDocument()
   })
 
+  it('uses compact dates and labelled visit totals in calendar cards', async () => {
+    await renderLoaded()
+    expect(screen.getAllByText(/^[A-Z][a-z]{2} \d{1,2}$/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/^\d+ Visits?$/).length).toBeGreaterThan(0)
+  })
+
   it('never shows a student name anywhere on the page (display-privacy rule)', async () => {
     await renderLoaded()
     const text = document.body.textContent ?? ''

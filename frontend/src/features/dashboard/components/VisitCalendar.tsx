@@ -96,7 +96,6 @@ function WeekView({
       {days.map((day) => {
         const future = day.date > today
         const total = day.visits + day.incidents
-        const d = parseISODate(day.date)
         return (
           <li
             key={day.date}
@@ -108,7 +107,6 @@ function WeekView({
             )}
           >
             <span className="text-xs font-semibold">
-              {WEEKDAYS_LONG[d.getDay()]},{' '}
               {formatDate(day.date, { month: 'short', day: 'numeric' })}
               {day.date === today && ' (today)'}
             </span>
@@ -116,10 +114,8 @@ function WeekView({
               <span className="text-xs">Not yet</span>
             ) : (
               <>
-                <span className="text-xl font-semibold">{total}</span>
-                <span className="text-xs">
-                  {day.visits} {day.visits === 1 ? 'visit' : 'visits'} · {day.incidents}{' '}
-                  {day.incidents === 1 ? 'incident' : 'incidents'}
+                <span className="text-xl font-semibold">
+                  {total} {total === 1 ? 'Visit' : 'Visits'}
                 </span>
               </>
             )}
@@ -179,10 +175,12 @@ function MonthView({
                     )}
                   >
                     <div className="flex items-start justify-between gap-1">
-                      <span className="text-xs">{parseISODate(date).getDate()}</span>
+                      <span className="text-xs">
+                        {formatDate(date, { month: 'short', day: 'numeric' })}
+                      </span>
                       {!future && day && (
                         <span className="text-sm font-semibold">
-                          {total}
+                          {total} {total === 1 ? 'Visit' : 'Visits'}
                           <span className="sr-only">
                             {' '}
                             total: {day.visits} visits, {day.incidents} incidents

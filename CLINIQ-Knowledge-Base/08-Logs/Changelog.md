@@ -1,4 +1,15 @@
 # Changelog
+| Thursday, October 01, 2026 — 22:51:35 PHT | Lowered and compacted the shared sidebar footer: expanded items now have text-only hit/hover behavior, sit on one row with `·` dividers, while the collapsed icon targets remain accessible. | `frontend/src/layouts/Sidebar.tsx`, `frontend/src/layouts/AppShell.test.tsx`, `.claude/skills/cliniq-sidebar-patterns/`, `04-Development/Skills-Setup.md`, `08-Logs/Agent-Sessions/2026-10-01-sidebar-footer-hover-and-divider.md` |
+
+| Thursday, October 01, 2026 — 22:44 PHT | Reduced the expanded-sidebar Mendez Christian Academy label from 12px to 11px, adding room before the aligned collapse control. | `frontend/src/layouts/Sidebar.tsx`, `.claude/skills/cliniq-sidebar-patterns/`, `04-Development/Skills-Setup.md`, `08-Logs/Agent-Sessions/2026-10-01-sidebar-academy-label-sizing.md` |
+
+| Thursday, October 01, 2026 — 22:42 PHT | Corrected the sidebar brand layout: the collapse control is again vertically aligned beside the CLINIQ, academy, and attribution stack; the decorative attribution is now smaller and muted. | `frontend/src/layouts/Sidebar.tsx`, `.claude/skills/cliniq-sidebar-patterns/`, `04-Development/Skills-Setup.md`, `08-Logs/Agent-Sessions/2026-10-01-sidebar-branding-alignment.md` |
+
+| Thursday, October 01, 2026 — 22:42:14 PHT | Clarified Dashboard calendar cards with short month/day labels and labelled visit totals, retaining the existing heatmap and event tags. | `frontend/src/features/dashboard/components/VisitCalendar.tsx`, `frontend/src/features/dashboard/DashboardPage.test.tsx`, `08-Logs/Agent-Sessions/2026-10-01-calendar-card-labels.md` |
+
+| Thursday, October 01, 2026 — 22:38 PHT | Moved the non-interactive HealWare attribution from the sidebar footer to a third line beneath Mendez Christian Academy, and put the collapse control on its own right-aligned line for clear spacing. | `frontend/src/layouts/Sidebar.tsx`, `.claude/skills/cliniq-sidebar-patterns/`, `04-Development/Skills-Setup.md`, `08-Logs/Agent-Sessions/2026-10-01-sidebar-branding-spacing.md` |
+
+| Thursday, October 01, 2026 — 22:33:50 PHT | Removed the misleading spin animation from desktop and mobile logout icons while preserving the pending-action guard and logout audit flow; added a regression assertion. | `frontend/src/layouts/AppShell.tsx`, `frontend/src/features/qr-digital-health-id/mobile/QrMobileHubPage.tsx`, `frontend/src/layouts/AppShell.test.tsx`, `08-Logs/Agent-Sessions/2026-10-01-logout-icon-animation-fix.md` |
 
 | Thursday, October 01, 2026 — 21:32 PHT | Added source-specific descriptions for every README-linked documentation area and file, so SRS writers can choose the right source without opening each link first. | README.md, 08-Logs/Agent-Sessions/2026-10-01-readme-link-descriptions.md |
 
