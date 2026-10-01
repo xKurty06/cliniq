@@ -16,12 +16,12 @@ import {
   Skeleton,
   type BadgeTone,
   type DataTableColumn,
-  type DataTableSortDirection,
 } from '../../components'
 import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { formatDateTime } from '../../lib/dates'
 import { describeRange, type DateRange } from '../../lib/dateRange'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
 import { paths } from '../../routes/paths'
 import type { Disposition } from '../../types/entities'
 import {
@@ -34,11 +34,6 @@ type DispositionFilter = Disposition | 'all'
 
 const PAGE_SIZE = 10
 type VisitLogSortKey = 'dateTime' | 'studentNumber' | 'record' | 'disposition'
-
-interface VisitLogSort {
-  key: VisitLogSortKey
-  direction: DataTableSortDirection
-}
 
 const dispositionOptions = [
   { value: 'all', label: 'All' },
@@ -82,7 +77,7 @@ export function VisitLogListPage() {
   const [range, setRange] = useState<DateRange>({ preset: 'all', ...defaultRange })
   const [search, setSearch] = useState('')
   const [disposition, setDisposition] = useState<DispositionFilter>('all')
-  const [sort, setSort] = useState<VisitLogSort>({ key: 'dateTime', direction: 'descending' })
+  const [sort, setSort] = useState<TableSortState<VisitLogSortKey>>({ key: 'dateTime', direction: 'descending' })
   const [page, setPage] = useState(1)
 
   const { data, status, isRefetching, reload } = useAsyncData(
@@ -107,11 +102,7 @@ export function VisitLogListPage() {
 
   function toggleSort(key: VisitLogSortKey) {
     setPage(1)
-    setSort((current) =>
-      current.key === key
-        ? { key, direction: current.direction === 'ascending' ? 'descending' : 'ascending' }
-        : { key, direction: 'ascending' },
-    )
+    setSort((current) => toggleTableSort(current, key))
   }
 
   if (status === 'error') {
@@ -133,21 +124,17 @@ export function VisitLogListPage() {
     )
   }
 
-  const sortedRows = [...data].sort((a, b) => {
-    const valueFor = (row: VisitLogRow) => {
-      switch (sort.key) {
-        case 'dateTime':
-          return row.dateTime
-        case 'studentNumber':
-          return row.studentNumber
-        case 'record':
-          return row.complaint
-        case 'disposition':
-          return dispositionMeta[row.disposition].label
-      }
+  const sortedRows = sortTableRows(data, sort, (row, key) => {
+    switch (key) {
+      case 'dateTime':
+        return row.dateTime
+      case 'studentNumber':
+        return row.studentNumber
+      case 'record':
+        return row.complaint
+      case 'disposition':
+        return dispositionMeta[row.disposition].label
     }
-    const comparison = valueFor(a).localeCompare(valueFor(b), undefined, { numeric: true })
-    return sort.direction === 'ascending' ? comparison : -comparison
   })
 
   const pageCount = Math.max(1, Math.ceil(sortedRows.length / PAGE_SIZE))
@@ -259,7 +246,7 @@ export function VisitLogListPage() {
               value={range}
               onChange={changeRange}
               today={defaultRange.to}
-              presets={['today', 'last7', 'thisMonth', 'all', 'custom']}
+              presets={['all', 'today', 'last7', 'thisMonth', 'custom']}
               presetLabels={{ last7: 'This week' }}
               customPopover
             />

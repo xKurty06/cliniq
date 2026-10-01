@@ -8,6 +8,8 @@ This is a substantially expanded pass over the first one — that version only c
 
 | Skill | Location | Purpose |
 |---|---|---|
+| `cliniq-date-range-patterns` | `.claude/skills/cliniq-date-range-patterns/` | Keeps every date-range filter ordered with All first and opened on the unbounded All range, while preserving shared custom-range behavior |
+| `cliniq-sorting-patterns` | `.claude/skills/cliniq-sorting-patterns/` | Keeps every meaningful table column on the Visit Log's accessible deterministic sort pattern, with sort state coordinated with filtering, pagination, privacy, and fixed layout |
 | `cliniq-table-patterns` | `.claude/skills/cliniq-table-patterns/` | Keeps reusable DataTables stable when filters change rows, with deliberate column widths and visually hidden but accessible captions |
 | `cliniq-input-patterns` | `.claude/skills/cliniq-input-patterns/` | Keeps shared text inputs at the same 40px, semibold, lightly elevated treatment as standard selects |
 | `cliniq-sidebar-patterns` | `.claude/skills/cliniq-sidebar-patterns/` | Keeps the shared sidebar's Healware system mark, favicon pairing, expanded academy label, and plain collapsed-logo treatment consistent |
@@ -15,7 +17,7 @@ This is a substantially expanded pass over the first one — that version only c
 | `cliniq-display-privacy` | `.claude/skills/cliniq-display-privacy/` | Enforces the Student Number vs full name rule on every new screen |
 | `cliniq-audit-trail` | `.claude/skills/cliniq-audit-trail/` | Ensures every mutating action gets logged per RA 10173 |
 | `cliniq-interactive-states` | `.claude/skills/cliniq-interactive-states/` | Enforces cursor states, hover feedback, and custom-styled dropdowns on every interactive element — added after the first Dashboard build shipped without any of these |
-| `cliniq-multi-select-patterns` | `.claude/skills/cliniq-multi-select-patterns/` | Reuses the accessible checkbox filter popover for a requirement that intentionally accepts several values |
+| `cliniq-multi-select-patterns` | `.claude/skills/cliniq-multi-select-patterns/` | Reuses the accessible checkbox filter popover, with an All option first and selected by default when no values are narrowed |
 | `cliniq-pagination-patterns` | `.claude/skills/cliniq-pagination-patterns/` | Reuses the growing-list pager, including a complete filtered print view |
 | `cliniq-modal-patterns` | `.claude/skills/cliniq-modal-patterns/` | Decides which actions need a confirmation (irreversible ones; not the expected routine outcome) and keeps every dialog on the shared, keyboard-safe `Modal` — added Wednesday, September 30, 2026, once confirmations were in use on five screens |
 

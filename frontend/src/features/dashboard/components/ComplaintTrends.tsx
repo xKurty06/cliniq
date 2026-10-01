@@ -16,6 +16,7 @@ import {
 } from '../../../components'
 import { cn } from '../../../lib/cn'
 import { formatDate } from '../../../lib/dates'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../../lib/tableSort'
 import { colorToken } from '../../../lib/tokens'
 import type {
   ComplaintSeries,
@@ -195,6 +196,7 @@ function TrendLineChart({ trends, clusters }: { trends: Trends; clusters: Cluste
 }
 
 function TrendTable({ trends }: { trends: Trends }) {
+  const [sort, setSort] = useState<TableSortState<string>>({ key: 'total', direction: 'descending' })
   const totals = bucketTotals(trends)
   const totalRow: ComplaintSeries = {
     complaint: 'All visits & incidents',
@@ -203,12 +205,18 @@ function TrendTable({ trends }: { trends: Trends }) {
     clusterBuckets: [],
   }
   const rows = [totalRow, ...trends.series, ...trends.otherComplaints]
+  const sortColumn = (key: string, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => setSort((current) => toggleTableSort(current, key)),
+  })
   const columns: Array<DataTableColumn<ComplaintSeries>> = [
-    { key: 'complaint', header: 'Complaint', cell: (r) => r.complaint, rowHeader: true },
+    { key: 'complaint', header: 'Complaint', cell: (r) => r.complaint, rowHeader: true, sort: sortColumn('complaint', 'Complaint') },
     ...trends.buckets.map((b, i) => ({
       key: b.key,
       header: bucketName(b, trends.granularity),
       align: 'right' as const,
+      sort: sortColumn(b.key, bucketName(b, trends.granularity)),
       cell: (r: ComplaintSeries) =>
         r.clusterBuckets.includes(i) ? (
           <span className="inline-flex items-center gap-1 font-semibold">
@@ -220,13 +228,19 @@ function TrendTable({ trends }: { trends: Trends }) {
           r.counts[i]
         ),
     })),
-    { key: 'total', header: 'Total', align: 'right', cell: (r) => <strong>{r.total}</strong> },
+    { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (r) => <strong>{r.total}</strong> },
   ]
+  const sortedRows = sortTableRows(rows, sort, (row, key) => {
+    if (key === 'complaint') return row.complaint
+    if (key === 'total') return row.total
+    const bucketIndex = trends.buckets.findIndex((bucket) => bucket.key === key)
+    return bucketIndex >= 0 ? row.counts[bucketIndex] : null
+  })
   return (
     <DataTable
       caption="Complaint counts per period, visits and incidents combined. A warning icon marks a possible symptom cluster."
       columns={columns}
-      rows={rows}
+      rows={sortedRows}
       rowKey={(r) => r.complaint}
       fixedLayout
     />

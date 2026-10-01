@@ -172,6 +172,18 @@ describe('complaint trends', () => {
     )
   })
 
+  it('keeps an All-range trend bounded by the first recorded event', () => {
+    const trends = buildComplaintTrends(
+      [{ date: '2026-09-10', complaint: 'Headache' }],
+      '1900-01-01',
+      '2026-09-26',
+      'week',
+      CONFIG,
+    )
+    expect(trends.buckets[0].from).toBe('2026-09-10')
+    expect(trends.buckets.length).toBeLessThan(5)
+  })
+
   it('flags a spike as a possible cluster only when there are buckets to compare', () => {
     expect(detectClusters([2, 3, 12, 2], CONFIG)).toEqual([2])
     expect(detectClusters([12], CONFIG)).toEqual([])

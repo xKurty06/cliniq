@@ -5,6 +5,7 @@ import { Bar } from 'react-chartjs-2'
 import { DataTable, EmptyState, SegmentedControl, type DataTableColumn } from '../../../components'
 import { cn } from '../../../lib/cn'
 import { colorToken } from '../../../lib/tokens'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../../lib/tableSort'
 import type { ComplaintCount } from '../../../lib/mock-db'
 
 /*
@@ -19,6 +20,7 @@ import type { ComplaintCount } from '../../../lib/mock-db'
  */
 
 type ViewMode = 'chart' | 'table'
+type HealthSortKey = 'complaint' | 'visits'
 
 function plural(n: number, word: string) {
   return `${n} ${word}${n === 1 ? '' : 's'}`
@@ -97,6 +99,7 @@ function ComplaintBarChart({ rows }: { rows: ComplaintCount[] }) {
 /** `rows` arrive computed (visits per complaint, most frequent first) from the data layer. */
 export function HealthSummary({ rows }: { rows: ComplaintCount[] }) {
   const [view, setView] = useState<ViewMode>('chart')
+  const [sort, setSort] = useState<TableSortState<HealthSortKey>>({ key: 'visits', direction: 'descending' })
   const totalVisits = rows.reduce((sum, row) => sum + row.count, 0)
 
   if (rows.length === 0) {
@@ -109,10 +112,16 @@ export function HealthSummary({ rows }: { rows: ComplaintCount[] }) {
     )
   }
 
+  const sortColumn = (key: HealthSortKey, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => setSort((current) => toggleTableSort(current, key)),
+  })
   const columns: Array<DataTableColumn<ComplaintCount>> = [
-    { key: 'complaint', header: 'Complaint', rowHeader: true, cell: (r) => r.complaint },
-    { key: 'visits', header: 'Visits', align: 'right', cell: (r) => r.count },
+    { key: 'complaint', header: 'Complaint', rowHeader: true, sort: sortColumn('complaint', 'Complaint'), cell: (r) => r.complaint },
+    { key: 'visits', header: 'Visits', align: 'right', sort: sortColumn('visits', 'Visits'), cell: (r) => r.count },
   ]
+  const sortedRows = sortTableRows(rows, sort, (row, key) => key === 'complaint' ? row.complaint : row.count)
 
   return (
     <div className="flex flex-col gap-4">
@@ -149,7 +158,7 @@ export function HealthSummary({ rows }: { rows: ComplaintCount[] }) {
         <DataTable
           caption="Health summary by complaint"
           columns={columns}
-          rows={rows}
+          rows={sortedRows}
           rowKey={(r) => r.complaint}
           fixedLayout
         />

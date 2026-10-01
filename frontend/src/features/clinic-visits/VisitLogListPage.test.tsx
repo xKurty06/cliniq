@@ -81,9 +81,15 @@ describe('Visit Log', () => {
     expect(screen.getByRole('button', { name: 'Date range' })).toHaveTextContent('All')
 
     await user.click(screen.getByRole('button', { name: 'Date range' }))
-    for (const label of ['Today', 'This week', 'This month', 'All', 'Custom range']) {
-      expect(screen.getByRole('option', { name: label })).toBeInTheDocument()
-    }
+    const options = screen.getAllByRole('option')
+    expect(options[0]).toHaveTextContent('All')
+    expect(options.map((option) => option.textContent)).toEqual([
+      'All',
+      'Today',
+      'This week',
+      'This month',
+      'Custom range',
+    ])
     await user.click(screen.getByRole('option', { name: 'Custom range' }))
     expect(screen.getByRole('form', { name: 'Custom date range' })).toHaveClass('absolute')
   })

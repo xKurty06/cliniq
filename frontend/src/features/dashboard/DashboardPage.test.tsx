@@ -80,7 +80,7 @@ describe('Clinic Overview Dashboard', () => {
     const labels = screen.getAllByRole('button').map((b) => b.textContent?.trim())
     for (const label of labels) {
       expect(label).toMatch(
-        /^(Today|Last 7 days|Last 30 days|This month|Custom range|Print \/ Save as PDF|Previous.*|Next.*)$/,
+        /^(All|Today|Last 7 days|Last 30 days|This month|Custom range|Print \/ Save as PDF|Previous.*|Next.*)$/,
       )
     }
   })
@@ -104,7 +104,7 @@ describe('Clinic Overview Dashboard', () => {
     expect(presets).toHaveClass('min-w-full')
     expect(presets).toHaveClass('w-max')
     expect(presets.querySelector('svg')).not.toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Last 30 days' })).toHaveClass(
+    expect(screen.getByRole('option', { name: 'All' })).toHaveClass(
       'bg-surface',
       'text-brand-green-dark',
     )

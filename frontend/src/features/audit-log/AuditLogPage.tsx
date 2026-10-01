@@ -21,12 +21,14 @@ import {
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { describeRange, rangeForPreset, type DateRange } from '../../lib/dateRange'
 import { formatDateTime, todayISO } from '../../lib/dates'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
 import { auditTargetTypes, type AuditLogRow, type AuditTargetType, type SessionUser } from '../../lib/mock-db'
 import type { AuditActionType } from '../../types/entities'
 import { paths } from '../../routes/paths'
 import { fetchAuditLog } from './api/auditLogApi'
 
 const PAGE_SIZE = 10
+type AuditSortKey = 'timestamp' | 'user' | 'action' | 'target'
 
 const actionOptions: Array<{ value: AuditActionType; label: string }> = [
   { value: 'login', label: 'Login' },
@@ -112,6 +114,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   const defaultRange = rangeForPreset('all', todayISO())
   const [filters, setFilters] = useState<AuditLogFilters>({ range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
   const [page, setPage] = useState(1)
+  const [sort, setSort] = useState<TableSortState<AuditSortKey>>({ key: 'timestamp', direction: 'descending' })
   const { range, userId, actionTypes, targetTypes } = filters
   const queryKey = `${range.from}|${range.to}|${userId}|${actionTypes.join(',')}|${targetTypes.join(',')}`
   const { data, status, isRefetching, reload } = useAsyncData(queryKey, () => fetchAuditLog({ from: range.from, to: range.to, userId, actionTypes, targetTypes }))
@@ -123,15 +126,30 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   if (status === 'error') return <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load the audit log." onRetry={reload} /></div>
   if (!data) return <><p className="sr-only" role="status">Loading audit log...</p><AuditLogSkeleton /></>
 
-  const pageCount = Math.max(1, Math.ceil(data.rows.length / PAGE_SIZE))
-  const currentPage = Math.min(page, pageCount)
-  const pageRows = data.rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+  const sortedRows = sortTableRows(data.rows, sort, (row, key) => {
+    if (key === 'timestamp') return row.dateTime
+    if (key === 'user') return row.userName
+    if (key === 'action') return actionStatusMap[row.actionType].label
+    return row.target?.label ?? 'No record'
+  })
+  const changeSort = (key: AuditSortKey) => {
+    setSort((current) => toggleTableSort(current, key))
+    setPage(1)
+  }
+  const sortColumn = (key: AuditSortKey, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => changeSort(key),
+  })
   const columns: Array<DataTableColumn<AuditLogRow>> = [
-    { key: 'timestamp', header: 'Timestamp', rowHeader: true, cell: (row) => formatDateTime(row.dateTime) },
-    { key: 'user', header: 'Who', cell: (row) => row.userName },
-    { key: 'action', header: 'Action', cell: (row) => <StatusBadge status={row.actionType} map={actionStatusMap} /> },
-    { key: 'target', header: 'Target record', cell: (row) => targetCell(row, viewer) },
+    { key: 'timestamp', header: 'Timestamp', rowHeader: true, sort: sortColumn('timestamp', 'Timestamp'), cell: (row) => formatDateTime(row.dateTime) },
+    { key: 'user', header: 'Who', sort: sortColumn('user', 'Who'), cell: (row) => row.userName },
+    { key: 'action', header: 'Action', sort: sortColumn('action', 'Action'), cell: (row) => <StatusBadge status={row.actionType} map={actionStatusMap} /> },
+    { key: 'target', header: 'Target record', sort: sortColumn('target', 'Target record'), cell: (row) => targetCell(row, viewer) },
   ]
+  const pageCount = Math.max(1, Math.ceil(sortedRows.length / PAGE_SIZE))
+  const currentPage = Math.min(page, pageCount)
+  const pageRows = sortedRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
   const clearFilters = () => {
     updateFilters({ range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
   }
@@ -152,14 +170,14 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
         <CardHeader titleId="audit-log-title" title="Audit entries" description={`${data.rows.length.toLocaleString('en-PH')} entr${data.rows.length === 1 ? 'y' : 'ies'} shown · ${describeRange(range)}`} icon={<Icon name="clipboardList" />} />
         <CardBody className="flex flex-col gap-4">
           <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 xl:grid-cols-4 print:hidden">
-            <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['today', 'last7', 'thisMonth', 'all', 'custom']} presetLabels={{ last7: 'This week' }} customPopover fullWidth />
+            <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['all', 'today', 'last7', 'thisMonth', 'custom']} presetLabels={{ last7: 'This week' }} customPopover fullWidth />
             <Select label="User" value={userId} options={data.users.map((user) => ({ value: user.id, label: user.name }))} placeholder="All users" onChange={(value) => updateFilters({ userId: value })} />
             <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => updateFilters({ actionTypes: values as AuditActionType[] })} />
             <MultiSelect label="Target / module" values={targetTypes} options={auditTargetTypes.map((type) => ({ value: type, label: targetLabels[type] }))} allLabel="All targets" onChange={(values) => updateFilters({ targetTypes: values as AuditTargetType[] })} />
           </div>
           <div className="flex justify-end print:hidden"><Button variant="neutral" size="sm" onClick={clearFilters}>Clear Filters</Button></div>
           <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>
-            {data.rows.length ? <><DataTable caption="Filtered audit log" columns={columns} rows={pageRows} rowKey={(row) => row.id} className="print:hidden" fixedLayout /><div aria-hidden="true" className="hidden print:block"><DataTable caption="Filtered audit log" columns={columns} rows={data.rows} rowKey={(row) => row.id} fixedLayout /></div><Pagination page={currentPage} pageCount={pageCount} total={data.rows.length} pageSize={PAGE_SIZE} itemLabel="entries" onPageChange={setPage} /></> : <EmptyState icon="clipboardList" title="No audit entries found" description="Try another date range, user, action type, or target/module filter." />}
+            {data.rows.length ? <><DataTable caption="Filtered audit log" columns={columns} rows={pageRows} rowKey={(row) => row.id} className="print:hidden" fixedLayout /><div aria-hidden="true" className="hidden print:block"><DataTable caption="Filtered audit log" columns={columns} rows={sortedRows} rowKey={(row) => row.id} fixedLayout /></div><Pagination page={currentPage} pageCount={pageCount} total={sortedRows.length} pageSize={PAGE_SIZE} itemLabel="entries" onPageChange={setPage} /></> : <EmptyState icon="clipboardList" title="No audit entries found" description="Try another date range, user, action type, or target/module filter." />}
           </div>
         </CardBody>
       </Card>

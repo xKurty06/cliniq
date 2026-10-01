@@ -57,6 +57,10 @@ export function MultiSelect({
     onChange(options.filter((option) => next.has(option.value)).map((option) => option.value))
   }
 
+  function clearSelection() {
+    onChange([])
+  }
+
   return (
     <div ref={rootRef} className={cn('relative flex flex-col gap-1', className)}>
       <span id={`${id}-label`} className="text-xs font-semibold text-text-primary">
@@ -101,6 +105,16 @@ export function MultiSelect({
           <fieldset>
             <legend className="sr-only">{label}</legend>
             <div className="flex flex-col">
+              <label htmlFor={`${id}-all`} className={DROPDOWN_CHECK_ROW}>
+                <input
+                  id={`${id}-all`}
+                  type="checkbox"
+                  checked={values.length === 0}
+                  onChange={clearSelection}
+                  className="size-4 cursor-pointer accent-brand-green-dark"
+                />
+                {allLabel}
+              </label>
               {options.map((option) => {
                 const optionId = `${id}-${option.value}`
                 return (

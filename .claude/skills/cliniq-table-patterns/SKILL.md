@@ -5,8 +5,8 @@ description: Apply when building or changing a CLINIQ data table, especially one
 
 # CLINIQ Table Patterns
 
-Use this alongside `cliniq-interactive-states`, `cliniq-pagination-patterns`, and
-`cliniq-display-privacy` when a table is added or changed.
+Use this alongside `cliniq-interactive-states`, `cliniq-pagination-patterns`,
+`cliniq-sorting-patterns`, and `cliniq-display-privacy` when a table is added or changed.
 
 ## Shared table boundary
 

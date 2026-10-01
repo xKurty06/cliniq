@@ -20,6 +20,7 @@ import {
   type DataTableColumn,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
 import { paths } from '../../routes/paths'
 import { fetchInventory, type InventoryFilters, type InventoryItemView } from './api/inventoryApi'
 
@@ -43,7 +44,9 @@ function stockBadges(item: InventoryItemView) {
   )
 }
 
-const columns: Array<DataTableColumn<InventoryItemView>> = [
+type InventorySortKey = 'name' | 'category' | 'stock' | 'expiry' | 'status'
+
+const baseColumns: Array<DataTableColumn<InventoryItemView>> = [
   { key: 'name', header: 'Item', rowHeader: true, cell: (item) => item.name },
   { key: 'category', header: 'Category', cell: (item) => item.category === 'medicine' ? 'Medicine' : 'Supply' },
   { key: 'stock', header: 'Current stock', align: 'right', cell: (item) => `${item.currentStock} ${item.unit}` },
@@ -54,16 +57,37 @@ const columns: Array<DataTableColumn<InventoryItemView>> = [
 
 export function InventoryListPage() {
   const [filters, setFilters] = useState<InventoryFilters>({ search: '', category: '' })
+  const [sort, setSort] = useState<TableSortState<InventorySortKey>>({ key: 'expiry', direction: 'descending' })
   const key = `${filters.search}|${filters.category}`
   const { data, status, isRefetching, reload } = useAsyncData(key, () => fetchInventory(filters))
   if (status === 'error') return <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load inventory." onRetry={reload} /></div>
   if (!data) return <><p className="sr-only" role="status">Loading inventory...</p><InventorySkeleton /></>
+  const sortColumn = (key: InventorySortKey, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => setSort((current) => toggleTableSort(current, key)),
+  })
+  const columns: Array<DataTableColumn<InventoryItemView>> = baseColumns.map((column) => {
+    if (column.key === 'name') return { ...column, sort: sortColumn('name', 'Item') }
+    if (column.key === 'category') return { ...column, sort: sortColumn('category', 'Category') }
+    if (column.key === 'stock') return { ...column, sort: sortColumn('stock', 'Current stock') }
+    if (column.key === 'expiry') return { ...column, sort: sortColumn('expiry', 'Expiration') }
+    if (column.key === 'status') return { ...column, sort: sortColumn('status', 'Status') }
+    return column
+  })
+  const sortedData = sortTableRows(data, sort, (item, key) => {
+    if (key === 'name') return item.name
+    if (key === 'category') return item.category
+    if (key === 'stock') return item.currentStock
+    if (key === 'expiry') return item.expirationDate
+    return [...item.flags, item.belowZero ? 'below-zero' : ''].join(',')
+  })
   return (
     <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-2xl font-bold tracking-tight text-text-primary">Inventory</h1><p className="mt-1 text-sm text-text-secondary">Track medicine and supplies, expiration dates, and low-stock thresholds.</p></div><Link className={buttonClassName({ variant: 'primary' })} to={paths.inventoryNew}><Icon name="package" />Add Item</Link></div></Card>
       <Card aria-labelledby="inventory-list-title"><CardHeader titleId="inventory-list-title" title="Medicine and supplies" description={`${data.length} item${data.length === 1 ? '' : 's'} shown`} icon={<Icon name="package" />} /><CardBody className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_14rem_auto] md:items-end"><Input label="Search" value={filters.search} placeholder="Item name" onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))} /><Select label="Category" value={filters.category} options={[{ value: 'medicine', label: 'Medicine' }, { value: 'supply', label: 'Supply' }]} placeholder="All categories" onChange={(value) => setFilters((current) => ({ ...current, category: value as InventoryFilters['category'] }))} /><Button variant="secondary" onClick={() => setFilters({ search: '', category: '' })}>Clear Filters</Button></div>
-        <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>{data.length ? <DataTable caption="Inventory items" columns={columns} rows={data} rowKey={(item) => item.id} fixedLayout /> : <EmptyState icon="package" title="No inventory items found" description="Try a different search or category." />}</div>
+        <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>{data.length ? <DataTable caption="Inventory items" columns={columns} rows={sortedData} rowKey={(item) => item.id} fixedLayout /> : <EmptyState icon="package" title="No inventory items found" description="Try a different search or category." />}</div>
       </CardBody></Card>
     </div>
   )

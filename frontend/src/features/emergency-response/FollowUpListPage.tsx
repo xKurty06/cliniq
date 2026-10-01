@@ -17,6 +17,7 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { getMockSessionUser } from '../../lib/mock-db'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
 import type { FollowUpStatus } from '../../types/entities'
 import { fetchFollowUps, updateFollowUpStatus, type FollowUpRow } from './api/followUpApi'
 
@@ -62,10 +63,13 @@ const OUTCOME_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' },
 ]
 
+type FollowUpSortKey = 'student' | 'reason' | 'due' | 'status'
+
 export function FollowUpListPage() {
   const [statusFilter, setStatusFilter] = useState<'' | FollowUpStatus>('')
   const [statusOverrides, setStatusOverrides] = useState<Record<string, FollowUpStatus>>({})
   const [confirming, setConfirming] = useState<null | { item: FollowUpRow; status: 'missed' | 'cancelled' }>(null)
+  const [sort, setSort] = useState<TableSortState<FollowUpSortKey>>({ key: 'due', direction: 'descending' })
   const { data, status, reload } = useAsyncData(statusFilter, () => fetchFollowUps(statusFilter))
   if (status === 'error')
     return (
@@ -83,6 +87,17 @@ export function FollowUpListPage() {
       </>
     )
   const rows = data.map((item) => ({ ...item, status: statusOverrides[item.id] ?? item.status }))
+  const sortColumn = (key: FollowUpSortKey, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => setSort((current) => toggleTableSort(current, key)),
+  })
+  const sortedRows = sortTableRows(rows, sort, (item, key) => {
+    if (key === 'student') return item.studentNumber
+    if (key === 'reason') return item.reason
+    if (key === 'due') return item.followUpDate
+    return item.status
+  })
   async function applyStatus(item: FollowUpRow, next: FollowUpStatus) {
     // Optimistic: the row flips immediately; the data layer writes the status and its audit entry.
     setStatusOverrides((current) => ({ ...current, [item.id]: next }))
@@ -100,11 +115,12 @@ export function FollowUpListPage() {
       key: 'student',
       header: 'Student Number',
       rowHeader: true,
+      sort: sortColumn('student', 'Student Number'),
       cell: (item) => item.studentNumber,
     },
-    { key: 'reason', header: 'Reason', cell: (item) => item.reason },
-    { key: 'due', header: 'Due date', cell: (item) => formatDate(item.followUpDate) },
-    { key: 'status', header: 'Status', cell: (item) => statusBadge(item.status) },
+    { key: 'reason', header: 'Reason', sort: sortColumn('reason', 'Reason'), cell: (item) => item.reason },
+    { key: 'due', header: 'Due date', sort: sortColumn('due', 'Due date'), cell: (item) => formatDate(item.followUpDate) },
+    { key: 'status', header: 'Status', sort: sortColumn('status', 'Status'), cell: (item) => statusBadge(item.status) },
     {
       key: 'actions',
       header: 'Actions',
@@ -161,7 +177,7 @@ export function FollowUpListPage() {
             <DataTable
               caption="Follow-up tasks"
               columns={columns}
-              rows={rows}
+              rows={sortedRows}
               rowKey={(item) => item.id}
               fixedLayout
             />

@@ -152,7 +152,15 @@ export function buildComplaintTrends(
   granularity: TrendGranularity,
   config: Pick<MockDbConfig, 'clusterMinCount' | 'clusterRatio' | 'topComplaints'>,
 ): ComplaintTrends {
-  const buckets = buildBuckets(from, to, granularity)
+  // An All dashboard range starts at the safe historical floor (1900), but empty buckets before
+  // the first recorded event add no information and can create thousands of chart points. Keep the
+  // visible range bounded by the event history while the summary counts still cover the full query.
+  const trendFrom = events.length
+    ? events.reduce<ISODate>((earliest, event) => (event.date < earliest ? event.date : earliest), to)
+    : from <= to
+      ? to
+      : from
+  const buckets = buildBuckets(trendFrom, to, granularity)
   const byComplaint = new Map<string, number[]>()
   for (const e of events) {
     const index = buckets.findIndex((b) => isWithin(e.date, b.from, b.to))

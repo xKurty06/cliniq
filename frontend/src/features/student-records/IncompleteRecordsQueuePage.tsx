@@ -16,6 +16,7 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { formatDate } from '../../lib/dates'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import {
   fetchIncompleteRecords,
@@ -24,6 +25,7 @@ import {
 } from './api/incompleteRecordsApi'
 
 type QueueFilter = 'open' | 'resolved' | 'all'
+type IncompleteSortKey = 'student' | 'grade' | 'missing' | 'imported' | 'status'
 
 interface ResolvedRecord {
   resolvedBy: string
@@ -71,10 +73,11 @@ export function IncompleteRecordsQueuePage({
     'incomplete-records',
     fetchIncompleteRecords,
   )
-  const [filter, setFilter] = useState<QueueFilter>('open')
+  const [filter, setFilter] = useState<QueueFilter>('all')
   const [search, setSearch] = useState('')
   const [resolved, setResolved] = useState<Record<string, ResolvedRecord>>({})
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [sort, setSort] = useState<TableSortState<IncompleteSortKey>>({ key: 'imported', direction: 'descending' })
 
   async function resolveRecord(record: IncompleteRecord) {
     setSavingId(record.id)
@@ -115,11 +118,30 @@ export function IncompleteRecordsQueuePage({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resolutionOf only reads `resolved`
   }, [data, filter, resolved, search])
 
+  const sortedRows = useMemo(
+    () => sortTableRows(visibleRows, sort, (record, key) => {
+      if (key === 'student') return record.fullName
+      if (key === 'grade') return record.gradeLevel
+      if (key === 'missing') return record.missingFields.join(', ')
+      if (key === 'imported') return record.importedAt
+      return resolutionOf(record) ? 'Resolved' : 'Open'
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resolutionOf only reads `resolved`
+    [visibleRows, sort, resolved],
+  )
+
+  const sortColumn = (key: IncompleteSortKey, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => setSort((current) => toggleTableSort(current, key)),
+  })
+
   const columns: Array<DataTableColumn<IncompleteRecord>> = [
     {
       key: 'student',
       header: 'Student',
       rowHeader: true,
+      sort: sortColumn('student', 'Student'),
       cell: (record) => (
         <div>
           <p>{record.fullName}</p>
@@ -130,11 +152,13 @@ export function IncompleteRecordsQueuePage({
     {
       key: 'grade',
       header: 'Grade level',
+      sort: sortColumn('grade', 'Grade level'),
       cell: (record) => record.gradeLevel,
     },
     {
       key: 'missing',
       header: 'Missing fields',
+      sort: sortColumn('missing', 'Missing fields'),
       cell: (record) => (
         <div className="flex flex-wrap gap-1">
           {record.missingFields.map((field) => (
@@ -148,6 +172,7 @@ export function IncompleteRecordsQueuePage({
     {
       key: 'imported',
       header: 'Imported',
+      sort: sortColumn('imported', 'Imported'),
       cell: (record) => (
         <div>
           <p>{record.importedAt ? formatDate(record.importedAt) : '—'}</p>
@@ -158,6 +183,7 @@ export function IncompleteRecordsQueuePage({
     {
       key: 'status',
       header: 'Resolution',
+      sort: sortColumn('status', 'Resolution'),
       cell: (record) => {
         const resolution = resolutionOf(record)
         if (resolution) {
@@ -252,9 +278,9 @@ export function IncompleteRecordsQueuePage({
               value={filter}
               onChange={(value) => setFilter(value as QueueFilter)}
               options={[
+                { value: 'all', label: 'All' },
                 { value: 'open', label: 'Open' },
                 { value: 'resolved', label: 'Resolved' },
-                { value: 'all', label: 'All' },
               ]}
             />
           }
@@ -273,7 +299,7 @@ export function IncompleteRecordsQueuePage({
               <DataTable
                 caption="Incomplete student records"
                 columns={columns}
-                rows={visibleRows}
+                rows={sortedRows}
                 rowKey={(record) => record.id}
                 fixedLayout
               />

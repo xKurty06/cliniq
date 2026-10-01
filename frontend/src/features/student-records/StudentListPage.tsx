@@ -14,6 +14,7 @@ import {
   type DataTableColumn,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
 import type { Student } from '../../types/entities'
 import { fetchGradeLevels, fetchStudentList } from './api/studentListApi'
 
@@ -59,7 +60,9 @@ function GradeSelect({
   )
 }
 
-const columns: Array<DataTableColumn<Student>> = [
+type StudentSortKey = 'name' | 'number' | 'grade' | 'status'
+
+const baseColumns: Array<DataTableColumn<Student>> = [
   {
     key: 'name',
     header: 'Full name',
@@ -121,6 +124,7 @@ export function StudentListPage() {
   const [search, setSearch] = useState('')
   const [gradeLevel, setGradeLevel] = useState('')
   const [includeArchived, setIncludeArchived] = useState(false)
+  const [sort, setSort] = useState<TableSortState<StudentSortKey>>({ key: 'name', direction: 'ascending' })
   const key = `${search}|${gradeLevel}|${includeArchived}`
   const { data, status, isRefetching, reload } = useAsyncData(key, () =>
     fetchStudentList({ search, gradeLevel, includeArchived }),
@@ -150,6 +154,25 @@ export function StudentListPage() {
       </>
     )
   }
+
+  const sortColumn = (key: StudentSortKey, label: string) => ({
+    label,
+    direction: sort.key === key ? sort.direction : undefined,
+    onSort: () => setSort((current) => toggleTableSort(current, key)),
+  })
+  const columns: Array<DataTableColumn<Student>> = baseColumns.map((column) => {
+    if (column.key === 'name') return { ...column, sort: sortColumn('name', 'Full name') }
+    if (column.key === 'number') return { ...column, sort: sortColumn('number', 'Student Number') }
+    if (column.key === 'grade') return { ...column, sort: sortColumn('grade', 'Grade level') }
+    if (column.key === 'status') return { ...column, sort: sortColumn('status', 'Record status') }
+    return column
+  })
+  const sortedData = sortTableRows(data, sort, (student, key) => {
+    if (key === 'name') return student.fullName
+    if (key === 'number') return student.studentNumber
+    if (key === 'grade') return student.gradeLevel
+    return student.recordComplete ? (student.archived ? 'Complete Archived' : 'Complete') : 'Incomplete'
+  })
 
   return (
     <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
@@ -194,7 +217,7 @@ export function StudentListPage() {
               <DataTable
                 caption="Student masterlist"
                 columns={columns}
-                rows={data}
+                rows={sortedData}
                 rowKey={(student) => student.id}
                 fixedLayout
               />

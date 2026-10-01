@@ -14,6 +14,7 @@ import {
 import { useAsyncData } from '../../../hooks/useAsyncData'
 import { cn } from '../../../lib/cn'
 import { formatDate, parseISODate } from '../../../lib/dates'
+import { sortTableRows, toggleTableSort, type TableSortState } from '../../../lib/tableSort'
 import type { ISODate } from '../../../types/entities'
 import { fetchCalendarDays } from '../api/dashboardApi'
 import {
@@ -286,6 +287,20 @@ function YearView({
 }
 
 function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[] }) {
+  const [sort, setSort] = useState<TableSortState<string>>({
+    key: view === 'year' ? 'month' : 'date',
+    direction: 'descending',
+  })
+  const effectiveSort = view === 'year' && sort.key === 'date'
+    ? { key: 'month', direction: 'descending' as const }
+    : view !== 'year' && sort.key === 'month'
+      ? { key: 'date', direction: 'descending' as const }
+      : sort
+  const sortColumn = (key: string, label: string) => ({
+    label,
+    direction: effectiveSort.key === key ? effectiveSort.direction : undefined,
+    onSort: () => setSort((current) => toggleTableSort(current, key)),
+  })
   if (view === 'year') {
     const byMonth = new Map<
       string,
@@ -305,18 +320,26 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
         key: 'month',
         header: 'Month',
         rowHeader: true,
+        sort: sortColumn('month', 'Month'),
         cell: (r) => formatDate(`${r.key}-01`, { month: 'long', year: 'numeric' }),
       },
-      { key: 'visits', header: 'Visits', align: 'right', cell: (r) => r.visits },
-      { key: 'incidents', header: 'Incidents', align: 'right', cell: (r) => r.incidents },
-      { key: 'total', header: 'Total', align: 'right', cell: (r) => r.visits + r.incidents },
-      { key: 'tags', header: 'Event tags', cell: (r) => r.tags.join(', ') || '—' },
+      { key: 'visits', header: 'Visits', align: 'right', sort: sortColumn('visits', 'Visits'), cell: (r) => r.visits },
+      { key: 'incidents', header: 'Incidents', align: 'right', sort: sortColumn('incidents', 'Incidents'), cell: (r) => r.incidents },
+      { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (r) => r.visits + r.incidents },
+      { key: 'tags', header: 'Event tags', sort: sortColumn('tags', 'Event tags'), cell: (r) => r.tags.join(', ') || '—' },
     ]
+    const sortedRows = sortTableRows(rows, effectiveSort, (row, key) => {
+      if (key === 'month') return row.key
+      if (key === 'visits') return row.visits
+      if (key === 'incidents') return row.incidents
+      if (key === 'total') return row.visits + row.incidents
+      return row.tags.join(', ')
+    })
     return (
       <DataTable
         caption="Visits and incidents per month"
         columns={columns}
-        rows={rows}
+        rows={sortedRows}
         rowKey={(r) => r.key}
         fixedLayout
       />
@@ -328,18 +351,26 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       key: 'date',
       header: 'Date',
       rowHeader: true,
+      sort: sortColumn('date', 'Date'),
       cell: (d) => formatDate(d.date, { weekday: 'short', month: 'short', day: 'numeric' }),
     },
-    { key: 'visits', header: 'Visits', align: 'right', cell: (d) => d.visits },
-    { key: 'incidents', header: 'Incidents', align: 'right', cell: (d) => d.incidents },
-    { key: 'total', header: 'Total', align: 'right', cell: (d) => d.visits + d.incidents },
-    { key: 'tags', header: 'Event tags', cell: (d) => d.eventTags.join(', ') || '—' },
+    { key: 'visits', header: 'Visits', align: 'right', sort: sortColumn('visits', 'Visits'), cell: (d) => d.visits },
+    { key: 'incidents', header: 'Incidents', align: 'right', sort: sortColumn('incidents', 'Incidents'), cell: (d) => d.incidents },
+    { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (d) => d.visits + d.incidents },
+    { key: 'tags', header: 'Event tags', sort: sortColumn('tags', 'Event tags'), cell: (d) => d.eventTags.join(', ') || '—' },
   ]
+  const sortedRows = sortTableRows(rows, effectiveSort, (row, key) => {
+    if (key === 'date') return row.date
+    if (key === 'visits') return row.visits
+    if (key === 'incidents') return row.incidents
+    if (key === 'total') return row.visits + row.incidents
+    return row.eventTags.join(', ')
+  })
   return rows.length ? (
     <DataTable
       caption="Days with clinic activity or an event tag"
       columns={columns}
-      rows={rows}
+      rows={sortedRows}
       rowKey={(d) => d.date}
       fixedLayout
     />

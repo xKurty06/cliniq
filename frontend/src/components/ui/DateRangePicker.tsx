@@ -36,12 +36,13 @@ export interface DateRangePickerProps {
   className?: string
 }
 
-const defaultPresetOrder: DateRangePreset[] = ['today', 'last7', 'last30', 'thisMonth', 'custom']
+const defaultPresetOrder: DateRangePreset[] = ['all', 'today', 'last7', 'last30', 'thisMonth', 'custom']
 
 /**
- * Date-range filter: presets first, with a custom From/To pair behind "Custom range". Editing the
- * dates only changes a draft; nothing is applied until Apply (or Enter). An invalid custom range is
- * explained inline and never applied, so the rest of the page keeps showing the last valid range.
+ * Date-range filter: "All" is the first, default-safe preset, followed by narrower presets and a
+ * custom From/To pair behind "Custom range". Editing the dates only changes a draft; nothing is
+ * applied until Apply (or Enter). An invalid custom range is explained inline and never applied,
+ * so the rest of the page keeps showing the last valid range.
  */
 export function DateRangePicker({
   value,

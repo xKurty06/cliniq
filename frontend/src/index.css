@@ -104,6 +104,13 @@
   }
 }
 
+/* Keep the shared screen frame compact across content, loading, empty, and error wrappers.
+   Explicit print layouts remain in control of their own padding. */
+[class~='pt-10'][class~='pb-8']:not([class~='print:py-0']) {
+  padding-top: calc(var(--spacing) * 6);
+  padding-bottom: calc(var(--spacing) * 6);
+}
+
 @media print {
   @page {
     margin: 12mm;
