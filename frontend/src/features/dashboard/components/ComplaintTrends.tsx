@@ -214,13 +214,18 @@ export function TrendTable({ trends }: { trends: Trends }) {
     .map((_, index) => firstVisibleBucketIndex + index)
   const visibleBuckets = visibleBucketIndexes.map((index) => trends.buckets[index])
   const earlierPeriodCount = firstVisibleBucketIndex
+  const visibleTotal = (counts: number[]) =>
+    visibleBucketIndexes.reduce((sum, index) => sum + counts[index], 0)
   const totalRow: ComplaintSeries = {
     complaint: 'All visits & incidents',
     counts: totals,
-    total: totals.reduce((a, b) => a + b, 0),
+    total: visibleTotal(totals),
     clusterBuckets: [],
   }
-  const complaintRows = [...trends.series, ...trends.otherComplaints]
+  const complaintRows = [...trends.series, ...trends.otherComplaints].map((row) => ({
+    ...row,
+    total: visibleTotal(row.counts),
+  }))
   const maxComplaintLength = Math.max(
     totalRow.complaint.length,
     ...complaintRows.map((row) => row.complaint.length),

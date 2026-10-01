@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ComplaintTrends, TrendTable } from './ComplaintTrends'
@@ -77,7 +77,9 @@ describe('TrendTable', () => {
     await user.click(toggle)
 
     expect(screen.getByRole('row', { name: /No activity/ })).toBeInTheDocument()
-    expect(screen.getByRole('row', { name: /Earlier only/ })).toBeInTheDocument()
+    const earlierOnlyRow = screen.getByRole('row', { name: /Earlier only/ })
+    expect(earlierOnlyRow).toBeInTheDocument()
+    expect(within(earlierOnlyRow).getAllByRole('cell').at(-1)).toHaveTextContent('0')
     expect(
       screen.getByRole('button', { name: 'Hide zero-activity complaint types' }),
     ).toHaveAttribute('aria-pressed', 'true')
