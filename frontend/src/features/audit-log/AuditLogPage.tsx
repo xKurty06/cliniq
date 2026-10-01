@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
 import {
   Button,
   Card,
@@ -10,6 +9,8 @@ import {
   EmptyState,
   ErrorState,
   Icon,
+  Input,
+  ListItemLink,
   MultiSelect,
   Pagination,
   Select,
@@ -66,6 +67,7 @@ const targetLabels: Record<AuditTargetType, string> = {
 }
 
 interface AuditLogFilters {
+  search: string
   range: DateRange
   userId: string
   actionTypes: AuditActionType[]
@@ -76,7 +78,7 @@ function AuditLogSkeleton() {
   return (
     <div aria-hidden="true" className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">
       <Card className="p-5"><Skeleton className="h-7 w-48 max-w-full" /><Skeleton className="mt-2 h-4 w-96 max-w-full" /></Card>
-      <Card className="p-5"><div className="grid grid-cols-1 gap-3 md:grid-cols-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div><div className="mt-5 flex flex-col gap-2">{Array.from({ length: 10 }, (_, index) => <Skeleton key={index} className="h-9 w-full" />)}</div></Card>
+      <Card className="p-5"><div className="flex flex-wrap gap-3"><Skeleton className="h-10 min-w-56 flex-1" /><Skeleton className="h-10 w-40" /><Skeleton className="h-10 w-48" /><Skeleton className="h-10 w-48" /><Skeleton className="h-10 w-48" /></div><div className="mt-5 flex flex-col gap-2">{Array.from({ length: 10 }, (_, index) => <Skeleton key={index} className="h-9 w-full" />)}</div></Card>
     </div>
   )
 }
@@ -106,16 +108,16 @@ function targetPath(row: AuditLogRow, viewer: SessionUser): string | undefined {
 function targetCell(row: AuditLogRow, viewer: SessionUser) {
   if (!row.target) return <span className="text-text-secondary">No record</span>
   const path = targetPath(row, viewer)
-  const content = <><span className="text-xs text-text-secondary">{targetLabels[row.target.type]}</span><span>{row.target.label}</span></>
-  return path ? <Link to={path} className="flex cursor-pointer flex-col rounded-sm underline decoration-brand-green/50 underline-offset-2 transition-colors duration-150 hover:text-brand-green-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none">{content}</Link> : <div className="flex flex-col">{content}</div>
+  if (!path) return row.target.label
+  return <ListItemLink to={path}>View<span className="sr-only"> {row.target.label}</span></ListItemLink>
 }
 
 export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   const defaultRange = rangeForPreset('all', todayISO())
-  const [filters, setFilters] = useState<AuditLogFilters>({ range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
+  const [filters, setFilters] = useState<AuditLogFilters>({ search: '', range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState<TableSortState<AuditSortKey>>({ key: 'timestamp', direction: 'descending' })
-  const { range, userId, actionTypes, targetTypes } = filters
+  const { search, range, userId, actionTypes, targetTypes } = filters
   const queryKey = `${range.from}|${range.to}|${userId}|${actionTypes.join(',')}|${targetTypes.join(',')}`
   const { data, status, isRefetching, reload } = useAsyncData(queryKey, () => fetchAuditLog({ from: range.from, to: range.to, userId, actionTypes, targetTypes }))
   const updateFilters = (changes: Partial<AuditLogFilters>) => {
@@ -126,7 +128,15 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   if (status === 'error') return <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load the audit log." onRetry={reload} /></div>
   if (!data) return <><p className="sr-only" role="status">Loading audit log...</p><AuditLogSkeleton /></>
 
-  const sortedRows = sortTableRows(data.rows, sort, (row, key) => {
+  // Search matches only what the table already shows, so it never surfaces hidden student details.
+  const needle = search.trim().toLowerCase()
+  const filteredRows = needle
+    ? data.rows.filter((row) =>
+        [row.userName, actionStatusMap[row.actionType].label, row.target ? targetLabels[row.target.type] : 'No record', row.target?.label ?? '']
+          .some((text) => text.toLowerCase().includes(needle)),
+      )
+    : data.rows
+  const sortedRows = sortTableRows(filteredRows, sort, (row, key) => {
     if (key === 'timestamp') return row.dateTime
     if (key === 'user') return row.userName
     if (key === 'action') return actionStatusMap[row.actionType].label
@@ -151,7 +161,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   const currentPage = Math.min(page, pageCount)
   const pageRows = sortedRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
   const clearFilters = () => {
-    updateFilters({ range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
+    updateFilters({ search: '', range: defaultRange, userId: '', actionTypes: [], targetTypes: [] })
   }
 
   return (
@@ -167,17 +177,17 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
       </Card>
 
       <Card aria-labelledby="audit-log-title">
-        <CardHeader titleId="audit-log-title" title="Audit entries" description={`${data.rows.length.toLocaleString('en-PH')} entr${data.rows.length === 1 ? 'y' : 'ies'} shown · ${describeRange(range)}`} icon={<Icon name="clipboardList" />} />
+        <CardHeader titleId="audit-log-title" title="Audit entries" description={`${sortedRows.length.toLocaleString('en-PH')} entr${sortedRows.length === 1 ? 'y' : 'ies'} shown · ${describeRange(range)}`} icon={<Icon name="clipboardList" />} actions={<Button variant="neutral" onClick={clearFilters} className="print:hidden">Clear Filters</Button>} />
         <CardBody className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-2 xl:grid-cols-4 print:hidden">
-            <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['all', 'today', 'last7', 'thisMonth', 'custom']} presetLabels={{ last7: 'This week' }} customPopover fullWidth />
-            <Select label="User" value={userId} options={data.users.map((user) => ({ value: user.id, label: user.name }))} placeholder="All users" onChange={(value) => updateFilters({ userId: value })} />
-            <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => updateFilters({ actionTypes: values as AuditActionType[] })} />
-            <MultiSelect label="Target / module" values={targetTypes} options={auditTargetTypes.map((type) => ({ value: type, label: targetLabels[type] }))} allLabel="All targets" onChange={(values) => updateFilters({ targetTypes: values as AuditTargetType[] })} />
+          <div className="flex flex-wrap items-end gap-3 print:hidden">
+            <Input label="Search" type="search" value={search} placeholder="User, action, or target record" onChange={(event) => updateFilters({ search: event.target.value })} className="w-full sm:min-w-56 sm:flex-1" />
+            <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['all', 'today', 'last7', 'thisMonth', 'custom']} presetLabels={{ last7: 'This week' }} customPopover popoverAlign="start" />
+            <Select label="User" value={userId} options={data.users.map((user) => ({ value: user.id, label: user.name }))} placeholder="All users" onChange={(value) => updateFilters({ userId: value })} className="w-full sm:w-48" />
+            <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => updateFilters({ actionTypes: values as AuditActionType[] })} className="w-full sm:w-48" />
+            <MultiSelect label="Target / module" values={targetTypes} options={auditTargetTypes.map((type) => ({ value: type, label: targetLabels[type] }))} allLabel="All targets" onChange={(values) => updateFilters({ targetTypes: values as AuditTargetType[] })} className="w-full sm:w-48" />
           </div>
-          <div className="flex justify-end print:hidden"><Button variant="neutral" size="sm" onClick={clearFilters}>Clear Filters</Button></div>
           <div aria-busy={isRefetching} className={isRefetching ? 'opacity-60' : undefined}>
-            {data.rows.length ? <><DataTable caption="Filtered audit log" columns={columns} rows={pageRows} rowKey={(row) => row.id} className="print:hidden" fixedLayout /><div aria-hidden="true" className="hidden print:block"><DataTable caption="Filtered audit log" columns={columns} rows={sortedRows} rowKey={(row) => row.id} fixedLayout /></div><Pagination page={currentPage} pageCount={pageCount} total={sortedRows.length} pageSize={PAGE_SIZE} itemLabel="entries" onPageChange={setPage} /></> : <EmptyState icon="clipboardList" title="No audit entries found" description="Try another date range, user, action type, or target/module filter." />}
+            {sortedRows.length ? <><DataTable caption="Filtered audit log" columns={columns} rows={pageRows} rowKey={(row) => row.id} className="print:hidden" fixedLayout /><div aria-hidden="true" className="hidden print:block"><DataTable caption="Filtered audit log" columns={columns} rows={sortedRows} rowKey={(row) => row.id} fixedLayout /></div><Pagination page={currentPage} pageCount={pageCount} total={sortedRows.length} pageSize={PAGE_SIZE} itemLabel="entries" onPageChange={setPage} /></> : <EmptyState icon="clipboardList" title="No audit entries found" description="Try another search, date range, user, action type, or target/module filter." />}
           </div>
         </CardBody>
       </Card>

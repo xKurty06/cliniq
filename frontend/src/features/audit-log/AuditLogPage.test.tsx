@@ -36,6 +36,23 @@ describe('Audit Log', () => {
     expect(within(table).getAllByText('Gilan Avelida')).toHaveLength(7)
   })
 
+  it('searches the visible user, action, and target text and clears with the other filters', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('table', { name: 'Filtered audit log' })
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'gilan')
+    await screen.findByText(/7 entries shown/)
+
+    await user.clear(screen.getByRole('searchbox', { name: 'Search' }))
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'no such entry')
+    expect(await screen.findByText('No audit entries found')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Clear Filters' }))
+    expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('')
+    expect(await screen.findByRole('table', { name: 'Filtered audit log' })).toBeInTheDocument()
+  })
+
   it('filters action types through the multi-select control', async () => {
     const user = userEvent.setup()
     renderPage()

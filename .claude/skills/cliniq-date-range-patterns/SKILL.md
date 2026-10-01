@@ -18,6 +18,8 @@ Use this with `cliniq-dropdown-patterns` and `cliniq-interactive-states` wheneve
 
 - Keep edits as a draft and apply them only after the user selects Apply (or presses Enter). Invalid or incomplete dates must explain the problem without changing the currently applied range.
 - Use `customPopover` when the picker sits in a filter row above a table or list. The custom From/To panel must overlay content below the trigger, never reflow the controls, table, or page layout.
+- The popover opens only when Custom range is chosen and closes on Apply, Cancel, Escape, or an outside click; the applied preset stays unchanged until Apply succeeds. Pass `popoverAlign="start"` when the picker is at the left edge of its row so the panel does not overflow leftward.
+- In a filter row, size the picker to its content (no `fullWidth`) unless the row is an intentional grid of equal-width filters.
 - Do not let a custom range end later than today.
 
 ## Interaction boundary

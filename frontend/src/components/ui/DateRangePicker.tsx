@@ -31,6 +31,8 @@ export interface DateRangePickerProps {
   presetLabels?: Partial<Record<DateRangePreset, string>>
   /** Float the custom dates below this control instead of changing the surrounding layout. */
   customPopover?: boolean
+  /** Which trigger edge the floating custom panel lines up with; use "start" at a row's left edge. */
+  popoverAlign?: 'start' | 'end'
   /** Stretch the trigger across its container, for a grid of equal-width filters. */
   fullWidth?: boolean
   className?: string
@@ -52,6 +54,7 @@ export function DateRangePicker({
   presets = defaultPresetOrder,
   presetLabels,
   customPopover = false,
+  popoverAlign = 'end',
   fullWidth = false,
   className,
 }: DateRangePickerProps) {
@@ -63,10 +66,12 @@ export function DateRangePicker({
   const [draft, setDraft] = useState({ from: value.from, to: value.to })
   const [error, setError] = useState<string | undefined>()
   const [open, setOpen] = useState(false)
-  // Compact (page header) only: the From/To panel floats like a dropdown, so it needs its own
-  // open state instead of showing whenever the preset is "custom".
+  // Compact and popover variants: the From/To panel floats like a dropdown, so it needs its own
+  // open state (dismissable, never stacked under the preset list) instead of showing whenever the
+  // preset is "custom".
+  const floating = compact || customPopover
   const [customOpen, setCustomOpen] = useState(false)
-  const showCustom = compact ? customOpen && !open : value.preset === 'custom'
+  const showCustom = floating ? customOpen && !open : value.preset === 'custom'
   const selectedIndex = Math.max(
     0,
     presets.findIndex((preset) => preset === value.preset),
@@ -104,7 +109,7 @@ export function DateRangePicker({
     } else {
       setError(undefined)
       onChange({ preset: 'custom', ...next })
-      if (compact) closeCustom()
+      if (floating) closeCustom()
     }
   }
 
@@ -119,9 +124,10 @@ export function DateRangePicker({
     setCustomOpen(preset === 'custom')
     if (preset === 'custom') {
       setError(undefined)
-      setDraft({ from: value.from, to: value.to })
-      // Compact: the popover holds the draft, and the preset only switches once Apply succeeds.
-      if (!compact) onChange({ ...value, preset: 'custom' })
+      // "All" uses a 1900 sentinel start date, which is no useful starting point for a custom draft.
+      setDraft(value.preset === 'all' ? { from: today, to: today } : { from: value.from, to: value.to })
+      // Floating: the popover holds the draft, and the preset only switches once Apply succeeds.
+      if (!floating) onChange({ ...value, preset: 'custom' })
     } else {
       setError(undefined)
       onChange(rangeForPreset(preset, today))
@@ -168,7 +174,7 @@ export function DateRangePicker({
     <div
       ref={rootRef}
       className={cn(
-        compact || customPopover
+        floating
           ? cn('relative flex', !fullWidth && 'justify-end')
           : 'flex flex-wrap items-end gap-3',
         className,
@@ -248,13 +254,16 @@ export function DateRangePicker({
             applyCustom(draft)
           }}
           onKeyDown={(event) => {
-            if (compact && event.key === 'Escape') cancelCustom()
+            if (floating && event.key === 'Escape') cancelCustom()
           }}
           className={cn(
             'rounded-md border border-border bg-background',
             // Popover variants overlay below the trigger so custom dates never shift page content.
-            compact || customPopover
-              ? 'absolute top-full right-0 z-30 mt-1.5 w-max p-3 shadow-raised'
+            floating
+              ? cn(
+                  'absolute top-full z-30 mt-1.5 w-max p-3 shadow-raised',
+                  popoverAlign === 'start' ? 'left-0' : 'right-0',
+                )
               : 'basis-full p-3 shadow-card',
           )}
         >
@@ -288,7 +297,7 @@ export function DateRangePicker({
             </p>
           )}
           <div className="mt-3 flex justify-end gap-2">
-            {compact && (
+            {floating && (
               <Button type="button" variant="neutral" size="sm" onClick={cancelCustom}>
                 Cancel
               </Button>
