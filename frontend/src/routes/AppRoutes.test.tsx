@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { listStudents } from '../lib/mock-db'
-import type { SessionUser } from '../lib/mock-db'
+import { getRecordedAuditEntries, type SessionUser } from '../lib/mock-db'
 import { AppRoutes } from './AppRoutes'
 
 // jsdom has no canvas. Replace the chart with a stub that keeps its accessible label.
@@ -38,7 +38,10 @@ describe('App routes', () => {
 
     expect(await screen.findByRole('heading', { name: 'Student List' })).toBeInTheDocument()
     const nav = screen.getByRole('navigation', { name: 'Main' })
-    expect(within(nav).getByRole('link', { name: 'Students' })).toHaveAttribute('aria-current', 'page')
+    expect(within(nav).getByRole('link', { name: 'Students' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
   })
 
   it('navigates between screens from the sidebar without a page reload', async () => {
@@ -86,7 +89,30 @@ describe('App routes', () => {
     renderAt('/audit-log', ADMIN)
 
     expect(await screen.findByRole('heading', { name: 'Audit Log' })).toBeInTheDocument()
-    expect(within(screen.getByRole('navigation', { name: 'Main' })).getByRole('link', { name: 'Audit Log' })).toHaveAttribute('aria-current', 'page')
+    expect(
+      within(screen.getByRole('navigation', { name: 'Main' })).getByRole('link', {
+        name: 'Audit Log',
+      }),
+    ).toHaveAttribute('aria-current', 'page')
+  })
+
+  it.each([
+    ['Staff', STAFF],
+    ['Admin/Principal', ADMIN],
+    ['PE/Sports Instructor', INSTRUCTOR],
+  ] as const)('opens Privacy Policy for %s with the footer link available', async (_, user) => {
+    renderAt('/privacy-policy', user)
+
+    expect(
+      await screen.findByRole('heading', { name: 'CLINIQ Privacy Policy — Draft' }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId('path')).toHaveTextContent('/privacy-policy')
+    expect(document.title).toBe('CLINIQ — Privacy Policy')
+    expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    expect(getRecordedAuditEntries()).toEqual([])
   })
 
   it('does not allow the PE/Sports Instructor to open the audit log', async () => {

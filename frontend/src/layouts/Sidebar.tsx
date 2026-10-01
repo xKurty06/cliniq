@@ -1,8 +1,9 @@
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { Icon } from '../components'
 import { cn } from '../lib/cn'
 import { navGroupsFor, type NavKey } from './navigation'
 import type { SessionUser } from '../lib/mock-db'
+import { paths } from '../routes/paths'
 
 function navGroupId(label: string): string {
   return `nav-group-${label.toLowerCase().replace(/\s+/g, '-')}`
@@ -18,7 +19,9 @@ export function BrandLogo({ compact = false }: { compact?: boolean }) {
       />
       <span className={cn('flex flex-col leading-tight', compact && 'max-sm:hidden')}>
         <span className="text-xl font-bold tracking-tight text-brand-green-dark">CLINIQ</span>
-        <span className="text-xs font-medium tracking-tight whitespace-nowrap text-text-secondary">Mendez Christian Academy</span>
+        <span className="text-xs font-medium tracking-tight whitespace-nowrap text-text-secondary">
+          Mendez Christian Academy
+        </span>
       </span>
     </span>
   )
@@ -34,6 +37,8 @@ interface SidebarProps {
 export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarProps) {
   const groups = navGroupsFor(user.role)
   const labelVisibility = collapsed ? 'sr-only' : ''
+  const location = useLocation()
+  const privacyPolicyActive = location.pathname === paths.privacyPolicy
 
   return (
     <aside
@@ -42,7 +47,12 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
         collapsed ? 'items-center gap-5 px-3' : 'gap-6 px-4',
       )}
     >
-      <div className={cn('flex w-full items-center', collapsed ? 'justify-center' : 'justify-between pl-2 pr-0')}>
+      <div
+        className={cn(
+          'flex w-full items-center',
+          collapsed ? 'justify-center' : 'justify-between pl-2 pr-0',
+        )}
+      >
         {collapsed ? (
           <button
             type="button"
@@ -83,7 +93,10 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
 
       <nav
         aria-label="Main"
-        className={cn('flex w-full flex-col overflow-y-auto', collapsed ? 'items-center gap-2 pr-0' : 'gap-4 pr-1')}
+        className={cn(
+          'flex min-h-0 flex-1 w-full flex-col overflow-y-auto',
+          collapsed ? 'items-center gap-2 pr-0' : 'gap-4 pr-1',
+        )}
       >
         {groups.map((group) => {
           const groupId = navGroupId(group.label)
@@ -152,6 +165,30 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
           )
         })}
       </nav>
+
+      <div
+        className={cn(
+          'mt-auto w-full pt-3',
+          collapsed ? 'flex justify-center' : '',
+        )}
+      >
+        <Link
+          to={paths.privacyPolicy}
+          aria-label={collapsed ? 'Privacy Policy' : undefined}
+          aria-current={privacyPolicyActive ? 'page' : undefined}
+          title={collapsed ? 'Privacy Policy' : undefined}
+          className={cn(
+            'flex min-h-10 cursor-pointer items-center rounded-sm text-xs transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
+            collapsed ? 'w-10 justify-center' : 'px-1',
+            privacyPolicyActive
+              ? 'font-medium text-text-primary underline decoration-brand-green-dark underline-offset-4'
+              : 'text-text-secondary hover:text-text-primary hover:underline',
+          )}
+        >
+          {collapsed && <Icon name="fileText" />}
+          <span className={labelVisibility}>Privacy Policy</span>
+        </Link>
+      </div>
     </aside>
   )
 }

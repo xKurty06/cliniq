@@ -25,6 +25,10 @@ describe('App Shell / Navigation', () => {
     expect(screen.getByText('Students')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Inventory' })).toHaveAttribute('href', '/inventory')
     expect(screen.getByText('Backup')).toBeInTheDocument()
+    const privacyPolicyLink = screen.getByRole('link', { name: 'Privacy Policy' })
+    expect(privacyPolicyLink).toHaveAttribute('href', '/privacy-policy')
+    expect(privacyPolicyLink).toHaveClass('text-xs', 'text-text-secondary')
+    expect(privacyPolicyLink).not.toHaveClass('bg-brand-green-dark')
     expect(screen.getAllByAltText('Healware logo')).toHaveLength(2)
     screen
       .getAllByAltText('Healware logo')
@@ -60,7 +64,10 @@ describe('App Shell / Navigation', () => {
     const opener = screen.getByRole('button', { name: 'Open navigation' })
     await user.click(opener)
     const menu = screen.getByRole('navigation', { name: 'Mobile navigation' })
-    expect(within(menu).getByRole('link', { name: 'Inventory' })).toHaveAttribute('href', '/inventory')
+    expect(within(menu).getByRole('link', { name: 'Inventory' })).toHaveAttribute(
+      'href',
+      '/inventory',
+    )
 
     await user.click(within(menu).getByRole('link', { name: 'Students' }))
     expect(screen.queryByRole('navigation', { name: 'Mobile navigation' })).not.toBeInTheDocument()
@@ -84,7 +91,11 @@ describe('App Shell / Navigation', () => {
 
     await waitFor(() => expect(onLogout).toHaveBeenCalledOnce())
     expect(getRecordedAuditEntries()).toEqual([
-      expect.objectContaining({ actionType: 'logout', userId: 'user-staff-01', targetRecord: null }),
+      expect.objectContaining({
+        actionType: 'logout',
+        userId: 'user-staff-01',
+        targetRecord: null,
+      }),
     ])
   })
 
