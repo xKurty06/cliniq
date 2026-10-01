@@ -1,3 +1,4 @@
+import { pickDate } from '../../test/pickDate'
 import { renderWithRouter } from '../../test/renderWithRouter'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -61,10 +62,8 @@ describe('Visit Log', () => {
     await screen.findByRole('heading', { name: 'Visit Log' })
     await user.click(screen.getByRole('button', { name: 'Date range' }))
     await user.click(screen.getByRole('option', { name: 'Custom range' }))
-    await user.clear(screen.getByLabelText('From'))
-    await user.type(screen.getByLabelText('From'), '2000-01-01')
-    await user.clear(screen.getByLabelText('To'))
-    await user.type(screen.getByLabelText('To'), '2000-01-02')
+    await pickDate(user, screen.getByLabelText('From'), '2000-01-01')
+    await pickDate(user, screen.getByLabelText('To'), '2000-01-02')
     await user.click(screen.getByRole('button', { name: 'Apply' }))
 
     expect(await screen.findByText('No visits found')).toBeInTheDocument()
@@ -108,10 +107,8 @@ describe('Visit Log', () => {
 
     await user.click(screen.getByRole('button', { name: 'Date range' }))
     await user.click(screen.getByRole('option', { name: 'Custom range' }))
-    await user.clear(screen.getByLabelText('From'))
-    await user.type(screen.getByLabelText('From'), '2000-01-01')
-    await user.clear(screen.getByLabelText('To'))
-    await user.type(screen.getByLabelText('To'), '2000-01-02')
+    await pickDate(user, screen.getByLabelText('From'), '2000-01-01')
+    await pickDate(user, screen.getByLabelText('To'), '2000-01-02')
     await user.click(screen.getByRole('button', { name: 'Apply' }))
     expect(screen.queryByRole('form', { name: 'Custom date range' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Date range' })).toHaveTextContent('Custom range')

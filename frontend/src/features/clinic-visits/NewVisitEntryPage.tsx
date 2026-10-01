@@ -5,6 +5,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  DatePicker,
   EmptyState,
   ErrorState,
   Icon,
@@ -390,14 +391,13 @@ export function NewVisitEntryPage({
               </label>
               {needsFollowUp && (
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <Input
-                    type="date"
+                  <DatePicker
                     label="Follow-up date"
                     value={followUpDate}
                     min={today}
                     required
-                    onChange={(event) => {
-                      setFollowUpDate(event.target.value)
+                    onChange={(next) => {
+                      setFollowUpDate(next)
                       setErrors((current) => ({ ...current, followUpDate: undefined }))
                     }}
                     error={errors.followUpDate}

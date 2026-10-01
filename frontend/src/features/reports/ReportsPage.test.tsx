@@ -1,6 +1,7 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { pickMonth } from '../../test/pickDate'
 import { ReportsPage } from './ReportsPage'
 import { todayISO } from '../../lib/dates'
 import { getMonthlyReport } from '../../lib/mock-db'
@@ -91,7 +92,7 @@ describe('Reports', () => {
     const user = userEvent.setup()
     render(<ReportsPage viewer={STAFF} />)
     await user.click(screen.getByRole('tab', { name: 'Health Summaries' }))
-    fireEvent.change(screen.getByLabelText('Report month'), { target: { value: '2000-01' } })
+    await pickMonth(user, screen.getByLabelText('Report month'), '2000-01')
 
     expect(await screen.findByText('No clinic visits recorded this month')).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: /clinic visits by complaint/i })).not.toBeInTheDocument()

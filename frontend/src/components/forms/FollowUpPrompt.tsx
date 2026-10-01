@@ -1,4 +1,5 @@
 import type { ISODate } from '../../types/entities'
+import { DatePicker } from '../ui/DatePicker'
 import { Input } from '../ui/Input'
 import { Textarea } from '../ui/Textarea'
 
@@ -66,13 +67,12 @@ export function FollowUpPrompt({
       </label>
       {draft.needed && (
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Input
-            type="date"
+          <DatePicker
             label="Follow-up date"
             value={draft.followUpDate}
             min={minDate}
             required
-            onChange={(event) => set('followUpDate', event.target.value)}
+            onChange={(next) => set('followUpDate', next)}
             error={errors.followUpDate}
           />
           <Input

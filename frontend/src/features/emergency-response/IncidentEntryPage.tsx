@@ -4,6 +4,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  DatePicker,
   EmptyState,
   ErrorState,
   Icon,
@@ -201,7 +202,8 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
   const [referToHospital, setReferToHospital] = useState(false)
   const [referralDestination, setReferralDestination] = useState('')
   const [transportMode, setTransportMode] = useState('')
-  const [departureTime, setDepartureTime] = useState('')
+  const [departureDate, setDepartureDate] = useState('')
+  const [departureClock, setDepartureClock] = useState('')
   const [notificationOutcome, setNotificationOutcome] = useState<ParentNotificationOutcome>('reached')
   const [notificationDetail, setNotificationDetail] = useState('')
   const [notifications, setNotifications] = useState<
@@ -284,7 +286,10 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
         ? {
             destination: referralDestination.trim(),
             transportMode: transportMode.trim() || 'Not recorded',
-            departureTime: departureTime || new Date().toISOString(),
+            departureTime:
+              departureDate || departureClock
+                ? `${departureDate || today}T${departureClock || '00:00'}`
+                : new Date().toISOString(),
           }
         : null
       const result = await completeStageTwoIncident(
@@ -506,7 +511,7 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                       </span>
                     </label>
                     {referToHospital && (
-                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <Input
                           label="Destination"
                           value={referralDestination}
@@ -522,11 +527,17 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                           value={transportMode}
                           onChange={(event) => setTransportMode(event.target.value)}
                         />
+                        <DatePicker
+                          label="Departure date"
+                          value={departureDate}
+                          max={today}
+                          onChange={setDepartureDate}
+                        />
                         <Input
-                          type="datetime-local"
+                          type="time"
                           label="Departure time"
-                          value={departureTime}
-                          onChange={(event) => setDepartureTime(event.target.value)}
+                          value={departureClock}
+                          onChange={(event) => setDepartureClock(event.target.value)}
                         />
                       </div>
                     )}
@@ -598,13 +609,12 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                     </label>
                     {needsFollowUp && (
                       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <Input
-                          type="date"
+                        <DatePicker
                           label="Follow-up date"
                           value={followUpDate}
                           min={today}
                           required
-                          onChange={(event) => setFollowUpDate(event.target.value)}
+                          onChange={setFollowUpDate}
                         />
                         <Input
                           label="Reason"

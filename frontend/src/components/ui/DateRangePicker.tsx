@@ -16,7 +16,7 @@ import {
   dropdownOptionClassName,
   dropdownTriggerClassName,
 } from './dropdownClassName'
-import { Input } from './Input'
+import { DatePicker } from './DatePicker'
 
 export interface DateRangePickerProps {
   value: DateRange
@@ -268,23 +268,21 @@ export function DateRangePicker({
           )}
         >
           <div className="flex flex-wrap items-start gap-3">
-            <Input
-              type="date"
+            <DatePicker
               label="From"
               value={draft.from}
               max={today}
-              onChange={(e) => editDraft({ ...draft, from: e.target.value })}
+              onChange={(next) => editDraft({ ...draft, from: next })}
               aria-describedby={error ? `${selectId}-range-error` : undefined}
-              inputClassName="border-border bg-background hover:border-brand-green"
+              className="w-40"
             />
-            <Input
-              type="date"
+            <DatePicker
               label="To"
               value={draft.to}
               max={today}
-              onChange={(e) => editDraft({ ...draft, to: e.target.value })}
+              onChange={(next) => editDraft({ ...draft, to: next })}
               aria-describedby={error ? `${selectId}-range-error` : undefined}
-              inputClassName="border-border bg-background hover:border-brand-green"
+              className="w-40"
             />
           </div>
           {error && (

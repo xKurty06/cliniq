@@ -1,3 +1,4 @@
+import { pickDate } from '../../test/pickDate'
 import { renderWithRouter } from '../../test/renderWithRouter'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -281,9 +282,8 @@ describe('Clinic Overview Dashboard', () => {
     const user = await renderLoaded()
     await user.click(screen.getByRole('button', { name: 'Date range' }))
     await user.click(screen.getByRole('option', { name: 'Custom range' }))
-    const from = screen.getByLabelText('From')
-    await user.clear(from)
-    await user.type(from, '2099-01-01')
+    await pickDate(user, screen.getByLabelText('To'), '2024-12-31')
+    await pickDate(user, screen.getByLabelText('From'), '2025-01-01')
     await user.click(screen.getByRole('button', { name: 'Apply' }))
     expect(
       await screen.findByText(/start date must be on or before the end date/i),
@@ -296,9 +296,7 @@ describe('Clinic Overview Dashboard', () => {
     const before = trigger.textContent
     await user.click(trigger)
     await user.click(screen.getByRole('option', { name: 'Custom range' }))
-    const from = screen.getByLabelText('From')
-    await user.clear(from)
-    await user.type(from, '2020-01-01')
+    await pickDate(user, screen.getByLabelText('From'), '2020-01-01')
     expect(trigger).toHaveTextContent(before ?? '')
     await user.click(screen.getByRole('button', { name: 'Apply' }))
     expect(trigger).toHaveTextContent('Custom range')

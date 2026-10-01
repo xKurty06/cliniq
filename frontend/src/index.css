@@ -80,6 +80,11 @@
 }
 
 @layer base {
+  /* Time fields are typed (hh:mm AM/PM); the browser's clock popup is OS chrome, not CLINIQ UI. */
+  input[type='time']::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
   html {
     font-family: var(--font-sans);
     font-feature-settings: 'cv11', 'ss01';
