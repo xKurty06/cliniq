@@ -24,6 +24,7 @@ export type MockCollection =
   | 'reports'
   | 'backupLogs'
   | 'auditLog'
+  | 'issueReports'
 
 const DEFAULT_LATENCY_MS = 450
 const SLOW_LATENCY_MS = 2500

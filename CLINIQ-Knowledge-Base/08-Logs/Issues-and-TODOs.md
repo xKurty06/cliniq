@@ -8,6 +8,10 @@
 - **Additional backup layer beyond local + external drive** — team is still evaluating what this should be (possibly off-site/cloud). Not yet decided.
 - **Who manages the system when the nurse is absent** — pending a reply from Ms. Jennesse Baas.
 
+## Report an Issue follow-up
+
+- **Recipient email.** Temporary placeholder `team@example.com` is used by the footer modal's `mailto:` fallback; replace it with the team's real contact in `frontend/src/features/issue-reports/reportIssueConfig.ts` when one is designated. Added Thursday, October 01, 2026 — 13:09 PHT.
+
 ## Open design questions — school year handling & grade promotion
 
 **This was a real gap: this whole discussion happened in chat and was never actually written down here — caught late, when it should have been captured the same session it came up, like everything else in this file.** Nothing below has been decided; these are the open questions as originally raised, not resolved answers.

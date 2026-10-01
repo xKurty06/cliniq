@@ -13,6 +13,7 @@ import type {
   Student,
   StudentNumber,
   User,
+  UserRole,
   Visit,
 } from '../../types/entities'
 
@@ -147,6 +148,16 @@ export interface PeReferral<T = ISODateTime> {
   createdAt: T
 }
 
+export interface IssueReport<T = ISODateTime> {
+  id: string
+  description: string
+  route: string
+  pageName: string
+  role: UserRole
+  reportedByUserId: string
+  createdAt: T
+}
+
 export interface SeedFrontendOnly {
   _note: string
   devAccounts: DevAccount[]
@@ -156,6 +167,7 @@ export interface SeedFrontendOnly {
   recordReviews: Array<RecordReview<RelativeDate, RelativeDateTime>>
   excuseLetterApprovals: Array<ExcuseLetterApproval<RelativeDateTime>>
   peReferrals: Array<PeReferral<RelativeDateTime>>
+  issueReports: Array<IssueReport<RelativeDateTime>>
 }
 
 export interface MockDbSeed {
@@ -183,6 +195,7 @@ export interface FrontendOnlyState {
   recordReviews: RecordReview[]
   excuseLetterApprovals: ExcuseLetterApproval[]
   peReferrals: PeReferral[]
+  issueReports: IssueReport[]
 }
 
 /** Raw records only. `Student` here never carries `recordComplete`; selectors add it on read. */

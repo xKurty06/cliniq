@@ -18,6 +18,7 @@ export type {
   ComplaintType,
   ExcuseLetterApproval,
   InventoryTransaction,
+  IssueReport,
   MockDbConfig,
   PeReferral,
   RecordReview,

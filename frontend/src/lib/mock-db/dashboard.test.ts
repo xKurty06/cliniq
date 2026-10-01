@@ -100,6 +100,7 @@ function dataset(partial: Partial<DbState>): DbState {
       recordReviews: [],
       excuseLetterApprovals: [],
       peReferrals: [],
+      issueReports: [],
     },
     ...partial,
   }

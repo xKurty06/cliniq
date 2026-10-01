@@ -4,6 +4,7 @@ import { cn } from '../lib/cn'
 import { navGroupsFor, type NavKey } from './navigation'
 import type { SessionUser } from '../lib/mock-db'
 import { paths } from '../routes/paths'
+import { APP_VERSION } from '../config/appVersion'
 
 function navGroupId(label: string): string {
   return `nav-group-${label.toLowerCase().replace(/\s+/g, '-')}`
@@ -31,10 +32,11 @@ interface SidebarProps {
   active: NavKey | null
   collapsed: boolean
   onCollapsedChange: (collapsed: boolean) => void
+  onReportIssue: () => void
   user: SessionUser
 }
 
-export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarProps) {
+export function Sidebar({ active, collapsed, onCollapsedChange, onReportIssue, user }: SidebarProps) {
   const groups = navGroupsFor(user.role)
   const labelVisibility = collapsed ? 'sr-only' : ''
   const location = useLocation()
@@ -169,25 +171,52 @@ export function Sidebar({ active, collapsed, onCollapsedChange, user }: SidebarP
       <div
         className={cn(
           'mt-auto w-full pt-3',
-          collapsed ? 'flex justify-center' : '',
+          collapsed ? 'flex flex-col items-center' : '',
         )}
       >
-        <Link
-          to={paths.privacyPolicy}
-          aria-label={collapsed ? 'Privacy Policy' : undefined}
-          aria-current={privacyPolicyActive ? 'page' : undefined}
-          title={collapsed ? 'Privacy Policy' : undefined}
+        <div
           className={cn(
-            'flex min-h-10 cursor-pointer items-center rounded-sm text-xs transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
-            collapsed ? 'w-10 justify-center' : 'px-1',
-            privacyPolicyActive
-              ? 'font-medium text-text-primary underline decoration-brand-green-dark underline-offset-4'
-              : 'text-text-secondary hover:text-text-primary hover:underline',
+            'flex flex-wrap items-center gap-x-3 gap-y-1',
+            collapsed ? 'flex-col items-center' : 'px-1',
           )}
         >
-          {collapsed && <Icon name="fileText" />}
-          <span className={labelVisibility}>Privacy Policy</span>
-        </Link>
+          <Link
+            to={paths.privacyPolicy}
+            aria-label={collapsed ? 'Privacy Policy' : undefined}
+            aria-current={privacyPolicyActive ? 'page' : undefined}
+            title={collapsed ? 'Privacy Policy' : undefined}
+            className={cn(
+              'flex min-h-10 cursor-pointer items-center rounded-sm text-[11px] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
+              collapsed ? 'w-10 justify-center' : 'px-0',
+              privacyPolicyActive
+                ? 'font-medium text-text-primary underline decoration-brand-green-dark underline-offset-4'
+                : 'text-text-secondary hover:text-text-primary hover:underline',
+            )}
+          >
+            {collapsed && <Icon name="fileText" />}
+            <span className={labelVisibility}>Privacy Policy</span>
+          </Link>
+          <button
+            type="button"
+            aria-label={collapsed ? 'Report an Issue' : undefined}
+            aria-haspopup="dialog"
+            title={collapsed ? 'Report an Issue' : undefined}
+            onClick={onReportIssue}
+            className={cn(
+              'flex min-h-10 cursor-pointer items-center rounded-sm text-[11px] text-text-secondary transition-colors duration-150 hover:text-text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-dark motion-reduce:transition-none',
+              collapsed ? 'w-10 justify-center' : 'px-0',
+            )}
+          >
+            {collapsed && <Icon name="info" />}
+            <span className={labelVisibility}>Report an Issue</span>
+          </button>
+          <span className="whitespace-nowrap text-[10px] leading-4 text-text-secondary">
+            v{APP_VERSION}
+          </span>
+          <span className="whitespace-nowrap text-[10px] leading-4 text-text-secondary">
+            Powered by HealWare™
+          </span>
+        </div>
       </div>
     </aside>
   )

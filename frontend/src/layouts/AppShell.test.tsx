@@ -27,8 +27,11 @@ describe('App Shell / Navigation', () => {
     expect(screen.getByText('Backup')).toBeInTheDocument()
     const privacyPolicyLink = screen.getByRole('link', { name: 'Privacy Policy' })
     expect(privacyPolicyLink).toHaveAttribute('href', '/privacy-policy')
-    expect(privacyPolicyLink).toHaveClass('text-xs', 'text-text-secondary')
+    expect(privacyPolicyLink).toHaveClass('text-[11px]', 'text-text-secondary')
     expect(privacyPolicyLink).not.toHaveClass('bg-brand-green-dark')
+    expect(screen.getByRole('button', { name: 'Report an Issue' })).toBeInTheDocument()
+    expect(screen.getByText('v0.1.0')).toBeInTheDocument()
+    expect(screen.getByText('Powered by HealWare™')).toBeInTheDocument()
     expect(screen.getAllByAltText('Healware logo')).toHaveLength(2)
     screen
       .getAllByAltText('Healware logo')
@@ -47,6 +50,47 @@ describe('App Shell / Navigation', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Log out' })).toHaveClass('text-error')
+  })
+
+  it('opens the Report an Issue modal from the footer', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(
+      <AppShell
+        user={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }}
+        active="dashboard"
+        onLogout={() => {}}
+      >
+        <div>Screen</div>
+      </AppShell>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Report an Issue' }))
+
+    expect(screen.getByRole('dialog', { name: 'Report an Issue' })).toBeInTheDocument()
+  })
+
+  it('keeps footer actions labeled when the sidebar is collapsed', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(
+      <AppShell
+        user={{ id: 'user-staff-01', name: 'Jennesse Baas', role: 'staff' }}
+        active="dashboard"
+        onLogout={() => {}}
+      >
+        <div>Screen</div>
+      </AppShell>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Collapse sidebar' }))
+
+    expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+      'title',
+      'Privacy Policy',
+    )
+    expect(screen.getByRole('button', { name: 'Report an Issue' })).toHaveAttribute(
+      'title',
+      'Report an Issue',
+    )
   })
 
   it('offers the role-aware navigation from the mobile header', async () => {

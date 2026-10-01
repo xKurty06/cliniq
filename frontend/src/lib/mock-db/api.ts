@@ -48,6 +48,7 @@ import type {
   ComplaintType,
   DbState,
   ExcuseLetterApproval,
+  IssueReport,
   PeReferral,
   SeedStudent,
 } from './types'
@@ -79,6 +80,10 @@ function view(): DbState {
     reports: isEmptied('reports') ? [] : s.reports,
     backupLogs: isEmptied('backupLogs') ? [] : s.backupLogs,
     auditLog: isEmptied('auditLog') ? [] : s.auditLog,
+    frontendOnly: {
+      ...s.frontendOnly,
+      issueReports: isEmptied('issueReports') ? [] : s.frontendOnly.issueReports,
+    },
   }
 }
 
@@ -984,6 +989,38 @@ export function lookupStudentByScan(
 
 export function getAuditLog(): Promise<AuditLogEntry[]> {
   return read('audit log', (s) => [...s.auditLog].sort((a, b) => b.timestamp.localeCompare(a.timestamp)))
+}
+
+export interface IssueReportInput {
+  description: string
+  route: string
+  pageName: string
+}
+
+export function createIssueReport(input: IssueReportInput, actor?: SessionUser): Promise<IssueReport> {
+  return write('report issue', (s) => {
+    const by = actorOr(actor)
+    const description = input.description.trim()
+    if (!description) throw new Error('Issue description is required.')
+    const report: IssueReport = {
+      id: nextId('issue-report', s.frontendOnly.issueReports),
+      description,
+      route: input.route,
+      pageName: input.pageName,
+      role: by.role,
+      reportedByUserId: by.id,
+      createdAt: now(s),
+    }
+    s.frontendOnly.issueReports.push(report)
+    audit(s, by, 'create', { type: 'issue-report', id: report.id })
+    return report
+  })
+}
+
+export function listIssueReports(): Promise<IssueReport[]> {
+  return read('issue reports', (s) =>
+    [...s.frontendOnly.issueReports].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+  )
 }
 
 /** Privacy-safe, resolved Audit Log Viewer data. Reading it intentionally creates no audit entry (ADR-016). */

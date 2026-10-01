@@ -27,7 +27,7 @@ const FIELDS = {
   reports: ['type', 'dateRange'],
   backupLogs: ['lastRun', 'fileSizeBytes', 'status', 'verifiedByUserId'],
   auditLog: ['userId', 'actionType', 'targetRecord', 'timestamp'],
-  frontendOnly: ['_note', 'devAccounts', 'visitComplaintTypes', 'incidentComplaintTypes', 'inventoryTransactions', 'recordReviews', 'excuseLetterApprovals', 'peReferrals'],
+  frontendOnly: ['_note', 'devAccounts', 'visitComplaintTypes', 'incidentComplaintTypes', 'inventoryTransactions', 'recordReviews', 'excuseLetterApprovals', 'peReferrals', 'issueReports'],
 } as const
 
 /**
@@ -287,6 +287,16 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
     userRef(`${w}.referredByUserId`, p.referredByUserId)
     oneOf(`${w}.disposition`, p.disposition, ENUMS.disposition)
     relDateTime(`${w}.createdAt`, p.createdAt)
+  })
+  ;((fo.issueReports ?? []) as Rec[]).forEach((r, i) => {
+    const w = `frontendOnly.issueReports[${i}]`
+    checkFields(w, r, ['id', 'description', 'route', 'pageName', 'role', 'reportedByUserId', 'createdAt'])
+    if (!String(r.description).trim()) fail(`${w}.description: must not be empty`)
+    if (!String(r.route).trim()) fail(`${w}.route: must not be empty`)
+    if (!String(r.pageName).trim()) fail(`${w}.pageName: must not be empty`)
+    oneOf(`${w}.role`, r.role, ENUMS.role)
+    userRef(`${w}.reportedByUserId`, r.reportedByUserId)
+    relDateTime(`${w}.createdAt`, r.createdAt)
   })
 
   return problems

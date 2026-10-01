@@ -7,6 +7,7 @@ import { logoutMockSession, ROLE_LABELS, type SessionUser } from '../lib/mock-db
 import { showKeyboardShortcuts } from '../lib/shortcuts'
 import { BrandLogo, Sidebar } from './Sidebar'
 import { navGroupsFor, type NavKey } from './navigation'
+import { ReportIssueModal } from '../features/issue-reports/ReportIssueModal'
 
 /**
  * App shell: left sidebar (logo + role-aware nav) and a top bar (user chip), following the reference
@@ -29,6 +30,8 @@ export function AppShell({ user, active, children, onLogout }: AppShellProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
+  const [reportIssueNotice, setReportIssueNotice] = useState<string | null>(null)
 
   async function handleLogout() {
     setIsLoggingOut(true)
@@ -60,6 +63,10 @@ export function AppShell({ user, active, children, onLogout }: AppShellProps) {
         active={active}
         collapsed={isSidebarCollapsed}
         onCollapsedChange={setIsSidebarCollapsed}
+        onReportIssue={() => {
+          setReportIssueNotice(null)
+          setIsReportIssueOpen(true)
+        }}
         user={user}
       />
 
@@ -147,6 +154,27 @@ export function AppShell({ user, active, children, onLogout }: AppShellProps) {
           ))}
         </nav>
       </Modal>
+      <ReportIssueModal
+        open={isReportIssueOpen}
+        user={user}
+        onClose={() => setIsReportIssueOpen(false)}
+        onSubmitted={(mailtoOpened) => {
+          setReportIssueNotice(
+            mailtoOpened
+              ? 'Issue submitted. An email draft was opened as a fallback.'
+              : 'Issue submitted. The report was saved, but the email draft could not be opened.',
+          )
+        }}
+      />
+      {reportIssueNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed right-4 bottom-4 z-50 max-w-sm rounded-md border border-success bg-background px-4 py-3 text-sm font-semibold text-text-primary shadow-card"
+        >
+          {reportIssueNotice}
+        </div>
+      )}
     </div>
   )
 }

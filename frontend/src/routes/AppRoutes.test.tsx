@@ -112,6 +112,9 @@ describe('App routes', () => {
       'aria-current',
       'page',
     )
+    expect(screen.getByRole('button', { name: 'Report an Issue' })).toBeInTheDocument()
+    expect(screen.getByText('v0.1.0')).toBeInTheDocument()
+    expect(screen.getByText('Powered by HealWare™')).toBeInTheDocument()
     expect(getRecordedAuditEntries()).toEqual([])
   })
 
