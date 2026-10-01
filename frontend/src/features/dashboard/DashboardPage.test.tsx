@@ -14,11 +14,21 @@ vi.mock('react-chartjs-2', () => {
   return { Bar: Stub, Line: Stub }
 })
 
-async function renderLoaded() {
+async function renderLoaded({ allTime = false }: { allTime?: boolean } = {}) {
   const user = userEvent.setup()
   renderWithRouter(<DashboardPage />)
   await screen.findByRole('heading', { name: /due & upcoming follow-ups/i })
+  if (allTime) await showAllTime(user)
   return user
+}
+
+/** The Dashboard opens on This month; tests that need the full mock history widen it to All. */
+async function showAllTime(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: 'Date range' }))
+  await user.click(screen.getByRole('option', { name: 'All' }))
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Date range' })).toHaveTextContent('All'),
+  )
 }
 
 describe('Clinic Overview Dashboard', () => {
@@ -72,7 +82,7 @@ describe('Clinic Overview Dashboard', () => {
   })
 
   it('never shows a student name anywhere on the page (display-privacy rule)', async () => {
-    await renderLoaded()
+    await renderLoaded({ allTime: true })
     const text = document.body.textContent ?? ''
     const names = new Set((await listStudents({ includeArchived: true })).map((s) => s.fullName))
     for (const name of names) expect(text).not.toContain(name)
@@ -86,7 +96,7 @@ describe('Clinic Overview Dashboard', () => {
   })
 
   it('gives Staff read-only drill-down links and an inline calendar day summary', async () => {
-    const user = await renderLoaded()
+    const user = await renderLoaded({ allTime: true })
     const summary = screen.getByRole('region', { name: 'Summary counts' })
     for (const [label, href] of [
       ['Clinic visits', '/visits'],
@@ -148,7 +158,7 @@ describe('Clinic Overview Dashboard', () => {
   })
 
   it('is view-only: no create/update/delete actions exist', async () => {
-    await renderLoaded()
+    await renderLoaded({ allTime: true })
     const labels = screen
       .getAllByRole('button')
       .map((b) => b.getAttribute('aria-label') ?? b.textContent?.trim())
@@ -178,7 +188,8 @@ describe('Clinic Overview Dashboard', () => {
     expect(presets).toHaveClass('min-w-full')
     expect(presets).toHaveClass('w-max')
     expect(presets.querySelector('svg')).not.toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'All' })).toHaveClass(
+    expect(dateRange).toHaveTextContent('This month')
+    expect(screen.getByRole('option', { name: 'This month' })).toHaveClass(
       'bg-surface',
       'text-brand-green-dark',
     )
@@ -219,7 +230,7 @@ describe('Clinic Overview Dashboard', () => {
   })
 
   it('keeps all alert cards on one shared height track', async () => {
-    await renderLoaded()
+    await renderLoaded({ allTime: true })
     const alertCards = within(screen.getByRole('region', { name: 'Alerts' })).getAllByRole(
       'region',
       { name: /scrollable list/i },
@@ -249,7 +260,7 @@ describe('Clinic Overview Dashboard', () => {
   })
 
   it('offers a table fallback for the complaint chart', async () => {
-    const user = await renderLoaded()
+    const user = await renderLoaded({ allTime: true })
     await user.click(
       within(screen.getByRole('radiogroup', { name: 'Show trend as' })).getByRole('radio', {
         name: /table/i,
@@ -306,6 +317,7 @@ describe('Clinic Overview Dashboard', () => {
   it('shows the plain "Clinic Overview" title for Admin/Principal, with the same sections', async () => {
     renderWithRouter(<DashboardPage viewer={{ id: 'a', name: 'Principal', role: 'admin' }} />)
     await screen.findByRole('heading', { name: /due & upcoming follow-ups/i })
+    await showAllTime(userEvent.setup())
     expect(screen.getByRole('heading', { level: 1, name: 'Clinic Overview' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /visits trend/i })).toBeInTheDocument()
     expect(

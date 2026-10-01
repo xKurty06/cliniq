@@ -47,7 +47,8 @@ function DashboardSkeleton() {
  */
 export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: SessionUser }) {
   const today = todayISO()
-  const [range, setRange] = useState<DateRange>(() => rangeForPreset('all', today))
+  // A summary view opens on the current month; operational logs keep the All default.
+  const [range, setRange] = useState<DateRange>(() => rangeForPreset('thisMonth', today))
   const [granularity, setGranularity] = useState<TrendGranularity>('week')
   const canNavigate = viewer.role === 'staff'
 
