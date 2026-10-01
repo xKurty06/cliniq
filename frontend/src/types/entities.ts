@@ -146,4 +146,10 @@ export interface AuditLogEntry {
   actionType: AuditActionType
   targetRecord: { type: string; id: string } | null
   timestamp: ISODateTime
+  /**
+   * Optional: what changed, naming fields or states only, never their values (e.g. "Updated
+   * allergies", not the allergy itself), so the multi-record log stays privacy-safe. Omitted when
+   * the action and target already say everything (login, scan, submit). ADR-017.
+   */
+  summary?: string
 }

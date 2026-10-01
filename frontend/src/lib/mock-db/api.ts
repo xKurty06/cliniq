@@ -141,8 +141,33 @@ function audit(
   actor: SessionUser,
   actionType: AuditActionType,
   targetRecord: AuditLogEntry['targetRecord'],
+  summary?: string,
 ) {
-  state.auditLog.push({ userId: actor.id, actionType, targetRecord, timestamp: now(state) })
+  state.auditLog.push({ userId: actor.id, actionType, targetRecord, timestamp: now(state), ...(summary ? { summary } : {}) })
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  fullName: 'name',
+  gradeLevel: 'grade level',
+  contactInfo: 'contact info',
+  medicalConditions: 'medical conditions',
+  emergencyContact: 'emergency contact',
+  currentStock: 'stock',
+  expirationDate: 'expiration date',
+  lowStockThreshold: 'low-stock threshold',
+  dateTime: 'date and time',
+  eventTag: 'event tag',
+}
+
+/** "Updated allergies and grade level" — names the changed fields for the audit summary, never their values. */
+function changedSummary(before: object, after: object): string | undefined {
+  const old = before as Record<string, unknown>
+  const changed = Object.entries(after)
+    .filter(([key, value]) => JSON.stringify(old[key]) !== JSON.stringify(value))
+    .map(([key]) => FIELD_LABELS[key] ?? key.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`))
+  if (!changed.length) return undefined
+  const list = changed.length === 1 ? changed[0] : `${changed.slice(0, -1).join(', ')} and ${changed[changed.length - 1]}`
+  return `Updated ${list}`
 }
 
 function actorOr(actor?: SessionUser): SessionUser {
@@ -272,7 +297,7 @@ export async function changeMockPassword(userId: string, nextPassword: string): 
     audit(state, { id: user.id, name: user.name, role: user.role }, 'update', {
       type: 'user',
       id: userId,
-    })
+    }, 'Changed password')
   })
 }
 
@@ -332,6 +357,7 @@ export function saveUser(input: UserInput, options: { userId?: string; actor?: S
       throw new DuplicateUsernameError()
     }
     const existing = options.userId ? must(s.users.find((u) => u.id === options.userId), 'User') : null
+    const summary = existing ? changedSummary(existing, { name: input.name.trim(), username: input.username.trim(), role: input.role }) : undefined
     const user: User = existing
       ? Object.assign(existing, { name: input.name.trim(), username: input.username.trim(), role: input.role })
       : {
@@ -342,7 +368,7 @@ export function saveUser(input: UserInput, options: { userId?: string; actor?: S
           lastLogin: null,
         }
     if (!existing) s.users.push(user)
-    audit(s, actorOr(options.actor), existing ? 'update' : 'create', { type: 'user', id: user.id })
+    audit(s, actorOr(options.actor), existing ? 'update' : 'create', { type: 'user', id: user.id }, summary)
     return user
   })
 }
@@ -460,6 +486,7 @@ export function saveStudent(
       medicalConditions: input.medicalConditions,
       emergencyContact: input.emergencyContact,
     }
+    const summary = existing ? changedSummary(existing, fields) : undefined
     let record: SeedStudent
     if (existing) record = Object.assign(existing, fields)
     else {
@@ -467,7 +494,7 @@ export function saveStudent(
       s.students.push(record)
     }
     const action = existing ? 'update' : 'create'
-    audit(s, actorOr(options.actor), action, { type: 'student', id: record.id })
+    audit(s, actorOr(options.actor), action, { type: 'student', id: record.id }, summary)
     return { status: 'saved', student: toStudent(record), action }
   })
 }
@@ -598,8 +625,9 @@ export function updateVisit(
 ): Promise<Visit> {
   return write('update visit', (s) => {
     const visit = must(s.visits.find((v) => v.id === id), 'Visit')
+    const summary = changedSummary(visit, patch)
     Object.assign(visit, patch)
-    audit(s, actorOr(actor), 'update', { type: 'visit', id })
+    audit(s, actorOr(actor), 'update', { type: 'visit', id }, summary)
     return visit
   })
 }
@@ -712,7 +740,7 @@ export function completeIncidentStageTwo(
       hospitalReferral: input.hospitalReferral,
       stage: 2 as const,
     })
-    audit(s, by, 'update', { type: 'incident-stage-2', id: incident.id })
+    audit(s, by, 'update', { type: 'incident-stage-2', id: incident.id }, 'Completed Stage 2 details')
     for (const attempt of input.newParentNotifications) {
       incident.parentNotifications.push(attempt)
       audit(s, by, 'create', {
@@ -784,8 +812,9 @@ export function listFollowUps(query: { status?: FollowUpStatus | '' } = {}): Pro
 export function setFollowUpStatus(id: string, status: FollowUpStatus, actor?: SessionUser): Promise<FollowUp> {
   return write('update follow-up', (s) => {
     const followUp = must(s.followUps.find((f) => f.id === id), 'Follow-up')
+    const summary = followUp.status === status ? undefined : `Marked ${status}`
     followUp.status = status
-    audit(s, actorOr(actor), 'update', { type: 'follow-up', id })
+    audit(s, actorOr(actor), 'update', { type: 'follow-up', id }, summary)
     return followUp
   })
 }
@@ -816,9 +845,10 @@ export type InventoryInput = Omit<InventoryItem, 'id'>
 export function saveInventoryItem(input: InventoryInput, options: { itemId?: string; actor?: SessionUser } = {}): Promise<InventoryItem> {
   return write('save inventory item', (s) => {
     const existing = options.itemId ? must(s.inventoryItems.find((i) => i.id === options.itemId), 'Inventory item') : null
+    const summary = existing ? changedSummary(existing, input) : undefined
     const item = existing ? Object.assign(existing, input) : { id: nextId('item', s.inventoryItems), ...input }
     if (!existing) s.inventoryItems.push(item)
-    audit(s, actorOr(options.actor), existing ? 'update' : 'create', { type: 'inventory', id: item.id })
+    audit(s, actorOr(options.actor), existing ? 'update' : 'create', { type: 'inventory', id: item.id }, summary)
     return item
   })
 }
@@ -952,7 +982,7 @@ export function verifyLatestBackup(actor?: SessionUser): Promise<BackupStatusVie
     const latest = must(backupStatus(s).latest, 'Backup')
     const record = must(s.backupLogs.find((b) => b.lastRun === latest.lastRun), 'Backup')
     record.verifiedByUserId = by.id
-    audit(s, by, 'update', { type: 'backup', id: record.lastRun })
+    audit(s, by, 'update', { type: 'backup', id: record.lastRun }, 'Verified backup')
     return { ...backupStatus(s), verifiedByName: userName(s, by.id) }
   })
 }

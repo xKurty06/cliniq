@@ -10,6 +10,7 @@ import type {
   InventoryItem,
   Student,
   StudentListRef,
+  UserRole,
 } from '../../types/entities'
 import type { DbState, RecordReview, SeedStudent } from './types'
 
@@ -52,10 +53,19 @@ export interface AuditLogRow {
   dateTime: string
   userId: string
   userName: string
+  userRole: UserRole | null
   actionType: AuditActionType
+  /** What changed, by field name only (never values); absent when the action and target say it all. */
+  summary?: string
   target: {
+    /** Filter/module bucket. */
     type: AuditTargetType
+    /** The exact record kind as recorded, e.g. `incident-stage-2` or `excuse-letter`. */
+    recordType: string
+    /** Display word for the kind of record, e.g. "Incident" or "Excuse letter". */
+    kind: string
     id: string
+    /** Short identifier shown beside the kind (Student Number, item or report name); may be empty. */
     label: string
     studentNumber?: string
   } | null
@@ -69,36 +79,33 @@ export interface AuditLogList {
 function auditTargetType(target: NonNullable<AuditLogEntry['targetRecord']>): AuditTargetType {
   if (target.type.startsWith('inventory')) return 'inventory'
   if (target.type === 'followup') return 'follow-up'
+  // Incident stage saves and sign-offs are recorded against the incident itself.
+  if (target.type.startsWith('incident-stage') || target.type === 'incident-report') return 'incident'
   if (auditTargetTypes.includes(target.type as AuditTargetType)) return target.type as AuditTargetType
   return 'report'
 }
 
-function auditTargetLabel(state: DbState, target: NonNullable<AuditLogEntry['targetRecord']>) {
-  const type = auditTargetType(target)
-  if (type === 'student') {
-    const student = studentsById(state).get(target.id)
-    return { type, id: target.id, label: student ? `Student ${student.studentNumber}` : 'Student record', studentNumber: student?.studentNumber }
-  }
-  if (type === 'inventory') return { type, id: target.id, label: state.inventoryItems.find((item) => item.id === target.id)?.name ?? 'Inventory record' }
-  if (type === 'user') return { type, id: target.id, label: state.users.find((user) => user.id === target.id)?.name ?? 'User account' }
-  if (type === 'follow-up') {
-    const followUp = state.followUps.find((item) => item.id === target.id)
-    const student = followUp ? studentsById(state).get(followUp.studentId) : undefined
-    return { type, id: target.id, label: student ? `Follow-up for ${student.studentNumber}` : 'Follow-up record' }
-  }
-  return { type, id: target.id, label: describeAuditRecord(state, target) }
-}
-
-const AUDIT_RECORD_NAMES: Record<string, string> = {
+const AUDIT_RECORD_KINDS: Record<string, string> = {
+  student: 'Student',
   visit: 'Visit',
   incident: 'Incident',
+  'incident-stage-1': 'Incident',
+  'incident-stage-2': 'Incident',
   'incident-report': 'Incident report',
   'incident-escalation': 'Incident escalation',
+  'parent-notification': 'Parent notification',
   'excuse-letter': 'Excuse letter',
   'pe-sports-referral': 'PE/Sports referral',
-  'inventory-dispensation': 'Inventory dispensation',
-  backup: 'Backup',
+  inventory: 'Inventory',
+  'inventory-restock': 'Inventory',
+  'inventory-dispense': 'Inventory',
+  'inventory-dispensation': 'Inventory',
+  user: 'User',
+  'follow-up': 'Follow-up',
+  followup: 'Follow-up',
   report: 'Report',
+  backup: 'Backup',
+  'issue-report': 'Issue report',
 }
 
 const REPORT_NAMES: Record<string, string> = {
@@ -108,36 +115,52 @@ const REPORT_NAMES: Record<string, string> = {
 }
 
 /**
- * A readable description of an audited record. Internal ids (`visit-0001`) never reach the screen:
- * a visit or incident is described by its Student Number and time, which is what Staff recognise.
+ * A short, privacy-safe identifier for an audited record, shown beside its kind ("Visit · 2020-00009").
+ * Internal ids (`visit-0001`) never reach the screen, and students appear only by Student Number.
  * A human-facing reference number is a backend-phase follow-up (Issues-and-TODOs.md).
  */
-function describeAuditRecord(state: DbState, target: NonNullable<AuditLogEntry['targetRecord']>): string {
-  const name = AUDIT_RECORD_NAMES[target.type] ?? 'Record'
-  if (target.type === 'report') return REPORT_NAMES[target.id] ?? name
-  const visit = target.type === 'visit' ? state.visits.find((item) => item.id === target.id) : undefined
-  const incident =
-    target.type === 'incident' || target.type === 'incident-report'
-      ? state.incidents.find((item) => item.id === target.id)
-      : undefined
-  const record = visit ? { studentId: visit.studentId, when: visit.dateTime } : incident ? { studentId: incident.studentId, when: incident.time } : undefined
-  if (!record) return name
-  const student = studentsById(state).get(record.studentId)
-  return [name, student?.studentNumber, formatDateTime(record.when)].filter(Boolean).join(' · ')
+function auditTargetIdentifier(state: DbState, target: NonNullable<AuditLogEntry['targetRecord']>, type: AuditTargetType): { label: string; studentNumber?: string } {
+  const students = studentsById(state)
+  const studentId =
+    type === 'student'
+      ? target.id
+      : type === 'visit'
+        ? state.visits.find((item) => item.id === target.id)?.studentId
+        : type === 'incident'
+          ? state.incidents.find((item) => item.id === target.id)?.studentId
+          : type === 'follow-up'
+            ? state.followUps.find((item) => item.id === target.id)?.studentId
+            : undefined
+  if (studentId !== undefined) {
+    const studentNumber = students.get(studentId)?.studentNumber
+    return { label: studentNumber ?? '', studentNumber }
+  }
+  if (type === 'inventory') return { label: state.inventoryItems.find((item) => item.id === target.id)?.name ?? '' }
+  if (type === 'user') return { label: state.users.find((user) => user.id === target.id)?.name ?? '' }
+  if (target.type === 'report') return { label: REPORT_NAMES[target.id] ?? '' }
+  if (target.type === 'backup') return { label: /^\d{4}-\d{2}-\d{2}T/.test(target.id) ? formatDateTime(target.id) : '' }
+  return { label: '' }
+}
+
+function auditTarget(state: DbState, target: NonNullable<AuditLogEntry['targetRecord']>): NonNullable<AuditLogRow['target']> {
+  const type = auditTargetType(target)
+  return { type, recordType: target.type, kind: AUDIT_RECORD_KINDS[target.type] ?? 'Record', id: target.id, ...auditTargetIdentifier(state, target, type) }
 }
 
 /** Resolves audit actors and privacy-safe targets before a screen can render them. */
 export function auditLogList(state: DbState, query: AuditLogQuery): AuditLogList {
-  const userNames = new Map(state.users.map((user) => [user.id, user.name]))
+  const usersById = new Map(state.users.map((user) => [user.id, user]))
   const rows = state.auditLog
     .map((entry, index): AuditLogRow => ({
       id: `${entry.timestamp}|${entry.userId}|${entry.actionType}|${index}`,
       timestamp: dateOf(entry.timestamp),
       dateTime: entry.timestamp,
       userId: entry.userId,
-      userName: userNames.get(entry.userId) ?? 'Unknown user',
+      userName: usersById.get(entry.userId)?.name ?? 'Unknown user',
+      userRole: usersById.get(entry.userId)?.role ?? null,
       actionType: entry.actionType,
-      target: entry.targetRecord ? auditTargetLabel(state, entry.targetRecord) : null,
+      ...(entry.summary ? { summary: entry.summary } : {}),
+      target: entry.targetRecord ? auditTarget(state, entry.targetRecord) : null,
     }))
     .filter((row) => row.timestamp >= query.from && row.timestamp <= query.to)
     .filter((row) => !query.userId || row.userId === query.userId)

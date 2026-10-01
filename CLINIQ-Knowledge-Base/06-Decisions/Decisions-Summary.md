@@ -65,3 +65,7 @@ Every role stays signed in for up to one week, then must sign in again; there is
 ## 016 Audit Log Viewer
 
 Staff and Admin can review a read-only history of important actions, filter it, and print or export it when needed. PE and Sports Instructors cannot open it, and nobody can change or delete its entries.
+
+## 017 Audit entry summary and actor role
+
+Audit Log rows now show the actor's role, the kind of record beside a short identifier, and an optional "what changed" line on updates (e.g. "Updated allergies"). The line names fields only, never values, so no health details appear in the list.

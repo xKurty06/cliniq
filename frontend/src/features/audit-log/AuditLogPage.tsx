@@ -23,13 +23,13 @@ import { useAsyncData } from '../../hooks/useAsyncData'
 import { describeRange, rangeForPreset, type DateRange } from '../../lib/dateRange'
 import { formatDateTime, todayISO } from '../../lib/dates'
 import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
-import { auditTargetTypes, type AuditLogRow, type AuditTargetType, type SessionUser } from '../../lib/mock-db'
+import { ROLE_LABELS, auditTargetTypes, type AuditLogRow, type AuditTargetType, type SessionUser } from '../../lib/mock-db'
 import type { AuditActionType } from '../../types/entities'
 import { paths } from '../../routes/paths'
 import { fetchAuditLog } from './api/auditLogApi'
 
 const PAGE_SIZE = 10
-type AuditSortKey = 'timestamp' | 'user' | 'action' | 'target'
+type AuditSortKey = 'timestamp' | 'user' | 'action' | 'module' | 'record'
 
 const actionOptions: Array<{ value: AuditActionType; label: string }> = [
   { value: 'login', label: 'Login' },
@@ -86,7 +86,9 @@ function AuditLogSkeleton() {
 function targetPath(row: AuditLogRow, viewer: SessionUser): string | undefined {
   const target = row.target
   if (!target) return undefined
-  if (viewer.role === 'admin') return target.type === 'report' ? paths.reports : undefined
+  // Only an actual generated report opens Reports; excuse letters, referrals, and issue reports have no page of their own.
+  const isReport = target.recordType === 'report'
+  if (viewer.role === 'admin') return isReport ? paths.reports : undefined
   switch (target.type) {
     case 'student':
       return target.studentNumber ? paths.studentProfile(target.studentNumber) : undefined
@@ -97,7 +99,7 @@ function targetPath(row: AuditLogRow, viewer: SessionUser): string | undefined {
     case 'follow-up':
       return paths.followUps
     case 'report':
-      return paths.reports
+      return isReport ? paths.reports : undefined
     case 'backup':
       return paths.backup
     default:
@@ -105,11 +107,13 @@ function targetPath(row: AuditLogRow, viewer: SessionUser): string | undefined {
   }
 }
 
-function targetCell(row: AuditLogRow, viewer: SessionUser) {
+const emptyCell = <span className="text-text-secondary">—</span>
+
+function recordCell(row: AuditLogRow, viewer: SessionUser) {
   if (!row.target) return <span className="text-text-secondary">No record</span>
   const path = targetPath(row, viewer)
-  if (!path) return row.target.label
-  return <ListItemLink to={path}>View<span className="sr-only"> {row.target.label}</span></ListItemLink>
+  if (!row.target.label) return path ? <ListItemLink to={path}>View<span className="sr-only"> {row.target.kind}</span></ListItemLink> : emptyCell
+  return path ? <ListItemLink to={path}>{row.target.label}</ListItemLink> : row.target.label
 }
 
 export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
@@ -132,7 +136,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
   const needle = search.trim().toLowerCase()
   const filteredRows = needle
     ? data.rows.filter((row) =>
-        [row.userName, actionStatusMap[row.actionType].label, row.target ? targetLabels[row.target.type] : 'No record', row.target?.label ?? '']
+        [row.userName, row.userRole ? ROLE_LABELS[row.userRole] : '', actionStatusMap[row.actionType].label, row.summary ?? '', row.target?.kind ?? 'No record', row.target?.label ?? '']
           .some((text) => text.toLowerCase().includes(needle)),
       )
     : data.rows
@@ -140,7 +144,8 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
     if (key === 'timestamp') return row.dateTime
     if (key === 'user') return row.userName
     if (key === 'action') return actionStatusMap[row.actionType].label
-    return row.target?.label ?? 'No record'
+    if (key === 'module') return row.target?.kind ?? ''
+    return row.target?.label ?? ''
   })
   const changeSort = (key: AuditSortKey) => {
     setSort((current) => toggleTableSort(current, key))
@@ -152,10 +157,11 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
     onSort: () => changeSort(key),
   })
   const columns: Array<DataTableColumn<AuditLogRow>> = [
-    { key: 'timestamp', header: 'Timestamp', rowHeader: true, sort: sortColumn('timestamp', 'Timestamp'), cell: (row) => formatDateTime(row.dateTime) },
-    { key: 'user', header: 'Who', sort: sortColumn('user', 'Who'), cell: (row) => row.userName },
-    { key: 'action', header: 'Action', sort: sortColumn('action', 'Action'), cell: (row) => <StatusBadge status={row.actionType} map={actionStatusMap} /> },
-    { key: 'target', header: 'Target record', sort: sortColumn('target', 'Target record'), cell: (row) => targetCell(row, viewer) },
+    { key: 'timestamp', header: 'Timestamp', rowHeader: true, width: '19%', sort: sortColumn('timestamp', 'Timestamp'), cell: (row) => formatDateTime(row.dateTime) },
+    { key: 'user', header: 'Who', width: '20%', sort: sortColumn('user', 'Who'), cell: (row) => <div className="flex flex-col"><span>{row.userName}</span>{row.userRole && <span className="text-xs text-text-secondary">{ROLE_LABELS[row.userRole]}</span>}</div> },
+    { key: 'action', header: 'Action', width: '20%', sort: sortColumn('action', 'Action'), cell: (row) => <div className="flex flex-col items-start gap-1"><StatusBadge status={row.actionType} map={actionStatusMap} />{row.summary && <span className="text-xs text-text-secondary">{row.summary}</span>}</div> },
+    { key: 'module', header: 'Module', width: '17%', sort: sortColumn('module', 'Module'), cell: (row) => row.target?.kind ?? emptyCell },
+    { key: 'record', header: 'Record', width: '24%', sort: sortColumn('record', 'Record'), cell: (row) => recordCell(row, viewer) },
   ]
   const pageCount = Math.max(1, Math.ceil(sortedRows.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
@@ -180,7 +186,7 @@ export function AuditLogPage({ viewer }: { viewer: SessionUser }) {
         <CardHeader titleId="audit-log-title" title="Audit entries" description={`${sortedRows.length.toLocaleString('en-PH')} entr${sortedRows.length === 1 ? 'y' : 'ies'} shown · ${describeRange(range)}`} icon={<Icon name="clipboardList" />} actions={<Button variant="neutral" onClick={clearFilters} className="print:hidden">Clear Filters</Button>} />
         <CardBody className="flex flex-col gap-4">
           <div className="flex flex-wrap items-end gap-3 print:hidden">
-            <Input label="Search" type="search" value={search} placeholder="User, action, or target record" onChange={(event) => updateFilters({ search: event.target.value })} className="w-full sm:min-w-56 sm:flex-1" />
+            <Input label="Search" type="search" value={search} placeholder="User, role, action, or target record" onChange={(event) => updateFilters({ search: event.target.value })} className="w-full sm:min-w-56 sm:flex-1" />
             <DateRangePicker value={range} onChange={(value) => updateFilters({ range: value })} today={defaultRange.to} presets={['all', 'today', 'last7', 'thisMonth', 'custom']} presetLabels={{ last7: 'This week' }} customPopover popoverAlign="start" />
             <Select label="User" value={userId} options={data.users.map((user) => ({ value: user.id, label: user.name }))} placeholder="All users" onChange={(value) => updateFilters({ userId: value })} className="w-full sm:w-48" />
             <MultiSelect label="Action type" values={actionTypes} options={actionOptions} allLabel="All actions" onChange={(values) => updateFilters({ actionTypes: values as AuditActionType[] })} className="w-full sm:w-48" />

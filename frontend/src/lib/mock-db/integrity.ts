@@ -72,13 +72,13 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
   const fail = (message: string) => problems.push(message)
   const s = seed as unknown as Rec
 
-  const checkFields = (where: string, record: unknown, allowed: readonly string[]) => {
+  const checkFields = (where: string, record: unknown, allowed: readonly string[], optional: readonly string[] = []) => {
     if (!record || typeof record !== 'object') return fail(`${where}: expected an object`)
     const keys = Object.keys(record)
     for (const key of keys) {
       if (DERIVED_FIELDS.has(key))
         fail(`${where}: "${key}" is a derived value. Selectors compute it; don't store it in the JSON.`)
-      else if (!allowed.includes(key)) fail(`${where}: unexpected field "${key}"`)
+      else if (!allowed.includes(key) && !optional.includes(key)) fail(`${where}: unexpected field "${key}"`)
     }
     for (const key of allowed) if (!key.startsWith('_') && !keys.includes(key)) fail(`${where}: missing field "${key}"`)
   }
@@ -245,7 +245,8 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
 
   list('auditLog').forEach((a, i) => {
     const w = `auditLog[${i}]`
-    checkFields(w, a, FIELDS.auditLog)
+    checkFields(w, a, FIELDS.auditLog, ['summary'])
+    if (a.summary !== undefined && (typeof a.summary !== 'string' || !a.summary.trim())) fail(`${w}.summary: expected a non-empty string when present`)
     userRef(`${w}.userId`, a.userId)
     oneOf(`${w}.actionType`, a.actionType, ENUMS.actionType)
     relDateTime(`${w}.timestamp`, a.timestamp)

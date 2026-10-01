@@ -10,7 +10,7 @@
 - **InventoryItem** — id, name, category, current stock, unit, expiration date, low-stock threshold
 - **Report** — type, date range, generated file/data
 - **BackupLog** — last run timestamp, file size, status, verified-by
-- **AuditLogEntry** — user, action type, target record, timestamp
+- **AuditLogEntry** — user, action type, target record, timestamp, optional summary of what changed (field names only, never values — ADR-017)
 
 Full source for these: `CLINIQ_Frontend_Context_Brief.md`, §5.
 

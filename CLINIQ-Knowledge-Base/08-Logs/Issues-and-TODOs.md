@@ -87,6 +87,8 @@
 
 ## Known gaps
 
+- **Canonical Frontend Context Brief §5 needs the optional AuditLogEntry `summary` field** (Friday, October 2, 2026 — 00:28 PHT). ADR-017 added it (field names only, never values). ERD.md is updated; the canonical brief's AuditLogEntry line still lists only user / action / target / timestamp.
+
 - Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
 - Frontend mock implementation is now substantially built through the F2 screen set; Laravel API integration, database schema, and production authentication remain future backend work.
 

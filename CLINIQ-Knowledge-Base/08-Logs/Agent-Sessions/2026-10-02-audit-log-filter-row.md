@@ -49,3 +49,23 @@ Prompt/Request: "replace it with just view"
 Changes Made: Navigable Target record cells now render only the `View ›` ListItemLink; the target label survives only as sr-only text in the link's accessible name. Non-navigable targets (e.g. most rows for the Admin viewer) still show their label as plain text, since there is nothing to open. Search and Target-column sorting still use the label.
 Testing Performed: `npx tsc -b --noEmit` clean; `npx vitest run` — 49 files / 221 tests pass.
 Known Issues: Sighted users can no longer see which record a navigable entry targets without opening it; sorting by Target record orders rows by a label that is no longer visible.
+
+---
+
+Follow-up — Friday, October 2, 2026 — 00:28 PHT
+Prompt/Request: User felt the Audit Log was "missing informations" but couldn't name it. I identified the missing "which record" (lost to the bare "View" link) and proposed: a short-form target, the actor's role, and a "what changed" line. The user replied "yes" to all.
+Files Modified: frontend/src/types/entities.ts; frontend/src/lib/mock-db/{api.ts, selectors.ts, integrity.ts, mock-db.json}; frontend/src/features/audit-log/{AuditLogPage.tsx, AuditLogPage.test.tsx}; frontend/src/features/ui-review-regressions.test.tsx; 06-Decisions/ADR-017 + Decisions-Summary; 02-Architecture/Database/ERD.md; 08-Logs/Issues-and-TODOs.md.
+Changes Made:
+- AuditLogEntry.summary (optional, field names only). Mock `audit()` takes it; `changedSummary()` names the fields that actually changed for student, visit, user, and inventory saves. Fixed summaries: "Changed password", "Completed Stage 2 details", "Marked <status>", "Verified backup". Five seeded update entries got summaries. The validator allows it as an optional non-empty string.
+- AuditLogRow: added userRole and summary. The target is now {type, recordType, kind, id, label}, with label a short identifier (Student Number / item / user / report name, or empty). The visit/incident datetime was dropped from the label. incident-stage-* and incident-report now bucket as Incident (they had fallen through to Report and linked to the Reports page). Excuse letters, referrals, and issue reports no longer link to Reports.
+- UI: Who = name + ROLE_LABELS role; Action = badge + optional summary; Target = muted kind · ListItemLink identifier (plain bold when not navigable). Search also matches role, summary, and kind. Target sort uses kind + identifier.
+- Updated the regression test that locked the old long label format. The "no internal ids" assertion is unchanged.
+Testing Performed: tsc clean; vitest 49 files / 222 tests pass; visual check at 1440px (default list and "updated" search).
+Known Issues: Canonical Frontend Context Brief §5 still needs the summary field (flagged in Issues-and-TODOs).
+
+---
+
+Follow-up — Friday, October 2, 2026 — 00:31 PHT
+Prompt/Request: "it doesn't look appealing maybe add another column or what" (screenshot of the combined Target record cell; it showed the pre-ADR-017 long labels, i.e. a stale HMR module in the user's browser).
+Changes Made: Replaced the single Target record column with Module (target.kind, "—" when there's no target) and Record (ListItemLink identifier; "View" when navigable but unlabeled; "No record" when no target). Both are sortable (sort keys module/record). Columns get fixed widths 19/20/20/17/24%. Removed the Issues entry about the combined kind+identifier sort, which is now moot. Updated the regression test's text pattern for the split cells.
+Testing Performed: tsc clean; vitest 49 files / 222 tests pass; visual check at 1440px after a fresh reload.

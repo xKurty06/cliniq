@@ -53,6 +53,19 @@ describe('Audit Log', () => {
     expect(await screen.findByRole('table', { name: 'Filtered audit log' })).toBeInTheDocument()
   })
 
+  it('shows each actor role, the record kind beside its identifier, and what changed', async () => {
+    renderPage()
+    const table = await screen.findByRole('table', { name: 'Filtered audit log' })
+
+    expect(within(table).getAllByText('School Clinician').length).toBeGreaterThan(0)
+    expect(within(table).getAllByText('Student').length).toBeGreaterThan(0)
+    expect(within(table).getAllByRole('link', { name: /^\d{4}-\d{5}$/ }).length).toBeGreaterThan(0)
+
+    await userEvent.setup().type(screen.getByRole('searchbox', { name: 'Search' }), 'updated allergies')
+    await screen.findByText(/1 entry shown/)
+    expect(screen.getAllByText('Updated allergies').length).toBeGreaterThan(0)
+  })
+
   it('filters action types through the multi-select control', async () => {
     const user = userEvent.setup()
     renderPage()
