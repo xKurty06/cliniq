@@ -12,6 +12,10 @@
 
 - **Recipient email.** Temporary placeholder `team@example.com` is used by the footer modal's `mailto:` fallback; replace it with the team's real contact in `frontend/src/features/issue-reports/reportIssueConfig.ts` when one is designated. Added Thursday, October 01, 2026 — 13:09 PHT.
 
+## Verification notes
+
+- Thursday, October 01, 2026 — 15:42 PHT — `npm run lint` currently fails on the pre-existing `react-hooks/set-state-in-effect` error in `frontend/src/features/issue-reports/ReportIssueModal.tsx`; the Dashboard inventory badge change does not touch that file.
+
 ## Open design questions — school year handling & grade promotion
 
 **This was a real gap: this whole discussion happened in chat and was never actually written down here — caught late, when it should have been captured the same session it came up, like everything else in this file.** Nothing below has been decided; these are the open questions as originally raised, not resolved answers.

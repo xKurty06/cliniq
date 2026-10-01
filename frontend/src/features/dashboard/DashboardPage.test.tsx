@@ -125,6 +125,25 @@ describe('Clinic Overview Dashboard', () => {
     expect(screen.getByText('MCA Dance Program')).toHaveClass('bg-brand-yellow')
   })
 
+  it('stacks inventory badges only when the alert card is narrow', async () => {
+    await renderLoaded()
+    const inventoryList = screen.getByRole('region', {
+      name: /low-stock & expiring items \(scrollable list\)/i,
+    })
+    const cetirizineRow = within(inventoryList).getByText('Cetirizine 10mg').closest('li')
+    const badgeGroup = within(cetirizineRow as HTMLElement)
+      .getByText('Expires in 11 days')
+      .closest('div')
+
+    expect(badgeGroup).toHaveClass(
+      'flex',
+      'flex-wrap',
+      '@max-[28rem]:flex-col',
+      '@max-[28rem]:flex-nowrap',
+      '@max-[28rem]:items-end',
+    )
+  })
+
   it('switches calendar views with the keyboard (radiogroup arrow keys)', async () => {
     const user = await renderLoaded()
     const group = screen.getByRole('radiogroup', { name: 'Calendar period' })

@@ -124,6 +124,7 @@ export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
       title={LISTS.inventory.title}
       icon={LISTS.inventory.icon}
       count={rows.length}
+      className="@container"
       description="Current stock. Low stock and expiry are separate flags."
       empty={{
         title: 'No inventory alerts',
@@ -136,7 +137,7 @@ export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
           primary={row.item.name}
           secondary={`${row.item.currentStock} ${row.item.unit} in stock · threshold ${row.item.lowStockThreshold}`}
           trailing={
-            <>
+            <div className="flex flex-wrap justify-end gap-1 @max-[28rem]:flex-col @max-[28rem]:flex-nowrap @max-[28rem]:items-end">
               {row.flags.map((flag) => (
                 <StatusBadge
                   key={flag}
@@ -145,7 +146,7 @@ export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
                   label={flag === 'low_stock' ? undefined : expiryLabel(row)}
                 />
               ))}
-            </>
+            </div>
           }
         />
       ))}

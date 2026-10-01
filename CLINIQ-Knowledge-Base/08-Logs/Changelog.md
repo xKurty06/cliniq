@@ -1,5 +1,7 @@
 # Changelog
 
+| Thursday, October 01, 2026 — 15:42 PHT | Kept Dashboard inventory badges horizontal when space allows, then stacks them below a narrow-card limit so long item names retain their width; added regression coverage. | `frontend/src/features/dashboard/components/AlertLists.tsx`, `frontend/src/features/dashboard/DashboardPage.test.tsx`, `08-Logs/Agent-Sessions/2026-10-01-dashboard-inventory-badge-wrap.md` |
+
 | Thursday, October 01, 2026 — 15:32 PHT | Added an explicit repository rule not to use Microsoft Edge, Edge CDP, or headless Edge for testing; deterministic tests and Playwright/Chromium are the permitted verification paths. | `AGENTS.md`, `08-Logs/Agent-Sessions/2026-10-01-no-edge-testing.md` |
 
 | Thursday, October 01, 2026 — 15:23 PHT | Corrected Dashboard trend-table totals to sum only the visible post-cap periods, so a complaint with activity only in an earlier hidden period no longer shows a non-zero Total beside all-zero visible cells. Chart and Common complaints totals remain full-range. | `frontend/src/features/dashboard/components/ComplaintTrends.tsx`, `frontend/src/features/dashboard/components/ComplaintTrends.test.tsx`, `08-Logs/Agent-Sessions/2026-10-01-dashboard-table-visible-total.md` |
