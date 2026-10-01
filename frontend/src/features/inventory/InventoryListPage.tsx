@@ -23,6 +23,7 @@ import { useAsyncData } from '../../hooks/useAsyncData'
 import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
 import { paths } from '../../routes/paths'
 import { fetchInventory, type InventoryFilters, type InventoryItemView } from './api/inventoryApi'
+import { inventoryStatusSortValue } from './inventoryStatusSort'
 
 function InventorySkeleton() {
   return (
@@ -57,7 +58,7 @@ const baseColumns: Array<DataTableColumn<InventoryItemView>> = [
 
 export function InventoryListPage() {
   const [filters, setFilters] = useState<InventoryFilters>({ search: '', category: '' })
-  const [sort, setSort] = useState<TableSortState<InventorySortKey>>({ key: 'expiry', direction: 'descending' })
+  const [sort, setSort] = useState<TableSortState<InventorySortKey>>({ key: 'status', direction: 'ascending' })
   const key = `${filters.search}|${filters.category}`
   const { data, status, isRefetching, reload } = useAsyncData(key, () => fetchInventory(filters))
   if (status === 'error') return <div className="mx-auto max-w-page-wide px-4 pt-10 pb-8 sm:px-8"><ErrorState title="Unable to load inventory." onRetry={reload} /></div>
@@ -80,7 +81,7 @@ export function InventoryListPage() {
     if (key === 'category') return item.category
     if (key === 'stock') return item.currentStock
     if (key === 'expiry') return item.expirationDate
-    return [...item.flags, item.belowZero ? 'below-zero' : ''].join(',')
+    return inventoryStatusSortValue(item)
   })
   return (
     <div className="mx-auto flex max-w-page-wide flex-col gap-4 px-4 pt-10 pb-8 sm:px-8">

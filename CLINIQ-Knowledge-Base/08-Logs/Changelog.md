@@ -1,5 +1,7 @@
 # Changelog
 
+| Thursday, October 01, 2026 — 08:20 | Inventory now opens sorted by Staff attention status: critical expired/below-zero items, nearing expiration, low stock, then normal inventory. | `frontend/src/features/inventory/InventoryListPage.tsx`, `frontend/src/features/inventory/inventoryStatusSort.ts`, `08-Logs/Agent-Sessions/2026-10-01-inventory-status-default-sort.md` |
+
 | Date | Summary | Detail |
 |---|---|---|
 | Thursday, October 1, 2026 — 08:06 PHT | Made date/date-time columns the active default sort in descending order across sortable tables, keeping missing dates at the bottom so the latest real record appears first. | `08-Logs/Agent-Sessions/2026-10-01-default-date-sorts.md`, `.claude/skills/cliniq-sorting-patterns/`, `frontend/src/lib/tableSort.ts` |
