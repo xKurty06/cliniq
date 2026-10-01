@@ -38,6 +38,8 @@ import type {
 
 type ViewMode = 'chart' | 'table'
 
+const MAX_VISIBLE_TABLE_PERIODS = 12
+
 function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
   return granularity === 'week'
     ? `Week of ${formatDate(bucket.from)}`
@@ -195,16 +197,30 @@ function TrendLineChart({ trends, clusters }: { trends: Trends; clusters: Cluste
   )
 }
 
-function TrendTable({ trends }: { trends: Trends }) {
-  const [sort, setSort] = useState<TableSortState<string>>({ key: 'total', direction: 'descending' })
+export function TrendTable({ trends }: { trends: Trends }) {
+  const [sort, setSort] = useState<TableSortState<string>>({
+    key: 'total',
+    direction: 'descending',
+  })
+  const [showAllComplaints, setShowAllComplaints] = useState(false)
   const totals = bucketTotals(trends)
+  const firstVisibleBucketIndex = Math.max(0, trends.buckets.length - MAX_VISIBLE_TABLE_PERIODS)
+  const visibleBucketIndexes = trends.buckets
+    .slice(firstVisibleBucketIndex)
+    .map((_, index) => firstVisibleBucketIndex + index)
+  const visibleBuckets = visibleBucketIndexes.map((index) => trends.buckets[index])
+  const earlierPeriodCount = firstVisibleBucketIndex
   const totalRow: ComplaintSeries = {
     complaint: 'All visits & incidents',
     counts: totals,
     total: totals.reduce((a, b) => a + b, 0),
     clusterBuckets: [],
   }
-  const rows = [totalRow, ...trends.series, ...trends.otherComplaints]
+  const complaintRows = [...trends.series, ...trends.otherComplaints]
+  const visibleComplaintRows = complaintRows.filter(
+    (row) => showAllComplaints || visibleBucketIndexes.some((index) => row.counts[index] > 0),
+  )
+  const rows = [totalRow, ...visibleComplaintRows]
   const sortColumn = (key: string, label: string) => ({
     label,
     direction: sort.key === key ? sort.direction : undefined,
@@ -219,23 +235,26 @@ function TrendTable({ trends }: { trends: Trends }) {
       width: '14rem',
       sort: sortColumn('complaint', 'Complaint'),
     },
-    ...trends.buckets.map((b, i) => ({
-      key: b.key,
-      header: bucketName(b, trends.granularity),
-      align: 'right' as const,
-      width: '8rem',
-      sort: sortColumn(b.key, bucketName(b, trends.granularity)),
-      cell: (r: ComplaintSeries) =>
-        r.clusterBuckets.includes(i) ? (
-          <span className="inline-flex items-center gap-1 font-semibold">
-            <Icon name="alertTriangle" size={12} className="text-warning" />
-            {r.counts[i]}
-            <span className="sr-only"> (possible symptom cluster)</span>
-          </span>
-        ) : (
-          r.counts[i]
-        ),
-    })),
+    ...visibleBuckets.map((b, displayIndex) => {
+      const sourceIndex = visibleBucketIndexes[displayIndex]
+      return {
+        key: b.key,
+        header: bucketName(b, trends.granularity),
+        align: 'right' as const,
+        width: '8rem',
+        sort: sortColumn(b.key, bucketName(b, trends.granularity)),
+        cell: (r: ComplaintSeries) =>
+          r.clusterBuckets.includes(sourceIndex) ? (
+            <span className="inline-flex items-center gap-1 font-semibold">
+              <Icon name="alertTriangle" size={12} className="text-warning" />
+              {r.counts[sourceIndex]}
+              <span className="sr-only"> (possible symptom cluster)</span>
+            </span>
+          ) : (
+            r.counts[sourceIndex]
+          ),
+      }
+    }),
     {
       key: 'total',
       header: 'Total',
@@ -252,14 +271,36 @@ function TrendTable({ trends }: { trends: Trends }) {
     return bucketIndex >= 0 ? row.counts[bucketIndex] : null
   })
   return (
-    <DataTable
-      caption="Complaint counts per period, visits and incidents combined. A warning icon marks a possible symptom cluster."
-      columns={columns}
-      rows={sortedRows}
-      rowKey={(r) => r.complaint}
-      fixedLayout
-      className="[&_table]:min-w-max"
-    />
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        aria-pressed={showAllComplaints}
+        onClick={() => setShowAllComplaints((current) => !current)}
+        className="w-fit cursor-pointer rounded-sm px-1 py-0.5 text-xs text-text-secondary underline-offset-2 transition-colors duration-150 hover:text-brand-green-dark hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
+      >
+        {showAllComplaints ? 'Hide zero-activity complaint types' : 'Show all complaint types'}
+      </button>
+      <p aria-live="polite" className="sr-only">
+        {showAllComplaints
+          ? 'Showing all complaint types.'
+          : 'Zero-activity complaint types are hidden.'}
+      </p>
+      <DataTable
+        caption="Complaint counts per period, visits and incidents combined. A warning icon marks a possible symptom cluster."
+        columns={columns}
+        rows={sortedRows}
+        rowKey={(r) => r.complaint}
+        fixedLayout
+        stickyFirstColumn
+        className="[&_table]:min-w-max"
+      />
+      {earlierPeriodCount > 0 && (
+        <p className="text-xs text-text-secondary">
+          + {earlierPeriodCount} earlier period{earlierPeriodCount === 1 ? '' : 's'} — narrow the
+          date range to see them
+        </p>
+      )}
+    </div>
   )
 }
 

@@ -30,6 +30,8 @@ export interface DataTableProps<Row> {
   rowKey: (row: Row) => string
   /** Prevent filtered row content from redistributing column positions. */
   fixedLayout?: boolean
+  /** Keep the leftmost column opaque and visible while the table scrolls horizontally. */
+  stickyFirstColumn?: boolean
   className?: string
 }
 
@@ -45,12 +47,16 @@ export function DataTable<Row>({
   rows,
   rowKey,
   fixedLayout = false,
+  stickyFirstColumn = false,
   className,
 }: DataTableProps<Row>) {
   return (
     <div
       tabIndex={0}
-      className={cn('relative overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green', className)}
+      className={cn(
+        'relative overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green',
+        className,
+      )}
     >
       <table className={cn('w-full border-collapse text-sm', fixedLayout && 'table-fixed')}>
         {fixedLayout && (
@@ -67,7 +73,7 @@ export function DataTable<Row>({
         </caption>
         <thead>
           <tr className="border-b border-border">
-            {columns.map((col) => (
+            {columns.map((col, columnIndex) => (
               <th
                 key={col.key}
                 scope="col"
@@ -75,6 +81,9 @@ export function DataTable<Row>({
                 className={cn(
                   'px-2 py-1.5 text-xs font-semibold whitespace-nowrap text-text-secondary',
                   col.align === 'right' ? 'text-right' : 'text-left',
+                  stickyFirstColumn &&
+                    columnIndex === 0 &&
+                    'sticky left-0 z-20 border-r border-border bg-background',
                 )}
               >
                 {col.sort ? (
@@ -107,7 +116,7 @@ export function DataTable<Row>({
         <tbody>
           {rows.map((row) => (
             <tr key={rowKey(row)} className="border-b border-border last:border-b-0">
-              {columns.map((col) => {
+              {columns.map((col, columnIndex) => {
                 const Cell = col.rowHeader ? 'th' : 'td'
                 return (
                   <Cell
@@ -117,6 +126,9 @@ export function DataTable<Row>({
                       'px-2 py-1.5 text-text-primary tabular-nums',
                       col.rowHeader ? 'font-semibold' : 'font-normal',
                       col.align === 'right' ? 'text-right' : 'text-left',
+                      stickyFirstColumn &&
+                        columnIndex === 0 &&
+                        'sticky left-0 z-10 border-r border-border bg-background',
                     )}
                   >
                     {col.cell(row)}

@@ -151,6 +151,14 @@ describe('Clinic Overview Dashboard', () => {
     expect(table).toBeInTheDocument()
     expect(table).toHaveClass('table-fixed')
     expect(table.parentElement).toHaveClass('[&_table]:min-w-max')
+    expect(table.querySelectorAll('thead th')).toHaveLength(14)
+    expect(
+      screen.getByText(/earlier periods — narrow the date range to see them/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Sort by Total, currently descending' }),
+    ).toBeInTheDocument()
+    expect(table.querySelector('thead th')).toHaveClass('sticky', 'left-0', 'bg-background')
     const columns = table.querySelectorAll('col')
     expect(columns[0]).toHaveAttribute('style', 'width: 14rem;')
     expect(columns[1]).toHaveAttribute('style', 'width: 8rem;')
