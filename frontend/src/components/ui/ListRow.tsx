@@ -30,15 +30,8 @@ export function ListRow({
   interactive = false,
   className,
 }: ListRowProps) {
-  return (
-    <li
-      className={cn(
-        'flex items-start justify-between gap-3 px-5 py-3',
-        interactive &&
-          'cursor-pointer transition-colors hover:bg-surface motion-reduce:transition-none',
-        className,
-      )}
-    >
+  const content = (
+    <>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-semibold text-text-primary">{primary}</div>
         {/* Wraps instead of truncating: a list must not hide part of an item's detail. */}
@@ -50,7 +43,16 @@ export function ListRow({
           {meta && <span className="text-xs text-text-secondary tabular-nums">{meta}</span>}
         </div>
       )}
-    </li>
+    </>
+  )
+  const rowClass = cn(
+    'flex items-start justify-between gap-3 px-5 py-3',
+    interactive &&
+      'cursor-pointer transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-brand-green motion-reduce:transition-none',
+  )
+
+  return (
+    <li className={cn(rowClass, className)}>{content}</li>
   )
 }
 

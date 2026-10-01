@@ -49,6 +49,7 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
   const today = todayISO()
   const [range, setRange] = useState<DateRange>(() => rangeForPreset('all', today))
   const [granularity, setGranularity] = useState<TrendGranularity>('week')
+  const canNavigate = viewer.role === 'staff'
 
   const { data, status, isRefetching, reload } = useAsyncData(
     `${range.from}|${range.to}|${granularity}`,
@@ -87,12 +88,12 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
             isRefetching && 'opacity-60',
           )}
         >
-          <StatCardRow summary={data} range={range} />
+          <StatCardRow summary={data} range={range} canNavigate={canNavigate} />
 
           <section aria-label="Alerts" className={ALERT_GRID}>
-            <FollowUpsAlert summary={data} />
-            <FrequentVisitorsAlert summary={data} range={range} />
-            <InventoryAlert summary={data} />
+            <FollowUpsAlert summary={data} canNavigate={canNavigate} />
+            <FrequentVisitorsAlert summary={data} range={range} canNavigate={canNavigate} />
+            <InventoryAlert summary={data} canNavigate={canNavigate} />
           </section>
 
           <ComplaintTrends
@@ -104,7 +105,7 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
       ) : null}
 
       {/* Separate data source: loads in parallel with its own skeleton, and fails/retries on its own. */}
-      <VisitCalendar today={today} initialAnchor={range.to} />
+      <VisitCalendar today={today} initialAnchor={range.to} canNavigate={canNavigate} />
     </div>
   )
 }

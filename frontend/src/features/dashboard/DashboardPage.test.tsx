@@ -81,12 +81,69 @@ describe('Clinic Overview Dashboard', () => {
     expect(first.textContent).toMatch(/Frequent-visit warning/)
   })
 
+  it('gives Staff read-only drill-down links and an inline calendar day summary', async () => {
+    const user = await renderLoaded()
+    const summary = screen.getByRole('region', { name: 'Summary counts' })
+    for (const [label, href] of [
+      ['Clinic visits', '/visits'],
+      ['Incidents', '/incidents'],
+      ['Incomplete records', '/students/incomplete'],
+      ['Low-stock items', '/inventory'],
+      ['Active students', '/students'],
+    ]) {
+      const link = within(summary).getByRole('link', { name: label })
+      expect(link).toHaveAttribute('href', href)
+      expect(link).toHaveClass('text-current', 'hover:underline', 'hover:brightness-75')
+    }
+    expect(within(summary).queryByText('View all')).not.toBeInTheDocument()
+
+    const followUps = screen.getByRole('region', {
+      name: /due & upcoming follow-ups \(scrollable list\)/i,
+    })
+    expect(within(followUps).getAllByRole('link')[0].getAttribute('href')).toMatch(/^\/students\//)
+    expect(screen.getAllByRole('link', { name: 'View all' }).some((link) => link.getAttribute('href') === '/follow-ups')).toBe(true)
+
+    const frequentVisitors = screen.getByRole('region', {
+      name: /frequent-visitor warnings \(scrollable list\)/i,
+    })
+    expect(within(frequentVisitors).getAllByRole('link')[0].getAttribute('href')).toMatch(
+      /^\/students\//,
+    )
+    expect(screen.getAllByRole('link', { name: 'View all' })).toHaveLength(2)
+
+    const inventory = screen.getByRole('region', {
+      name: /low-stock & expiring items \(scrollable list\)/i,
+    })
+
+    for (const list of [followUps, inventory]) {
+      const card = list.closest('section')
+      expect(card?.firstElementChild).toContainElement(
+        within(card as HTMLElement).getByRole('link', { name: 'View all' }),
+      )
+    }
+
+    const oralRehydrationSalts = within(inventory).getByRole('link', {
+      name: 'Oral Rehydration Salts',
+    })
+    expect(oralRehydrationSalts).toHaveClass('max-w-full')
+    expect(oralRehydrationSalts.firstElementChild).toHaveClass('truncate')
+    expect(oralRehydrationSalts.querySelector('svg')).toHaveClass('shrink-0')
+
+    expect(within(inventory).getAllByRole('link')[0]).toHaveAttribute('href', '/inventory')
+
+    const day = screen.getAllByRole('button', { name: /view activity for/i })[0]
+    await user.click(day)
+    expect(screen.getByRole('region', { name: /activity on/i })).toBeInTheDocument()
+  })
+
   it('is view-only: no create/update/delete actions exist', async () => {
     await renderLoaded()
-    const labels = screen.getAllByRole('button').map((b) => b.textContent?.trim())
+    const labels = screen
+      .getAllByRole('button')
+      .map((b) => b.getAttribute('aria-label') ?? b.textContent?.trim())
     for (const label of labels) {
       expect(label).toMatch(
-        /^(All|Today|Last 7 days|Last 30 days|This month|Custom range|Print \/ Save as PDF|Previous.*|Next.*)$/,
+        /^(Date range|All|Today|Last 7 days|Last 30 days|This month|Custom range|Print \/ Save as PDF|Previous.*|Next.*|View activity for.*)$/,
       )
     }
   })
@@ -127,7 +184,7 @@ describe('Clinic Overview Dashboard', () => {
     const followUpList = screen.getByRole('region', {
       name: /due & upcoming follow-ups \(scrollable list\)/i,
     })
-    expect(within(followUpList).getAllByRole('listitem')[0]).not.toHaveClass('cursor-pointer')
+    expect(within(followUpList).getAllByRole('link')[0]).toHaveClass('cursor-pointer', 'underline', 'text-brand-green-dark')
     expect(screen.getByText('MCA Dance Program')).toHaveClass('bg-brand-yellow')
   })
 
@@ -177,7 +234,7 @@ describe('Clinic Overview Dashboard', () => {
       'true',
     )
     expect(within(group).getByRole('radio', { name: 'Yearly' })).toHaveFocus()
-    await waitFor(() => expect(screen.getByText(/tagged days in/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/activity days in/i)).toBeInTheDocument())
   })
 
   it('offers a table fallback for the complaint chart', async () => {
@@ -243,6 +300,20 @@ describe('Clinic Overview Dashboard', () => {
     await screen.findByRole('heading', { name: /due & upcoming follow-ups/i })
     expect(screen.getByRole('heading', { level: 1, name: 'Clinic Overview' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /visits trend/i })).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('region', { name: 'Summary counts' })).queryAllByRole('link'),
+    ).toHaveLength(0)
+    expect(screen.queryByRole('link', { name: 'View all' })).not.toBeInTheDocument()
+    for (const name of [
+      /due & upcoming follow-ups \(scrollable list\)/i,
+      /frequent-visitor warnings \(scrollable list\)/i,
+      /low-stock & expiring items \(scrollable list\)/i,
+    ]) {
+      const list = screen.getByRole('region', { name })
+      expect(within(list).queryAllByRole('link')).toHaveLength(0)
+      expect(within(list).getAllByRole('listitem')[0]).not.toHaveClass('cursor-pointer')
+    }
+    expect(screen.queryByRole('button', { name: /view activity for/i })).not.toBeInTheDocument()
   })
 
   it('shows an error state with a retry action when loading fails', async () => {

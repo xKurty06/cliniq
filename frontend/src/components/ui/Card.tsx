@@ -43,7 +43,7 @@ export function CardHeader({
         className,
       )}
     >
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className="flex min-w-0 flex-1 items-center gap-2.5">
         {icon && <span className="shrink-0 text-brand-green-dark [&>svg]:size-8">{icon}</span>}
         <div className="min-w-0">
           <Heading id={titleId} className="text-base font-semibold text-text-primary">
@@ -52,7 +52,7 @@ export function CardHeader({
           {description && <p className="mt-0.5 text-xs text-text-secondary">{description}</p>}
         </div>
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2 print:hidden">{actions}</div>}
+      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2 print:hidden">{actions}</div>}
     </div>
   )
 }

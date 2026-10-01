@@ -18,6 +18,15 @@ This skill exists because the first real build (the Dashboard) shipped without c
 - Plain list rows/cards that navigate → subtle `surface` background tint on hover, so the whole row visibly responds
 - Links → an underline or color shift, not silence
 
+**Navigable cards and list items need an affordance visible at rest.** Do not make a whole card or
+row a silent click target signaled only by cursor/hover. List widgets use a visible `View all` link
+with a short arrow in the header, beside the title/count. Stat cards keep their required tone-icon
+chip alone in the header; their figure carries an icon-only trailing chevron whose link has an
+accessible `View all [stat label]` name. Individual list items link only the identifying text and
+show its at-rest underline/color plus a smaller chevron; keep that chevron `shrink-0` beside a
+truncating label so it can never wrap onto a line of its own. Surrounding metadata remains static.
+Touch users must be able to discover navigation without hover.
+
 **Dropdowns and selects must match the design system — never left as native OS/browser chrome.** A plain `<select>` renders with whatever the operating system defaults to, and that default has nothing to do with `brand-green`, this system's border-radius, or its focus-ring treatment. Minimum fix, no new dependency required: `appearance: none`, a custom chevron icon, and the same border/background/border-radius/focus-ring styling already used on text inputs. Only reach for a headless UI library (Radix UI, Headless UI) if genuinely richer interaction is needed later — not as the default fix for basic styling. In practice, don't style a native `<select>` at all: use the shared `Select`, `DateRangePicker`, or `MultiSelect`, which already share one look (see `cliniq-dropdown-patterns`).
 
 ## When to apply this

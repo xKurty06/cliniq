@@ -13,6 +13,8 @@ export interface ListCardProps {
   description?: ReactNode
   /** Row count, shown as a neutral badge next to the title. */
   count: number
+  /** Optional navigation or other non-mutating header control. */
+  actions?: ReactNode
   /** `ListRow` elements. */
   children: ReactNode
   empty: { title: string; description?: string }
@@ -31,6 +33,7 @@ export function ListCard({
   icon,
   description,
   count,
+  actions,
   children,
   empty,
   maxHeightClass = 'max-h-80',
@@ -52,6 +55,7 @@ export function ListCard({
         }
         icon={<Icon name={icon} />}
         description={description}
+        actions={actions}
       />
       {count === 0 ? (
         <EmptyState icon="checkCircle" title={empty.title} description={empty.description} />

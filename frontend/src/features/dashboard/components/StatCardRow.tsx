@@ -1,11 +1,14 @@
 import {
+  Icon,
   StatCard,
   StatCardSkeleton,
   type IconName,
   type StatTone,
   type StatTrend,
 } from '../../../components'
+import { Link } from 'react-router'
 import { rangeLengthDays, type DateRange } from '../../../lib/dateRange'
+import { paths } from '../../../routes/paths'
 import type { DashboardSummary } from '../../../types/dashboard'
 
 /**
@@ -22,6 +25,18 @@ const CARDS = {
 } satisfies Record<string, { icon: IconName; label: string; tone: StatTone }>
 
 const GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+
+function StatLabelLink({ to, label }: { to: string; label: string }) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex items-center gap-0.5 text-current cursor-pointer transition-[color,text-decoration-color] hover:underline hover:brightness-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
+    >
+      {label}
+      <Icon name="chevronRight" size={14} />
+    </Link>
+  )
+}
 
 export function StatCardRowSkeleton() {
   return (
@@ -57,61 +72,106 @@ function trendFor(current: number, previous: number, range: DateRange): StatTren
  * 2026-09-26, ADR-011). Range-scoped cards compare against the previous equal period (the header
  * shows which period); the others say "Current".
  */
-export function StatCardRow({ summary, range }: { summary: DashboardSummary; range: DateRange }) {
+export function StatCardRow({
+  summary,
+  range,
+  canNavigate,
+}: {
+  summary: DashboardSummary
+  range: DateRange
+  canNavigate: boolean
+}) {
   const { counts, previousCounts } = summary
+  const cards = [
+    {
+      to: paths.visits,
+      card: (
+        <StatCard
+          icon={CARDS.visits.icon}
+          label={CARDS.visits.label}
+          tone={CARDS.visits.tone}
+          value={counts.visits}
+          trend={trendFor(counts.visits, previousCounts.visits, range)}
+          labelAction={
+            canNavigate ? <StatLabelLink to={paths.visits} label={CARDS.visits.label} /> : undefined
+          }
+        />
+      ),
+    },
+    {
+      to: paths.incidents,
+      card: (
+        <StatCard
+          icon={CARDS.incidents.icon}
+          label={CARDS.incidents.label}
+          tone={CARDS.incidents.tone}
+          value={counts.incidents}
+          trend={trendFor(counts.incidents, previousCounts.incidents, range)}
+          footnote={
+            counts.incidentsAtStage1 > 0
+              ? `${counts.incidentsAtStage1} still at Stage 1`
+              : undefined
+          }
+          labelAction={
+            canNavigate ? <StatLabelLink to={paths.incidents} label={CARDS.incidents.label} /> : undefined
+          }
+        />
+      ),
+    },
+    {
+      to: paths.incompleteRecords,
+      card: (
+        <StatCard
+          icon={CARDS.pending.icon}
+          label={CARDS.pending.label}
+          tone={CARDS.pending.tone}
+          value={counts.pendingRecords}
+          scope="Current · missing required fields"
+          labelAction={
+            canNavigate ? <StatLabelLink to={paths.incompleteRecords} label={CARDS.pending.label} /> : undefined
+          }
+        />
+      ),
+    },
+    {
+      to: paths.inventory,
+      card: (
+        <StatCard
+          icon={CARDS.lowStock.icon}
+          label={CARDS.lowStock.label}
+          tone={CARDS.lowStock.tone}
+          value={counts.lowStockItems}
+          scope="Current · below threshold"
+          labelAction={
+            canNavigate ? <StatLabelLink to={paths.inventory} label={CARDS.lowStock.label} /> : undefined
+          }
+        />
+      ),
+    },
+    {
+      to: paths.students,
+      card: (
+        <StatCard
+          icon={CARDS.students.icon}
+          label={CARDS.students.label}
+          tone={CARDS.students.tone}
+          value={counts.activeStudents}
+          scope="Current · excludes archived"
+          labelAction={
+            canNavigate ? <StatLabelLink to={paths.students} label={CARDS.students.label} /> : undefined
+          }
+        />
+      ),
+    },
+  ]
   return (
     <section aria-label="Summary counts">
       <ul className={GRID}>
-        <li className="flex">
-          <StatCard
-            icon={CARDS.visits.icon}
-            label={CARDS.visits.label}
-            tone={CARDS.visits.tone}
-            value={counts.visits}
-            trend={trendFor(counts.visits, previousCounts.visits, range)}
-          />
-        </li>
-        <li className="flex">
-          <StatCard
-            icon={CARDS.incidents.icon}
-            label={CARDS.incidents.label}
-            tone={CARDS.incidents.tone}
-            value={counts.incidents}
-            trend={trendFor(counts.incidents, previousCounts.incidents, range)}
-            footnote={
-              counts.incidentsAtStage1 > 0
-                ? `${counts.incidentsAtStage1} still at Stage 1`
-                : undefined
-            }
-          />
-        </li>
-        <li className="flex">
-          <StatCard
-            icon={CARDS.pending.icon}
-            label={CARDS.pending.label}
-            tone={CARDS.pending.tone}
-            value={counts.pendingRecords}
-            scope="Current · missing required fields"
-          />
-        </li>
-        <li className="flex">
-          <StatCard
-            icon={CARDS.lowStock.icon}
-            label={CARDS.lowStock.label}
-            tone={CARDS.lowStock.tone}
-            value={counts.lowStockItems}
-            scope="Current · below threshold"
-          />
-        </li>
-        <li className="flex">
-          <StatCard
-            icon={CARDS.students.icon}
-            label={CARDS.students.label}
-            tone={CARDS.students.tone}
-            value={counts.activeStudents}
-            scope="Current · excludes archived"
-          />
-        </li>
+        {cards.map(({ to, card }) => (
+          <li key={to} className="flex">
+            {card}
+          </li>
+        ))}
       </ul>
     </section>
   )

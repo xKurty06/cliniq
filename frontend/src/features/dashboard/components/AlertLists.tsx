@@ -5,10 +5,13 @@ import {
   ListCard,
   ListCardSkeleton,
   ListRow,
+  ListItemLink,
   StatusBadge,
+  ViewAllLink,
 } from '../../../components'
 import { formatDate } from '../../../lib/dates'
 import { describeRange, type DateRange } from '../../../lib/dateRange'
+import { paths } from '../../../routes/paths'
 import type { DashboardSummary, DueFollowUpRow, InventoryAlertRow } from '../../../types/dashboard'
 
 /*
@@ -55,13 +58,20 @@ function dueText(row: DueFollowUpRow): string {
   return `${date} (in ${row.daysFromToday} ${row.daysFromToday === 1 ? 'day' : 'days'})`
 }
 
-export function FollowUpsAlert({ summary }: { summary: DashboardSummary }) {
+export function FollowUpsAlert({
+  summary,
+  canNavigate,
+}: {
+  summary: DashboardSummary
+  canNavigate: boolean
+}) {
   const rows = summary.dueFollowUps
   return (
     <ListCard
       title={LISTS.followUps.title}
       icon={LISTS.followUps.icon}
       count={rows.length}
+      actions={canNavigate ? <ViewAllLink to={paths.followUps} /> : undefined}
       maxHeightClass={ALERT_LIST_HEIGHT}
       description={`Overdue, due today, or due in the next ${summary.upcomingWindowDays} days. Counted from today.`}
       empty={{
@@ -72,7 +82,7 @@ export function FollowUpsAlert({ summary }: { summary: DashboardSummary }) {
       {rows.map((row) => (
         <ListRow
           key={row.followUp.id}
-          primary={row.student.studentNumber}
+          primary={canNavigate ? <ListItemLink to={paths.studentProfile(row.student.studentNumber)}>{row.student.studentNumber}</ListItemLink> : row.student.studentNumber}
           secondary={row.followUp.reason}
           meta={<time dateTime={row.followUp.followUpDate}>{dueText(row)}</time>}
           trailing={<StatusBadge status={row.dueState} map={followUpDueMap} />}
@@ -85,9 +95,11 @@ export function FollowUpsAlert({ summary }: { summary: DashboardSummary }) {
 export function FrequentVisitorsAlert({
   summary,
   range,
+  canNavigate,
 }: {
   summary: DashboardSummary
   range: DateRange
+  canNavigate: boolean
 }) {
   const rows = summary.frequentVisitors
   const scope = describeRange(range).toLowerCase()
@@ -106,7 +118,7 @@ export function FrequentVisitorsAlert({
       {rows.map((row) => (
         <ListRow
           key={row.student.id}
-          primary={row.student.studentNumber}
+          primary={canNavigate ? <ListItemLink to={paths.studentProfile(row.student.studentNumber)}>{row.student.studentNumber}</ListItemLink> : row.student.studentNumber}
           secondary={`${row.visitCount} visits`}
           trailing={<StatusBadge status="frequent_visits" map={frequentVisitorMap} />}
         />
@@ -124,7 +136,13 @@ function expiryLabel(row: InventoryAlertRow): string | undefined {
   return `Expires in ${days}`
 }
 
-export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
+export function InventoryAlert({
+  summary,
+  canNavigate,
+}: {
+  summary: DashboardSummary
+  canNavigate: boolean
+}) {
   const rows = summary.inventoryAlerts
   return (
     <ListCard
@@ -132,6 +150,7 @@ export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
       icon={LISTS.inventory.icon}
       count={rows.length}
       className="@container"
+      actions={canNavigate ? <ViewAllLink to={paths.inventory} /> : undefined}
       maxHeightClass={ALERT_LIST_HEIGHT}
       description="Current stock. Low stock and expiry are separate flags."
       empty={{
@@ -142,7 +161,7 @@ export function InventoryAlert({ summary }: { summary: DashboardSummary }) {
       {rows.map((row) => (
         <ListRow
           key={row.item.id}
-          primary={row.item.name}
+          primary={canNavigate ? <ListItemLink to={paths.inventory}>{row.item.name}</ListItemLink> : row.item.name}
           secondary={`${row.item.currentStock} ${row.item.unit} in stock · threshold ${row.item.lowStockThreshold}`}
           trailing={
             <div className="flex flex-wrap justify-end gap-1 @max-[28rem]:flex-col @max-[28rem]:flex-nowrap @max-[28rem]:items-end">
