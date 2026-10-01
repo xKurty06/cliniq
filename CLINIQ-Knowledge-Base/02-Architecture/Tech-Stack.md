@@ -7,6 +7,8 @@ All items below are **confirmed**, as of September 25, 2026 — the previously "
 | Frontend | React + TypeScript | |
 | Build tool | **Vite** | Confirmed as the 2026 default for new React SPAs — Create React App is deprecated, Vite is the "safest choice for most teams" |
 | Styling | Tailwind CSS | |
+| Routing | **React Router** (v7) | Path-based routes (`/{screen}`), one central route table (`routes/AppRoutes.tsx`) with role guards and lazy-loaded screens — see `ADR-012` |
+| Data fetching | Plain promise-based `useAsyncData` hook, feature-local `api/` modules | For the frontend-first and initial API-integration phases — see `ADR-013` |
 | Backend | Laravel (PHP) | |
 | Auth | **Laravel Sanctum** | SPA-mode token/cookie auth, built specifically for a React+Laravel pairing — not plain "Laravel Authentication," which assumes Blade views |
 | Database | MySQL | |

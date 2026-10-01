@@ -1,5 +1,11 @@
 # Changelog
 
+| Thursday, October 01, 2026 — 21:32 PHT | Added source-specific descriptions for every README-linked documentation area and file, so SRS writers can choose the right source without opening each link first. | README.md, 08-Logs/Agent-Sessions/2026-10-01-readme-link-descriptions.md |
+
+| Thursday, October 01, 2026 — 21:27 PHT | Split the root README into a concise SRS-supporting entry point and preserved the former version as README_ORIGINAL.md; added plain-language summaries for architecture and technology, project decisions, and canonical reference documents. | README.md, README_ORIGINAL.md, 02-Architecture/Tech-Stack-Summary.md, 06-Decisions/Decisions-Summary.md, 09-References/Canonical-Documents-Summary.md, 08-Logs/Agent-Sessions/2026-10-01-readme-and-summaries.md |
+
+| Thursday, October 01, 2026 — 20:42 PHT | Removed the obsolete duplicate session-lifetime ADR after confirming the canonical content lives in ADR-015, and added the confirmed React Router and plain `useAsyncData` data-fetching entries to the Tech Stack table. | `06-Decisions/ADR-015-Session-Lifetime-No-Idle-Timeout.md`, obsolete duplicate session-lifetime ADR (deleted), `02-Architecture/Tech-Stack.md`, `08-Logs/Agent-Sessions/2026-10-01-documentation-adr-and-tech-stack-cleanup.md` |
+
 | Thursday, October 01, 2026 — 16:13 PHT | Fixed the remaining Dashboard alert-card cutout by giving the desktop alert row one explicit height and letting all three list bodies fill it; the narrow-screen cap remains. | `frontend/src/features/dashboard/components/AlertLists.tsx`, `frontend/src/features/dashboard/DashboardPage.test.tsx`, `08-Logs/Agent-Sessions/2026-10-01-dashboard-alert-card-fixed-row-height.md` |
 
 | Thursday, October 01, 2026 — 15:59 PHT | Stabilized the three Dashboard alert cards on one shared grid height, made their scroll regions fill the flexible card body, and added regression coverage for the aligned layout. | `frontend/src/components/ui/ListCard.tsx`, `frontend/src/features/dashboard/components/AlertLists.tsx`, `frontend/src/features/dashboard/DashboardPage.test.tsx`, `08-Logs/Agent-Sessions/2026-10-01-dashboard-alert-card-height.md` |

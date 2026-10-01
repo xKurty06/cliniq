@@ -3,7 +3,7 @@
 **Date:** Monday, September 28, 2026 — actual time not available (no system clock access in this environment)
 **Status:** Accepted
 
-**Numbering note:** this record was first written as ADR-010, which collided with `ADR-010-Reason-Visibility-in-List-Rows.md` (already in use, and referenced from the code and the display-privacy skill). It was renumbered ADR-015 on Monday, September 28, 2026 — 22:29 PHT. If a file named `ADR-010-Session-Lifetime-No-Idle-Timeout.md` still exists in the repo, delete it.
+**Numbering note:** this record was first written as ADR-010, which collided with the already-used ADR-010 record for reason visibility in list rows. It was renumbered ADR-015 on Monday, September 28, 2026 — 22:29 PHT. The obsolete duplicate has now been removed.
 
 ## Context
 Module 1 originally specified an automatic session timeout after 15 minutes idle, for every account. Earlier in planning, the (since-retired) QR Viewer role had a session lasting up to 1 week — changed from per-shift specifically so an emergency scan would never be blocked by a login step (Project Plan Rev 1.5, `ADR-002`). The team decided to drop the idle timeout and give every role that same 1-week lifetime.

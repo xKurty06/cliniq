@@ -1,222 +1,55 @@
-<div align="center">
-
 # CLINIQ
 
-### Intelligent Clinic Tracking and Monitoring System
+CLINIQ is an intelligent clinic tracking and monitoring system for Mendez Christian Academy. The Project Plan and related documents in this repository were prepared as working reference material during planning, not as the team's official deliverable. The formal Software Requirements Specification is being written separately; this repository supports that work.
 
-Built for **Mendez Christian Academy** — Asis III, Mendez, Cavite, Philippines
+For the fuller historical README, see [README_ORIGINAL.md](./README_ORIGINAL.md), which retains the former repository overview, feature list, team information, and implementation-oriented reference links.
 
-*A CvSU–CEIT Software Engineering II capstone project*
+## Project Context
 
-<br/>
+This area explains why CLINIQ exists for a 900-plus-student school clinic with one nurse, one shared workstation, limited budget, and LAN-only operation. It brings together the problem evidence, intended outcomes, scope limits, and the people responsible for the project.
 
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+- [Overview](./CLINIQ-Knowledge-Base/00-Project-Core/Overview.md) — the clinic setting, hardware and staffing constraints, team, client contact, and background rationale for digitizing the current paper-and-Excel process.
+- [Problem Statement](./CLINIQ-Knowledge-Base/00-Project-Core/Problem-Statement.md) — the four priority problems from the weighted SWOT analysis: slow manual work, insufficient staff, human error, and dependence on one device.
+- [Objectives](./CLINIQ-Knowledge-Base/00-Project-Core/Objectives.md) — the measurable aims, including faster visit documentation, QR lookup in under ten seconds, automated reports, verified backups, and the project budget target.
+- [Scope](./CLINIQ-Knowledge-Base/00-Project-Core/Scope.md) — the baseline and enhancement modules in this release, plus clear exclusions such as remote access, parent portals, automated messaging, billing, and extra scanning hardware.
+- [Team and Roles](./CLINIQ-Knowledge-Base/00-Project-Core/Team-and-Roles.md) — the client, school partners, course adviser, three team members' responsibilities, planned deliverables, and target milestones.
 
-![Status](https://img.shields.io/badge/status-planning%20%26%20architecture%20complete-yellow?style=flat-square)
-![Deployment](https://img.shields.io/badge/deployment-local%20LAN-blue?style=flat-square)
-![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+## Requirements
 
-</div>
+This area turns the project scope into required system behavior, quality limits, access rules, and detailed module operations. It is the place to confirm what the system must do, who may do it, and the limits imposed by the school's equipment and privacy responsibilities.
 
-<br/>
+- [Functional Requirements](./CLINIQ-Knowledge-Base/01-Requirements/Functional-Requirements.md) — the required clinic functions, from role-based sign-in and student records to visits, two-stage emergencies, follow-ups, reports, QR lookup, inventory, dashboard alerts, backups, and audit entries.
+- [Non-Functional Requirements](./CLINIQ-Knowledge-Base/01-Requirements/Non-Functional-Requirements.md) — performance on the 4 GB workstation, LAN-only availability, privacy and session safeguards, usability for non-technical staff, maintainability, and modular growth expectations.
+- [User Roles and Permissions](./CLINIQ-Knowledge-Base/01-Requirements/User-Roles-and-Permissions.md) — the Staff, Admin or Principal, and PE or Sports Instructor access boundaries, including the privacy rule for names on multi-student screens and the deferred Canteen Staff role.
+- [Module Overview](./CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md) — the complete operations and access rules for all clinic modules, including follow-up status handling, inventory stock flow, dashboard content, the audit trail, open questions, and deferred future work.
 
-## 📖 About
+## Screens & UI Reference
 
-**CLINIQ** replaces a Philippine private school clinic's manual, paper-and-Excel workflow with a locally hosted, LAN-deployed system built around one hard constraint: **one nurse, one shared workstation, ~900 students, and effectively no budget for new hardware.**
+The design area contains the full screen list alongside the design system, reference-screen patterns, a visual audit, and source mockup assets. It explains both which screens exist and the presentation rules that keep their behavior and appearance consistent.
 
-It exists to solve four problems identified in a weighted SWOT analysis — in order of priority:
+- [Screen Inventory](./CLINIQ-Knowledge-Base/03-Design/Screen-Inventory.md) — the approximately 37 screens and views, organized by module, with each screen's purpose, role access, major behavior, privacy treatment, and print-layout needs.
 
-| # | Problem |
-|---|---|
-| 1 | ⏱️ Time-consuming manual processes |
-| 2 | 👤 Insufficient manpower |
-| 3 | ⚠️ High risk of human error |
-| 4 | 💻 Overdependence on a single device/system |
+## Architecture & Tech Stack
 
-Every feature in this project — down to individual UI decisions like *which screens show a student's name versus just their ID number* — traces back to one of these four.
+The architecture area explains how the browser app, clinic service, and database fit together, and also contains process and data diagrams, the data-retention policy, and the current ERD status. It is useful when the SRS needs to describe system boundaries, information flow, or the intended local-LAN deployment.
 
-<br/>
+- [Plain-language technology summary](./CLINIQ-Knowledge-Base/02-Architecture/Tech-Stack-Summary.md) — a short explanation of the browser app, server, database, local network, QR support, charts, routing, and shared data-loading approach.
+- [Tech Stack](./CLINIQ-Knowledge-Base/02-Architecture/Tech-Stack.md) — the confirmed technology choices and the specific compatibility, maintenance, and low-spec-workstation reasons for each.
+- [System Architecture](./CLINIQ-Knowledge-Base/02-Architecture/System-Architecture.md) — the three-tier React, Laravel, and MySQL arrangement, local deployment path, future cloud path, and matching frontend and backend module organization.
+- [Development Methodology](./CLINIQ-Knowledge-Base/02-Architecture/Development-Methodology.md) — the iterative, phase-gated approach and the decision to show interface prototypes to the client before completing supporting system work.
 
-## ✨ Key Features
+## Key Decisions
 
-<table>
-<tr>
-<td width="50%" valign="top">
+The decisions area holds the accepted records for choices that change system behavior or project direction, from privacy and roles to sessions, navigation, data handling, and the audit-log screen. Each full record explains the reason for the decision and any follow-on effects that the SRS may need to reflect.
 
-**🩺 Core Clinic Operations**
-- Student health records with duplicate detection
-- Visit logging with an embedded Smart Triage first-aid checklist
-- Two-stage emergency response (fast-capture now, complete later)
-- Excuse letter generation, review, and print
-- Follow-Up Handling with built-in reminders (no SMS/push required)
+- [Plain-language decisions summary](./CLINIQ-Knowledge-Base/06-Decisions/Decisions-Summary.md) — 16 short explanations of the distinct accepted decisions, including the current session-lifetime rule from ADR-015 rather than the obsolete duplicate record.
 
-</td>
-<td width="50%" valign="top">
+For the full records and their reasoning, see the CLINIQ-Knowledge-Base/06-Decisions/ folder.
 
-**📊 Operational Tools**
-- Medicine & supply inventory with auto-decrementing stock and expiry tracking
-- Clinic Overview Dashboard — trends, alerts, and a visit-activity calendar
-- One-tap QR lookup (desktop **and** mobile) tied into every workflow
-- Role-scoped read-only access for PE/Sports Instructors
-- Automated backup verification with a guided recovery checklist
+## The Actual Reference Documents
 
-</td>
-</tr>
-</table>
+The references area preserves the five authoritative planning documents in full, together with their technical index, external research sources, and the project privacy policy. Use it when an SRS statement needs the original evidence or wording instead of a knowledge-base summary.
 
-> 📋 Full breakdown of all 11 modules, every operation, and exactly who can access what: [`CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md`](./CLINIQ-Knowledge-Base/01-Requirements/Features/Module-Overview.md)
+- [Plain-language guide to the canonical documents](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents-Summary.md) — explains what each authoritative document covers and when an SRS writer should open its full version.
 
-<br/>
-
-## 🛠️ Tech Stack
-
-| Layer | Technology | Why |
-|---|---|---|
-| 🎨 Frontend | React + TypeScript, built with **Vite** | Modern SPA tooling, static build output — no Node runtime needed in production |
-| 💅 Styling | Tailwind CSS | Utility-first, fast to build a consistent design system on |
-| ⚙️ Backend | Laravel (PHP) | Batteries-included framework, small-team-friendly |
-| 🔐 Auth | Laravel Sanctum | SPA-specific token/cookie auth, not generic session auth |
-| 🗄️ Database | MySQL | |
-| 📷 QR Generation | [`endroid/qr-code`](https://github.com/endroid/qr-code) | Actively maintained (the more obvious pick was abandoned since 2021) |
-| 📱 QR Scanning | [`qr-scanner`](https://github.com/nimiq/qr-scanner) | Falls back gracefully on browsers without native barcode APIs — works on iPhone, not just Android |
-| 📈 Charts | Chart.js + `react-chartjs-2` | Smaller bundle, Canvas rendering — matters on a 4GB RAM workstation |
-| 🧪 Testing | Pest (backend) · Vitest + RTL (frontend) | |
-| 🏠 Local Dev | XAMPP, standardized across every machine | Matches the client's actual production environment |
-| ☁️ Deployment | Local LAN today → remote/cloud is a documented future phase | API-driven architecture supports the move without a rewrite |
-
-Every choice above was researched, not assumed — see [`ADR-007`](./CLINIQ-Knowledge-Base/06-Decisions/ADR-007-Stack-Finalization.md) for the full reasoning, including why the *more obvious-looking* QR scanning library was rejected.
-
-<br/>
-
-## 📁 Project Structure
-
-```
-CLINIQ/
-├── 🤖 AGENTS.md                 → start here if you're an AI coding agent
-├── 🤖 CLAUDE.md                 → identical to AGENTS.md (Claude Code auto-loads this one)
-├── 📄 README.md                 → you are here
-│
-├── 🎨 frontend/                 → React + TypeScript + Vite
-│   └── src/features/            → one folder per module, feature-based structure
-│       └── qr-digital-health-id/
-│           ├── desktop/         → Staff's computer quick-action hub
-│           ├── mobile/          → Staff mobile flow + PE/Sports Instructor lookup
-│           └── shared/          → the one camera-scanning implementation, used by both
-│
-├── ⚙️ backend/                  → Laravel API
-│   └── app/Modules/             → one folder per module, mirroring the frontend directly
-│
-├── 🧠 .claude/skills/           → bespoke, CLINIQ-specific agent skills
-│   ├── cliniq-display-privacy/
-│   └── cliniq-audit-trail/
-│
-└── 📚 CLINIQ-Knowledge-Base/    → the full project knowledge base (Obsidian-compatible)
-    ├── 00-Project-Core/         → what this is, for whom, and why
-    ├── 01-Requirements/         → functional & non-functional requirements
-    ├── 02-Architecture/         → tech stack, system design, database
-    ├── 03-Design/               → full design system + reference screens
-    ├── 04-Development/          → setup, conventions, phases, skills
-    ├── 05-Testing/               → test strategy
-    ├── 06-Decisions/             → every ADR, with reasoning
-    ├── 07-AI-Agents/             → agent workflow rules
-    ├── 08-Logs/                  → changelog, session logs, open issues
-    └── 09-References/            → the 5 canonical planning documents, in full
-```
-
-One repository, not three — frontend, backend, and the knowledge base travel together so documentation can never quietly drift out of sync with the code.
-
-<br/>
-
-## 🚀 Getting Started
-
-> ⚠️ **Nothing is scaffolded yet.** Planning and architecture are complete; environment setup is fully specified but hasn't been executed. The steps below are what *will* run, not what already has.
-
-**Prerequisites:** XAMPP · Node.js (LTS) · Composer · Git
-
-```bash
-# 1. Clone the repo
-git clone <repo-url> CLINIQ && cd CLINIQ
-
-# 2. Backend
-composer create-project laravel/laravel backend
-cd backend
-composer require laravel/sanctum endroid/qr-code
-cp .env.example .env   # configure against XAMPP's MySQL
-
-# 3. Frontend
-cd ../frontend
-npm create vite@latest . -- --template react-ts
-npm install tailwindcss qr-scanner chart.js react-chartjs-2
-cp .env.example .env
-```
-
-Full step-by-step detail, including *why* each choice was made: [`CLINIQ-Knowledge-Base/04-Development/Environment-Setup.md`](./CLINIQ-Knowledge-Base/04-Development/Environment-Setup.md)
-
-<br/>
-
-## 🗺️ Development Roadmap
-
-Frontend and backend are built as two coordinated tracks — frontend leads (per feature) so the client sees and approves a working UI before backend logic is finalized behind it.
-
-| Track | Phases |
-|---|---|
-| 🎨 **Frontend** | `F0` Setup & design tokens → `F1` 5 reference screens → `F2` every remaining screen, module by module → `F3` polish & accessibility |
-| ⚙️ **Backend** | `B0` Scaffold → `B1` Database schema *(TBA — not yet designed)* → `B2` Auth/RBAC → `B3` Audit trail → `B4`–`B10` one phase per module |
-
-Full phase-by-phase detail, dependencies, and the two decisions still blocking Phase F0: [`CLINIQ-Knowledge-Base/04-Development/Development-Phases.md`](./CLINIQ-Knowledge-Base/04-Development/Development-Phases.md)
-
-<br/>
-
-## 👥 Team
-
-**HealWare** is the team behind CLINIQ; its mark is already used as the app's system logo and favicon (see `.claude/skills/cliniq-sidebar-patterns/SKILL.md`).
-
-| | Name | Role |
-|---|---|---|
-| 🧭 | **Ghenly B. Tinapay** | Project Manager |
-| 🔍 | **Christian John C. Lugami** | System Analyst |
-| 💻 | **Zean Kurt G. Balboa** | Developer / Tester |
-
-**Client contact:** Ms. Jennesse Baas, School Clinician, Mendez Christian Academy
-
-<br/>
-
-## 📚 Documentation
-
-This project takes documentation seriously — every real decision has a paper trail.
-
-- 📋 **[Project Plan](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Project_Plan.md)** — problem domain, approach, system design, timeline, budget (full revision history included)
-- 🧩 **[Modules & Features](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Modules_and_Features.md)** — every module, submodule, and access rule
-- 🖥️ **[Frontend Context Brief](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Frontend_Context_Brief.md)** — full spec for an AI coding agent
-- 🎨 **[Frontend Design Reference](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Frontend_Design_Reference.md)** — the 5 reference screens, in depth
-- 🔬 **[Review of Related Systems](./CLINIQ-Knowledge-Base/09-References/Canonical-Documents/CLINIQ_Review_of_Related_Systems.md)** — 10 existing systems compared, feature by feature
-- 🗂️ **[Decision Log (ADRs)](./CLINIQ-Knowledge-Base/06-Decisions/)** — why, not just what
-- 📝 **[Changelog](./CLINIQ-Knowledge-Base/08-Logs/Changelog.md)** — everything that's happened, in order
-- 🔗 **[URL Parameters](./URL-Parameters.md)** — active query parameters, examples, and retired `?screen` history
-
-<br/>
-
-## 📄 License
-
-MIT — see [`LICENSE`](./LICENSE). This was decided directly in the repo (not through this chat/vault workflow) — caught and synced here after checking the live GitHub repo, per the standing rule that the vault must be verified against GitHub before edits, not assumed current.
-
-<br/>
-
-## 🙏 Acknowledgments
-
-- **Ms. Jennesse Baas** and Mendez Christian Academy, for the trust and the real-world constraints that shaped every design decision in this project
-- **Prof. Kryss Coleen Creus**, Software Engineering II course adviser, CvSU–CEIT
-
-<br/>
-
-<div align="center">
-
-*Built with care for a clinic that runs on one workstation and one very busy nurse.*
-
-</div>
+For the complete source documents, see the CLINIQ-Knowledge-Base/09-References/Canonical-Documents/ folder.
