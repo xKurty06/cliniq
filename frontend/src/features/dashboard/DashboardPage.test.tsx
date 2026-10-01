@@ -39,12 +39,15 @@ describe('Clinic Overview Dashboard', () => {
     for (const label of [
       'Clinic visits',
       'Incidents',
-      'Incomplete records',
+      'Incomplete',
       'Low-stock items',
       'Active students',
     ]) {
       expect(
-        within(screen.getByRole('region', { name: 'Summary counts' })).getByText(label),
+        // Labels may be split across a no-wrap span (TitleLink), so match the label paragraph's full text.
+        within(screen.getByRole('region', { name: 'Summary counts' })).getByText(
+          (_, el) => el?.tagName === 'P' && el.textContent === label,
+        ),
       ).toBeInTheDocument()
     }
     for (const name of [
@@ -87,7 +90,7 @@ describe('Clinic Overview Dashboard', () => {
     for (const [label, href] of [
       ['Clinic visits', '/visits'],
       ['Incidents', '/incidents'],
-      ['Incomplete records', '/students/incomplete'],
+      ['Incomplete', '/students/incomplete'],
       ['Low-stock items', '/inventory'],
       ['Active students', '/students'],
     ]) {
@@ -101,7 +104,6 @@ describe('Clinic Overview Dashboard', () => {
       name: /due & upcoming follow-ups \(scrollable list\)/i,
     })
     expect(within(followUps).getAllByRole('link')[0].getAttribute('href')).toMatch(/^\/students\//)
-    expect(screen.getAllByRole('link', { name: 'View all' }).some((link) => link.getAttribute('href') === '/follow-ups')).toBe(true)
 
     const frequentVisitors = screen.getByRole('region', {
       name: /frequent-visitor warnings \(scrollable list\)/i,
@@ -109,18 +111,26 @@ describe('Clinic Overview Dashboard', () => {
     expect(within(frequentVisitors).getAllByRole('link')[0].getAttribute('href')).toMatch(
       /^\/students\//,
     )
-    expect(screen.getAllByRole('link', { name: 'View all' })).toHaveLength(2)
+    expect(screen.queryByRole('link', { name: 'View all' })).not.toBeInTheDocument()
 
     const inventory = screen.getByRole('region', {
       name: /low-stock & expiring items \(scrollable list\)/i,
     })
 
-    for (const list of [followUps, inventory]) {
-      const card = list.closest('section')
-      expect(card?.firstElementChild).toContainElement(
-        within(card as HTMLElement).getByRole('link', { name: 'View all' }),
-      )
+    // The widget's own title is the drill-down link; the count badge stays outside it.
+    for (const [title, href] of [
+      ['Due & upcoming follow-ups', '/follow-ups'],
+      ['Low-stock & expiring items', '/inventory'],
+    ]) {
+      const heading = screen.getByRole('heading', { name: new RegExp(title, 'i') })
+      const link = within(heading).getByRole('link', { name: title })
+      expect(link).toHaveAttribute('href', href)
+      expect(link).toHaveClass('text-current', 'hover:underline')
+      expect(link.querySelector('svg')).toBeInTheDocument()
     }
+    expect(
+      within(screen.getByRole('heading', { name: /frequent-visitor warnings/i })).queryByRole('link'),
+    ).not.toBeInTheDocument()
 
     const oralRehydrationSalts = within(inventory).getByRole('link', {
       name: 'Oral Rehydration Salts',

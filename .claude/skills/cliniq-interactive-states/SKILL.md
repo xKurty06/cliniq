@@ -19,13 +19,17 @@ This skill exists because the first real build (the Dashboard) shipped without c
 - Links → an underline or color shift, not silence
 
 **Navigable cards and list items need an affordance visible at rest.** Do not make a whole card or
-row a silent click target signaled only by cursor/hover. List widgets use a visible `View all` link
-with a short arrow in the header, beside the title/count. Stat cards keep their required tone-icon
-chip alone in the header; their figure carries an icon-only trailing chevron whose link has an
-accessible `View all [stat label]` name. Individual list items link only the identifying text and
-show its at-rest underline/color plus a smaller chevron; keep that chevron `shrink-0` beside a
-truncating label so it can never wrap onto a line of its own. Surrounding metadata remains static.
-Touch users must be able to discover navigation without hover.
+row a silent click target signaled only by cursor/hover. A widget's drill-down lives on the
+widget's own name, via the shared `TitleLink` (`frontend/src/components/ui/TitleLink.tsx`): the stat
+card label or list-card title (pass `titleTo` to `ListCard`) becomes the link, keeps its own color at
+rest, and carries a small (12px), bold (stroke 3) open-link icon (square with an arrow leaving its corner) that stays
+glued to the last word so it never wraps alone. Hover adds an underline plus a color shift: tinted
+or grey labels darken (`hover="darken"`, the default); near-black list titles turn
+`brand-green-dark` (`hover="brand"`) — never grey. No separate `View all` link, and the stat card's
+tone-icon chip stays a plain icon. A list card's count badge stays outside the link. Individual list
+items link only the identifying text and show its at-rest underline/color plus a smaller chevron;
+keep that chevron `shrink-0` beside a truncating label so it can never wrap onto a line of its own.
+Surrounding metadata remains static. Touch users must be able to discover navigation without hover.
 
 **Dropdowns and selects must match the design system — never left as native OS/browser chrome.** A plain `<select>` renders with whatever the operating system defaults to, and that default has nothing to do with `brand-green`, this system's border-radius, or its focus-ring treatment. Minimum fix, no new dependency required: `appearance: none`, a custom chevron icon, and the same border/background/border-radius/focus-ring styling already used on text inputs. Only reach for a headless UI library (Radix UI, Headless UI) if genuinely richer interaction is needed later — not as the default fix for basic styling. In practice, don't style a native `<select>` at all: use the shared `Select`, `DateRangePicker`, or `MultiSelect`, which already share one look (see `cliniq-dropdown-patterns`).
 

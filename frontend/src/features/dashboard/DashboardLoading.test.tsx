@@ -25,7 +25,7 @@ describe('Clinic Overview Dashboard: first-load skeletons', () => {
     for (const label of [
       'Clinic visits',
       'Incidents',
-      'Incomplete records',
+      'Incomplete',
       'Low-stock items',
       'Active students',
     ]) {

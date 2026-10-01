@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from 'react'
+import type { To } from 'react-router'
 import { cn } from '../../lib/cn'
 import { Icon, type IconName } from '../icons/Icon'
 import { Badge } from './Badge'
@@ -6,6 +7,7 @@ import { Card, CARD_SURFACE, CardHeader } from './Card'
 import { EmptyState } from './EmptyState'
 import { RowList } from './ListRow'
 import { Skeleton } from './Skeleton'
+import { TitleLink } from './TitleLink'
 
 export interface ListCardProps {
   title: string
@@ -13,7 +15,9 @@ export interface ListCardProps {
   description?: ReactNode
   /** Row count, shown as a neutral badge next to the title. */
   count: number
-  /** Optional navigation or other non-mutating header control. */
+  /** Drill-down target; turns the title itself into the link (the count badge stays outside it). */
+  titleTo?: To
+  /** Optional non-mutating header control. */
   actions?: ReactNode
   /** `ListRow` elements. */
   children: ReactNode
@@ -33,6 +37,7 @@ export function ListCard({
   icon,
   description,
   count,
+  titleTo,
   actions,
   children,
   empty,
@@ -46,7 +51,13 @@ export function ListCard({
         titleId={headingId}
         title={
           <span className="flex items-center gap-2">
-            {title}
+            {titleTo ? (
+              <TitleLink to={titleTo} hover="brand">
+                {title}
+              </TitleLink>
+            ) : (
+              title
+            )}
             <Badge tone="neutral" variant="soft" icon={null}>
               <span className="sr-only">Count: </span>
               {count}

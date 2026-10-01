@@ -7,7 +7,6 @@ import {
   ListRow,
   ListItemLink,
   StatusBadge,
-  ViewAllLink,
 } from '../../../components'
 import { formatDate } from '../../../lib/dates'
 import { describeRange, type DateRange } from '../../../lib/dateRange'
@@ -71,7 +70,7 @@ export function FollowUpsAlert({
       title={LISTS.followUps.title}
       icon={LISTS.followUps.icon}
       count={rows.length}
-      actions={canNavigate ? <ViewAllLink to={paths.followUps} /> : undefined}
+      titleTo={canNavigate ? paths.followUps : undefined}
       maxHeightClass={ALERT_LIST_HEIGHT}
       description={`Overdue, due today, or due in the next ${summary.upcomingWindowDays} days. Counted from today.`}
       empty={{
@@ -150,7 +149,7 @@ export function InventoryAlert({
       icon={LISTS.inventory.icon}
       count={rows.length}
       className="@container"
-      actions={canNavigate ? <ViewAllLink to={paths.inventory} /> : undefined}
+      titleTo={canNavigate ? paths.inventory : undefined}
       maxHeightClass={ALERT_LIST_HEIGHT}
       description="Current stock. Low stock and expiry are separate flags."
       empty={{

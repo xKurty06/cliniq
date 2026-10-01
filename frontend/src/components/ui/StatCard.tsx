@@ -27,7 +27,7 @@ export interface StatCardProps {
    * The label always names the meaning, so color is emphasis, never the only signal.
   */
   tone?: StatTone
-  /** Link wrapping the label and compact chevron, never the icon-chip header. */
+  /** Link wrapping the label and its open-link icon (`TitleLink`), never the icon-chip header. */
   labelAction?: ReactNode
   className?: string
 }

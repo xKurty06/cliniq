@@ -1,12 +1,11 @@
 import {
-  Icon,
   StatCard,
   StatCardSkeleton,
+  TitleLink,
   type IconName,
   type StatTone,
   type StatTrend,
 } from '../../../components'
-import { Link } from 'react-router'
 import { rangeLengthDays, type DateRange } from '../../../lib/dateRange'
 import { paths } from '../../../routes/paths'
 import type { DashboardSummary } from '../../../types/dashboard'
@@ -19,24 +18,12 @@ import type { DashboardSummary } from '../../../types/dashboard'
 const CARDS = {
   visits: { icon: 'activity', label: 'Clinic visits', tone: 'brand' },
   incidents: { icon: 'alertTriangle', label: 'Incidents', tone: 'error' },
-  pending: { icon: 'clipboardList', label: 'Incomplete records', tone: 'warning' },
+  pending: { icon: 'clipboardList', label: 'Incomplete', tone: 'warning' },
   lowStock: { icon: 'package', label: 'Low-stock items', tone: 'warning' },
   students: { icon: 'users', label: 'Active students', tone: 'neutral' },
 } satisfies Record<string, { icon: IconName; label: string; tone: StatTone }>
 
 const GRID = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
-
-function StatLabelLink({ to, label }: { to: string; label: string }) {
-  return (
-    <Link
-      to={to}
-      className="inline-flex items-center gap-0.5 text-current cursor-pointer transition-[color,text-decoration-color] hover:underline hover:brightness-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
-    >
-      {label}
-      <Icon name="chevronRight" size={14} />
-    </Link>
-  )
-}
 
 export function StatCardRowSkeleton() {
   return (
@@ -93,7 +80,7 @@ export function StatCardRow({
           value={counts.visits}
           trend={trendFor(counts.visits, previousCounts.visits, range)}
           labelAction={
-            canNavigate ? <StatLabelLink to={paths.visits} label={CARDS.visits.label} /> : undefined
+            canNavigate ? <TitleLink to={paths.visits}>{CARDS.visits.label}</TitleLink> : undefined
           }
         />
       ),
@@ -113,7 +100,7 @@ export function StatCardRow({
               : undefined
           }
           labelAction={
-            canNavigate ? <StatLabelLink to={paths.incidents} label={CARDS.incidents.label} /> : undefined
+            canNavigate ? <TitleLink to={paths.incidents}>{CARDS.incidents.label}</TitleLink> : undefined
           }
         />
       ),
@@ -128,7 +115,7 @@ export function StatCardRow({
           value={counts.pendingRecords}
           scope="Current · missing required fields"
           labelAction={
-            canNavigate ? <StatLabelLink to={paths.incompleteRecords} label={CARDS.pending.label} /> : undefined
+            canNavigate ? <TitleLink to={paths.incompleteRecords}>{CARDS.pending.label}</TitleLink> : undefined
           }
         />
       ),
@@ -143,7 +130,7 @@ export function StatCardRow({
           value={counts.lowStockItems}
           scope="Current · below threshold"
           labelAction={
-            canNavigate ? <StatLabelLink to={paths.inventory} label={CARDS.lowStock.label} /> : undefined
+            canNavigate ? <TitleLink to={paths.inventory}>{CARDS.lowStock.label}</TitleLink> : undefined
           }
         />
       ),
@@ -158,7 +145,7 @@ export function StatCardRow({
           value={counts.activeStudents}
           scope="Current · excludes archived"
           labelAction={
-            canNavigate ? <StatLabelLink to={paths.students} label={CARDS.students.label} /> : undefined
+            canNavigate ? <TitleLink to={paths.students}>{CARDS.students.label}</TitleLink> : undefined
           }
         />
       ),

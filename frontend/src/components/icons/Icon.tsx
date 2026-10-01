@@ -67,6 +67,13 @@ const paths = {
       <path d="M12 6v6l4 2" />
     </>
   ),
+  /** Square with an arrow leaving its open corner: "open this list/page". */
+  externalLink: (
+    <>
+      <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
+      <path d="m21 3-9 9M15 3h6v6" />
+    </>
+  ),
   fileText: (
     <>
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
