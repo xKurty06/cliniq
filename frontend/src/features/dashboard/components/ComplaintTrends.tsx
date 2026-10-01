@@ -46,6 +46,10 @@ function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string 
     : formatDate(bucket.from, { month: 'long', year: 'numeric' })
 }
 
+function tableBucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
+  return granularity === 'week' ? formatDate(bucket.from) : bucketName(bucket, granularity)
+}
+
 interface ClusterNote {
   complaint: string
   bucketIndex: number
@@ -217,6 +221,11 @@ export function TrendTable({ trends }: { trends: Trends }) {
     clusterBuckets: [],
   }
   const complaintRows = [...trends.series, ...trends.otherComplaints]
+  const maxComplaintLength = Math.max(
+    totalRow.complaint.length,
+    ...complaintRows.map((row) => row.complaint.length),
+  )
+  const complaintColumnWidth = `${maxComplaintLength + 2}ch`
   const visibleComplaintRows = complaintRows.filter(
     (row) => showAllComplaints || visibleBucketIndexes.some((index) => row.counts[index] > 0),
   )
@@ -232,17 +241,17 @@ export function TrendTable({ trends }: { trends: Trends }) {
       header: 'Complaint',
       cell: (r) => r.complaint,
       rowHeader: true,
-      width: '14rem',
+      width: complaintColumnWidth,
       sort: sortColumn('complaint', 'Complaint'),
     },
     ...visibleBuckets.map((b, displayIndex) => {
       const sourceIndex = visibleBucketIndexes[displayIndex]
       return {
         key: b.key,
-        header: bucketName(b, trends.granularity),
+        header: tableBucketName(b, trends.granularity),
         align: 'right' as const,
         width: '8rem',
-        sort: sortColumn(b.key, bucketName(b, trends.granularity)),
+        sort: sortColumn(b.key, tableBucketName(b, trends.granularity)),
         cell: (r: ComplaintSeries) =>
           r.clusterBuckets.includes(sourceIndex) ? (
             <span className="inline-flex items-center gap-1 font-semibold">
@@ -292,6 +301,7 @@ export function TrendTable({ trends }: { trends: Trends }) {
         rowKey={(r) => r.complaint}
         fixedLayout
         stickyFirstColumn
+        stickyLastColumn
         className="[&_table]:min-w-max"
       />
       {earlierPeriodCount > 0 && (

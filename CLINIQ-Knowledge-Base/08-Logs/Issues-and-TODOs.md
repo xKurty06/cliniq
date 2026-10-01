@@ -32,6 +32,8 @@
 
 ## Resolved since last update
 
+- **Thursday, October 1, 2026 — 15:18 PHT — Dashboard trend-table edge visibility and weekly header density.** The Total summary could disappear during horizontal scrolling, the Complaint column was wider than the current content required, and weekly table headers repeated “Week of.” Resolved with shared right-edge stickiness, data-derived Complaint width, and compact weekly Table labels; chart wording remains explicit.
+
 - **Thursday, October 1, 2026 — 15:02 PHT — Dashboard complaint-trend table usability.** The weekly table could lose the Complaint column under horizontal scroll, render an unreadable number of period columns, and make zero-activity complaint types compete with active rows. Resolved with shared `DataTable` sticky-first-column support, a table-only newest-12-period window plus overflow note, and a Show all complaint types toggle; the Common complaints card remains full-range and unchanged.
 
 - **Thursday, October 1, 2026 — 08:31 PHT — Dashboard trend-table overflow.** The fixed layout applied to the complaint-trend fallback table made its many period columns divide the card width, so headers and values overlapped. Resolved by assigning deliberate widths to the complaint, period, and total columns and setting an intrinsic minimum table width so the existing focused horizontal scroller is used.

@@ -23,14 +23,15 @@ Use this alongside `cliniq-interactive-states`, `cliniq-pagination-patterns`,
 ## Horizontal scrolling and sticky columns
 
 - Keep horizontal scrolling on the shared `DataTable` wrapper; do not make the page itself scroll sideways.
-- Set `stickyFirstColumn` when the first column identifies each row and users need to compare it against periods or other wide columns. The shared component keeps that column opaque, layered above scrolled cells, and visually separated at the right edge.
+- Set `stickyFirstColumn` when the first column identifies each row and `stickyLastColumn` when a summary/action column must remain available at the right edge. The shared component keeps either edge column opaque, layered above scrolled cells, and visually separated at its inner edge.
 - Combine sticky columns with `fixedLayout` and calibrated widths. A sticky position without an intrinsic table width can still leave the browser compressing the columns until their content overlaps.
-- Verify the actual scroll interaction at the left edge, middle, and far-right positions. The identifying column must remain inside the scroller viewport, readable, and not show the columns underneath through its background.
+- Verify the actual scroll interaction at the left edge, middle, and far-right positions. Each sticky edge column must remain inside the scroller viewport, readable, and not show the columns underneath through its background.
 
 ## Wide time-series tables
 
 - Cap period columns in the table view itself when a date range can produce a wide time series; do not cap the shared aggregation or chart data just to make a table fit.
 - Show the most recent periods, preserve the source bucket indexes for counts and cluster markers, and add a plain note below the table stating how many earlier periods are hidden and how to see them.
+- Keep period headers compact when their repeated prefix adds no information in a dense table (for example, use `Sep 14` in a weekly table while retaining `Week of Sep 14` in chart explanations and tooltips).
 - Keep the cap local to the table's view model so charts, summary totals, and other dashboard panels continue to represent the full selected range.
 
 ## Low-signal rows
@@ -43,7 +44,7 @@ Use this alongside `cliniq-interactive-states`, `cliniq-pagination-patterns`,
 
 - In the screen test, assert that changing the relevant filter still leaves the same table structure and that a fixed table has the `table-fixed` class.
 - For calibrated tables, assert the `col` widths so a later content change cannot silently restore auto-layout.
-- For sticky wide tables, assert the sticky first-column classes and verify the identifying cell remains readable at multiple real horizontal scroll positions.
+- For sticky wide tables, assert the sticky edge-column classes and verify both identifying and summary cells remain readable at multiple real horizontal scroll positions.
 - For wide time-series tables, assert no more than 12 period columns, the earlier-period note, and that the chart still receives the uncapped bucket list.
 - For low-signal filtering, assert a zero-activity row is hidden by default, appears after the labelled toggle is pressed, and does not alter another panel's totals.
 - Apply the display-privacy rule to the row content and the pagination pattern when the list can grow.

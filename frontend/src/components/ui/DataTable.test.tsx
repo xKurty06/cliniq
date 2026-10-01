@@ -53,6 +53,7 @@ describe('DataTable sortable headers', () => {
         rows={[{ name: 'Amina', period: 1 }]}
         rowKey={(row) => row.name}
         stickyFirstColumn
+        stickyLastColumn
       />,
     )
 
@@ -60,6 +61,12 @@ describe('DataTable sortable headers', () => {
     expect(screen.getByRole('row', { name: 'Amina 1' }).querySelector('th')).toHaveClass(
       'sticky',
       'left-0',
+      'bg-background',
+    )
+    expect(screen.getByRole('columnheader', { name: 'Period' })).toHaveClass('sticky', 'right-0')
+    expect(screen.getByRole('row', { name: 'Amina 1' }).querySelector('td')).toHaveClass(
+      'sticky',
+      'right-0',
       'bg-background',
     )
   })

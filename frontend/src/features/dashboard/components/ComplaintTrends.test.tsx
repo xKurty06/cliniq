@@ -60,6 +60,9 @@ describe('TrendTable', () => {
     ).toBeInTheDocument()
     expect(screen.getAllByRole('row')[1]).toHaveTextContent('All visits & incidents')
     expect(screen.getByRole('columnheader', { name: 'Complaint' })).toHaveClass('sticky', 'left-0')
+    expect(table.querySelector('col')).toHaveAttribute('style', 'width: 24ch;')
+    expect(screen.getByRole('columnheader', { name: 'Total' })).toHaveClass('sticky', 'right-0')
+    expect(table.querySelector('thead')).not.toHaveTextContent('Week of')
   })
 
   it('hides zero-activity rows in the visible window and reveals them with the toggle', async () => {

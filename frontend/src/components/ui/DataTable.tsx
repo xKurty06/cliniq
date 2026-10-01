@@ -32,6 +32,8 @@ export interface DataTableProps<Row> {
   fixedLayout?: boolean
   /** Keep the leftmost column opaque and visible while the table scrolls horizontally. */
   stickyFirstColumn?: boolean
+  /** Keep the rightmost column opaque and visible while the table scrolls horizontally. */
+  stickyLastColumn?: boolean
   className?: string
 }
 
@@ -48,6 +50,7 @@ export function DataTable<Row>({
   rowKey,
   fixedLayout = false,
   stickyFirstColumn = false,
+  stickyLastColumn = false,
   className,
 }: DataTableProps<Row>) {
   return (
@@ -84,6 +87,9 @@ export function DataTable<Row>({
                   stickyFirstColumn &&
                     columnIndex === 0 &&
                     'sticky left-0 z-20 border-r border-border bg-background',
+                  stickyLastColumn &&
+                    columnIndex === columns.length - 1 &&
+                    'sticky right-0 z-20 border-l border-border bg-background',
                 )}
               >
                 {col.sort ? (
@@ -129,6 +135,9 @@ export function DataTable<Row>({
                       stickyFirstColumn &&
                         columnIndex === 0 &&
                         'sticky left-0 z-10 border-r border-border bg-background',
+                      stickyLastColumn &&
+                        columnIndex === columns.length - 1 &&
+                        'sticky right-0 z-10 border-l border-border bg-background',
                     )}
                   >
                     {col.cell(row)}

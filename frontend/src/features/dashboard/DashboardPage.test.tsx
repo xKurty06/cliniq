@@ -160,9 +160,14 @@ describe('Clinic Overview Dashboard', () => {
     ).toBeInTheDocument()
     expect(table.querySelector('thead th')).toHaveClass('sticky', 'left-0', 'bg-background')
     const columns = table.querySelectorAll('col')
-    expect(columns[0]).toHaveAttribute('style', 'width: 14rem;')
+    expect(columns[0]).toHaveAttribute('style', 'width: 26ch;')
     expect(columns[1]).toHaveAttribute('style', 'width: 8rem;')
     expect(columns[columns.length - 1]).toHaveAttribute('style', 'width: 5rem;')
+    expect(table.querySelector('thead th:last-child')).toHaveClass(
+      'sticky',
+      'right-0',
+      'bg-background',
+    )
   })
 
   it('explains an invalid custom date range instead of applying it', async () => {
