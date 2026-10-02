@@ -343,6 +343,7 @@ function VisitsTrendCard({
         icon={<Icon name="activity" />}
         title="Visits trend"
         description={`Visits and incidents per ${granularity}.`}
+        className="sticky top-16 z-[25] rounded-t-lg bg-background"
         actions={
           <>
             <SegmentedControl
@@ -356,8 +357,8 @@ function VisitsTrendCard({
             />
             <SegmentedControl
               label="Show trend as"
-              value={showTable ? 'table' : view}
-              onChange={setView}
+              value={view}
+              onChange={(nextView) => setView(nextView)}
               options={[
                 { value: 'chart', label: 'Chart', icon: 'barChart' },
                 { value: 'table', label: 'Table', icon: 'table' },

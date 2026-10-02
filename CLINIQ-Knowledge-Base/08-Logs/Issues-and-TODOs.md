@@ -43,6 +43,8 @@
 
 ## Resolved since last update
 
+- **Saturday, October 3, 2026 — 03:07 PHT — Dashboard Chart control covered while scrolling.** The Visits Trend card header now sticks below the AppShell top bar (`top-16`, below the shell's `z-30` layer), keeping Chart/Table controls visible and clickable while the dashboard scrolls.
+
 - **Saturday, October 3, 2026 — 02:20 PHT — Dashboard Chart control unreachable for one-period ranges.** The earlier mode-state correction made the automatic table fallback keep Table selected, so Chart could not be selected. The fallback is now explicit: Chart and Table both remain interactive, with the single-period comparison notice retained.
 
 - **Saturday, October 3, 2026 — 02:07 PHT — Dashboard trend table overlapped the sticky top bar while scrolling.** The shared AppShell header was `z-10`, below the DataTable sticky edge cells at `z-20`; it now uses `z-30`, keeping table stickies below the header while preserving their horizontal-scroll behavior.

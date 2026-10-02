@@ -35,7 +35,7 @@ export function QrScannerView({ title, description, onDetected, onScanStart }: Q
         icon={<Icon name="qrCode" />}
       />
       <CardBody className="flex flex-col gap-4">
-        <div className="overflow-hidden rounded-lg border border-border bg-text-primary">
+        <div className="overflow-hidden rounded-md border border-border bg-text-primary">
           <video
             ref={videoRef}
             className="aspect-[4/3] w-full bg-text-primary object-cover"

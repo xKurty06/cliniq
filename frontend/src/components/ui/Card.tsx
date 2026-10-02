@@ -2,12 +2,12 @@ import type { HTMLAttributes, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 /**
- * The shared panel surface: white, rounded-lg, soft shadow, no outline (reference-mockup style).
+ * The shared panel surface: white, rounded-md, soft shadow, no outline (reference-mockup style).
  * Print and forced-colors modes get a real border back, since shadows don't survive either.
  * Use this class for any custom container (skeletons included) so every panel matches.
  */
 export const CARD_SURFACE =
-  'rounded-lg bg-background shadow-card forced-colors:border print:border print:border-border print:shadow-none'
+  'rounded-md bg-background shadow-card forced-colors:border print:border print:border-border print:shadow-none'
 
 export function Card({ className, ...rest }: HTMLAttributes<HTMLElement>) {
   return <section className={cn(CARD_SURFACE, 'print:break-inside-avoid', className)} {...rest} />

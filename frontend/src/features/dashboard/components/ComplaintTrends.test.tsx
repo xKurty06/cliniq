@@ -67,6 +67,18 @@ describe('TrendTable', () => {
     expect(screen.getByRole('columnheader', { name: /Sep 1, 2026/i })).toBeInTheDocument()
   })
 
+  it('switches back to Chart after viewing the table', async () => {
+    const user = userEvent.setup()
+    render(<ComplaintTrends trends={trends} granularity="week" onGranularityChange={vi.fn()} />)
+
+    await user.click(screen.getByRole('radio', { name: 'Table' }))
+    expect(screen.getByRole('table', { name: /complaint counts per period/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Chart' }))
+    expect(screen.getByRole('img', { name: /visits and incidents by week/i })).toBeInTheDocument()
+    expect(screen.queryByRole('table', { name: /complaint counts per period/i })).not.toBeInTheDocument()
+  })
+
   it("leaves the chart's full bucket range uncapped", () => {
     render(<ComplaintTrends trends={trends} granularity="week" onGranularityChange={vi.fn()} />)
 

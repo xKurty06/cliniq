@@ -110,7 +110,7 @@ export function AppShell({ user, active, children, onLogout }: AppShellProps) {
               title="Log out"
               disabled={isLoggingOut}
               onClick={() => void handleLogout()}
-              className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-error transition-colors hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex shrink-0 cursor-pointer rounded-sm text-error transition-[filter] hover:brightness-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:brightness-100 motion-reduce:transition-none"
             >
               <Icon name="logout" />
             </button>

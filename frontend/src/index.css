@@ -62,8 +62,8 @@
   --text-3xl--line-height: 2.5rem;
 
   /* One restrained radius set, reused everywhere (Design-System.md, Shape Language): softened,
-     never pill-shaped except true pills (avatars, progress tracks). sm = badges, md = buttons/inputs,
-     lg = cards/panels. */
+     never pill-shaped except true pills (avatars, progress tracks). sm = badges/menu items;
+     md = panel surfaces and controls. */
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
