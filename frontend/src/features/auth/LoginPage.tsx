@@ -62,7 +62,8 @@ export function LoginPage({ onLogin }: { onLogin: (user: SessionUser) => void })
   return (
     <main className="relative isolate flex min-h-screen items-center justify-center px-4 pt-8 pb-20">
       <LoginBackdrop />
-      <Card className="w-full max-w-md p-6">
+      {/* Login only: the card takes its fields' 8px radius instead of the shared Card's 12px. */}
+      <Card className="w-full max-w-md rounded-md! p-6">
         <header>
           <BrandLogo />
           <h1 className="mt-6 border-t border-border pt-5 text-2xl font-bold tracking-tight text-text-primary">Sign In</h1>
