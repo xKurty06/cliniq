@@ -164,7 +164,7 @@ describe('Clinic Overview Dashboard', () => {
       .map((b) => b.getAttribute('aria-label') ?? b.textContent?.trim())
     for (const label of labels) {
       expect(label).toMatch(
-        /^(Date range|All|Today|Last 7 days|Last 30 days|This month|Custom range|Print \/ Save as PDF|Previous.*|Next.*|View activity for.*)$/,
+        /^(Date range|All|Today|Last 7 days|Last 30 days|This month|This year|Custom range|Print \/ Save as PDF|Previous.*|Next.*|View activity for.*)$/,
       )
     }
   })

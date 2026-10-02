@@ -9,6 +9,7 @@ import {
   buildDueFollowUps,
   buildInventoryAlerts,
   detectClusters,
+  trendGranularityForRange,
 } from './dashboard'
 import type { DbState, MockDbConfig, SeedStudent } from './types'
 
@@ -183,6 +184,32 @@ describe('complaint trends', () => {
     )
     expect(trends.buckets[0].from).toBe('2026-09-10')
     expect(trends.buckets.length).toBeLessThan(5)
+  })
+
+  it('keeps bounded ranges anchored at their selected start and fills zero buckets', () => {
+    const trends = buildComplaintTrends(
+      [{ date: '2026-09-03', complaint: 'Headache' }],
+      '2026-09-01',
+      '2026-09-05',
+      'day',
+      CONFIG,
+    )
+    expect(trends.buckets.map((bucket) => bucket.from)).toEqual([
+      '2026-09-01',
+      '2026-09-02',
+      '2026-09-03',
+      '2026-09-04',
+      '2026-09-05',
+    ])
+    expect(trends.series[0].counts).toEqual([0, 0, 1, 0, 0])
+  })
+
+  it('selects adaptive granularity by range length', () => {
+    expect(trendGranularityForRange({ from: '2026-09-26', to: '2026-09-26' })).toBe('day')
+    expect(trendGranularityForRange({ from: '2026-09-01', to: '2026-09-30' })).toBe('day')
+    expect(trendGranularityForRange({ from: '2026-01-01', to: '2026-12-31' })).toBe('month')
+    expect(trendGranularityForRange({ from: '2020-01-01', to: '2026-12-31' })).toBe('year')
+    expect(rangeForPreset('thisYear', TODAY)).toMatchObject({ from: '2026-01-01', to: TODAY })
   })
 
   it('flags a spike as a possible cluster only when there are buckets to compare', () => {

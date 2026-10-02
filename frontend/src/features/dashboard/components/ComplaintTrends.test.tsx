@@ -42,6 +42,20 @@ const trends: ComplaintTrendsData = {
 }
 
 describe('TrendTable', () => {
+  it('keeps a genuinely empty multi-bucket range as a zero chart', () => {
+    render(
+      <ComplaintTrends
+        trends={{ granularity: 'day', buckets: buckets.slice(0, 3), series: [], otherComplaints: [] }}
+        granularity="day"
+        onGranularityChange={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('img', { name: /visits and incidents by day/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Visits trend' })).toBeInTheDocument()
+    expect(screen.queryByText('No visits or incidents in this date range')).not.toBeInTheDocument()
+  })
+
   it('keeps Chart selectable when a range has one period', async () => {
     const user = userEvent.setup()
     const singlePeriod: ComplaintTrendsData = {

@@ -5,6 +5,7 @@ import { cn } from '../../lib/cn'
 import { todayISO } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import { rangeForPreset, type DateRange } from '../../lib/dateRange'
+import { trendGranularityForRange } from '../../lib/mock-db/dashboard'
 import { fetchDashboardSummary } from './api/dashboardApi'
 import {
   ALERT_GRID,
@@ -49,7 +50,9 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
   const today = todayISO()
   // A summary view opens on the current month; operational logs keep the All default.
   const [range, setRange] = useState<DateRange>(() => rangeForPreset('thisMonth', today))
-  const [granularity, setGranularity] = useState<TrendGranularity>('week')
+  const [granularity, setGranularity] = useState<TrendGranularity>(() =>
+    trendGranularityForRange(rangeForPreset('thisMonth', today)),
+  )
   const canNavigate = viewer.role === 'staff'
 
   const { data, status, isRefetching, reload } = useAsyncData(
@@ -64,7 +67,10 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
           viewer={viewer}
           today={today}
           range={range}
-          onRangeChange={setRange}
+          onRangeChange={(nextRange) => {
+            setRange(nextRange)
+            setGranularity(trendGranularityForRange(nextRange))
+          }}
           isRefetching={isRefetching}
           onPrint={() => window.print()}
         />

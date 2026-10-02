@@ -41,13 +41,16 @@ type ViewMode = 'chart' | 'table'
 const MAX_VISIBLE_TABLE_PERIODS = 12
 
 function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
-  return granularity === 'week'
-    ? `Week of ${formatDate(bucket.from)}`
-    : formatDate(bucket.from, { month: 'long', year: 'numeric' })
+  if (granularity === 'day') return formatDate(bucket.from)
+  if (granularity === 'week') return `Week of ${formatDate(bucket.from)}`
+  if (granularity === 'year') return formatDate(bucket.from, { year: 'numeric' })
+  return formatDate(bucket.from, { month: 'long', year: 'numeric' })
 }
 
 function tableBucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
-  return granularity === 'week' ? formatDate(bucket.from) : bucketName(bucket, granularity)
+  return granularity === 'week' || granularity === 'day'
+    ? formatDate(bucket.from)
+    : bucketName(bucket, granularity)
 }
 
 interface ClusterNote {
@@ -332,7 +335,7 @@ function VisitsTrendCard({
 }) {
   const headingId = useId()
   const [view, setView] = useState<ViewMode>('chart')
-  const hasData = trends.series.length > 0
+  const hasData = trends.buckets.length > 1 || trends.series.length > 0
   const tooFewBuckets = trends.buckets.length < 2
   const showTable = view === 'table'
 
@@ -351,8 +354,10 @@ function VisitsTrendCard({
               value={granularity}
               onChange={onGranularityChange}
               options={[
+                { value: 'day', label: 'Daily' },
                 { value: 'week', label: 'Weekly' },
                 { value: 'month', label: 'Monthly' },
+                { value: 'year', label: 'Yearly' },
               ]}
             />
             <SegmentedControl

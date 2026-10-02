@@ -1,5 +1,5 @@
-import { addDays, diffDays, eachDay, endOfMonth, formatDate, formatShortDate, isWithin, startOfMonth, startOfWeek } from '../dates'
-import { previousPeriod } from '../dateRange'
+import { addDays, diffDays, eachDay, endOfMonth, endOfYear, formatDate, formatShortDate, isWithin, startOfMonth, startOfWeek, startOfYear } from '../dates'
+import { previousPeriod, rangeLengthDays, type DateRange } from '../dateRange'
 import type { ISODate } from '../../types/entities'
 import type {
   CalendarDay,
@@ -125,24 +125,54 @@ export function buildBuckets(
   granularity: TrendGranularity,
 ): TrendBucket[] {
   const buckets: TrendBucket[] = []
-  let cursor = granularity === 'week' ? startOfWeek(from) : startOfMonth(from)
+  let cursor =
+    granularity === 'day'
+      ? from
+      : granularity === 'week'
+        ? startOfWeek(from)
+        : granularity === 'month'
+          ? startOfMonth(from)
+          : startOfYear(from)
   while (cursor <= to) {
-    const end = granularity === 'week' ? addDays(cursor, 6) : endOfMonth(cursor)
+    const end =
+      granularity === 'day'
+        ? cursor
+        : granularity === 'week'
+          ? addDays(cursor, 6)
+          : granularity === 'month'
+            ? endOfMonth(cursor)
+            : endOfYear(cursor)
     // Clip each bucket to the selected range so partial weeks/months never count outside it.
     const bFrom = cursor < from ? from : cursor
     const bTo = end > to ? to : end
     buckets.push({
       key: cursor,
       label:
-        granularity === 'week'
+        granularity === 'day'
           ? formatShortDate(bFrom)
-          : formatDate(cursor, { month: 'short', year: 'numeric' }),
+          : granularity === 'week'
+            ? formatShortDate(bFrom)
+            : granularity === 'month'
+              ? formatDate(cursor, { month: 'short', year: 'numeric' })
+              : formatDate(cursor, { year: 'numeric' }),
       from: bFrom,
       to: bTo,
     })
     cursor = addDays(end, 1)
   }
   return buckets
+}
+
+/** Pick the finest readable bucket size for the selected calendar span. */
+export function trendGranularityForRange(
+  range: Pick<DateRange, 'from' | 'to'> & Partial<Pick<DateRange, 'preset'>>,
+): TrendGranularity {
+  if (range.preset === 'all') return 'month'
+  const days = rangeLengthDays(range)
+  if (days <= 31) return 'day'
+  if (days <= 120) return 'week'
+  if (days <= 3 * 366) return 'month'
+  return 'year'
 }
 
 export function buildComplaintTrends(
@@ -152,13 +182,11 @@ export function buildComplaintTrends(
   granularity: TrendGranularity,
   config: Pick<MockDbConfig, 'clusterMinCount' | 'clusterRatio' | 'topComplaints'>,
 ): ComplaintTrends {
-  // An All dashboard range starts at the safe historical floor (1900), but empty buckets before
-  // the first recorded event add no information and can create thousands of chart points. Keep the
-  // visible range bounded by the event history while the summary counts still cover the full query.
-  const trendFrom = events.length
-    ? events.reduce<ISODate>((earliest, event) => (event.date < earliest ? event.date : earliest), to)
-    : from <= to
-      ? to
+  // Only All uses the safe historical floor (1900), so its empty pre-history buckets can be skipped.
+  // Bounded ranges must retain their selected start so zero-activity periods remain visible.
+  const trendFrom =
+    from === '1900-01-01' && events.length
+      ? events.reduce<ISODate>((earliest, event) => (event.date < earliest ? event.date : earliest), to)
       : from
   const buckets = buildBuckets(trendFrom, to, granularity)
   const byComplaint = new Map<string, number[]>()

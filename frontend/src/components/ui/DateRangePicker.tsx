@@ -38,7 +38,15 @@ export interface DateRangePickerProps {
   className?: string
 }
 
-const defaultPresetOrder: DateRangePreset[] = ['all', 'today', 'last7', 'last30', 'thisMonth', 'custom']
+const defaultPresetOrder: DateRangePreset[] = [
+  'all',
+  'today',
+  'last7',
+  'last30',
+  'thisMonth',
+  'thisYear',
+  'custom',
+]
 
 /**
  * Date-range filter: "All" is the first, default-safe preset, followed by narrower presets and a

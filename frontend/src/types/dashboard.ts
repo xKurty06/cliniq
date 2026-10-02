@@ -17,7 +17,7 @@ import type {
  * A dashboard component can't render a name because it never receives one (ADR-004).
  */
 
-export type TrendGranularity = 'week' | 'month'
+export type TrendGranularity = 'day' | 'week' | 'month' | 'year'
 
 export interface DashboardQuery {
   range: DateRange
