@@ -23,6 +23,8 @@ export function LoginBackdrop() {
     >
       {/* Scaled past the edges so the blur doesn't fade into a fringe of the fallback at the viewport edge. */}
       {!failed && <img src={LOGIN_BACKDROP_SRC} alt="" className="size-full scale-110 object-cover blur-sm" onError={() => setFailed(true)} />}
+      {/* Darkens the photo so the white card stands apart from it; the fallback gradient is already dark. */}
+      {!failed && <div className="absolute inset-0 bg-brand-green-dark/45" />}
     </div>
   )
 }
