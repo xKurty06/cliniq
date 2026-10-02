@@ -19,6 +19,7 @@ describe('App Shell / Navigation', () => {
     )
 
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
+    expect(screen.getByRole('banner')).toHaveClass('sticky', 'top-0', 'z-30')
     expect(screen.getByText('Student Care')).toBeInTheDocument()
     expect(screen.getByText('Operations')).toBeInTheDocument()
     expect(screen.getByText('Administration')).toBeInTheDocument()

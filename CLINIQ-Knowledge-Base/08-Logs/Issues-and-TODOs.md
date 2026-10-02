@@ -12,6 +12,13 @@
 
 - **Recipient email.** Temporary placeholder `team@example.com` is used by the footer modal's `mailto:` fallback; replace it with the team's real contact in `frontend/src/features/issue-reports/reportIssueConfig.ts` when one is designated. Added Thursday, October 01, 2026 — 13:09 PHT.
 
+## Login redesign follow-ups — Saturday, October 03, 2026 — 02:11 PHT
+
+- **Official school photo for the Login backdrop.** Updated Saturday, October 03, 2026 — 02:21 PHT: a stand-in is now in place at `frontend/public/brand/login-backdrop.jpg`, a frame from a campus drone video of the main building, blurred in CSS. Replace it with an official Mendez Christian Academy photo when one is available: same path, no code change. The unused alternative `frontend/public/brand/campus-courtyard.jpg` (~0.9 MB) still ships in the build; delete it if it isn't wanted.
+- **Force Password Change (#2) still uses the old plain gray layout**, so the first-login flow changes look between Login and that screen. Left as-is by the requester's choice (Login-only scope); decide whether it should share the backdrop.
+- **The shared `Modal` overlay doesn't scroll.** A dialog taller than the viewport is centered with its top and bottom off-screen, so on a phone its ✕ and Close are unreachable. Demo Accounts works around it with a local `max-h`/`overflow-y-auto`; a shared fix in `frontend/src/components/ui/Modal.tsx` would cover every dialog.
+- **`BrandLogo` academy subtitle is 11px**, below the Design-System 12px floor (pre-existing; now also shown on Login).
+
 ## Verification notes
 
 - Thursday, October 01, 2026 — 15:42 PHT — `npm run lint` currently fails on the pre-existing `react-hooks/set-state-in-effect` error in `frontend/src/features/issue-reports/ReportIssueModal.tsx`; the Dashboard inventory badge change does not touch that file.
@@ -35,6 +42,12 @@
 7. **Timing of archival.** Does Staff archive a student the moment the Registrar reports them gone, or is this batched into one end-of-year operation alongside the promotion/section work above?
 
 ## Resolved since last update
+
+- **Saturday, October 3, 2026 — 02:20 PHT — Dashboard Chart control unreachable for one-period ranges.** The earlier mode-state correction made the automatic table fallback keep Table selected, so Chart could not be selected. The fallback is now explicit: Chart and Table both remain interactive, with the single-period comparison notice retained.
+
+- **Saturday, October 3, 2026 — 02:07 PHT — Dashboard trend table overlapped the sticky top bar while scrolling.** The shared AppShell header was `z-10`, below the DataTable sticky edge cells at `z-20`; it now uses `z-30`, keeping table stickies below the header while preserving their horizontal-scroll behavior.
+
+- **Saturday, October 3, 2026 — 02:02 PHT — Dashboard trend mode mismatch.** With a month-to-date range containing one weekly bucket, the Visits Trend component correctly rendered its table fallback but left the Chart segment selected. The control now reflects the rendered Table mode; the This month range and its possibly empty frequent-visitor card remain intentional.
 
 - **Thursday, October 1, 2026 — 15:23 PHT — Dashboard trend-table visible Total mismatch.** With the newest-12-period table cap, a complaint whose cases existed only in an earlier hidden period could show zero in every visible period but still show its full-range Total. The table Total now sums only the displayed periods; chart and Common complaints totals remain full-range.
 

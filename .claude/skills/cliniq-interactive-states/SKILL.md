@@ -15,8 +15,11 @@ This skill exists because the first real build (the Dashboard) shipped without c
 - Primary buttons (`brand-green-dark` fill, white label) → lighten slightly on hover (`hover:brightness-125`). Never use a `brand-green` fill under a white label: button labels are small text, and that pairing is only 3.74:1
 - Secondary/outlined buttons → pick up a light `surface` background tint on hover
 - Destructive buttons (`error` fill) → darken the same way
+- Icon-only actions → the icon itself changes color on hover, with no background box (see below)
 - Plain list rows/cards that navigate → subtle `surface` background tint on hover, so the whole row visibly responds
 - Links → an underline or color shift, not silence
+
+**Clickable icons stay bare icons; don't style them as buttons.** An icon-only action (show password, a field's clear ✕, a collapse chevron) is enough on its own. Don't give it a background fill, a border, or a `surface` box that appears on hover. Its hover feedback is the icon's own color shift (`text-secondary` → `brand-green-dark`), plus the pointer cursor. The click area is the icon too: size the button to the glyph, with no padding or fixed box, so the pointer cursor and hover begin only over the icon, and the `focus-visible` ring hugs it (`rounded-sm`, offset 2). Underneath, it's still a real `<button type="button">` with an accessible name (`aria-label`). "Not a button" means not *styled* as one, and not *sized* as one either; never make a clickable `<span>` or `<svg>`. Reach for a visible button with a text label only when the action needs emphasis or the icon alone wouldn't be understood. Reference: the password reveal in `frontend/src/components/ui/Input.tsx`.
 
 **Navigable cards and list items need an affordance visible at rest.** Do not make a whole card or
 row a silent click target signaled only by cursor/hover. A widget's drill-down lives on the

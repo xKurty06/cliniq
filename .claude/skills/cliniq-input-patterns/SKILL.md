@@ -14,6 +14,12 @@ Use this with `cliniq-interactive-states` whenever a text input is created or ch
 - Keep the real visible label above the field, required indicator, nearby hint/error text, hover response, and visible keyboard focus treatment.
 - Use an explicit local override only where a documented compact control is necessary; do not shrink filter inputs merely to create a different height from their paired dropdown.
 
+## Leading icons and password reveal
+
+- `Input` takes an optional `icon` (an `IconName`), drawn inside the field on the left in `text-secondary`. It is decorative (`aria-hidden`) and never replaces the visible label. Use it where an icon helps a user recognize the field, as on Login (`user` for Username, `lock` for Password); don't add one to every field by default.
+- Every `type="password"` field automatically gets a reveal toggle on its right: a 32px eye/eye-off button named "Show password", with `aria-pressed` for its state. It's `type="button"`, so it never submits the form. Edge's built-in reveal eye is hidden so a field never shows two. Don't build a page-local reveal.
+- Fields without `icon` or `type="password"` render exactly as before, with no extra wrapper.
+
 ## Date, month, and time fields
 
 - Never use a native `type="date"`, `type="month"`, or `type="datetime-local"` input: their calendars are operating-system chrome. Use `DatePicker` (value `YYYY-MM-DD`) or `MonthPicker` (value `YYYY-MM`) from `frontend/src/components/ui/DatePicker.tsx`.

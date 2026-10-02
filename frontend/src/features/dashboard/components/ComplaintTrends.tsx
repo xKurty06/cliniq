@@ -334,7 +334,7 @@ function VisitsTrendCard({
   const [view, setView] = useState<ViewMode>('chart')
   const hasData = trends.series.length > 0
   const tooFewBuckets = trends.buckets.length < 2
-  const showTable = view === 'table' || tooFewBuckets
+  const showTable = view === 'table'
 
   return (
     <Card aria-labelledby={headingId} className="lg:col-span-2">
@@ -356,7 +356,7 @@ function VisitsTrendCard({
             />
             <SegmentedControl
               label="Show trend as"
-              value={view}
+              value={showTable ? 'table' : view}
               onChange={setView}
               options={[
                 { value: 'chart', label: 'Chart', icon: 'barChart' },
@@ -378,7 +378,7 @@ function VisitsTrendCard({
             {tooFewBuckets && (
               <p className="text-xs text-text-secondary">
                 This period fits in a single {granularity}, so there’s nothing to compare over time.
-                Showing totals as a table. Choose a longer period to see a trend.
+                Choose a longer period to see a trend.
               </p>
             )}
             {showTable ? (

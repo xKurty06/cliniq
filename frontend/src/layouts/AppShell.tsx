@@ -71,7 +71,7 @@ export function AppShell({ user, active, children, onLogout }: AppShellProps) {
       />
 
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-2 border-b border-border bg-background px-4 sm:px-8 print:hidden">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border bg-background px-4 sm:px-8 print:hidden">
           <div className="flex min-w-0 items-center gap-2 lg:hidden">
             <button
               type="button"

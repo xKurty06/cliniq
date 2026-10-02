@@ -42,6 +42,31 @@ const trends: ComplaintTrendsData = {
 }
 
 describe('TrendTable', () => {
+  it('keeps Chart selectable when a range has one period', async () => {
+    const user = userEvent.setup()
+    const singlePeriod: ComplaintTrendsData = {
+      ...trends,
+      buckets: [buckets[0]],
+      series: trends.series.map((row) => ({ ...row, counts: [row.counts[0]] })),
+      otherComplaints: trends.otherComplaints.map((row) => ({ ...row, counts: [row.counts[0]] })),
+    }
+    render(
+      <ComplaintTrends
+        trends={singlePeriod}
+        granularity="week"
+        onGranularityChange={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('radio', { name: 'Chart' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: 'Table' })).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByRole('img', { name: /visits and incidents by week/i })).toBeInTheDocument()
+    expect(screen.queryByRole('table', { name: /complaint counts per period/i })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Table' }))
+    expect(screen.getByRole('columnheader', { name: /Sep 1, 2026/i })).toBeInTheDocument()
+  })
+
   it("leaves the chart's full bucket range uncapped", () => {
     render(<ComplaintTrends trends={trends} granularity="week" onGranularityChange={vi.fn()} />)
 

@@ -1,5 +1,6 @@
-import { forwardRef, useId, type InputHTMLAttributes } from 'react'
+import { forwardRef, useId, useState, type InputHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
+import { Icon, type IconName } from '../icons/Icon'
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
   /** A real, visible label. Placeholder text never stands in for one. */
@@ -7,6 +8,8 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   hint?: string
   /** Plain-language validation message, shown under the field. */
   error?: string
+  /** Decorative leading icon inside the field; the visible label still names it. */
+  icon?: IconName
   id?: string
   className?: string
   inputClassName?: string
@@ -16,8 +19,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input({
   label,
   hint,
   error,
+  icon,
   id,
+  type,
   required,
+  disabled,
   className,
   inputClassName,
   ...rest
@@ -26,6 +32,29 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input({
   const inputId = id ?? autoId
   const hintId = hint ? `${inputId}-hint` : undefined
   const errorId = error ? `${inputId}-error` : undefined
+  // Every password field can be revealed, so a typo can be checked before it counts toward lockout.
+  const isPassword = type === 'password'
+  const [revealed, setRevealed] = useState(false)
+  const field = (
+    <input
+      id={inputId}
+      ref={ref}
+      type={isPassword && revealed ? 'text' : type}
+      required={required}
+      disabled={disabled}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={cn(hintId, errorId) || undefined}
+      className={cn(
+        'h-10 rounded-md border bg-background px-3 text-sm font-semibold text-text-primary shadow-card transition-colors duration-150 hover:border-brand-green hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none',
+        error ? 'border-error' : 'border-border',
+        icon && 'pl-9',
+        // Edge draws its own reveal eye; hide it so the field never shows two.
+        isPassword && 'pr-10 [&::-ms-reveal]:hidden',
+        inputClassName,
+      )}
+      {...rest}
+    />
+  )
   return (
     <div className={cn('flex flex-col gap-1', className)}>
       <label htmlFor={inputId} className="text-xs font-semibold text-text-primary">
@@ -38,19 +67,29 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input({
         )}
         {required && <span className="sr-only"> (required)</span>}
       </label>
-      <input
-        id={inputId}
-        ref={ref}
-        required={required}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={cn(hintId, errorId) || undefined}
-        className={cn(
-          'h-10 rounded-md border bg-background px-3 text-sm font-semibold text-text-primary shadow-card transition-colors duration-150 hover:border-brand-green hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none',
-          error ? 'border-error' : 'border-border',
-          inputClassName,
-        )}
-        {...rest}
-      />
+      {icon || isPassword ? (
+        <div className="relative flex flex-col">
+          {icon && (
+            <Icon name={icon} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-secondary" />
+          )}
+          {field}
+          {isPassword && (
+            <button
+              type="button"
+              aria-label="Show password"
+              aria-pressed={revealed}
+              aria-controls={inputId}
+              disabled={disabled}
+              onClick={() => setRevealed((value) => !value)}
+              className="absolute top-1/2 right-3 inline-flex -translate-y-1/2 cursor-pointer rounded-sm text-text-secondary transition-colors hover:text-brand-green-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+            >
+              <Icon name={revealed ? 'eyeOff' : 'eye'} />
+            </button>
+          )}
+        </div>
+      ) : (
+        field
+      )}
       {hint && !error && (
         <p id={hintId} className="text-xs text-text-secondary">
           {hint}
