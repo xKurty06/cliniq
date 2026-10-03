@@ -20,8 +20,8 @@ import type {
 export type TrendGranularity = 'day' | 'week' | 'month' | 'year'
 
 export interface DashboardQuery {
+  /** The trend's bucket size is derived from this range (preset and span); nothing else picks it. */
   range: DateRange
-  trendGranularity: TrendGranularity
 }
 
 export interface DashboardCounts {

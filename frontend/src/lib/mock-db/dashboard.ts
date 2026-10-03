@@ -1,5 +1,5 @@
 import { addDays, diffDays, eachDay, endOfMonth, endOfYear, formatDate, formatShortDate, isWithin, startOfMonth, startOfWeek, startOfYear } from '../dates'
-import { previousPeriod, rangeLengthDays, type DateRange } from '../dateRange'
+import { previousPeriod, rangeLengthDays, type DateRange, type DateRangePreset } from '../dateRange'
 import type { ISODate } from '../../types/entities'
 import type {
   CalendarDay,
@@ -69,9 +69,7 @@ export function buildDashboardSummary(
         ...visitsInRange.map((v) => ({ date: dateOf(v.dateTime), complaint: v.complaint })),
         ...incidentsInRange.map((i) => ({ date: dateOf(i.time), complaint: i.complaint })),
       ],
-      from,
-      to,
-      query.trendGranularity,
+      query.range,
       config,
     ),
   }
@@ -163,31 +161,48 @@ export function buildBuckets(
   return buckets
 }
 
-/** Pick the finest readable bucket size for the selected calendar span. */
-export function trendGranularityForRange(
-  range: Pick<DateRange, 'from' | 'to'> & Partial<Pick<DateRange, 'preset'>>,
+/**
+ * The trend's bucket size, derived only from the selected range; there is no manual override.
+ * Presets map directly: Today (a single bucket, more a total than a trend), Last 7 days, Last 30
+ * days, and This month are daily; This year is monthly. All and Custom are sized by their actual
+ * span so the chart stays readable: All is monthly unless its recorded history passes two years
+ * (then yearly); Custom is daily up to a month, weekly up to about four months, monthly up to two
+ * years, then yearly.
+ */
+export function trendGranularityFor(
+  preset: DateRangePreset,
+  window: { from: ISODate; to: ISODate },
 ): TrendGranularity {
-  if (range.preset === 'all') return 'month'
-  const days = rangeLengthDays(range)
-  if (days <= 31) return 'day'
-  if (days <= 120) return 'week'
-  if (days <= 3 * 366) return 'month'
-  return 'year'
+  const days = rangeLengthDays(window)
+  switch (preset) {
+    case 'today':
+    case 'last7':
+    case 'last30':
+    case 'thisMonth':
+      return 'day'
+    case 'thisYear':
+      return 'month'
+    case 'all':
+      return days <= 2 * 366 ? 'month' : 'year'
+    case 'custom':
+      return days <= 31 ? 'day' : days <= 120 ? 'week' : days <= 2 * 366 ? 'month' : 'year'
+  }
 }
 
 export function buildComplaintTrends(
   events: Array<{ date: ISODate; complaint: string }>,
-  from: ISODate,
-  to: ISODate,
-  granularity: TrendGranularity,
+  range: Pick<DateRange, 'preset' | 'from' | 'to'>,
   config: Pick<MockDbConfig, 'clusterMinCount' | 'clusterRatio' | 'topComplaints'>,
 ): ComplaintTrends {
-  // Only All uses the safe historical floor (1900), so its empty pre-history buckets can be skipped.
-  // Bounded ranges must retain their selected start so zero-activity periods remain visible.
+  const { from, to } = range
+  // Only All starts at the historical floor (1900), so only All skips its empty pre-history and
+  // starts at the first recorded event (or today, when nothing is recorded yet). Bounded ranges keep
+  // their selected start so zero-activity days, weeks, or months remain visible as zero buckets.
   const trendFrom =
-    from === '1900-01-01' && events.length
+    range.preset === 'all'
       ? events.reduce<ISODate>((earliest, event) => (event.date < earliest ? event.date : earliest), to)
       : from
+  const granularity = trendGranularityFor(range.preset, { from: trendFrom, to })
   const buckets = buildBuckets(trendFrom, to, granularity)
   const byComplaint = new Map<string, number[]>()
   for (const e of events) {

@@ -1,6 +1,6 @@
 import '../../../components/charts/chartSetup'
 import type { Chart, ChartOptions, Plugin, ScriptableContext } from 'chart.js'
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useState, type ReactNode } from 'react'
 import { Line } from 'react-chartjs-2'
 import {
   Card,
@@ -15,7 +15,7 @@ import {
   type DataTableColumn,
 } from '../../../components'
 import { cn } from '../../../lib/cn'
-import { formatDate } from '../../../lib/dates'
+import { formatDate, formatShortDate } from '../../../lib/dates'
 import { sortTableRows, toggleTableSort, type TableSortState } from '../../../lib/tableSort'
 import { colorToken } from '../../../lib/tokens'
 import type {
@@ -28,8 +28,9 @@ import type {
 /*
  * Trends row (Reference 1, item 4), laid out like the reference mockup's "Visits Trend" +
  * "Top Visit Reasons" pair:
- * - Left (2/3): visits + incidents over time, grouped by week or month (line with a light area
- *   wash). A possible symptom cluster is drawn ON the chart as a warning-colored point with a ⚠
+ * - Left (2/3): visits + incidents over time, grouped by day, week, month, or year (line with a
+ *   light area wash). The grouping follows the page's date range (data layer); there's no toggle
+ *   for it, only for Chart vs Table. A possible symptom cluster is drawn ON the chart as a warning-colored point with a ⚠
  *   marker (spec: "a simple highlighted marker on the chart, not a separate widget").
  * - Right (1/3): the most common complaints in the range as labeled horizontal bars. A complaint
  *   with a possible cluster gets a warning bar plus a ⚠ icon and text, never color alone.
@@ -39,6 +40,8 @@ import type {
 type ViewMode = 'chart' | 'table'
 
 const MAX_VISIBLE_TABLE_PERIODS = 12
+const PERIOD_COLUMN_WIDTH = '5rem'
+const TOTAL_COLUMN_WIDTH = '5rem'
 
 function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
   if (granularity === 'day') return formatDate(bucket.from)
@@ -47,10 +50,41 @@ function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string 
   return formatDate(bucket.from, { month: 'long', year: 'numeric' })
 }
 
+/** Full period name for the table's sort labels (the accessible name of each period column). */
 function tableBucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
   return granularity === 'week' || granularity === 'day'
     ? formatDate(bucket.from)
     : bucketName(bucket, granularity)
+}
+
+/**
+ * Period header without the visible year (the card title shows it once), so period columns stay
+ * narrow. The year stays in the header's accessible name as screen-reader-only text. Yearly
+ * periods are years, so they show as-is.
+ */
+function tableBucketHeader(bucket: TrendBucket, granularity: TrendGranularity): ReactNode {
+  if (granularity === 'year') return bucketName(bucket, granularity)
+  const year = bucket.from.slice(0, 4)
+  return granularity === 'month' ? (
+    <>
+      {formatDate(bucket.from, { month: 'short' })}
+      <span className="sr-only"> {year}</span>
+    </>
+  ) : (
+    <>
+      {formatShortDate(bucket.from)}
+      <span className="sr-only">, {year}</span>
+    </>
+  )
+}
+
+/** The year(s) the trend covers, e.g. "2026" or "2025–2026"; none for Yearly, whose periods are years. */
+function trendYears(trends: Trends): string | undefined {
+  const first = trends.buckets[0]
+  const last = trends.buckets.at(-1)
+  if (trends.granularity === 'year' || !first || !last) return undefined
+  const [from, to] = [first.from.slice(0, 4), last.to.slice(0, 4)]
+  return from === to ? from : `${from}–${to}`
 }
 
 interface ClusterNote {
@@ -256,9 +290,9 @@ export function TrendTable({ trends }: { trends: Trends }) {
       const sourceIndex = visibleBucketIndexes[displayIndex]
       return {
         key: b.key,
-        header: tableBucketName(b, trends.granularity),
+        header: tableBucketHeader(b, trends.granularity),
         align: 'right' as const,
-        width: '8rem',
+        width: PERIOD_COLUMN_WIDTH,
         sort: sortColumn(b.key, tableBucketName(b, trends.granularity)),
         cell: (r: ComplaintSeries) =>
           r.clusterBuckets.includes(sourceIndex) ? (
@@ -276,11 +310,14 @@ export function TrendTable({ trends }: { trends: Trends }) {
       key: 'total',
       header: 'Total',
       align: 'right',
-      width: '5rem',
+      width: TOTAL_COLUMN_WIDTH,
       sort: sortColumn('total', 'Total'),
       cell: (r) => <strong>{r.total}</strong>,
     },
   ]
+  // The table is as wide as its columns, so a long period window overflows into the scroller while
+  // fixed layout keeps every column at its calibrated width when rows are hidden or shown.
+  const tableMinWidth = `calc(${complaintColumnWidth} + ${visibleBuckets.length} * ${PERIOD_COLUMN_WIDTH} + ${TOTAL_COLUMN_WIDTH})`
   const sortedRows = sortTableRows(rows, sort, (row, key) => {
     if (key === 'complaint') return row.complaint
     if (key === 'total') return row.total
@@ -308,9 +345,9 @@ export function TrendTable({ trends }: { trends: Trends }) {
         rows={sortedRows}
         rowKey={(r) => r.complaint}
         fixedLayout
+        minTableWidth={tableMinWidth}
         stickyFirstColumn
         stickyLastColumn
-        className="[&_table]:min-w-max"
       />
       {earlierPeriodCount > 0 && (
         <p className="text-xs text-text-secondary">
@@ -325,16 +362,13 @@ export function TrendTable({ trends }: { trends: Trends }) {
 function VisitsTrendCard({
   trends,
   clusters,
-  granularity,
-  onGranularityChange,
 }: {
   trends: Trends
   clusters: ClusterNote[]
-  granularity: TrendGranularity
-  onGranularityChange: (g: TrendGranularity) => void
 }) {
   const headingId = useId()
   const [view, setView] = useState<ViewMode>('chart')
+  const years = trendYears(trends)
   const hasData = trends.buckets.length > 1 || trends.series.length > 0
   const tooFewBuckets = trends.buckets.length < 2
   const showTable = view === 'table'
@@ -344,32 +378,27 @@ function VisitsTrendCard({
       <CardHeader
         titleId={headingId}
         icon={<Icon name="activity" />}
-        title="Visits trend"
-        description={`Visits and incidents per ${granularity}.`}
+        title={
+          years ? (
+            <>
+              Visits trend <span className="font-normal text-text-secondary">· {years}</span>
+            </>
+          ) : (
+            'Visits trend'
+          )
+        }
+        description={`Visits and incidents per ${trends.granularity}.`}
         className="sticky top-16 z-[25] rounded-t-lg bg-background"
         actions={
-          <>
-            <SegmentedControl
-              label="Group trend by"
-              value={granularity}
-              onChange={onGranularityChange}
-              options={[
-                { value: 'day', label: 'Daily' },
-                { value: 'week', label: 'Weekly' },
-                { value: 'month', label: 'Monthly' },
-                { value: 'year', label: 'Yearly' },
-              ]}
-            />
-            <SegmentedControl
-              label="Show trend as"
-              value={view}
-              onChange={(nextView) => setView(nextView)}
-              options={[
-                { value: 'chart', label: 'Chart', icon: 'barChart' },
-                { value: 'table', label: 'Table', icon: 'table' },
-              ]}
-            />
-          </>
+          <SegmentedControl
+            label="Show trend as"
+            value={view}
+            onChange={(nextView) => setView(nextView)}
+            options={[
+              { value: 'chart', label: 'Chart', icon: 'barChart' },
+              { value: 'table', label: 'Table', icon: 'table' },
+            ]}
+          />
         }
       />
       <CardBody className="flex flex-col gap-3">
@@ -383,7 +412,7 @@ function VisitsTrendCard({
           <>
             {tooFewBuckets && (
               <p className="text-xs text-text-secondary">
-                This period fits in a single {granularity}, so there’s nothing to compare over time.
+                This period fits in a single {trends.granularity}, so there’s nothing to compare over time.
                 Choose a longer period to see a trend.
               </p>
             )}
@@ -484,24 +513,13 @@ function CommonComplaintsCard({ trends, clusters }: { trends: Trends; clusters: 
 
 export interface ComplaintTrendsProps {
   trends: Trends
-  granularity: TrendGranularity
-  onGranularityChange: (g: TrendGranularity) => void
 }
 
-export function ComplaintTrends({
-  trends,
-  granularity,
-  onGranularityChange,
-}: ComplaintTrendsProps) {
+export function ComplaintTrends({ trends }: ComplaintTrendsProps) {
   const clusters = useMemo(() => findClusters(trends), [trends])
   return (
     <section aria-label="Trends" className={TRENDS_GRID}>
-      <VisitsTrendCard
-        trends={trends}
-        clusters={clusters}
-        granularity={granularity}
-        onGranularityChange={onGranularityChange}
-      />
+      <VisitsTrendCard trends={trends} clusters={clusters} />
       <CommonComplaintsCard trends={trends} clusters={clusters} />
     </section>
   )

@@ -19,4 +19,5 @@ frontend/*.local
 .DS_Store
 .vscode/
 .idea/
-/.tmp-edge-*
+.tmp-edge-*
+.playwright-mcp

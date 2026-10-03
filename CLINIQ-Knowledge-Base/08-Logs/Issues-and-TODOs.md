@@ -21,6 +21,8 @@
 
 ## Verification notes
 
+- Saturday, October 3, 2026 — 14:52 PHT — **Dashboard trend table “no longer horizontally scrollable” not reproduced.** Before any change, with `fixedLayout` + `[&_table]:min-w-max` at 1280px, the table overflowed and a real horizontal wheel scrolled it to its maximum: Last 30 days 1828px in a 585px scroller (max 1243), This year 1590px (max 1005), All 1846px (max 1261). It also scrolled at 390/768/1024/1440px. On the default This month range (3 days into October) the table has only 3 period columns, so there is just 91px to scroll, which may have looked like no scrolling. Only Chromium could be tested.
+- Saturday, October 3, 2026 — 13:58 PHT — **Dashboard Alerts row “blank middle card” not reproduced.** Live Playwright checks of `FrequentVisitorsAlert` at 1440/1280/1024/900/768px, across every date-range preset (mid-refetch and settled), the first-load skeleton (`?mock=slow`), `?mock=empty`, print media, and a generated PDF all rendered its header, count, and empty state. The only headerless blank card reproduced was a full-page-screenshot artifact: a capture taken while scrolled paints sticky elements (AppShell bar, Visits trend header) at the scroll position, leaving the Visits trend card looking empty. If it recurs, note the width, range, scroll position, and how the screenshot was taken.
 - Thursday, October 01, 2026 — 15:42 PHT — `npm run lint` currently fails on the pre-existing `react-hooks/set-state-in-effect` error in `frontend/src/features/issue-reports/ReportIssueModal.tsx`; the Dashboard inventory badge change does not touch that file.
 
 ## Open design questions — school year handling & grade promotion
@@ -43,6 +45,9 @@
 
 ## Resolved since last update
 
+- **Saturday, October 3, 2026 — 14:52 PHT — Dashboard trend table relied on `min-width: max-content` with `table-layout: fixed`.** That pairing worked in Chromium but isn't consistently defined across browsers. The table now keeps `fixedLayout`, which keeps its column widths stable under the zero-activity toggle, and overflows through an explicit `minTableWidth` equal to its column sum.
+- **Saturday, October 3, 2026 — 13:58 PHT — Dashboard Alerts lists overflowed in print.** Print lifts each `ListCard` height cap, but the Alerts grid kept its fixed `26rem` rows, so full follow-up and inventory lists spilled over the Visits trend / Common complaints row. The grid now uses `print:auto-rows-auto`; screen layout is unchanged.
+- **Saturday, October 3, 2026 — 14:13 PHT — Dashboard trend granularity could contradict the date range.** Daily was selectable on All (re-creating the 50+ column problem) and Yearly on Today. The manual toggle is removed; `trendGranularityFor` derives the bucket size from the range preset and span. An empty All range no longer builds monthly buckets back to 1900.
 - **Saturday, October 3, 2026 — 03:07 PHT — Dashboard Chart control covered while scrolling.** The Visits Trend card header now sticks below the AppShell top bar (`top-16`, below the shell's `z-30` layer), keeping Chart/Table controls visible and clickable while the dashboard scrolls.
 
 - **Saturday, October 3, 2026 — 02:20 PHT — Dashboard Chart control unreachable for one-period ranges.** The earlier mode-state correction made the automatic table fallback keep Table selected, so Chart could not be selected. The fallback is now explicit: Chart and Table both remain interactive, with the single-period comparison notice retained.

@@ -45,15 +45,28 @@ describe('TrendTable', () => {
   it('keeps a genuinely empty multi-bucket range as a zero chart', () => {
     render(
       <ComplaintTrends
-        trends={{ granularity: 'day', buckets: buckets.slice(0, 3), series: [], otherComplaints: [] }}
-        granularity="day"
-        onGranularityChange={vi.fn()}
+        trends={{
+          granularity: 'day',
+          buckets: buckets.slice(0, 3),
+          series: [],
+          otherComplaints: [],
+        }}
       />,
     )
 
     expect(screen.getByRole('img', { name: /visits and incidents by day/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Visits trend' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Visits trend · 2026' })).toBeInTheDocument()
     expect(screen.queryByText('No visits or incidents in this date range')).not.toBeInTheDocument()
+  })
+
+  it('has no granularity toggle; the bucket size follows the date range', () => {
+    render(<ComplaintTrends trends={trends} />)
+
+    expect(screen.queryByRole('radiogroup', { name: 'Group trend by' })).not.toBeInTheDocument()
+    for (const name of ['Daily', 'Weekly', 'Monthly', 'Yearly']) {
+      expect(screen.queryByRole('radio', { name })).not.toBeInTheDocument()
+    }
+    expect(screen.getByRole('radiogroup', { name: 'Show trend as' })).toBeInTheDocument()
   })
 
   it('keeps Chart selectable when a range has one period', async () => {
@@ -64,13 +77,7 @@ describe('TrendTable', () => {
       series: trends.series.map((row) => ({ ...row, counts: [row.counts[0]] })),
       otherComplaints: trends.otherComplaints.map((row) => ({ ...row, counts: [row.counts[0]] })),
     }
-    render(
-      <ComplaintTrends
-        trends={singlePeriod}
-        granularity="week"
-        onGranularityChange={vi.fn()}
-      />,
-    )
+    render(<ComplaintTrends trends={singlePeriod} />)
 
     expect(screen.getByRole('radio', { name: 'Chart' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('radio', { name: 'Table' })).toHaveAttribute('aria-checked', 'false')
@@ -81,9 +88,29 @@ describe('TrendTable', () => {
     expect(screen.getByRole('columnheader', { name: /Sep 1, 2026/i })).toBeInTheDocument()
   })
 
+  it('shows period headers without the year and puts the year in the card title', async () => {
+    const user = userEvent.setup()
+    render(<ComplaintTrends trends={trends} />)
+    expect(screen.getByRole('heading', { name: 'Visits trend · 2026' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Table' }))
+    const table = screen.getByRole('table')
+    // The year is screen-reader-only: visible header text is compact, accessible names are full.
+    expect(screen.getByRole('columnheader', { name: /Sep 14, 2026/ })).toBeInTheDocument()
+    expect(within(table).getByText('Sep 14')).toBeInTheDocument()
+    const visibleHeaderText = [...table.querySelectorAll('thead th')]
+      .map((th) => {
+        const copy = th.cloneNode(true) as HTMLElement
+        copy.querySelectorAll('.sr-only').forEach((el) => el.remove())
+        return copy.textContent
+      })
+      .join(' ')
+    expect(visibleHeaderText).not.toContain('2026')
+  })
+
   it('switches back to Chart after viewing the table', async () => {
     const user = userEvent.setup()
-    render(<ComplaintTrends trends={trends} granularity="week" onGranularityChange={vi.fn()} />)
+    render(<ComplaintTrends trends={trends} />)
 
     await user.click(screen.getByRole('radio', { name: 'Table' }))
     expect(screen.getByRole('table', { name: /complaint counts per period/i })).toBeInTheDocument()
@@ -94,7 +121,7 @@ describe('TrendTable', () => {
   })
 
   it("leaves the chart's full bucket range uncapped", () => {
-    render(<ComplaintTrends trends={trends} granularity="week" onGranularityChange={vi.fn()} />)
+    render(<ComplaintTrends trends={trends} />)
 
     const chartLabel = screen.getByRole('img').getAttribute('aria-label') ?? ''
     expect(chartLabel.split('; ')).toHaveLength(14)
@@ -138,7 +165,7 @@ describe('TrendTable', () => {
 
   it('keeps the Common complaints totals unchanged when table rows are revealed', async () => {
     const user = userEvent.setup()
-    render(<ComplaintTrends trends={trends} granularity="week" onGranularityChange={vi.fn()} />)
+    render(<ComplaintTrends trends={trends} />)
 
     await user.click(screen.getByRole('radio', { name: 'Table' }))
     const commonTotal = screen.getByText(/other complaint types, 2 cases/i)

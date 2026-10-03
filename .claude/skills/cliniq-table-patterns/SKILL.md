@@ -25,13 +25,14 @@ Use this alongside `cliniq-interactive-states`, `cliniq-pagination-patterns`,
 - Keep horizontal scrolling on the shared `DataTable` wrapper; do not make the page itself scroll sideways.
 - Set `stickyFirstColumn` when the first column identifies each row and `stickyLastColumn` when a summary/action column must remain available at the right edge. The shared component keeps either edge column opaque, layered above scrolled cells, and visually separated at its inner edge.
 - Combine sticky columns with `fixedLayout` and calibrated widths. A sticky position without an intrinsic table width can still leave the browser compressing the columns until their content overlaps.
+- When a fixed-layout table must grow past its scroller (a wide time series), give it an explicit `minTableWidth` equal to the sum of its column widths (e.g. `calc(26ch + 12 * 8rem + 5rem)`). Don't use `min-w-max` / `min-width: max-content` on a fixed-layout table: how browsers resolve max-content for `table-layout: fixed` isn't consistently defined. Don't drop `fixedLayout` to get overflow either: the column widths only apply with it, so columns would reshuffle as rows are filtered.
 - Verify the actual scroll interaction at the left edge, middle, and far-right positions. Each sticky edge column must remain inside the scroller viewport, readable, and not show the columns underneath through its background.
 
 ## Wide time-series tables
 
 - Cap period columns in the table view itself when a date range can produce a wide time series; do not cap the shared aggregation or chart data just to make a table fit.
 - Show the most recent periods, preserve the source bucket indexes for counts and cluster markers, and add a plain note below the table stating how many earlier periods are hidden and how to see them.
-- Keep period headers compact when their repeated prefix adds no information in a dense table (for example, use `Sep 14` in a weekly table while retaining `Week of Sep 14` in chart explanations and tooltips).
+- Keep period headers compact when their repeated prefix adds no information in a dense table (for example, use `Sep 14` in a weekly table while retaining `Week of Sep 14` in chart explanations and tooltips). Drop the year from period headers too: show it once in the card title (e.g. `Visits trend · 2025–2026`), keep it in each header's accessible name as screen-reader-only text, and size period columns to the short header (the Dashboard trend table uses 5rem). Yearly periods keep their year, since it is the period.
 - Keep the cap local to the table's view model so charts, summary totals, and other dashboard panels continue to represent the full selected range.
 
 ## Low-signal rows

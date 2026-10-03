@@ -269,7 +269,9 @@ describe('Clinic Overview Dashboard', () => {
     const table = screen.getByRole('table', { name: /complaint counts per period/i })
     expect(table).toBeInTheDocument()
     expect(table).toHaveClass('table-fixed')
-    expect(table.parentElement).toHaveClass('[&_table]:min-w-max')
+    // Overflow comes from an explicit width, the column sum (26ch + 12 × 5rem + 5rem), not
+    // min-width: max-content; the CSS engine folds the product into 60rem.
+    expect(table.style.minWidth).toBe('calc(26ch + 5rem + 60rem)')
     expect(table.querySelectorAll('thead th')).toHaveLength(14)
     expect(
       screen.getByText(/earlier periods — narrow the date range to see them/i),
@@ -280,7 +282,7 @@ describe('Clinic Overview Dashboard', () => {
     expect(table.querySelector('thead th')).toHaveClass('sticky', 'left-0', 'bg-background')
     const columns = table.querySelectorAll('col')
     expect(columns[0]).toHaveAttribute('style', 'width: 26ch;')
-    expect(columns[1]).toHaveAttribute('style', 'width: 8rem;')
+    expect(columns[1]).toHaveAttribute('style', 'width: 5rem;')
     expect(columns[columns.length - 1]).toHaveAttribute('style', 'width: 5rem;')
     expect(table.querySelector('thead th:last-child')).toHaveClass(
       'sticky',

@@ -81,7 +81,7 @@ describe('editing mock-db.json changes every screen consistently', () => {
     expect((await fetchNewVisitContext(student.studentNumber)).student?.fullName).toBe(EDITED_NAME)
 
     // Dashboard: they're a frequent visitor, shown by Student Number only (ADR-004).
-    const dash = await fetchDashboardSummary({ range: rangeForPreset('last30', todayISO()), trendGranularity: 'week' })
+    const dash = await fetchDashboardSummary({ range: rangeForPreset('last30', todayISO()) })
     expect(dash.frequentVisitors.map((f) => f.student.studentNumber)).toContain(student.studentNumber)
     expect(JSON.stringify(dash)).not.toContain(EDITED_NAME)
   })
@@ -98,7 +98,7 @@ describe('editing mock-db.json changes every screen consistently', () => {
     expect(item.currentStock).toBeLessThan(item.lowStockThreshold)
     expect(item.flags).toContain('low_stock')
 
-    const dash = await fetchDashboardSummary({ range: rangeForPreset('last30', todayISO()), trendGranularity: 'week' })
+    const dash = await fetchDashboardSummary({ range: rangeForPreset('last30', todayISO()) })
     const alert = dash.inventoryAlerts.find((a) => a.item.name === EDITED_ITEM)
     expect(alert?.flags).toContain('low_stock')
     const lowStockItems = (await fetchInventory({ search: '', category: '' })).filter((i) => i.flags.includes('low_stock'))
@@ -113,7 +113,7 @@ describe('editing mock-db.json changes every screen consistently', () => {
 describe('writing through the layer updates every screen together', () => {
   it('a new visit moves the Dashboard counts and the student history in one step', async () => {
     const student = await editedStudent()
-    const query = { range: rangeForPreset('today', todayISO()), trendGranularity: 'week' as const }
+    const query = { range: rangeForPreset('today', todayISO()) }
     const before = await fetchDashboardSummary(query)
     const historyBefore = await fetchStudentProfile(student.studentNumber)
     const logBefore = await fetchVisitLog({ from: todayISO(), to: todayISO(), search: '', disposition: 'all' })

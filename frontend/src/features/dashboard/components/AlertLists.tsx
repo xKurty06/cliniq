@@ -30,7 +30,10 @@ const LISTS = {
   inventory: { title: 'Low-stock & expiring items', icon: 'package' },
 } as const
 
-export const ALERT_GRID = 'grid grid-cols-1 items-stretch gap-4 lg:auto-rows-[26rem] lg:grid-cols-3'
+// Print lifts each list's height cap (ListCard), so rows must size to their content there too;
+// a fixed 26rem row would let full lists spill over the trends row below.
+export const ALERT_GRID =
+  'grid grid-cols-1 items-stretch gap-4 lg:auto-rows-[26rem] lg:grid-cols-3 print:auto-rows-auto'
 const ALERT_LIST_HEIGHT = 'max-h-80 lg:max-h-none'
 
 export function AlertListsSkeleton() {

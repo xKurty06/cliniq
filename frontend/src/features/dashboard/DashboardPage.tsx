@@ -5,7 +5,6 @@ import { cn } from '../../lib/cn'
 import { todayISO } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import { rangeForPreset, type DateRange } from '../../lib/dateRange'
-import { trendGranularityForRange } from '../../lib/mock-db/dashboard'
 import { fetchDashboardSummary } from './api/dashboardApi'
 import {
   ALERT_GRID,
@@ -19,7 +18,6 @@ import { DashboardHeader } from './components/DashboardHeader'
 import { StaffShortcuts } from './components/StaffShortcuts'
 import { StatCardRow, StatCardRowSkeleton } from './components/StatCardRow'
 import { VisitCalendar } from './components/VisitCalendar'
-import type { TrendGranularity } from '../../types/dashboard'
 
 /**
  * First-load skeleton: each section's own shaped placeholder in the same grid positions as the
@@ -50,14 +48,12 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
   const today = todayISO()
   // A summary view opens on the current month; operational logs keep the All default.
   const [range, setRange] = useState<DateRange>(() => rangeForPreset('thisMonth', today))
-  const [granularity, setGranularity] = useState<TrendGranularity>(() =>
-    trendGranularityForRange(rangeForPreset('thisMonth', today)),
-  )
   const canNavigate = viewer.role === 'staff'
 
   const { data, status, isRefetching, reload } = useAsyncData(
-    `${range.from}|${range.to}|${granularity}`,
-    () => fetchDashboardSummary({ range, trendGranularity: granularity }),
+    // The preset is part of the key: the trend's bucket size depends on it, not only the dates.
+    `${range.preset}|${range.from}|${range.to}`,
+    () => fetchDashboardSummary({ range }),
   )
 
   return (
@@ -67,10 +63,7 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
           viewer={viewer}
           today={today}
           range={range}
-          onRangeChange={(nextRange) => {
-            setRange(nextRange)
-            setGranularity(trendGranularityForRange(nextRange))
-          }}
+          onRangeChange={setRange}
           isRefetching={isRefetching}
           onPrint={() => window.print()}
         />
@@ -103,11 +96,7 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
             <InventoryAlert summary={data} canNavigate={canNavigate} />
           </section>
 
-          <ComplaintTrends
-            trends={data.complaintTrends}
-            granularity={granularity}
-            onGranularityChange={setGranularity}
-          />
+          <ComplaintTrends trends={data.complaintTrends} />
         </div>
       ) : null}
 

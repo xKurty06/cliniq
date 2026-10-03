@@ -65,7 +65,7 @@ No separate login screen for Staff here — the computer and mobile Staff flows 
 30. **Dispense/Log Usage** — decrements stock, ties to a visit if applicable
 
 ### Clinic Overview Dashboard (enhancement, expanded from "Health Trends Dashboard"; Staff + Admin-facing)
-31. **Dashboard View** — total visit/incident counts, pending/incomplete records (pulled from #9's queue), common complaints by week/month, symptom-clustering flag, frequent-visitor flag identified by **Student Number** per the display-privacy rule (a warning only, never a diagnosis), plus a **calendar view** of visit counts toggleable weekly/monthly/yearly. Charts should have a simple table fallback for the low-spec machine
+31. **Dashboard View** — total visit/incident counts, pending/incomplete records (pulled from #9's queue), common complaints over time, grouped by day/week/month/year derived from the selected date range (no manual grouping toggle; Chart/Table remains), symptom-clustering flag, frequent-visitor flag identified by **Student Number** per the display-privacy rule (a warning only, never a diagnosis), plus a **calendar view** of visit counts toggleable weekly/monthly/yearly. Charts should have a simple table fallback for the low-spec machine
 
 ### Backup Verification Assistant (enhancement)
 32. **Backup Status Screen** — last backup date/size/status, plus a plain-language guided recovery checklist (Staff-only, likely nurse-only)

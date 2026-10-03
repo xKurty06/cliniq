@@ -30,6 +30,12 @@ export interface DataTableProps<Row> {
   rowKey: (row: Row) => string
   /** Prevent filtered row content from redistributing column positions. */
   fixedLayout?: boolean
+  /**
+   * Explicit minimum table width, for a fixed-layout table that must grow past its scroller (pass
+   * the sum of its column widths). Use this instead of `min-width: max-content`, whose result on a
+   * `table-layout: fixed` table isn't defined consistently across browsers.
+   */
+  minTableWidth?: string
   /** Keep the leftmost column opaque and visible while the table scrolls horizontally. */
   stickyFirstColumn?: boolean
   /** Keep the rightmost column opaque and visible while the table scrolls horizontally. */
@@ -49,6 +55,7 @@ export function DataTable<Row>({
   rows,
   rowKey,
   fixedLayout = false,
+  minTableWidth,
   stickyFirstColumn = false,
   stickyLastColumn = false,
   className,
@@ -61,7 +68,10 @@ export function DataTable<Row>({
         className,
       )}
     >
-      <table className={cn('w-full border-collapse text-sm', fixedLayout && 'table-fixed')}>
+      <table
+        className={cn('w-full border-collapse text-sm', fixedLayout && 'table-fixed')}
+        style={minTableWidth ? { minWidth: minTableWidth } : undefined}
+      >
         {fixedLayout && (
           <colgroup>
             {columns.map((col) => (

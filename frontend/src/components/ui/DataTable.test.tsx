@@ -33,6 +33,22 @@ describe('DataTable sortable headers', () => {
     expect(screen.getByRole('table').querySelector('caption')).toHaveClass('sr-only')
   })
 
+  it('gives a fixed-layout table an explicit minimum width when asked', () => {
+    render(
+      <DataTable
+        caption="Wide fixed records"
+        fixedLayout
+        minTableWidth="calc(20ch + 3 * 8rem)"
+        columns={[{ key: 'name', header: 'Name', width: '20ch', cell: (row: { name: string }) => row.name }]}
+        rows={[{ name: 'Amina' }]}
+        rowKey={(row) => row.name}
+      />,
+    )
+    const table = screen.getByRole('table', { name: 'Wide fixed records' })
+    expect(table).toHaveClass('table-fixed')
+    expect(table.style.minWidth).toBe('calc(20ch + 24rem)')
+  })
+
   it('keeps the first column sticky when horizontal scrolling is enabled', () => {
     render(
       <DataTable

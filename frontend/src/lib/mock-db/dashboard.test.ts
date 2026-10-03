@@ -9,7 +9,7 @@ import {
   buildDueFollowUps,
   buildInventoryAlerts,
   detectClusters,
-  trendGranularityForRange,
+  trendGranularityFor,
 } from './dashboard'
 import type { DbState, MockDbConfig, SeedStudent } from './types'
 
@@ -167,7 +167,7 @@ describe('complaint trends', () => {
     const events = names.flatMap((c, i) =>
       Array.from({ length: 10 - i }, () => ({ date: '2026-09-10', complaint: c })),
     )
-    const trends = buildComplaintTrends(events, '2026-09-01', '2026-09-30', 'month', CONFIG)
+    const trends = buildComplaintTrends(events, { preset: 'custom', from: '2026-09-01', to: '2026-09-30' }, CONFIG)
     expect(trends.series.map((s) => s.complaint)).toEqual(names.slice(0, CONFIG.topComplaints))
     expect(trends.otherComplaints.map((s) => s.complaint)).toEqual(
       names.slice(CONFIG.topComplaints),
@@ -177,11 +177,10 @@ describe('complaint trends', () => {
   it('keeps an All-range trend bounded by the first recorded event', () => {
     const trends = buildComplaintTrends(
       [{ date: '2026-09-10', complaint: 'Headache' }],
-      '1900-01-01',
-      '2026-09-26',
-      'week',
+      rangeForPreset('all', TODAY),
       CONFIG,
     )
+    expect(trends.granularity).toBe('month')
     expect(trends.buckets[0].from).toBe('2026-09-10')
     expect(trends.buckets.length).toBeLessThan(5)
   })
@@ -189,9 +188,7 @@ describe('complaint trends', () => {
   it('keeps bounded ranges anchored at their selected start and fills zero buckets', () => {
     const trends = buildComplaintTrends(
       [{ date: '2026-09-03', complaint: 'Headache' }],
-      '2026-09-01',
-      '2026-09-05',
-      'day',
+      { preset: 'custom', from: '2026-09-01', to: '2026-09-05' },
       CONFIG,
     )
     expect(trends.buckets.map((bucket) => bucket.from)).toEqual([
@@ -204,11 +201,44 @@ describe('complaint trends', () => {
     expect(trends.series[0].counts).toEqual([0, 0, 1, 0, 0])
   })
 
-  it('selects adaptive granularity by range length', () => {
-    expect(trendGranularityForRange({ from: '2026-09-26', to: '2026-09-26' })).toBe('day')
-    expect(trendGranularityForRange({ from: '2026-09-01', to: '2026-09-30' })).toBe('day')
-    expect(trendGranularityForRange({ from: '2026-01-01', to: '2026-12-31' })).toBe('month')
-    expect(trendGranularityForRange({ from: '2020-01-01', to: '2026-12-31' })).toBe('year')
+  it('derives the bucket size from the date range alone', () => {
+    const preset = (p: Parameters<typeof rangeForPreset>[0]) => {
+      const range = rangeForPreset(p, TODAY)
+      return trendGranularityFor(range.preset, range)
+    }
+    expect(preset('today')).toBe('day')
+    expect(preset('last7')).toBe('day')
+    expect(preset('last30')).toBe('day')
+    expect(preset('thisMonth')).toBe('day')
+    expect(preset('thisYear')).toBe('month')
+    // All is sized by its recorded history: monthly up to two years, then yearly.
+    expect(trendGranularityFor('all', { from: '2025-06-01', to: TODAY })).toBe('month')
+    expect(trendGranularityFor('all', { from: '2018-01-01', to: TODAY })).toBe('year')
+    // Custom follows its actual span.
+    const custom = (from: string) => trendGranularityFor('custom', { from, to: TODAY })
+    expect(custom('2026-09-20')).toBe('day')
+    expect(custom('2026-07-01')).toBe('week')
+    expect(custom('2025-10-01')).toBe('month')
+    expect(custom('2022-01-01')).toBe('year')
+  })
+
+  it('buckets This year by month, with empty months as zeros', () => {
+    const trends = buildComplaintTrends(
+      [{ date: '2026-03-04', complaint: 'Headache' }],
+      rangeForPreset('thisYear', TODAY),
+      CONFIG,
+    )
+    expect(trends.granularity).toBe('month')
+    expect(trends.buckets).toHaveLength(9)
+    expect(trends.series[0].counts).toEqual([0, 0, 1, 0, 0, 0, 0, 0, 0])
+  })
+
+  it('keeps an All range with no events to a single bucket instead of a century of months', () => {
+    const trends = buildComplaintTrends([], rangeForPreset('all', TODAY), CONFIG)
+    expect(trends.buckets).toHaveLength(1)
+  })
+
+  it('exposes This year as January 1 through today', () => {
     expect(rangeForPreset('thisYear', TODAY)).toMatchObject({ from: '2026-01-01', to: TODAY })
   })
 
@@ -235,7 +265,7 @@ describe('dashboard summary', () => {
   })
   const summary = buildDashboardSummary(
     data,
-    { range: rangeForPreset('last7', TODAY), trendGranularity: 'week' },
+    { range: rangeForPreset('last7', TODAY) },
     'now',
   )
 

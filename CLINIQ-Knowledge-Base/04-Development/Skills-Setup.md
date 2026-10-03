@@ -8,6 +8,10 @@ This is a substantially expanded pass over the first one — that version only c
 
 **Recent sidebar-pattern update — Thursday, October 01, 2026 — 22:51:35 PHT:** Footer items are compact hyperlink-like text in the expanded sidebar (label-only hit and hover), keep 40px icon targets when collapsed, and use `·` as the visual divider.
 
+**Recent table-pattern update — Saturday, October 3, 2026 — 14:59 PHT:** period headers in wide time-series tables drop the year (shown once in the card title, kept screen-reader-only in each header), with period columns sized to the short header.
+
+**Earlier table-pattern update — Saturday, October 3, 2026 — 14:52 PHT:** `cliniq-table-patterns` now says a fixed-layout table that must overflow its scroller gets an explicit `minTableWidth` (its column-width sum) instead of `min-w-max`, and must keep `fixedLayout` rather than drop it for overflow. First applied to the Dashboard complaint-trend table.
+
 | Skill | Location | Purpose |
 |---|---|---|
 | `cliniq-date-range-patterns` | `.claude/skills/cliniq-date-range-patterns/` | Keeps every date-range filter ordered with All first and opened on the unbounded All range (except the Clinic Overview Dashboard, which opens on This month — Friday, October 2, 2026 — 01:30), while preserving shared custom-range behavior — updated Friday, October 2, 2026 — 00:14: the custom popover is dismissable, applies only on Apply, and can align to the trigger's start edge |
