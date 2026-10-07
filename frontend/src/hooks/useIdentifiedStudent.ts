@@ -30,10 +30,19 @@ export function useIdentifiedStudent(
       setError(undefined)
     },
     /** Inline format check, run with the rest of the form's validation. */
-    validate(): boolean {
+    validate(message = 'Enter the Student Number (YYYY-NNNNN).'): boolean {
       if (student || isStudentNumber(input)) return true
-      setError('Enter the Student Number (YYYY-NNNNN).')
+      setError(message)
       return false
+    },
+    /** A student picked from a search (`StudentPicker`), looked up in full (allergies included). */
+    async select(studentNumber: string): Promise<void> {
+      try {
+        setPicked(await find(studentNumber))
+        setError(undefined)
+      } catch {
+        setError("This student couldn't be loaded. Search again.")
+      }
     },
     /** The identified student, looked up from the typed number when needed; `null` if not found. */
     async resolve(): Promise<Student | null> {

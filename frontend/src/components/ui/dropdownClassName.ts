@@ -61,7 +61,7 @@ const PANEL_MAX_HEIGHT = 256
 /**
  * Pins an option panel to its trigger in viewport coordinates, so a scrolling table or card can't
  * clip it. It opens upward when there's more room above, and never runs past the viewport edge.
- * Used by `Select` and `InventoryItemPicker`.
+ * Used by `Select`, `Combobox`, and `InventoryItemPicker`.
  */
 export function placeDropdownPanel(trigger: HTMLElement, panel: HTMLElement) {
   const rect = trigger.getBoundingClientRect()

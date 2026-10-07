@@ -42,6 +42,12 @@ export interface Student {
  */
 export type StudentListRef = Pick<Student, 'id' | 'studentNumber'>
 
+/**
+ * One result of a deliberate student search (a single lookup, so the name is shown): enough to
+ * tell similar names apart, and nothing medical.
+ */
+export type StudentSearchResult = Pick<Student, 'id' | 'studentNumber' | 'fullName' | 'gradeLevel'>
+
 export type UserRole = 'staff' | 'admin' | 'instructor'
 
 export interface User {

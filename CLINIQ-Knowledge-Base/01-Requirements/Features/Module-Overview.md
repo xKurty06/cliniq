@@ -88,14 +88,14 @@ Ten modules total: five baseline (from the Software Engineering I Technical Docu
 ### 3. Clinic Visit Monitoring — *Access: Staff only*
 
 **Daily Visit Logging**
-- Add new visit entry
+- Add new visit entry. A visit opened without an identified student finds one by Student Number or name (2+ characters, at most 8 active students, each shown with Student Number, full name, and grade). A `?student=` link or QR scan still identifies the student directly
 - Edit visit entry
 - View visit detail (full name shown — a deliberately opened single record)
 - View list of visits (filterable by date) — shows **Student Number**, not full name, per the display-privacy rule, since this rolling multi-student list is the kind of screen a bystander could glance at
 - Search visits by student
 
 **Complaint Monitoring**
-- Record complaint/symptom for the visit
+- Record complaint/symptom for the visit: free text with suggestions (the predefined complaint types plus complaints already recorded, most used first). Text matching a suggestion is stored in that suggestion's spelling, so counts don't split by capitalization. Smart Triage's checklist appears when the complaint matches a predefined type
 - View a student's complaint history (also visible to PE/Sports Instructor as part of visit/incident history)
 
 **Treatment Recording** *(two parts — ADR-018, Wednesday, October 07, 2026 — 10:43 PHT)*

@@ -1,0 +1,37 @@
+---
+name: cliniq-combobox-patterns
+description: Apply when building or changing a CLINIQ text field with a suggestion list (a combobox), such as the New Visit complaint field, or a student lookup by Student Number or name (StudentPicker). Keeps every combobox on the one shared, keyboard-usable primitive in the shared dropdown look.
+---
+
+# CLINIQ Combobox Patterns
+
+Use this with `cliniq-dropdown-patterns` (the panel and option look), `cliniq-input-patterns` (field sizing), and `cliniq-interactive-states` (hover and cursor rules). Don't repeat their rules here.
+
+## The primitive (`Combobox`)
+
+- One shared component: `frontend/src/components/ui/Combobox.tsx`. Build every suggestion field on it. Don't write a page-local one.
+- ARIA 1.2 combobox: the text field has `role="combobox"`, `aria-expanded`, `aria-controls`, and `aria-activedescendant`; suggestions are a `role="listbox"` of `role="option"` rows. Focus stays in the field.
+- Keyboard: Down/Up open the list and move through it, Enter picks the highlighted option, Escape closes the list (or clears the field when the list is already closed), Tab moves on. Enter never submits the surrounding form.
+- Look: the field uses `dropdownTriggerClassName` (40px, semibold, `border-border`, `shadow-card`) with a text cursor and no chevron (it would promise a list the field may not have yet; StudentPicker lists nothing on focus). The panel uses `DROPDOWN_PANEL` and `placeDropdownPanel`, so it pins to the field like `Select`. The highlighted row takes `bg-surface`.
+- `allowFreeText` decides whether typed text is the value (`true`) or only a pick counts (`false`).
+- States: `loading` ("Searching…"), `loadError` (shown in the panel as an alert), and "No matches" (`noMatchesText`, or `null` to keep the panel closed when empty).
+- The caller filters and caps the options. The primitive doesn't filter, so it serves a local list and an async search alike.
+
+## Complaint field (free text)
+
+- New Visit's Complaint is a Combobox with free text allowed. Suggestions are the predefined visit complaint types plus complaints already saved on visits, ranked by use count, then most recent. The pool comes from a data-layer selector (`complaintSuggestions`, ADR-014), never stored data.
+- Filtering is a case-insensitive "contains" match. At most 8 suggestions show, on focus and while typing.
+- On save the text is normalized (`frontend/src/lib/complaints.ts`): trimmed, repeated spaces collapsed, 60 characters max. Text that matches a suggestion case-insensitively is stored in that suggestion's spelling. Whitespace-only is invalid. The data layer applies the same normalization.
+- Helper text says complaint only, no names.
+- Smart Triage triggers on a case-insensitive match to a predefined type. Free text with no match shows no checklist.
+
+## Student lookup (`StudentPicker`)
+
+- `frontend/src/components/forms/StudentPicker.tsx`: a Combobox without free text. It matches a Student Number prefix or a name substring, case-insensitively, for active students only. Nothing is listed under 2 characters or on empty focus, and at most 8 results show, so it never reads as a roster.
+- Each result shows the Student Number, full name, and grade, so similar names can be told apart. It's a deliberate single lookup, so full names are correct (`cliniq-display-privacy`).
+- The query is never reformatted. A query of digits (and dashes) matches Student Numbers with the dashes ignored on both sides, so "202600001" and "2026-00001" both find 2026-00001. Anything with a letter is a name search.
+- A complete Student Number, with or without its dash, highlights its match, so typing it and pressing Enter still works.
+- No match: say so under the field. Pass `addStudentHref` only to roles that can add a student (Staff).
+- Search goes through the feature's `api/` function (ADR-013), so the real backend can replace it. Results carry no medical fields (`StudentSearchResult`).
+- After a pick, the form shows the chosen student (name, number, grade) with a Change action. A `?student=` deep link skips the picker entirely.
+- Used on New Visit. It would also fit Dispense, PE/Sports Referral, and Incident Stage 1, which still use `StudentNumberField`.

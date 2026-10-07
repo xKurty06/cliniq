@@ -1,6 +1,7 @@
 import type { FollowUpDueState } from '../../components/status/followUp'
 import type { InventoryFlag } from '../../components/status/inventory'
 import { addDays, diffDays, formatDateTime, isWithin } from '../dates'
+import { STUDENT_SEARCH_MIN_LENGTH } from '../studentNumber'
 import type {
   AuditActionType,
   AuditLogEntry,
@@ -10,6 +11,7 @@ import type {
   InventoryItem,
   Student,
   StudentListRef,
+  StudentSearchResult,
   UserRole,
 } from '../../types/entities'
 import type { DbState, RecordReview, SeedStudent } from './types'
@@ -216,6 +218,51 @@ export function studentByNumber(state: DbState, studentNumber: string): SeedStud
 
 export function activeStudents(state: DbState): SeedStudent[] {
   return state.students.filter((s) => !s.archived)
+}
+
+/**
+ * Active students whose Student Number starts with the query or whose name contains it, ignoring
+ * case. The Student Number match ignores dashes, so "202600001" and "2026-00001" both find it. Number matches come first, then by name. Capped, so a search never reads as a roster.
+ */
+export function searchStudents(state: DbState, query: string, limit = 8): StudentSearchResult[] {
+  const q = query.trim().toLowerCase()
+  if (q.length < STUDENT_SEARCH_MIN_LENGTH) return []
+  const digits = q.replace(/-/g, '')
+  // Only a query of digits and dashes can be a Student Number; "an-" stays a name search.
+  const numberQuery = /^[\d-]+$/.test(q) && digits.length > 0
+  return activeStudents(state)
+    .map((s) => ({ s, byNumber: numberQuery && s.studentNumber.replace(/-/g, '').startsWith(digits) }))
+    .filter(({ s, byNumber }) => byNumber || s.fullName.toLowerCase().includes(q))
+    .sort((a, b) => Number(b.byNumber) - Number(a.byNumber) || a.s.fullName.localeCompare(b.s.fullName))
+    .slice(0, limit)
+    .map(({ s }) => ({ id: s.id, studentNumber: s.studentNumber, fullName: s.fullName, gradeLevel: s.gradeLevel }))
+}
+
+/**
+ * The New Visit complaint suggestions: the predefined visit complaint types plus every complaint
+ * already saved on a visit, merged case-insensitively (a predefined type keeps its own spelling,
+ * otherwise the most recent spelling wins). Ranked by how many visits used it, then by how recently;
+ * never-used predefined types come last, alphabetically.
+ */
+export function complaintSuggestions(state: DbState): string[] {
+  const pool = new Map<string, { label: string; count: number; last: string; predefined: boolean }>()
+  for (const { label } of state.frontendOnly.visitComplaintTypes)
+    pool.set(label.toLowerCase(), { label, count: 0, last: '', predefined: true })
+  for (const v of state.visits) {
+    const label = v.complaint.trim()
+    if (!label) continue
+    const key = label.toLowerCase()
+    const entry = pool.get(key) ?? { label, count: 0, last: '', predefined: false }
+    entry.count += 1
+    if (v.dateTime > entry.last) {
+      entry.last = v.dateTime
+      if (!entry.predefined) entry.label = label
+    }
+    pool.set(key, entry)
+  }
+  return [...pool.values()]
+    .sort((a, b) => b.count - a.count || b.last.localeCompare(a.last) || a.label.localeCompare(b.label))
+    .map((entry) => entry.label)
 }
 
 export function gradeLevels(state: DbState): string[] {

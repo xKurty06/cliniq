@@ -5,6 +5,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Combobox,
   DatePicker,
   EmptyState,
   ErrorState,
@@ -12,19 +13,35 @@ import {
   Input,
   ItemsGivenField,
   SegmentedControl,
-  Select,
   Skeleton,
-  StudentNumberField,
+  StudentPicker,
   type ItemLineDraft,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { useIdentifiedStudent } from '../../hooks/useIdentifiedStudent'
 import { cn } from '../../lib/cn'
+import { cleanComplaint, COMPLAINT_MAX_LENGTH, normalizeComplaint } from '../../lib/complaints'
 import { addDays, todayISO } from '../../lib/dates'
 import { getMockSessionUser, StockRuleError, type ComplaintType, type InventoryItemView, type SessionUser } from '../../lib/mock-db'
-import { isStudentNumber } from '../../lib/studentNumber'
+import { paths } from '../../routes/paths'
 import type { Disposition } from '../../types/entities'
-import { fetchNewVisitContext, fetchVisitItems, findVisitStudent, submitNewVisit } from './api/newVisitApi'
+import {
+  fetchComplaintSuggestions,
+  fetchNewVisitContext,
+  fetchVisitItems,
+  findVisitStudent,
+  searchVisitStudents,
+  submitNewVisit,
+} from './api/newVisitApi'
+
+/** How many complaint suggestions the list shows at once. */
+const COMPLAINT_SUGGESTION_LIMIT = 8
+
+/** Smart Triage's complaint type for what was typed: a case-insensitive match, or none. */
+function matchComplaintType(complaint: string, complaintTypes: ComplaintType[]): ComplaintType | undefined {
+  const typed = cleanComplaint(complaint).toLowerCase()
+  return typed ? complaintTypes.find((type) => type.label.toLowerCase() === typed) : undefined
+}
 
 
 const dispositionOptions = [
@@ -125,8 +142,8 @@ function TriagePanel({
   checked: string[]
   onToggle: (step: string) => void
 }) {
-  const selected = complaintTypes.find((item) => item.label === complaint)
-  // Not every complaint has a checklist yet (checklist content is mock-only, see mock-db.json).
+  const selected = matchComplaintType(complaint, complaintTypes)
+  // Free text with no matching type has no checklist. Not every complaint has a checklist yet (checklist content is mock-only, see mock-db.json).
   if (!selected || selected.triageSteps.length === 0) return null
   return (
     <div className="rounded-md border border-border bg-surface p-4">
@@ -187,17 +204,22 @@ export function NewVisitEntryPage({
   const [lines, setLines] = useState<ItemLineDraft[]>([])
   /** Stock figures refreshed after a save; until then, the ones loaded with the form. */
   const [freshItems, setFreshItems] = useState<InventoryItemView[] | null>(null)
+  /** Complaint suggestions refreshed after a save, so a newly typed complaint is offered next time. */
+  const [freshSuggestions, setFreshSuggestions] = useState<string[] | null>(null)
+  /** After "Change", the student search takes focus again. */
+  const [focusStudentSearch, setFocusStudentSearch] = useState(false)
   const [errors, setErrors] = useState<Errors>({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   /** Set after a successful save: whether it created a follow-up, and what it took from inventory. */
   const [saved, setSaved] = useState<null | { withFollowUp: boolean; given: number; belowZero: string[] }>(null)
-  // Allergies sit beside the medicine picker, so look the student up as soon as a full number is typed.
-  const typedNumber = identified.needsStudentNumber && isStudentNumber(identified.input) ? identified.input : ''
-  const { data: typedAllergies } = useAsyncData(`visit-allergies|${typedNumber}`, () =>
-    typedNumber ? findVisitStudent(typedNumber).then((student) => student.allergies, () => null) : Promise.resolve(null),
-  )
-  const allergies = identified.student?.allergies ?? (typedNumber ? (typedAllergies ?? null) : null)
+  // Allergies sit beside the medicine picker; picking a student loads them in full.
+  const allergies = identified.student?.allergies ?? null
+  const suggestions = freshSuggestions ?? data?.complaintSuggestions ?? []
+  const typedComplaint = cleanComplaint(complaint).toLowerCase()
+  const complaintMatches = suggestions
+    .filter((label) => label.toLowerCase().includes(typedComplaint))
+    .slice(0, COMPLAINT_SUGGESTION_LIMIT)
   const formRef = useRef<HTMLFormElement>(null)
   const saveAndNewRef = useRef(false)
 
@@ -211,8 +233,10 @@ export function NewVisitEntryPage({
   }, [])
 
   function updateComplaint(value: string) {
+    // Ticked steps survive typing that keeps the same complaint type ("fever" to "Fever ").
+    const types = data?.complaintTypes ?? []
+    if (matchComplaintType(value, types) !== matchComplaintType(complaint, types)) setTriageSteps([])
     setComplaint(value)
-    setTriageSteps([])
     setErrors((current) => ({ ...current, complaint: undefined }))
   }
 
@@ -224,7 +248,7 @@ export function NewVisitEntryPage({
 
   function validate(): Errors {
     const next: Errors = {}
-    if (!complaint) next.complaint = 'Select the complaint for this visit.'
+    if (!cleanComplaint(complaint)) next.complaint = 'Enter the complaint for this visit.'
     if (!treatment.trim() && !lines.length) next.treatment = 'Enter treatment notes or add a medicine or supply.'
     if (lines.some((line) => line.quantity < 1)) next.itemsGiven = 'Each quantity must be at least 1.'
     if (needsFollowUp) {
@@ -238,7 +262,7 @@ export function NewVisitEntryPage({
     event.preventDefault()
     if (!data) return
     const nextErrors = validate()
-    const studentOk = identified.validate()
+    const studentOk = identified.validate('Choose the student: type a Student Number or name, then pick from the list.')
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length || !studentOk) return
     setSaving(true)
@@ -249,7 +273,7 @@ export function NewVisitEntryPage({
       const result = await submitNewVisit(
         {
           studentId: student.id,
-          complaint,
+          complaint: normalizeComplaint(complaint, suggestions),
           treatment: treatment.trim(),
           disposition,
           triageStepsCompleted: triageSteps,
@@ -269,6 +293,7 @@ export function NewVisitEntryPage({
       setSaved({ withFollowUp: needsFollowUp, given: lines.length, belowZero: result.belowZero })
       setLines([])
       setFreshItems(await fetchVisitItems())
+      setFreshSuggestions(await fetchComplaintSuggestions())
       setComplaint('')
       setTreatment('')
       setDisposition('returned_to_class')
@@ -279,6 +304,7 @@ export function NewVisitEntryPage({
       setFollowUpNotes('')
       setErrors({})
       identified.reset()
+      setFocusStudentSearch(false)
       saveAndNewRef.current = false
     } catch (caught) {
       // The data layer rejected a line (an item expired since the form loaded, say); nothing was saved.
@@ -318,7 +344,7 @@ export function NewVisitEntryPage({
             <p className="mt-1 text-sm text-text-secondary">
               {identified.student
                 ? `${identified.student.fullName} · ${identified.student.studentNumber} · ${identified.student.gradeLevel}`
-                : 'Student not identified yet. Enter the Student Number below.'}
+                : 'Student not identified yet. Search by Student Number or name below.'}
             </p>
           </div>
           <Badge tone="info" variant="soft" icon="stethoscope">
@@ -356,29 +382,67 @@ export function NewVisitEntryPage({
             title="Visit details"
             icon={<Icon name="stethoscope" />}
             description={
-              identified.needsStudentNumber
-                ? 'Required fields are marked. Enter the Student Number to identify the student.'
-                : 'Required fields are marked. The student is already identified from lookup/scan.'
+              data.student
+                ? 'Required fields are marked. The student is already identified from lookup/scan.'
+                : 'Required fields are marked. Search by Student Number or name to identify the student.'
             }
           />
           <CardBody className="flex flex-col gap-4">
-            {identified.needsStudentNumber && (
-              <StudentNumberField
-                value={identified.input}
-                error={identified.error}
-                onChange={identified.setInput}
-              />
-            )}
-            <Select
+            {!data.student &&
+              (identified.student ? (
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs font-semibold text-text-primary">Student</p>
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-surface px-3 py-2">
+                    <p className="text-sm text-text-primary">
+                      <span className="font-semibold">{identified.student.fullName}</span>
+                      <span className="text-text-secondary">
+                        {' · '}
+                        <span className="tabular-nums">{identified.student.studentNumber}</span>
+                        {' · '}
+                        {identified.student.gradeLevel}
+                      </span>
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      aria-label={`Change student (${identified.student.fullName})`}
+                      onClick={() => {
+                        identified.reset()
+                        setFocusStudentSearch(true)
+                      }}
+                    >
+                      Change
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <StudentPicker
+                  search={searchVisitStudents}
+                  onSelect={(student) => {
+                    setSaved(null)
+                    void identified.select(student.studentNumber)
+                  }}
+                  error={identified.error}
+                  addStudentHref={viewer.role === 'staff' ? paths.studentNew : undefined}
+                  autoFocus={focusStudentSearch}
+                />
+              ))}
+            <Combobox
               label="Complaint"
               required
+              allowFreeText
               value={complaint}
-              placeholder="Select complaint"
-              options={data.complaintTypes.map((type) => ({ value: type.label, label: type.label }))}
-              onChange={updateComplaint}
+              onValueChange={updateComplaint}
+              options={complaintMatches}
+              optionKey={(label) => label}
+              optionLabel={(label) => label}
+              noMatchesText="No matching suggestion. What you typed is saved as is."
+              maxLength={COMPLAINT_MAX_LENGTH}
+              placeholder="e.g. Headache"
+              hint="The complaint or symptom only. Don't include names."
               error={errors.complaint}
             />
-            {complaint ? (
+            {cleanComplaint(complaint) ? (
               <TriagePanel
                 complaint={complaint}
                 complaintTypes={data.complaintTypes}
@@ -388,8 +452,8 @@ export function NewVisitEntryPage({
             ) : (
               <EmptyState
                 icon="clipboardList"
-                title="Select a complaint to show Smart Triage"
-                description="The checklist appears inline after a complaint is selected."
+                title="Enter a complaint to show Smart Triage"
+                description="A first-aid checklist appears when the complaint matches a predefined type."
                 className="rounded-md border border-border bg-surface"
               />
             )}

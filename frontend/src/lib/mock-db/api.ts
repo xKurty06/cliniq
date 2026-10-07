@@ -17,10 +17,12 @@ import type {
   ReportType,
   Student,
   StudentNumber,
+  StudentSearchResult,
   User,
   UserRole,
   Visit,
 } from '../../types/entities'
+import { normalizeComplaint } from '../complaints'
 import { parseISODate, toISODate } from '../dates'
 import type { CalendarDay, DashboardQuery, DashboardSummary, Holiday, HolidayFeed } from '../../types/dashboard'
 import holidayData from './holidays-ph.json'
@@ -30,6 +32,7 @@ import { isEmptied, simulateRequest } from './devToggles'
 import {
   backupStatus,
   auditLogList,
+  complaintSuggestions,
   dateOf,
   followUpDueState,
   gradeLevels,
@@ -37,6 +40,7 @@ import {
   inventoryStatusFor,
   monthlyCounts,
   nextStudentNumber,
+  searchStudents as searchStudentRecords,
   studentsById,
   toStudent,
   type BackupStatus,
@@ -337,6 +341,11 @@ export function getVisitComplaintTypes(): Promise<ComplaintType[]> {
   return read('visit complaint types', (s) => s.frontendOnly.visitComplaintTypes)
 }
 
+/** New Visit complaint suggestions, most used and most recent first (see `complaintSuggestions`). */
+export function getVisitComplaintSuggestions(): Promise<string[]> {
+  return read('visit complaint suggestions', complaintSuggestions)
+}
+
 export function getIncidentComplaintTypes(): Promise<string[]> {
   return read('incident complaint types', (s) => s.frontendOnly.incidentComplaintTypes)
 }
@@ -417,6 +426,14 @@ export function listStudents(query: StudentQuery = {}): Promise<Student[]> {
       .slice(0, query.limit ?? Infinity)
       .map(toStudent)
   })
+}
+
+/**
+ * Student lookup by Student Number prefix or name: active students only, nothing under 2
+ * characters, at most `limit` results, no medical fields (see `searchStudents` in selectors.ts).
+ */
+export function searchStudents(query: string, limit = 8): Promise<StudentSearchResult[]> {
+  return read('student search', (s) => searchStudentRecords(s, query, limit))
 }
 
 export function getStudent(studentNumber: StudentNumber): Promise<Student> {
@@ -635,7 +652,8 @@ export function recordVisit(
       id: nextId('visit', s.visits),
       studentId: input.studentId,
       dateTime: now(s),
-      complaint: input.complaint,
+      // Stored in a known suggestion's spelling, so counts never split by case.
+      complaint: normalizeComplaint(input.complaint, complaintSuggestions(s)),
       treatment: input.treatment,
       disposition: input.disposition,
       loggedByUserId: by.id,

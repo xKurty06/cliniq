@@ -24,6 +24,7 @@ export { inventoryFlagMap, type InventoryFlag } from './status/inventory'
 export { ListCard, ListCardSkeleton } from './ui/ListCard'
 export { Select, type SelectOption } from './ui/Select'
 export { MultiSelect, type MultiSelectOption } from './ui/MultiSelect'
+export { Combobox, type ComboboxProps } from './ui/Combobox'
 export { Pagination } from './ui/Pagination'
 export { Textarea } from './ui/Textarea'
 export {
@@ -33,5 +34,6 @@ export {
   type FollowUpErrors,
 } from './forms/FollowUpPrompt'
 export { StudentNumberField } from './forms/StudentNumberField'
+export { StudentPicker } from './forms/StudentPicker'
 export { InventoryItemPicker, type PickableItem } from './forms/InventoryItemPicker'
 export { ItemsGivenField, INSTRUCTIONS_MAX, type ItemLineDraft } from './forms/ItemsGivenField'

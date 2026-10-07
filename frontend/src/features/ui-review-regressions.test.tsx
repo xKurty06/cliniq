@@ -21,7 +21,6 @@ vi.mock('react-chartjs-2', () => {
   return { Bar: Stub, Line: Stub }
 })
 import { renderWithRouter } from '../test/renderWithRouter'
-import { selectOption } from '../test/selectOption'
 import { getGradeLevels, getRecordedAuditEntries, getStudent, listIncidents, listVisits, resetMockDb } from '../lib/mock-db'
 import { StudentProfilePage } from './student-records/StudentProfilePage'
 import { IncidentReportPage } from './emergency-response/IncidentReportPage'
@@ -246,20 +245,23 @@ describe('UI/UX review Group B decisions', () => {
 
     await screen.findByRole('heading', { name: 'New Visit' })
     expect(screen.getByText(/student not identified yet/i)).toBeInTheDocument()
-    await selectOption(user, screen.getByLabelText(/complaint/i), 'Headache')
+    await user.type(screen.getByRole('combobox', { name: /complaint/i }), 'Headache{Escape}')
     await user.type(screen.getByLabelText(/treatment/i), 'Rested in clinic.')
     await user.click(screen.getByRole('button', { name: 'Save Visit' }))
-    expect(screen.getByText('Enter the Student Number (YYYY-NNNNN).')).toBeInTheDocument()
+    expect(screen.getByText(/choose the student/i)).toBeInTheDocument()
     expect(getRecordedAuditEntries()).toEqual([])
 
-    await user.type(screen.getByLabelText(/student number/i), '202600001')
+    await user.type(screen.getByRole('combobox', { name: /student/i }), '2026-00001')
+    await screen.findByRole('option', { name: /2026-00001/ })
+    await user.keyboard('{Enter}')
+    await screen.findByRole('button', { name: /change student/i })
     await user.click(screen.getByRole('button', { name: 'Save Visit' }))
     expect(await screen.findByText(/visit saved/i)).toBeInTheDocument()
     const student = await getStudent('2026-00001')
     const visits = await listVisits()
     expect(visits.some((visit) => visit.studentId === student.id && visit.treatment === 'Rested in clinic.')).toBe(true)
     // Ready for the next student: the field is back and empty.
-    expect(screen.getByLabelText(/student number/i)).toHaveValue('')
+    expect(screen.getByRole('combobox', { name: /student/i })).toHaveValue('')
   })
 
   it('confirms before recording a backup verification', async () => {

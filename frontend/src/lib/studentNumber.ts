@@ -9,6 +9,9 @@ export function normalizeStudentNumber(value: string): StudentNumber {
   return compact.length > 4 ? `${compact.slice(0, 4)}-${compact.slice(4)}` : compact
 }
 
+/** Shortest query a student search answers; below it nothing is listed (no browsable roster). */
+export const STUDENT_SEARCH_MIN_LENGTH = 2
+
 export function isStudentNumber(value: string): boolean {
   return STUDENT_NUMBER.test(value)
 }

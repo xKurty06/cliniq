@@ -232,6 +232,17 @@ Left open by the session that made every dropdown match the Dashboard's date-ran
 - **Config values now in `mock-db.json`, carried over from the Dashboard mock — not requirements, they need a team or nurse decision:** `frequentVisitorMinVisits` (3), `frequentVisitorWindowDays` (30; the Dashboard uses its selected range instead), `upcomingFollowUpDays` (7), `expiryWarningDays` (30), `clusterMinCount` (8), `clusterRatio` (2), `topComplaints` (5). Also open: whether stock *at* the threshold counts as low (currently strictly below).
 - **`frontendOnly` data to review when the ERD is designed:** `devAccounts` (credentials, `mustChangePassword`), `visitComplaintTypes` (incl. Smart Triage steps), `incidentComplaintTypes`, `inventoryTransactions`, `recordReviews`, `excuseLetterApprovals`, `peReferrals`.
 
+## Free-text complaints and student lookup — Wednesday, October 07, 2026 — 20:03 PHT
+
+- **Free-text complaints split the counts that group by complaint.** Case and spacing are merged on save, but synonyms and typos ("Head ache", "Headache and fever") stay separate. Affected, unchanged: the Dashboard complaint trends (series, the "Other" list, and symptom-cluster detection, which counts each complaint separately), the trend table (its complaint column widens to the longest label, up to 60 characters), and the Health Summary / monthly report complaint counts. The Visit Log search (substring) is unaffected. A long tail of one-off complaints can push real complaints out of the top 5 and hide a cluster. Decide whether Staff should merge complaints, or whether reports group them.
+- **Visit Detail's Complaint edit is still an unnormalized free textarea** (it was free text before this change). An edit can save "headache" next to "Headache", or more than 60 characters. Not changed: the request covered New Visit only.
+- **"Grade/section":** students have only `gradeLevel`; no section field exists, so the picker shows the grade only.
+- **Typing a full Student Number and clicking Save without picking** no longer identifies the student (the old field did). Enter, or a click on the result, picks it; Save without a pick asks for one.
+- **Student search isn't audit-logged**, the same as the Student List search. It returns no medical fields.
+- **StudentPicker rollout:** it would also fit Dispense, PE/Sports Referral, and Incident Stage 1, which still use `StudentNumberField`.
+- **Re-audit needed (Frontend-Loop-Engineering Phase 2):** New Visit Entry changed after its audit. Its boxes were left as they were.
+- **Canonical document drift:** the Modules & Features canonical doc (Module 3) needs the free-text complaint and student-lookup wording now in `Module-Overview.md` (`09-References/Canonical-Documents.md`).
+
 ## Excuse letter excused period — Wednesday, October 07, 2026 — 13:01 PHT
 
 - **Provisional fields for the ERD/schema design** (PROVISIONAL / `frontendOnly` convention; not a schema decision): `ExcuseLetterApproval.excusedFrom` and `ExcuseLetterApproval.excusedUntil` (dates, both required, `excusedUntil` ≥ `excusedFrom`), stored on the approval record in `frontendOnly.excuseLetterApprovals`.

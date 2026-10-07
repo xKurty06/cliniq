@@ -1,20 +1,24 @@
 import {
   getStudent,
+  getVisitComplaintSuggestions,
   getVisitComplaintTypes,
   listInventory,
   recordVisit,
+  searchStudents,
   type ComplaintType,
   type InventoryItemView,
   type ItemLineInput,
   type SessionUser,
 } from '../../../lib/mock-db'
-import type { Disposition, FollowUp, Student, Visit } from '../../../types/entities'
+import type { Disposition, FollowUp, Student, StudentSearchResult, Visit } from '../../../types/entities'
 
 export interface NewVisitContext {
   /** `null` when the form was opened without an identified student; it then asks for the Student Number. */
   student: Student | null
   /** Complaint options + their Smart Triage checklists (mock-only content; see mock-db.json). */
   complaintTypes: ComplaintType[]
+  /** Complaint suggestions: predefined types plus complaints saved on visits, most used first. */
+  complaintSuggestions: string[]
   /** Every inventory item with its computed flags, for the Medicines & supplies picker. */
   items: InventoryItemView[]
 }
@@ -38,12 +42,23 @@ export interface NewVisitResult {
 
 /** `studentNumber` is the route's `?student=` pre-selection; without one no student is attached. */
 export async function fetchNewVisitContext(studentNumber?: string): Promise<NewVisitContext> {
-  const [student, complaintTypes, items] = await Promise.all([
+  const [student, complaintTypes, complaintSuggestions, items] = await Promise.all([
     studentNumber ? getStudent(studentNumber) : Promise.resolve(null),
     getVisitComplaintTypes(),
+    getVisitComplaintSuggestions(),
     listInventory(),
   ])
-  return { student, complaintTypes, items }
+  return { student, complaintTypes, complaintSuggestions, items }
+}
+
+/** Fresh complaint suggestions after a save, so a newly typed complaint is offered next time. */
+export function fetchComplaintSuggestions(): Promise<string[]> {
+  return getVisitComplaintSuggestions()
+}
+
+/** The New Visit student search: Student Number prefix or name, active students, at most 8. */
+export function searchVisitStudents(query: string): Promise<StudentSearchResult[]> {
+  return searchStudents(query)
 }
 
 /** Resolves the Student Number typed on the form when the student wasn't identified beforehand. */
