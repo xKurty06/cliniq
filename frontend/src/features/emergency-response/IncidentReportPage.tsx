@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Badge, Button, Card, CardBody, CardHeader, ErrorState, Icon, Modal, Select, Skeleton } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { formatDateTime } from '../../lib/dates'
+import { incidentCareSummary } from '../../lib/itemsGiven'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { ParentNotificationOutcome } from '../../types/entities'
 import { approveReport, fetchIncidentRecord } from './api/incidentRecordApi'
@@ -12,7 +13,6 @@ const VITAL_LABELS: Record<string, { label: string; unit?: string }> = {
   pulseBpm: { label: 'Pulse', unit: 'bpm' },
   bloodPressure: { label: 'Blood pressure', unit: 'mmHg' },
   oxygenSaturation: { label: 'Oxygen saturation' },
-  treatmentNotes: { label: 'Treatment notes' },
 }
 
 const OUTCOME_LABELS: Record<ParentNotificationOutcome, string> = {
@@ -48,6 +48,7 @@ export function IncidentReportPage({ viewer = getMockSessionUser(), incidentId }
 
   const { incident, student, options, approved } = data
   const referral = incident.hospitalReferral
+  const hasTreatment = incidentCareSummary(incident) !== 'No treatment recorded'
 
   async function approve() {
     setApproving(true)
@@ -76,9 +77,16 @@ export function IncidentReportPage({ viewer = getMockSessionUser(), incidentId }
             <h1 className="text-2xl font-bold tracking-tight text-text-primary">Incident Report</h1>
             <p className="mt-1 text-sm text-text-secondary">Review, approve, and print one incident report.</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" icon="printer" onClick={() => window.print()}>Print / Save as PDF</Button>
-            <Button variant="primary" onClick={() => setConfirming(true)} disabled={approved}>{approved ? 'Approved' : 'Approve Report'}</Button>
+          <div className="flex flex-col items-end gap-2">
+            {!approved && !hasTreatment && (
+              <p role="status" className="rounded-md border border-warning bg-warning/10 px-3 py-2 text-sm font-semibold text-text-primary">
+                No treatment recorded. Check this is correct before approving.
+              </p>
+            )}
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button variant="secondary" icon="printer" onClick={() => window.print()}>Print / Save as PDF</Button>
+              <Button variant="primary" onClick={() => setConfirming(true)} disabled={approved}>{approved ? 'Approved' : 'Approve Report'}</Button>
+            </div>
           </div>
         </div>
       </Card>
@@ -111,7 +119,7 @@ export function IncidentReportPage({ viewer = getMockSessionUser(), incidentId }
           <section className="border-t border-border pt-4">
             <h2 className="text-sm font-semibold text-text-primary">Vitals and response</h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              {Object.entries(incident.vitals).map(([key, value]) => (
+              {Object.entries(incident.vitals).filter(([key]) => key !== 'treatmentNotes').map(([key, value]) => (
                 <div key={key} className="rounded-md border border-border bg-surface p-3">
                   <p className="text-xs text-text-secondary">{VITAL_LABELS[key]?.label ?? key}</p>
                   <p className="mt-1 text-sm font-semibold text-text-primary">
@@ -121,6 +129,11 @@ export function IncidentReportPage({ viewer = getMockSessionUser(), incidentId }
                 </div>
               ))}
             </div>
+          </section>
+
+          <section className="border-t border-border pt-4" aria-labelledby="report-treatment-title">
+            <h2 id="report-treatment-title" className="text-sm font-semibold text-text-primary">Treatment</h2>
+            <p className="mt-2 text-sm text-text-primary">{incidentCareSummary(incident)}</p>
           </section>
 
           <section className="border-t border-border pt-4" aria-labelledby="report-referral-title">

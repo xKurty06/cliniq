@@ -20,7 +20,7 @@ import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { formatDateRange, formatDateTime } from '../../lib/dates'
-import { visitCareSummary } from '../../lib/itemsGiven'
+import { incidentCareSummary, visitCareSummary } from '../../lib/itemsGiven'
 import { getMockSessionUser, type SessionUser, type StudentExcuseLetter } from '../../lib/mock-db'
 import type { Disposition, Incident, Student, Visit } from '../../types/entities'
 import { paths } from '../../routes/paths'
@@ -332,9 +332,14 @@ function IncidentHistoryCard({ incidents }: { incidents: Incident[] }) {
               key={incident.id}
               primary={incident.complaint}
               secondary={
-                incident.hospitalReferral
-                  ? `Hospital referral: ${incident.hospitalReferral.destination}`
-                  : 'No hospital referral recorded'
+                <>
+                  <span>{incidentCareSummary(incident)}</span>
+                  <span className="block">
+                    {incident.hospitalReferral
+                      ? `Hospital referral: ${incident.hospitalReferral.destination}`
+                      : 'No hospital referral recorded'}
+                  </span>
+                </>
               }
               meta={formatDateTime(incident.time)}
               trailing={<StatusBadge status={String(incident.stage) as '1' | '2'} map={incidentStageMap} />}

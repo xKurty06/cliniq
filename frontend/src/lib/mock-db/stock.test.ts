@@ -214,6 +214,23 @@ describe('Edit Item', () => {
 describe('incident Stage 2', () => {
   beforeEach(() => resetMockDb())
 
+  it('accepts no treatment notes and no medicine lines', async () => {
+    const student = await getStudent('2026-00001')
+    const stageOne = await saveIncidentStageOne({ studentId: student.id, complaint: 'Fall injury', vitals: { temperatureC: 36.8 } })
+
+    const { incident } = await completeIncidentStageTwo({
+      incidentId: stageOne.id,
+      complaint: 'Fall injury',
+      vitals: { temperatureC: 36.8, bloodPressure: '110/70', oxygenSaturation: '98%', treatmentNotes: '' },
+      hospitalReferral: null,
+      newParentNotifications: [],
+      followUp: null,
+      itemsGiven: [],
+    })
+
+    expect(incident).toMatchObject({ stage: 2, itemsGiven: [], vitals: { treatmentNotes: '' } })
+  })
+
   it('dispenses its lines with transactions that reference the incident, and fixes them once complete', async () => {
     const student = await getStudent('2026-00001')
     const stageOne = await saveIncidentStageOne({ studentId: student.id, complaint: 'Fall injury', vitals: { temperatureC: 36.8 } })

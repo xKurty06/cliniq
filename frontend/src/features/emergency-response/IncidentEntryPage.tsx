@@ -61,7 +61,6 @@ interface Errors {
   pulseBpm?: string
   bloodPressure?: string
   oxygenSaturation?: string
-  treatmentNotes?: string
   itemsGiven?: string
   referralDestination?: string
   notificationDetail?: string
@@ -272,7 +271,6 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
     const next: Errors = {}
     if (!bloodPressure.trim()) next.bloodPressure = 'Enter the blood pressure.'
     if (!oxygenSaturation.trim()) next.oxygenSaturation = 'Enter oxygen saturation.'
-    if (!treatmentNotes.trim()) next.treatmentNotes = 'Enter treatment notes.'
     if (referToHospital && !referralDestination.trim()) {
       next.referralDestination = 'Enter the hospital or clinic destination.'
     }
@@ -505,13 +503,13 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                   <TextareaField
                     label="Treatment notes"
                     value={treatmentNotes}
-                    required
                     onChange={(value) => {
                       setTreatmentNotes(value)
-                      setErrors((current) => ({ ...current, treatmentNotes: undefined }))
                     }}
-                    error={errors.treatmentNotes}
                   />
+                  {completed && incident && !treatmentNotes.trim() && !incident.itemsGiven.length && (
+                    <p className="text-sm text-text-secondary">No treatment recorded</p>
+                  )}
                   {completed && incident ? (
                     <section aria-labelledby="incident-items-title" className="rounded-md border border-border p-4">
                       <h2 id="incident-items-title" className="text-sm font-semibold text-text-primary">Medicines &amp; supplies given</h2>
@@ -678,6 +676,9 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                   </fieldset>
 
                   <div className="flex flex-wrap justify-end gap-2 pt-2">
+                    {!treatmentNotes.trim() && !lines.length && !completed && (
+                      <p className="mr-auto text-xs text-text-secondary">No treatment recorded. You can still save.</p>
+                    )}
                     <Button type="button" variant="neutral" onClick={() => window.history.back()}>Cancel</Button>
                     <Button type="submit" variant="primary" loading={savingStageTwo}>
                       Complete Incident

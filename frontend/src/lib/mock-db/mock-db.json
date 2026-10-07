@@ -3474,7 +3474,7 @@
         "pulseBpm": 107,
         "bloodPressure": "110/70",
         "oxygenSaturation": "98%",
-        "treatmentNotes": "Stabilized in clinic; observed until pickup"
+        "treatmentNotes": ""
       },
       "hospitalReferral": null,
       "parentNotifications": [

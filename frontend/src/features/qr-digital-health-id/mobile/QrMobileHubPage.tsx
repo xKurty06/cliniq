@@ -14,7 +14,7 @@ import {
 } from '../../../components'
 import { getMockSessionUser, logoutMockSession, type SessionUser } from '../../../lib/mock-db'
 import { formatDateTime } from '../../../lib/dates'
-import { visitCareSummary } from '../../../lib/itemsGiven'
+import { incidentCareSummary, visitCareSummary } from '../../../lib/itemsGiven'
 import type { StudentNumber } from '../../../types/entities'
 import { lookupStudentByNumber, type QrLookupResult } from '../api/qrLookupApi'
 import { paths } from '../../../routes/paths'
@@ -175,7 +175,7 @@ function InstructorReadOnly({ result }: { result: QrLookupResult }) {
                 <ListRow
                   key={incident.id}
                   primary={incident.complaint}
-                  secondary={incident.stage === 1 ? 'Needs completion' : 'Complete'}
+                  secondary={`${incident.stage === 1 ? 'Needs completion' : 'Complete'} · ${incidentCareSummary(incident)}`}
                   meta={formatDateTime(incident.time)}
                 />
               ))}

@@ -111,4 +111,17 @@ describe('Report Incident', () => {
     expect(screen.getAllByText(stageOne!.complaint).length).toBeGreaterThan(0)
     expect(screen.queryByLabelText(/student number/i)).not.toBeInTheDocument()
   })
+
+  it('completes Stage 2 without treatment notes or medicines', async () => {
+    const user = userEvent.setup()
+    render(<IncidentEntryPage incidentId="incident-0022" />)
+
+    await screen.findByRole('heading', { name: 'Complete Incident Record' })
+    await user.type(screen.getByLabelText(/blood pressure/i), '110/70')
+    await user.type(screen.getByLabelText(/oxygen saturation/i), '98%')
+    await user.click(screen.getByRole('button', { name: 'Complete Incident' }))
+
+    expect(await screen.findByText(/incident completed/i)).toBeInTheDocument()
+    expect(screen.getByText('No treatment recorded')).toBeInTheDocument()
+  })
 })

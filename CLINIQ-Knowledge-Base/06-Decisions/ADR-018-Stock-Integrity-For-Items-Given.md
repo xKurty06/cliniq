@@ -27,6 +27,10 @@ Each of these follows the existing PROVISIONAL / `frontendOnly` convention and i
 - `Visit.itemsGiven` and `Incident.itemsGiven`: arrays of `ItemGivenLine` (`itemId`, `itemName`, `unit`, `quantity`, `instructions`).
 - `InventoryTransaction.type` gains `adjustment`; `InventoryTransaction.reason` (`visit_edited` | `expired_disposed` | `damaged_spilled` | `miscount_correction` | `other`), `.note`, and `.incidentId`.
 
+## Amendment — Thursday, October 08, 2026 — 00:04 PHT
+
+The project owner made the same treatment rule explicit for Incident Stage 2: a completed incident may have neither treatment notes nor medicine/supply lines. Stage 2 still requires its full vitals and any applicable referral or follow-up fields; medicine-line stock, expiry, atomic-write, and post-completion editing rules are unchanged. Every incident treatment view now uses “No treatment recorded” for an empty treatment, and a pending Incident Report presents the non-blocking notice “No treatment recorded. Check this is correct before approving.” above its enabled Approve button. No new data is stored. The Modules & Features canonical document (Module 4) needs the matching update.
+
 ## Alternatives Considered
 - **Derive lines from transactions only.** Rejected: instructions and the name/unit snapshot would need a home anyway, and every read would re-sum history.
 - **Rewrite the original dispense on edit.** Rejected by the project owner: history must not be rewritten.

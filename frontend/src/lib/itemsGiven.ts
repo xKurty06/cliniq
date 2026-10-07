@@ -1,5 +1,5 @@
 import type { ItemLineDraft } from '../components/forms/ItemsGivenField'
-import type { ItemGivenLine, Visit } from '../types/entities'
+import type { Incident, ItemGivenLine, Visit } from '../types/entities'
 
 /** "Paracetamol 500mg × 2 tablets (1 tablet every 6 hours)", from the line's own snapshot. */
 export function formatItemGiven(line: Pick<ItemGivenLine, 'itemName' | 'quantity' | 'unit' | 'instructions'>): string {
@@ -10,6 +10,13 @@ export function formatItemGiven(line: Pick<ItemGivenLine, 'itemName' | 'quantity
 export function visitCareSummary(visit: Pick<Visit, 'treatment' | 'itemsGiven'>): string {
   const given = visit.itemsGiven.map(formatItemGiven).join('; ')
   return [visit.treatment.trim(), given && `Given: ${given}`].filter(Boolean).join(' · ') || 'No treatment recorded'
+}
+
+/** One line of incident care: treatment notes followed by any medicines or supplies given. */
+export function incidentCareSummary(incident: Pick<Incident, 'vitals' | 'itemsGiven'>): string {
+  const notes = String(incident.vitals.treatmentNotes ?? '').trim()
+  const given = incident.itemsGiven.map(formatItemGiven).join('; ')
+  return [notes, given && `Given: ${given}`].filter(Boolean).join(' · ') || 'No treatment recorded'
 }
 
 /** Editable drafts from a saved record's lines, for an edit form. */

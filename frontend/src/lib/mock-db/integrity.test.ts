@@ -41,6 +41,16 @@ describe('mock-db.json integrity', () => {
     ).toBe('')
   })
 
+  it('accepts a completed incident with neither treatment notes nor items given', () => {
+    expect(
+      problemsAfter((s) => {
+        const incident = s.incidents.find((item) => item.stage === 2)!
+        incident.vitals.treatmentNotes = ''
+        incident.itemsGiven = []
+      }),
+    ).toBe('')
+  })
+
   it('rejects disposition fields on the wrong disposition, and a draft beside an approved letter', () => {
     const draft = { excusedFrom: { daysAgo: 2 }, excusedUntil: { daysAgo: 1 }, note: null }
     const visit = (s: MockDbSeed, id: string) => s.visits.find((v) => v.id === id)!

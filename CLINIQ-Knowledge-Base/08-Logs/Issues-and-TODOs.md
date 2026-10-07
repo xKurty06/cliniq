@@ -1,5 +1,7 @@
 # Issues and TODOs
 
+- **New Visit full-suite tests fail shortly after midnight** (found Thursday, October 08, 2026 — 00:04 PHT): four `NewVisitEntryPage` tests expect a newly saved visit to sort ahead of the seed's same-day visits, but the mock timestamp at 00:03 sorts before seed records later that day. Focused incident tests pass; this is pre-existing, time-of-day-sensitive test behavior and was not changed in the Incident Stage 2 work.
+
 ## Open decisions, waiting on someone outside the dev team
 
 - **Physical barcode/QR scanner for the clinic PC.** Raised in a September 24 team discussion (garbled AI transcript, low confidence on specifics): MCA may already have an existing student masterlist with barcoded student IDs; a USB scanner (~₱1,000–2,500, possibly Principal-funded) was discussed as a way to import/use that existing data instead of building `YYYY-NNNNN` numbers from scratch. **Explicitly not being acted on** — team decided to keep building the current design and revisit only if the school approves the proposal. If approved, expect this to touch: `06-Decisions/ADR-005` (Student Number scheme), the QR module, and the Project Plan's Section 1.4 "RFID/barcode hardware" out-of-scope line.
