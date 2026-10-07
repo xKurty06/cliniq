@@ -8,10 +8,6 @@
 - **Additional backup layer beyond local + external drive** — team is still evaluating what this should be (possibly off-site/cloud). Not yet decided.
 - **Who manages the system when the nurse is absent** — pending a reply from Ms. Jennesse Baas.
 
-## Report an Issue follow-up
-
-- **Recipient email.** Temporary placeholder `team@example.com` is used by the footer modal's `mailto:` fallback; replace it with the team's real contact in `frontend/src/features/issue-reports/reportIssueConfig.ts` when one is designated. Added Thursday, October 01, 2026 — 13:09 PHT.
-
 ## Login redesign follow-ups — Saturday, October 03, 2026 — 02:11 PHT
 
 - **Official school photo for the Login backdrop.** Updated Saturday, October 03, 2026 — 02:21 PHT: a stand-in is now in place at `frontend/public/brand/login-backdrop.jpg`, a frame from a campus drone video of the main building, blurred in CSS. Replace it with an official Mendez Christian Academy photo when one is available: same path, no code change. The unused alternative `frontend/public/brand/campus-courtyard.jpg` (~0.9 MB) still ships in the build; delete it if it isn't wanted.
@@ -45,9 +41,11 @@
 
 ## Resolved since last update
 
+- **Wednesday, October 07, 2026 — 01:16 PHT — Report an Issue recipient email.** Replaced the footer modal's `mailto:` fallback recipient `team@example.com` with `zkg.balboa@gmail.com` in `frontend/src/features/issue-reports/reportIssueConfig.ts`, with the modal regression assertion updated to match.
+
 - **Saturday, October 3, 2026 — 14:52 PHT — Dashboard trend table relied on `min-width: max-content` with `table-layout: fixed`.** That pairing worked in Chromium but isn't consistently defined across browsers. The table now keeps `fixedLayout`, which keeps its column widths stable under the zero-activity toggle, and overflows through an explicit `minTableWidth` equal to its column sum.
-- **Saturday, October 3, 2026 — 13:58 PHT — Dashboard Alerts lists overflowed in print.** Print lifts each `ListCard` height cap, but the Alerts grid kept its fixed `26rem` rows, so full follow-up and inventory lists spilled over the Visits trend / Common complaints row. The grid now uses `print:auto-rows-auto`; screen layout is unchanged.
 - **Saturday, October 3, 2026 — 14:13 PHT — Dashboard trend granularity could contradict the date range.** Daily was selectable on All (re-creating the 50+ column problem) and Yearly on Today. The manual toggle is removed; `trendGranularityFor` derives the bucket size from the range preset and span. An empty All range no longer builds monthly buckets back to 1900.
+- **Saturday, October 3, 2026 — 13:58 PHT — Dashboard Alerts lists overflowed in print.** Print lifts each `ListCard` height cap, but the Alerts grid kept its fixed `26rem` rows, so full follow-up and inventory lists spilled over the Visits trend / Common complaints row. The grid now uses `print:auto-rows-auto`; screen layout is unchanged.
 - **Saturday, October 3, 2026 — 03:07 PHT — Dashboard Chart control covered while scrolling.** The Visits Trend card header now sticks below the AppShell top bar (`top-16`, below the shell's `z-30` layer), keeping Chart/Table controls visible and clickable while the dashboard scrolls.
 
 - **Saturday, October 3, 2026 — 02:20 PHT — Dashboard Chart control unreachable for one-period ranges.** The earlier mode-state correction made the automatic table fallback keep Table selected, so Chart could not be selected. The fallback is now explicit: Chart and Table both remain interactive, with the single-period comparison notice retained.
@@ -55,6 +53,10 @@
 - **Saturday, October 3, 2026 — 02:07 PHT — Dashboard trend table overlapped the sticky top bar while scrolling.** The shared AppShell header was `z-10`, below the DataTable sticky edge cells at `z-20`; it now uses `z-30`, keeping table stickies below the header while preserving their horizontal-scroll behavior.
 
 - **Saturday, October 3, 2026 — 02:02 PHT — Dashboard trend mode mismatch.** With a month-to-date range containing one weekly bucket, the Visits Trend component correctly rendered its table fallback but left the Chart segment selected. The control now reflects the rendered Table mode; the This month range and its possibly empty frequent-visitor card remain intentional.
+
+- **Thursday, October 01, 2026 — 22:42:14 PHT — Calendar card clarity:** Dashboard day cards now show compact short-month dates and labelled visit totals; their heatmap colors, detailed tooltips, and event tags are unchanged.
+
+- **Thursday, October 01, 2026 — 22:33:50 PHT — Logout icon animation:** Removed the misleading `animate-spin` state from the desktop shell and shell-free mobile logout controls. The controls still disable repeat clicks and preserve the logout audit/session flow.
 
 - **Thursday, October 1, 2026 — 15:23 PHT — Dashboard trend-table visible Total mismatch.** With the newest-12-period table cap, a complaint whose cases existed only in an earlier hidden period could show zero in every visible period but still show its full-range Total. The table Total now sums only the displayed periods; chart and Common complaints totals remain full-range.
 
@@ -65,6 +67,8 @@
 - **Thursday, October 1, 2026 — 08:31 PHT — Dashboard trend-table overflow.** The fixed layout applied to the complaint-trend fallback table made its many period columns divide the card width, so headers and values overlapped. Resolved by assigning deliberate widths to the complaint, period, and total columns and setting an intrinsic minimum table width so the existing focused horizontal scroller is used.
 
 - **Thursday, October 1, 2026 — 07:33 PHT — Filter-driven table movement.** Changing grade levels or other filters could redistribute columns because the shared tables used browser auto-layout. All current DataTables now opt into a fixed layout; Student List columns have explicit widths, and visible table captions are hidden while remaining available to screen readers.
+
+- **Thursday, October 1, 2026 — 00:04 PHT — Resolved remaining actionable frontend review findings.** The shared shell now provides role-aware mobile navigation below `lg`, with compact header identity treatment to prevent the 390px overflow. The Dashboard header now uses the shared Card surface; the Incident Archive now sorts newest-first; the desktop QR hub shows an instructional empty state rather than an idle skeleton; and all shared horizontally scrollable DataTables are keyboard-focusable with a visible focus ring. Add/Edit Student now uses the shared keyboard-safe Modal. Shared text inputs now match standard selects (40px, `border-border`, semibold, light shadow), and Dispense Item uses a concise mobile-safe stock option label. The completed follow-up/PE-default/stage-1 sign-off items remain product decisions, not implementation defects.
 
 - **Wednesday, September 30, 2026 — 22:55 — Security/accountability gap found and fixed: the app required no Login.** A never-signed-in browser could open every route, including the QR hubs, Emergency, Incident Stage 1, and Reports; `?role=instructor` impersonated any role; Log out did not block the next visit; and `/force-password-change?user=<id>` could set any account's password. Now a session exists only after Login, every route redirects to Login without one (and returns the user afterwards), a first-login account has no session until its password is changed, and Log out ends access. Recorded in `06-Decisions/ADR-002-QR-Staff-Only-Redesign.md` (security clarification). The backend must enforce the same rule in Phase B2.
 - ~~**Broken — PE/Sports Injury Referral (#14), Staff.** The `/visits/pe-referral` route is linked from nowhere, and it always files the referral against a hardcoded demo student with no way to choose one. Decide the entry point (Visit flow, QR quick-actions, Instructor-initiated?) and how the student is identified. The Audit box was un-checked.~~ (UI/UX review, Wednesday, September 30, 2026 — 19:55) Resolved Wednesday, September 30, 2026 — 22:55: it is now the 5th Student Quick-Action ("PE/Sports Referral") on the desktop hub and mobile quick-actions, pre-filled through `paths.peReferral(studentNumber)`. Opened without a student, it asks for the Student Number; it never uses a default student. "Use PE Defaults" moved beside the fields and fills all five.
@@ -96,6 +100,8 @@
 - Wednesday, September 30, 2026 — 17:29 — Completed the remaining F2 audit follow-ups: Student List rows now provide View profile links with stable table geometry; Parent Notification Log shows emergency-contact context; QR manual lookup formats `YYYYNNNNN` as `YYYY-NNNNN`; and relevant Visit/Incident Cancel actions return without submitting.
 
 - Tuesday, September 29, 2026 - 09:34 - F2 authentication screens: Login (#1) and Force Password Change (#2) now exist as frontend-first mock screens. Production Sanctum enforcement, token expiry, and server-side password history remain Phase B2 work.
+
+- **Tuesday, September 29, 2026 — 09:34 — F2 authentication screens:** Login (#1) and Force Password Change (#2) now exist as frontend-first mock screens. Login covers generic failures, five-attempt/30-minute lockout, role-aware redirects, and login audit calls; Force Password Change covers the 8-character minimum, recent-password reuse check, first-login completion, and update audit call. Production Sanctum enforcement, token expiry, and server-side password history remain Phase B2 work.
 
 - ~~Monday, September 28, 2026 — 08:40 — F2 audit finding: Follow-Up List generated a pseudo Student Number from its internal ID and offered no way to update a pending follow-up.~~ Resolved Monday, September 28, 2026 — 08:40: the list now resolves the actual linked Student Number, exposes an audited “Mark completed” action, and has regression coverage.
 - ~~Sunday, September 27, 2026 — 16:10 — F2 audit blocker: Screen #15 Incident Log List is missing.~~ Resolved Monday, September 28, 2026 — 08:25: added the Staff Incident Log List, `/incidents` route and navigation destination, privacy-safe Student Number rows, ADR-010-approved reason/description context, and Needs Completion/Complete status badges.
@@ -217,26 +223,12 @@ Left open by the session that made every dropdown match the Dashboard's date-ran
 - **Cosmetic — top bar at 390px.** With a visible vertical scrollbar (375px usable width), the account area in the top bar overflows the page by 7px, on every shell screen. Not caused by the dropdown work.
 - **Cosmetic — long option labels at 390px.** On Dispense Item the option text ("Salbutamol Nebule 2.5mg — 14 nebules available") is cut at the panel's right edge. The panel itself stays inside the viewport.
 
-## Resolved since last update
-
-- **Thursday, October 1, 2026 — 00:04 PHT — Resolved remaining actionable frontend review findings.** The shared shell now provides role-aware mobile navigation below `lg`, with compact header identity treatment to prevent the 390px overflow. The Dashboard header now uses the shared Card surface; the Incident Archive now sorts newest-first; the desktop QR hub shows an instructional empty state rather than an idle skeleton; and all shared horizontally scrollable DataTables are keyboard-focusable with a visible focus ring. Add/Edit Student now uses the shared keyboard-safe Modal. Shared text inputs now match standard selects (40px, `border-border`, semibold, light shadow), and Dispense Item uses a concise mobile-safe stock option label. The completed follow-up/PE-default/stage-1 sign-off items remain product decisions, not implementation defects.
-
 ## Open product decisions from the mock-data layer — Monday, September 28, 2026 — 09:19
 
 *(This entry was lost when a zip overwrote the file and was rebuilt from `ADR-014` and that session's log.)*
 
 - **Config values now in `mock-db.json`, carried over from the Dashboard mock — not requirements, they need a team or nurse decision:** `frequentVisitorMinVisits` (3), `frequentVisitorWindowDays` (30; the Dashboard uses its selected range instead), `upcomingFollowUpDays` (7), `expiryWarningDays` (30), `clusterMinCount` (8), `clusterRatio` (2), `topComplaints` (5). Also open: whether stock *at* the threshold counts as low (currently strictly below).
 - **`frontendOnly` data to review when the ERD is designed:** `devAccounts` (credentials, `mustChangePassword`), `visitComplaintTypes` (incl. Smart Triage steps), `incidentComplaintTypes`, `inventoryTransactions`, `recordReviews`, `excuseLetterApprovals`, `peReferrals`.
-
-## Resolved since last update
-
-- **Tuesday, September 29, 2026 — 09:34 — F2 authentication screens:** Login (#1) and Force Password Change (#2) now exist as frontend-first mock screens. Login covers generic failures, five-attempt/30-minute lockout, role-aware redirects, and login audit calls; Force Password Change covers the 8-character minimum, recent-password reuse check, first-login completion, and update audit call. Production Sanctum enforcement, token expiry, and server-side password history remain Phase B2 work.
-
-## Resolved since last update
-
-- **Thursday, October 01, 2026 — 22:33:50 PHT — Logout icon animation:** Removed the misleading `animate-spin` state from the desktop shell and shell-free mobile logout controls. The controls still disable repeat clicks and preserve the logout audit/session flow.
-
-- **Thursday, October 01, 2026 — 22:42:14 PHT — Calendar card clarity:** Dashboard day cards now show compact short-month dates and labelled visit totals; their heatmap colors, detailed tooltips, and event tags are unchanged.
 
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.

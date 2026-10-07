@@ -36,7 +36,7 @@ describe('ReportIssueModal', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalledOnce())
     expect(onSubmitted).toHaveBeenCalledWith(true)
     expect(open).toHaveBeenCalledWith(
-      expect.stringContaining('mailto:team@example.com'),
+      expect.stringContaining('mailto:zkg.balboa@gmail.com'),
       '_blank',
       'noopener,noreferrer',
     )
