@@ -96,6 +96,11 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
     if (nullable && value === null) return
     if (!isRelativeDateTime(value)) fail(`${where}: expected {"daysAgo"|"daysFromNow": n, "time": "HH:MM"}`)
   }
+  // Signed day offset of a relative date (NaN when malformed, so comparisons simply fail to match).
+  const relDays = (value: unknown) => {
+    const r = (value ?? {}) as Rec
+    return 'daysFromNow' in r ? Number(r.daysFromNow) : -Number(r.daysAgo)
+  }
   const list = (key: string): Rec[] => (Array.isArray(s[key]) ? (s[key] as Rec[]) : [])
 
   checkFields('top level', s, FIELDS.top)
@@ -355,6 +360,9 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
     if (!visitStudent.has(String(a.visitId))) fail(`${w}.visitId: "${String(a.visitId)}" doesn't exist`)
     userRef(`${w}.approvedByUserId`, a.approvedByUserId)
     relDateTime(`${w}.approvedAt`, a.approvedAt)
+    relDate(`${w}.excusedFrom`, a.excusedFrom)
+    relDate(`${w}.excusedUntil`, a.excusedUntil)
+    if (relDays(a.excusedUntil) < relDays(a.excusedFrom)) fail(`${w}.excusedUntil: can't be before excusedFrom`)
   })
   ;((fo.peReferrals ?? []) as Rec[]).forEach((p, i) => {
     const w = `frontendOnly.peReferrals[${i}]`

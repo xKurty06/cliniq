@@ -1,4 +1,12 @@
-import { archiveStudent, getDemoStudent, getStudent, getStudentHistory, type SessionUser } from '../../../lib/mock-db'
+import {
+  archiveStudent,
+  getDemoStudent,
+  getStudent,
+  getStudentExcuseLetters,
+  getStudentHistory,
+  type SessionUser,
+  type StudentExcuseLetter,
+} from '../../../lib/mock-db'
 import type { Incident, Student, Visit } from '../../../types/entities'
 
 /**
@@ -12,13 +20,21 @@ export interface StudentProfileData {
   student: Student
   visits: Visit[]
   incidents: Incident[]
+  /** Staff only (Module 3 is Staff-only); always empty for other roles. */
+  excuseLetters: StudentExcuseLetter[]
 }
 
 /** `studentNumber` comes from the `/students/:studentNumber` route; omitted, a demo student is used. */
-export async function fetchStudentProfile(studentNumber?: string): Promise<StudentProfileData> {
+export async function fetchStudentProfile(
+  studentNumber?: string,
+  viewer?: SessionUser,
+): Promise<StudentProfileData> {
   const student = studentNumber ? await getStudent(studentNumber) : await getDemoStudent({ withHistory: true })
-  const history = await getStudentHistory(student.id)
-  return { student, ...history }
+  const [history, excuseLetters] = await Promise.all([
+    getStudentHistory(student.id),
+    viewer?.role === 'staff' ? getStudentExcuseLetters(student.id) : [],
+  ])
+  return { student, ...history, excuseLetters }
 }
 
 /** Archive hides the student from active lists without deleting anything; the write is audited. */

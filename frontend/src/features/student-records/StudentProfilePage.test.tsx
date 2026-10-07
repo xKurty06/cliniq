@@ -1,6 +1,8 @@
 import { renderWithRouter } from '../../test/renderWithRouter'
 import { screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { addDays, formatDateRange } from '../../lib/dates'
+import { getMockToday } from '../../lib/mock-db'
 import { StudentProfilePage } from './StudentProfilePage'
 
 describe('Student Profile', () => {
@@ -35,5 +37,28 @@ describe('Student Profile', () => {
     expect(screen.queryByRole('link', { name: 'Edit' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Print' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Archive' })).not.toBeInTheDocument()
+  })
+
+  it("lists Staff the student's excused periods with a link to each visit", async () => {
+    renderWithRouter(<StudentProfilePage studentNumber="2021-00002" />)
+
+    expect(await screen.findByRole('heading', { name: 'Excuse Letters' })).toBeInTheDocument()
+    const today = getMockToday()
+    expect(
+      screen.getByText(`${formatDateRange(addDays(today, -9), addDays(today, -7))} · Sent home`),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'View visit' })).toHaveAttribute('href', '/visits/visit-0139')
+  })
+
+  it('keeps excuse letters off the PE/Sports Instructor view', async () => {
+    renderWithRouter(
+      <StudentProfilePage
+        studentNumber="2021-00002"
+        viewer={{ id: 'usr-pe', name: 'PE Instructor', role: 'instructor' }}
+      />,
+    )
+
+    await screen.findByText(/read-only profile view/i)
+    expect(screen.queryByRole('heading', { name: 'Excuse Letters' })).not.toBeInTheDocument()
   })
 })

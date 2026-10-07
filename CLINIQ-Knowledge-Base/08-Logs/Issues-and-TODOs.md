@@ -230,6 +230,14 @@ Left open by the session that made every dropdown match the Dashboard's date-ran
 - **Config values now in `mock-db.json`, carried over from the Dashboard mock — not requirements, they need a team or nurse decision:** `frequentVisitorMinVisits` (3), `frequentVisitorWindowDays` (30; the Dashboard uses its selected range instead), `upcomingFollowUpDays` (7), `expiryWarningDays` (30), `clusterMinCount` (8), `clusterRatio` (2), `topComplaints` (5). Also open: whether stock *at* the threshold counts as low (currently strictly below).
 - **`frontendOnly` data to review when the ERD is designed:** `devAccounts` (credentials, `mustChangePassword`), `visitComplaintTypes` (incl. Smart Triage steps), `incidentComplaintTypes`, `inventoryTransactions`, `recordReviews`, `excuseLetterApprovals`, `peReferrals`.
 
+## Excuse letter excused period — Wednesday, October 07, 2026 — 13:01 PHT
+
+- **Provisional fields for the ERD/schema design** (PROVISIONAL / `frontendOnly` convention; not a schema decision): `ExcuseLetterApproval.excusedFrom` and `ExcuseLetterApproval.excusedUntil` (dates, both required, `excusedUntil` ≥ `excusedFrom`), stored on the approval record in `frontendOnly.excuseLetterApprovals`.
+- **Draft letters are still not stored.** Only the approval (approver, time, and now the period) is persisted; recipient and body edits are never saved, before or after approval. That predates this change and wasn't altered. Decide whether the stored letter should keep its final wording when the ERD is designed.
+- **Re-audit needed (Frontend-Loop-Engineering Phase 2):** Excuse Letter Generator (#13) and Student Profile (#7) changed after their audits. Their Build/Audit boxes were left as they were.
+- **Canonical document drift:** the Modules & Features canonical doc (Module 3, Excuse Letter Issuance) needs the excused-period sentence added to `Module-Overview.md` (`09-References/Canonical-Documents.md`).
+- **DatePicker keyboard quirk (pre-existing, found in live check):** when the selected date is below `min` (e.g. "Excused until" after "Excused from" moves past it), opening the calendar and pressing arrow keys does not move to an enabled day; picking with the mouse works. Not changed here.
+
 ## Medicines & supplies given (ADR-018) — Wednesday, October 07, 2026 — 10:43 PHT
 
 - **Provisional fields for the ERD/schema design** (PROVISIONAL / `frontendOnly` convention; none is a schema decision): `Visit.itemsGiven` and `Incident.itemsGiven` (arrays of `ItemGivenLine`: `itemId`, `itemName` and `unit` snapshots, `quantity`, `instructions`); `InventoryTransaction.type` value `adjustment` (signed `quantity`); `InventoryTransaction.reason` (`visit_edited` / `expired_disposed` / `damaged_spilled` / `miscount_correction` / `other`); `InventoryTransaction.note`; `InventoryTransaction.incidentId`.

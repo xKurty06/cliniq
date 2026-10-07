@@ -148,11 +148,14 @@ export interface RecordReview<D = ISODate, T = ISODateTime> {
   resolvedAt: T | null
 }
 
-export interface ExcuseLetterApproval<T = ISODateTime> {
+export interface ExcuseLetterApproval<T = ISODateTime, D = ISODate> {
   id: string
   visitId: string
   approvedByUserId: string
   approvedAt: T
+  /** Excused period (provisional pending the ERD). Records dates only; no attendance integration. */
+  excusedFrom: D
+  excusedUntil: D
 }
 
 export interface PeReferral<T = ISODateTime> {
@@ -184,7 +187,7 @@ export interface SeedFrontendOnly {
   incidentComplaintTypes: string[]
   inventoryTransactions: Array<InventoryTransaction<RelativeDateTime>>
   recordReviews: Array<RecordReview<RelativeDate, RelativeDateTime>>
-  excuseLetterApprovals: Array<ExcuseLetterApproval<RelativeDateTime>>
+  excuseLetterApprovals: Array<ExcuseLetterApproval<RelativeDateTime, RelativeDate>>
   peReferrals: Array<PeReferral<RelativeDateTime>>
   issueReports: Array<IssueReport<RelativeDateTime>>
 }

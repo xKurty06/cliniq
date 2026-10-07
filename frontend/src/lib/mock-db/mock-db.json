@@ -4034,7 +4034,17 @@
         "id": "excuse-visit-0141",
         "visitId": "visit-0141",
         "approvedByUserId": "user-staff-01",
-        "approvedAt": { "daysAgo": 9, "time": "11:23" }
+        "approvedAt": { "daysAgo": 9, "time": "11:23" },
+        "excusedFrom": { "daysAgo": 9 },
+        "excusedUntil": { "daysAgo": 9 }
+      },
+      {
+        "id": "excuse-visit-0139",
+        "visitId": "visit-0139",
+        "approvedByUserId": "user-staff-01",
+        "approvedAt": { "daysAgo": 9, "time": "10:40" },
+        "excusedFrom": { "daysAgo": 9 },
+        "excusedUntil": { "daysAgo": 7 }
       }
     ],
     "peReferrals": [

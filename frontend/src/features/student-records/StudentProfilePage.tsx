@@ -19,9 +19,9 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
-import { formatDateTime } from '../../lib/dates'
+import { formatDateRange, formatDateTime } from '../../lib/dates'
 import { visitCareSummary } from '../../lib/itemsGiven'
-import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
+import { getMockSessionUser, type SessionUser, type StudentExcuseLetter } from '../../lib/mock-db'
 import type { Disposition, Incident, Student, Visit } from '../../types/entities'
 import { paths } from '../../routes/paths'
 import { archiveStudentRecord, fetchStudentProfile } from './api/studentProfileApi'
@@ -275,6 +275,36 @@ function VisitHistoryCard({ visits }: { visits: Visit[] }) {
   )
 }
 
+function ExcuseLettersCard({ letters }: { letters: StudentExcuseLetter[] }) {
+  return (
+    <Card aria-labelledby="excuse-letters" className="flex flex-col">
+      <CardHeader
+        titleId="excuse-letters"
+        title="Excuse Letters"
+        icon={<Icon name="fileText" />}
+        description="Approved letters and the dates excused. For cross-checking attendance; not linked to the attendance system."
+      />
+      {letters.length ? (
+        <RowList labelledBy="excuse-letters">
+          {letters.map((letter) => (
+            <ListRow
+              key={letter.id}
+              primary={`${formatDateRange(letter.excusedFrom, letter.excusedUntil)} · ${dispositionLabel[letter.disposition]}`}
+              trailing={
+                <Link to={paths.visitDetail(letter.visitId)} className={buttonClassName({ size: 'sm' })}>
+                  View visit
+                </Link>
+              }
+            />
+          ))}
+        </RowList>
+      ) : (
+        <EmptyState title="No excuse letters yet" description="No approved excuse letters are stored for this student." />
+      )}
+    </Card>
+  )
+}
+
 function IncidentHistoryCard({ incidents }: { incidents: Incident[] }) {
   return (
     <Card aria-labelledby="incident-history" className="flex flex-col">
@@ -322,7 +352,7 @@ export function StudentProfilePage({
   studentNumber?: string
 }) {
   const { data, status, reload } = useAsyncData(`student-profile|${studentNumber ?? 'default'}`, () =>
-    fetchStudentProfile(studentNumber),
+    fetchStudentProfile(studentNumber, viewer),
   )
 
   if (status === 'error') {
@@ -359,6 +389,7 @@ export function StudentProfilePage({
         </div>
         <div className="flex flex-col gap-4">
           <VisitHistoryCard visits={data.visits} />
+          {viewer.role === 'staff' && <ExcuseLettersCard letters={data.excuseLetters} />}
           <IncidentHistoryCard incidents={data.incidents} />
         </div>
       </div>

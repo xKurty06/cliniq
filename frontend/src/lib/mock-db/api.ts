@@ -684,15 +684,60 @@ export function getExcuseLetterApproval(visitId: string): Promise<ExcuseLetterAp
   return read('excuse letter', (s) => s.frontendOnly.excuseLetterApprovals.find((a) => a.visitId === visitId) ?? null)
 }
 
-export function approveExcuseLetter(visitId: string, actor?: SessionUser): Promise<ExcuseLetterApproval> {
+export interface StudentExcuseLetter extends ExcusedPeriod {
+  id: string
+  visitId: string
+  disposition: Disposition
+}
+
+/** A student's approved excuse letters, newest period first. */
+export function getStudentExcuseLetters(studentId: string): Promise<StudentExcuseLetter[]> {
+  return read('student excuse letters', (s) =>
+    s.frontendOnly.excuseLetterApprovals
+      .flatMap((a) => {
+        const visit = s.visits.find((v) => v.id === a.visitId && v.studentId === studentId)
+        return visit
+          ? [{ id: a.id, visitId: a.visitId, disposition: visit.disposition, excusedFrom: a.excusedFrom, excusedUntil: a.excusedUntil }]
+          : []
+      })
+      .sort((a, b) => b.excusedFrom.localeCompare(a.excusedFrom)),
+  )
+}
+
+export interface ExcusedPeriod {
+  excusedFrom: ISODate
+  excusedUntil: ISODate
+}
+
+/** Both dates required, "until" not before "from". No maximum span is defined. */
+export function excusedPeriodError({ excusedFrom, excusedUntil }: ExcusedPeriod): string | null {
+  if (!excusedFrom || !excusedUntil) return 'Excused from and Excused until are both required.'
+  if (excusedUntil < excusedFrom) return "Excused until can't be before Excused from."
+  return null
+}
+
+export function approveExcuseLetter(
+  visitId: string,
+  period: ExcusedPeriod,
+  actor?: SessionUser,
+): Promise<ExcuseLetterApproval> {
   return write('approve excuse letter', (s) => {
     const by = actorOr(actor)
     must(s.visits.find((v) => v.id === visitId), 'Visit')
-    const approval: ExcuseLetterApproval = { id: `excuse-${visitId}`, visitId, approvedByUserId: by.id, approvedAt: now(s) }
-    s.frontendOnly.excuseLetterApprovals = [
-      ...s.frontendOnly.excuseLetterApprovals.filter((a) => a.visitId !== visitId),
-      approval,
-    ]
+    const invalid = excusedPeriodError(period)
+    if (invalid) throw new Error(invalid)
+    // Approved letters are permanent: the period is fixed once stored.
+    if (s.frontendOnly.excuseLetterApprovals.some((a) => a.visitId === visitId))
+      throw new Error('This excuse letter is already approved and stored.')
+    const approval: ExcuseLetterApproval = {
+      id: `excuse-${visitId}`,
+      visitId,
+      approvedByUserId: by.id,
+      approvedAt: now(s),
+      excusedFrom: period.excusedFrom,
+      excusedUntil: period.excusedUntil,
+    }
+    s.frontendOnly.excuseLetterApprovals = [...s.frontendOnly.excuseLetterApprovals, approval]
     audit(s, by, 'approve', { type: 'excuse-letter', id: approval.id })
     return approval
   })

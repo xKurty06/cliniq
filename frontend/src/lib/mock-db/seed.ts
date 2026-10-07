@@ -101,6 +101,8 @@ export function resolveSeed(source: MockDbSeed, today: ISODate): DbState {
       excuseLetterApprovals: fo.excuseLetterApprovals.map((a) => ({
         ...a,
         approvedAt: resolveDateTime(a.approvedAt, today),
+        excusedFrom: resolveDate(a.excusedFrom, today),
+        excusedUntil: resolveDate(a.excusedUntil, today),
       })),
       peReferrals: fo.peReferrals.map((p) => ({ ...p, createdAt: resolveDateTime(p.createdAt, today) })),
       issueReports: fo.issueReports.map((r) => ({ ...r, createdAt: resolveDateTime(r.createdAt, today) })),

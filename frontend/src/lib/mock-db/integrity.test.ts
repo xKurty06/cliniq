@@ -32,6 +32,18 @@ describe('mock-db.json integrity', () => {
     expect(seed.visits.length).toBeGreaterThan(120)
   })
 
+  it('rejects an excuse letter whose period is missing or ends before it starts', () => {
+    expect(
+      problemsAfter((s) => delete (s.frontendOnly.excuseLetterApprovals[0] as Partial<(typeof s.frontendOnly.excuseLetterApprovals)[0]>).excusedUntil),
+    ).toMatch(/excuseLetterApprovals\[0\]\.excusedUntil/)
+    expect(
+      problemsAfter((s) => {
+        s.frontendOnly.excuseLetterApprovals[0].excusedFrom = { daysAgo: 3 }
+        s.frontendOnly.excuseLetterApprovals[0].excusedUntil = { daysAgo: 5 }
+      }),
+    ).toMatch(/excusedUntil: can't be before excusedFrom/)
+  })
+
   it('rejects a dangling Student Number reference', () => {
     expect(problemsAfter((s) => (s.visits[0].studentNumber = '2019-99999'))).toMatch(
       /visits\[0\].*Student Number "2019-99999" doesn't exist/,

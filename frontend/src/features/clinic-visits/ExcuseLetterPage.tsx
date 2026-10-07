@@ -5,18 +5,21 @@ import {
   Card,
   CardBody,
   CardHeader,
+  DatePicker,
   ErrorState,
   Icon,
   Input,
   Skeleton,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
-import { formatDate, formatDateTime } from '../../lib/dates'
+import { formatDate, formatDateRange, formatDateTime } from '../../lib/dates'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import {
   approveExcuseLetter,
+  excusedPeriodError,
   fetchExcuseLetterContext,
   type ExcuseLetterContext,
+  type ExcusedPeriod,
 } from './api/excuseLetterApi'
 
 function LetterSkeleton() {
@@ -45,13 +48,16 @@ function PrintableLetter({
   context,
   recipient,
   body,
+  period,
   approved,
 }: {
   context: ExcuseLetterContext
   recipient: string
   body: string
+  period: ExcusedPeriod
   approved: boolean
 }) {
+  const periodValid = !excusedPeriodError(period)
   return (
     <article className="rounded-md border border-border bg-background p-6 text-text-primary print:border-0 print:p-0">
       <div className="border-b border-border pb-4 text-center print:pb-3">
@@ -67,6 +73,10 @@ function PrintableLetter({
       <div className="mt-6 flex flex-col gap-4 text-sm leading-6">
         <p>{formatDate(context.issuedAt.slice(0, 10))}</p>
         <p>To: {recipient}</p>
+        <p className="font-semibold">
+          Excused period:{' '}
+          {periodValid ? formatDateRange(period.excusedFrom, period.excusedUntil) : 'Not set'}
+        </p>
         <div className="whitespace-pre-line">{body}</div>
         <div className="mt-6">
           <p className="font-semibold">{context.checkedBy}</p>
@@ -87,14 +97,16 @@ function PrintableLetter({
 function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
   const [recipient, setRecipient] = useState(context.recipient)
   const [body, setBody] = useState(context.body)
+  const [period, setPeriod] = useState(context.period)
   const [checked, setChecked] = useState(Boolean(context.approval))
   const [approved, setApproved] = useState(Boolean(context.approval))
   const [saving, setSaving] = useState(false)
+  const periodError = excusedPeriodError(period)
 
   async function approve() {
     setSaving(true)
     try {
-      await approveExcuseLetter(context)
+      await approveExcuseLetter(context, period)
       setApproved(true)
     } finally {
       setSaving(false)
@@ -148,6 +160,25 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
               value={recipient}
               onChange={(event) => setRecipient(event.target.value)}
             />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DatePicker
+                label="Excused from"
+                required
+                value={period.excusedFrom}
+                onChange={(excusedFrom) => setPeriod((current) => ({ ...current, excusedFrom }))}
+                disabled={approved}
+              />
+              <DatePicker
+                label="Excused until"
+                required
+                value={period.excusedUntil}
+                min={period.excusedFrom || undefined}
+                onChange={(excusedUntil) => setPeriod((current) => ({ ...current, excusedUntil }))}
+                error={periodError ?? undefined}
+                hint={approved ? 'Fixed once the letter is approved.' : undefined}
+                disabled={approved}
+              />
+            </div>
             <div className="flex flex-col gap-1">
               <label htmlFor="excuse-body" className="text-xs font-semibold text-text-primary">
                 Letter body
@@ -178,7 +209,7 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
               variant="primary"
               icon="checkCircle"
               loading={saving}
-              disabled={!checked || approved}
+              disabled={!checked || approved || Boolean(periodError)}
               onClick={() => void approve()}
             >
               Approve and Store
@@ -199,6 +230,7 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
               context={context}
               recipient={recipient}
               body={body}
+              period={period}
               approved={approved}
             />
           </CardBody>

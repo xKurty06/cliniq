@@ -7,9 +7,12 @@ import {
   getUser,
   getVisit,
   type ExcuseLetterApproval,
+  type ExcusedPeriod,
   type SessionUser,
 } from '../../../lib/mock-db'
 import { formatDate } from '../../../lib/dates'
+
+export { excusedPeriodError, type ExcusedPeriod } from '../../../lib/mock-db'
 import type { ISODateTime, Student, Visit } from '../../../types/entities'
 
 export interface ExcuseLetterContext {
@@ -20,6 +23,8 @@ export interface ExcuseLetterContext {
   checkedBy: string
   recipient: string
   body: string
+  /** Stored period once approved; otherwise the default (the visit date, one day). */
+  period: ExcusedPeriod
   /** Set once Staff has approved this letter; it's then kept in the student's record. */
   approval: ExcuseLetterApproval | null
 }
@@ -39,6 +44,7 @@ export async function fetchExcuseLetterContext(visitId?: string): Promise<Excuse
     getStudentById(visit.studentId),
     getExcuseLetterApproval(visit.id),
   ])
+  const visitDate = visit.dateTime.slice(0, 10)
   const checkedBy = approval
     ? await getUser(approval.approvedByUserId).then(
         (user) => user.name,
@@ -53,13 +59,17 @@ export async function fetchExcuseLetterContext(visitId?: string): Promise<Excuse
     checkedBy,
     recipient: 'Class Adviser',
     body: defaultBody(student, visit),
+    period: approval
+      ? { excusedFrom: approval.excusedFrom, excusedUntil: approval.excusedUntil }
+      : { excusedFrom: visitDate, excusedUntil: visitDate },
     approval,
   }
 }
 
 export async function approveExcuseLetter(
   context: ExcuseLetterContext,
+  period: ExcusedPeriod,
   actor?: SessionUser,
 ): Promise<void> {
-  await approveInLayer(context.visit.id, actor)
+  await approveInLayer(context.visit.id, period, actor)
 }
