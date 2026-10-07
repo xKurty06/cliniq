@@ -102,3 +102,15 @@ export function legendSteps(scale: HeatScale): Array<{ level: HeatLevel; label: 
   }
   return steps
 }
+
+/** The yellow chip used for a calendar event or an event tag (12px text, dark on yellow). */
+export const eventChipClass =
+  'max-w-full truncate rounded-sm border border-brand-yellow-dark bg-brand-yellow px-1.5 py-0.5 text-xs leading-tight font-semibold text-text-primary'
+
+/** How many labels a day cell shows before collapsing the rest into "+N more". */
+export const MAX_DAY_LABELS = 2
+
+/** A day's labels in display order: its calendar events, then visit/incident tags not already shown. */
+export function dayLabels(day: { events: Array<{ title: string }>; eventTags: string[] }): string[] {
+  return [...day.events.map((e) => e.title), ...day.eventTags]
+}

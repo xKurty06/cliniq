@@ -4060,6 +4060,97 @@
         "createdAt": { "daysAgo": 16, "time": "14:20" }
       }
     ],
-    "issueReports": []
+    "issueReports": [],
+    "calendarEvents": [
+      {
+        "id": "calendar-event-0001",
+        "title": "Intramurals",
+        "startDate": {
+          "daysAgo": 13
+        },
+        "endDate": {
+          "daysAgo": 11
+        },
+        "createdByUserId": "user-staff-01",
+        "createdAt": {
+          "daysAgo": 20,
+          "time": "09:15"
+        },
+        "updatedAt": {
+          "daysAgo": 20,
+          "time": "09:15"
+        }
+      },
+      {
+        "id": "calendar-event-0002",
+        "title": "Grade 7 annual physical exam",
+        "startDate": {
+          "daysAgo": 4
+        },
+        "endDate": null,
+        "createdByUserId": "user-staff-01",
+        "createdAt": {
+          "daysAgo": 9,
+          "time": "14:05"
+        },
+        "updatedAt": {
+          "daysAgo": 9,
+          "time": "14:05"
+        }
+      },
+      {
+        "id": "calendar-event-0003",
+        "title": "Fire drill",
+        "startDate": {
+          "daysAgo": 0
+        },
+        "endDate": null,
+        "createdByUserId": "user-staff-01",
+        "createdAt": {
+          "daysAgo": 3,
+          "time": "08:40"
+        },
+        "updatedAt": {
+          "daysAgo": 3,
+          "time": "08:40"
+        }
+      },
+      {
+        "id": "calendar-event-0004",
+        "title": "Faculty meeting",
+        "startDate": {
+          "daysAgo": 0
+        },
+        "endDate": null,
+        "createdByUserId": "user-staff-01",
+        "createdAt": {
+          "daysAgo": 2,
+          "time": "16:20"
+        },
+        "updatedAt": {
+          "daysAgo": 2,
+          "time": "16:20"
+        }
+      },
+      {
+        "id": "calendar-event-0005",
+        "title": "Foundation Day",
+        "startDate": {
+          "daysFromNow": 9
+        },
+        "endDate": {
+          "daysFromNow": 10
+        },
+        "createdByUserId": "user-staff-01",
+        "createdAt": {
+          "daysAgo": 1,
+          "time": "10:30"
+        },
+        "updatedAt": {
+          "daysAgo": 1,
+          "time": "10:30"
+        }
+      }
+    ]
   }
 }

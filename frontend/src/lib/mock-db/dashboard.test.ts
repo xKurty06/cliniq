@@ -103,6 +103,7 @@ function dataset(partial: Partial<DbState>): DbState {
       excuseLetterApprovals: [],
       peReferrals: [],
       issueReports: [],
+      calendarEvents: [],
     },
     ...partial,
   }
@@ -295,9 +296,43 @@ describe('calendar days', () => {
       ],
     })
     expect(buildCalendarDays(data, '2026-09-14', '2026-09-16')).toEqual([
-      { date: '2026-09-14', visits: 2, incidents: 0, eventTags: ['Intramurals'] },
-      { date: '2026-09-15', visits: 1, incidents: 0, eventTags: [] },
-      { date: '2026-09-16', visits: 0, incidents: 0, eventTags: [] },
+      { date: '2026-09-14', visits: 2, incidents: 0, events: [], eventTags: ['Intramurals'] },
+      { date: '2026-09-15', visits: 1, incidents: 0, events: [], eventTags: [] },
+      { date: '2026-09-16', visits: 0, incidents: 0, events: [], eventTags: [] },
     ])
+  })
+
+  it('puts calendar events on every day they cover, including empty and future days', () => {
+    const event = (id: string, title: string, startDate: string, endDate: string | null) => ({
+      id,
+      title,
+      startDate,
+      endDate,
+      createdByUserId: 'u1',
+      createdAt: '2026-09-01T08:00:00+08:00',
+      updatedAt: '2026-09-01T08:00:00+08:00',
+    })
+    const base = dataset({ visits: [visit('a', 's1', '2026-09-15', 'Headache', 'intramurals')] })
+    const data = {
+      ...base,
+      frontendOnly: {
+        ...base.frontendOnly,
+        calendarEvents: [
+          event('e1', 'Intramurals', '2026-09-13', '2026-09-15'),
+          event('e2', 'Foundation Day', '2026-09-30', null),
+        ],
+      },
+    }
+    const days = buildCalendarDays(data, '2026-09-14', '2026-09-30')
+    const on = (date: string) => days.find((d) => d.date === date)!
+    // Clipped to the visible range but still describes the whole event.
+    expect(on('2026-09-14').events).toEqual([
+      { id: 'e1', title: 'Intramurals', startDate: '2026-09-13', endDate: '2026-09-15' },
+    ])
+    // The visit tag repeats the event's title (different case), so it shows once, as the event.
+    expect(on('2026-09-15')).toMatchObject({ visits: 1, eventTags: [] })
+    expect(on('2026-09-15').events.map((e) => e.id)).toEqual(['e1'])
+    expect(on('2026-09-16').events).toEqual([])
+    expect(on('2026-09-30').events.map((e) => e.title)).toEqual(['Foundation Day'])
   })
 })

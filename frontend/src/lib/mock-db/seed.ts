@@ -106,6 +106,13 @@ export function resolveSeed(source: MockDbSeed, today: ISODate): DbState {
       })),
       peReferrals: fo.peReferrals.map((p) => ({ ...p, createdAt: resolveDateTime(p.createdAt, today) })),
       issueReports: fo.issueReports.map((r) => ({ ...r, createdAt: resolveDateTime(r.createdAt, today) })),
+      calendarEvents: fo.calendarEvents.map((e) => ({
+        ...e,
+        startDate: resolveDate(e.startDate, today),
+        endDate: e.endDate ? resolveDate(e.endDate, today) : null,
+        createdAt: resolveDateTime(e.createdAt, today),
+        updatedAt: resolveDateTime(e.updatedAt, today),
+      })),
     },
   })
 }

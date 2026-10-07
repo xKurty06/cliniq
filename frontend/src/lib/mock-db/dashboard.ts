@@ -247,7 +247,7 @@ export function detectClusters(
 
 export function buildCalendarDays(state: DbState, from: ISODate, to: ISODate): CalendarDay[] {
   const days = new Map<ISODate, CalendarDay>(
-    eachDay(from, to).map((date) => [date, { date, visits: 0, incidents: 0, eventTags: [] }]),
+    eachDay(from, to).map((date) => [date, { date, visits: 0, incidents: 0, events: [], eventTags: [] }]),
   )
   const addTag = (day: CalendarDay, tag: string | null) => {
     if (tag && !day.eventTags.includes(tag)) day.eventTags.push(tag)
@@ -263,6 +263,21 @@ export function buildCalendarDays(state: DbState, from: ISODate, to: ISODate): C
     if (!day) continue
     day.incidents += 1
     addTag(day, i.eventTag)
+  }
+  const events = [...state.frontendOnly.calendarEvents].sort(
+    (a, b) => a.startDate.localeCompare(b.startDate) || a.title.localeCompare(b.title),
+  )
+  for (const { id, title, startDate, endDate } of events) {
+    const last = endDate ?? startDate
+    if (last < from || startDate > to) continue
+    for (const date of eachDay(startDate < from ? from : startDate, last > to ? to : last)) {
+      days.get(date)?.events.push({ id, title, startDate, endDate })
+    }
+  }
+  for (const day of days.values()) {
+    if (!day.events.length) continue
+    const titles = new Set(day.events.map((e) => e.title.toLowerCase()))
+    day.eventTags = day.eventTags.filter((tag) => !titles.has(tag.toLowerCase()))
   }
   return [...days.values()]
 }

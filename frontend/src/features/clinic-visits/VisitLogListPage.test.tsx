@@ -12,6 +12,19 @@ describe('Visit Log', () => {
     expect(await screen.findByRole('link', { name: 'New Visit' })).toHaveAttribute('href', '/visits/new')
   })
 
+  it('opens on the day given by ?from=&to= (the Dashboard calendar\'s View visits)', async () => {
+    const range = defaultVisitLogRange()
+    const [visit] = await fetchVisitLog({ ...range, search: '', disposition: 'all' })
+    const day = visit.dateTime.slice(0, 10)
+    renderWithRouter(<VisitLogListPage />, { route: `/visits?from=${day}&to=${day}` })
+    expect(await screen.findByRole('button', { name: 'Date range' })).toHaveTextContent('Custom range')
+    const onDay = await fetchVisitLog({ from: day, to: day, search: '', disposition: 'all' })
+    // Only that day's visits are listed (one header row plus up to a page of rows).
+    await waitFor(() =>
+      expect(screen.getAllByRole('row')).toHaveLength(Math.min(onDay.length, 10) + 1),
+    )
+  })
+
   it('renders a privacy-safe multi-student visit list with the complaint visible (ADR-010)', async () => {
     renderWithRouter(<VisitLogListPage />)
 

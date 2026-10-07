@@ -95,8 +95,8 @@ describe('Clinic Overview Dashboard', () => {
     expect(first.textContent).toMatch(/Frequent-visit warning/)
   })
 
-  it('gives Staff read-only drill-down links and an inline calendar day summary', async () => {
-    const user = await renderLoaded({ allTime: true })
+  it('gives Staff read-only drill-down links', async () => {
+    await renderLoaded({ allTime: true })
     const summary = screen.getByRole('region', { name: 'Summary counts' })
     for (const [label, href] of [
       ['Clinic visits', '/visits'],
@@ -151,22 +151,88 @@ describe('Clinic Overview Dashboard', () => {
     expect(oralRehydrationSalts.querySelector('svg')).toHaveClass('shrink-0')
 
     expect(within(inventory).getAllByRole('link')[0]).toHaveAttribute('href', '/inventory')
-
-    const day = screen.getAllByRole('button', { name: /view activity for/i })[0]
-    await user.click(day)
-    expect(screen.getByRole('region', { name: /activity on/i })).toBeInTheDocument()
   })
 
-  it('is view-only: no create/update/delete actions exist', async () => {
+  it('is view-only apart from calendar days, which open the day panel', async () => {
     await renderLoaded({ allTime: true })
     const labels = screen
       .getAllByRole('button')
       .map((b) => b.getAttribute('aria-label') ?? b.textContent?.trim())
     for (const label of labels) {
       expect(label).toMatch(
-        /^(Date range|All|Today|Last 7 days|Last 30 days|This month|This year|Custom range|Print \/ Save as PDF|Previous.*|Next.*|View activity for.*)$/,
+        /^(Date range|All|Today|Last 7 days|Last 30 days|This month|This year|Custom range|Print \/ Save as PDF|Previous.*|Next.*|.*\. Open day)$/,
       )
     }
+    // The per-cell "View ›" links are gone: each day is one entry point.
+    expect(screen.queryByRole('button', { name: /^view/i })).not.toBeInTheDocument()
+  })
+
+  it('lets Staff open a day and see its counts, events, and a link to its visits', async () => {
+    const user = await renderLoaded()
+    const todayCell = await screen.findByRole('button', { name: /Fire drill.*\. Open day$/ })
+    // Two chips, then "+1 more" for the visit tag MCA Dance Program.
+    expect(within(todayCell).getByText('Fire drill')).toHaveClass('bg-brand-yellow')
+    expect(within(todayCell).getByText('Faculty meeting')).toBeInTheDocument()
+    expect(within(todayCell).getByText('+1 more')).toBeInTheDocument()
+    expect(todayCell).toHaveAccessibleName(/MCA Dance Program/)
+
+    await user.click(todayCell)
+    const panel = screen.getByRole('dialog')
+    expect(within(panel).getByText(/\d+ visits? · \d+ incidents?/)).toBeInTheDocument()
+    expect(within(panel).getByRole('button', { name: 'Edit Fire drill' })).toBeInTheDocument()
+    expect(within(panel).getByRole('button', { name: 'Delete Faculty meeting' })).toBeInTheDocument()
+    expect(within(panel).getByText('MCA Dance Program')).toBeInTheDocument()
+    const today = new Date()
+    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    expect(within(panel).getByRole('link', { name: /view visits/i })).toHaveAttribute(
+      'href',
+      `/visits?from=${iso}&to=${iso}`,
+    )
+    expect(within(panel).getByRole('button', { name: 'Add Event' })).toHaveFocus()
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(todayCell).toHaveFocus()
+  })
+
+  it('lets Staff add, edit, and delete an event with validation and confirmation', async () => {
+    const user = await renderLoaded()
+    // Next stays available to Staff so future dates can get events.
+    const next = await screen.findByRole('button', { name: /^Next ?Month$/ })
+    expect(next).toBeEnabled()
+    await user.click(next)
+    const day = (await screen.findAllByRole('button', { name: /\. Open day$/ }))[14]
+    await user.click(day)
+    let panel = screen.getByRole('dialog')
+    expect(within(panel).queryByText(/visits? ·/)).not.toBeInTheDocument()
+    expect(within(panel).queryByRole('link', { name: /view visits/i })).not.toBeInTheDocument()
+
+    await user.click(within(panel).getByRole('button', { name: 'Add Event' }))
+    const title = within(panel).getByRole('textbox', { name: /title/i })
+    expect(title).toHaveFocus()
+    await user.click(within(panel).getByRole('button', { name: 'Add Event' }))
+    expect(within(panel).getByText('Enter a title for the event.')).toBeInTheDocument()
+
+    await user.type(title, 'Science fair')
+    await user.click(within(panel).getByRole('button', { name: 'Add Event' }))
+    const edit = await within(panel).findByRole('button', { name: 'Edit Science fair' })
+    await waitFor(() => expect(day).toHaveAccessibleName(/event: Science fair\. Open day$/))
+
+    await user.click(edit)
+    const renamed = within(panel).getByRole('textbox', { name: /title/i })
+    await user.clear(renamed)
+    await user.type(renamed, 'Science and math fair')
+    await user.click(within(panel).getByRole('button', { name: 'Save Changes' }))
+    await user.click(await within(panel).findByRole('button', { name: 'Delete Science and math fair' }))
+    expect(within(panel).getByRole('button', { name: 'Keep Event' })).toHaveFocus()
+    await user.click(within(panel).getByRole('button', { name: 'Delete Event' }))
+    expect(await within(panel).findByText('No events on this day.')).toBeInTheDocument()
+
+    await user.click(within(panel).getByRole('button', { name: 'Close dialog' }))
+    panel = screen.queryByRole('dialog') as HTMLElement
+    expect(panel).toBeNull()
+    await waitFor(() => expect(day).not.toHaveAccessibleName(/Science/))
+    expect(day).toHaveFocus()
   })
 
   it('prints through the browser print dialog', async () => {
@@ -207,7 +273,7 @@ describe('Clinic Overview Dashboard', () => {
       name: /due & upcoming follow-ups \(scrollable list\)/i,
     })
     expect(within(followUpList).getAllByRole('link')[0]).toHaveClass('cursor-pointer', 'underline', 'text-brand-green-dark')
-    expect(screen.getByText('MCA Dance Program')).toHaveClass('bg-brand-yellow')
+    expect(screen.getByText('Fire drill')).toHaveClass('bg-brand-yellow')
   })
 
   it('stacks inventory badges only when the alert card is narrow', async () => {
@@ -256,7 +322,7 @@ describe('Clinic Overview Dashboard', () => {
       'true',
     )
     expect(within(group).getByRole('radio', { name: 'Yearly' })).toHaveFocus()
-    await waitFor(() => expect(screen.getByText(/activity days in/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/activity and event days in/i)).toBeInTheDocument())
   })
 
   it('offers a table fallback for the complaint chart', async () => {
@@ -335,7 +401,10 @@ describe('Clinic Overview Dashboard', () => {
       expect(within(list).queryAllByRole('link')).toHaveLength(0)
       expect(within(list).getAllByRole('listitem')[0]).not.toHaveClass('cursor-pointer')
     }
-    expect(screen.queryByRole('button', { name: /view activity for/i })).not.toBeInTheDocument()
+    // Admin sees the same event chips, but no day opens and the calendar stops at today.
+    expect(screen.queryByRole('button', { name: /open day/i })).not.toBeInTheDocument()
+    expect(await screen.findByText('Fire drill')).toHaveClass('bg-brand-yellow')
+    expect(await screen.findByRole('button', { name: /^Next ?Month$/ })).toBeDisabled()
   })
 
   it('shows an error state with a retry action when loading fails', async () => {

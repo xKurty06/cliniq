@@ -3,8 +3,9 @@
 ## Open decisions, waiting on someone outside the dev team
 
 - **Physical barcode/QR scanner for the clinic PC.** Raised in a September 24 team discussion (garbled AI transcript, low confidence on specifics): MCA may already have an existing student masterlist with barcoded student IDs; a USB scanner (~₱1,000–2,500, possibly Principal-funded) was discussed as a way to import/use that existing data instead of building `YYYY-NNNNN` numbers from scratch. **Explicitly not being acted on** — team decided to keep building the current design and revisit only if the school approves the proposal. If approved, expect this to touch: `06-Decisions/ADR-005` (Student Number scheme), the QR module, and the Project Plan's Section 1.4 "RFID/barcode hardware" out-of-scope line.
-- **Full school-events calendar** — who would maintain it (Staff, adding workload, vs. Admin/Principal, who has no write access today) is unresolved. Current phase uses lightweight free-text event tagging instead.
+- ~~**Full school-events calendar** — who would maintain it (Staff, adding workload, vs. Admin/Principal, who has no write access today) is unresolved. Current phase uses lightweight free-text event tagging instead.~~ Resolved Wednesday, October 07, 2026 — 16:48: Staff maintain events from the Dashboard calendar; Admin/Principal views only (ADR-019). Holidays remain a separate prompt. Canonical documents still need the matching update (listed in ADR-019).
 - **Canteen Staff QR access** — designed, not built. No blocker, just not this phase.
+- **Dashboard Calendar header overflows at 390px** (found Wednesday, October 07, 2026 — 16:48, pre-existing on `main` before ADR-019): the Calendar card's two segmented controls (Weekly/Monthly/Yearly and Calendar/Table) don't wrap, so the page scrolls sideways (scrollWidth 416px at a 390px viewport). Not changed in the school-events work.
 - **Additional backup layer beyond local + external drive** — team is still evaluating what this should be (possibly off-site/cloud). Not yet decided.
 - **Who manages the system when the nurse is absent** — pending a reply from Ms. Jennesse Baas.
 

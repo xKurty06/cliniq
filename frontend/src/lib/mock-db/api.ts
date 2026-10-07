@@ -21,6 +21,7 @@ import type {
   UserRole,
   Visit,
 } from '../../types/entities'
+import { parseISODate, toISODate } from '../dates'
 import type { CalendarDay, DashboardQuery, DashboardSummary } from '../../types/dashboard'
 import type { FollowUpDueState } from '../../components/status/followUp'
 import { buildCalendarDays, buildDashboardSummary } from './dashboard'
@@ -45,8 +46,10 @@ import {
 } from './selectors'
 import { clearMockSession, getMockSessionUser, type SessionUser } from './session'
 import { commit, db, restoreDb } from './store'
+import { CALENDAR_EVENT_TITLE_MAX } from './integrity'
 import type {
   AdjustmentReason,
+  CalendarEvent,
   ComplaintType,
   DbState,
   ExcuseLetterApproval,
@@ -86,6 +89,7 @@ function view(): DbState {
     frontendOnly: {
       ...s.frontendOnly,
       issueReports: isEmptied('issueReports') ? [] : s.frontendOnly.issueReports,
+      calendarEvents: isEmptied('calendarEvents') ? [] : s.frontendOnly.calendarEvents,
     },
   }
 }
@@ -1270,6 +1274,91 @@ export function getDashboardSummary(query: DashboardQuery): Promise<DashboardSum
 
 export function getCalendarDays(from: ISODate, to: ISODate): Promise<CalendarDay[]> {
   return read('calendar', (s) => buildCalendarDays(s, from, to))
+}
+
+// ---- calendar events (Module 9, ADR-019; PROVISIONAL pending the ERD) ----------------------
+
+export { CALENDAR_EVENT_TITLE_MAX }
+
+export interface CalendarEventInput {
+  title: string
+  startDate: ISODate
+  /** '' or null for a one-day event. */
+  endDate: ISODate | '' | null
+}
+
+export type CalendarEventErrors = Partial<Record<keyof CalendarEventInput, string>>
+
+const isRealDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && toISODate(parseISODate(value)) === value
+
+/** Field messages for an event form; empty when the input is valid. The writes below enforce the same rules. */
+export function validateCalendarEvent(input: CalendarEventInput): CalendarEventErrors {
+  const errors: CalendarEventErrors = {}
+  const title = input.title.trim()
+  if (!title) errors.title = 'Enter a title for the event.'
+  else if (title.length > CALENDAR_EVENT_TITLE_MAX) errors.title = `Keep the title to ${CALENDAR_EVENT_TITLE_MAX} characters or fewer.`
+  if (!input.startDate) errors.startDate = 'Choose the date the event starts.'
+  else if (!isRealDate(input.startDate)) errors.startDate = 'Enter a valid start date.'
+  if (input.endDate) {
+    if (!isRealDate(input.endDate)) errors.endDate = 'Enter a valid end date.'
+    else if (!errors.startDate && input.endDate < input.startDate) errors.endDate = "The end date can't be before the start date."
+  }
+  return errors
+}
+
+export class CalendarEventValidationError extends Error {
+  readonly errors: CalendarEventErrors
+  constructor(errors: CalendarEventErrors) {
+    super(Object.values(errors).join(' '))
+    this.errors = errors
+  }
+}
+
+function cleanEvent(input: CalendarEventInput): Pick<CalendarEvent, 'title' | 'startDate' | 'endDate'> {
+  const errors = validateCalendarEvent(input)
+  if (Object.keys(errors).length) throw new CalendarEventValidationError(errors)
+  // An end date on the start date is a one-day event.
+  const endDate = input.endDate && input.endDate !== input.startDate ? input.endDate : null
+  return { title: input.title.trim(), startDate: input.startDate, endDate }
+}
+
+export function createCalendarEvent(input: CalendarEventInput, actor?: SessionUser): Promise<CalendarEvent> {
+  return write('add calendar event', (s) => {
+    const by = actorOr(actor)
+    const at = now(s)
+    const event: CalendarEvent = {
+      id: nextId('calendar-event', s.frontendOnly.calendarEvents),
+      ...cleanEvent(input),
+      createdByUserId: by.id,
+      createdAt: at,
+      updatedAt: at,
+    }
+    s.frontendOnly.calendarEvents.push(event)
+    audit(s, by, 'create', { type: 'calendar-event', id: event.id })
+    return event
+  })
+}
+
+export function updateCalendarEvent(id: string, input: CalendarEventInput, actor?: SessionUser): Promise<CalendarEvent> {
+  return write('edit calendar event', (s) => {
+    const by = actorOr(actor)
+    const event = must(s.frontendOnly.calendarEvents.find((e) => e.id === id), 'Calendar event')
+    const next = cleanEvent(input)
+    const summary = changedSummary(event, next)
+    Object.assign(event, next, { updatedAt: now(s) })
+    audit(s, by, 'update', { type: 'calendar-event', id }, summary)
+    return event
+  })
+}
+
+export function deleteCalendarEvent(id: string, actor?: SessionUser): Promise<void> {
+  return write('delete calendar event', (s) => {
+    const by = actorOr(actor)
+    const index = s.frontendOnly.calendarEvents.findIndex((e) => e.id === id)
+    must(index >= 0 ? s.frontendOnly.calendarEvents[index] : undefined, 'Calendar event')
+    s.frontendOnly.calendarEvents.splice(index, 1)
+    audit(s, by, 'delete', { type: 'calendar-event', id })
+  })
 }
 
 // ---- QR lookup & audit ---------------------------------------------------------------------

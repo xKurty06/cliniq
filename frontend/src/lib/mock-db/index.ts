@@ -16,6 +16,7 @@ export {
 } from './session'
 export type {
   AdjustmentReason,
+  CalendarEvent,
   ComplaintType,
   ExcuseLetterApproval,
   InventoryTransaction,

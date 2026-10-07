@@ -103,10 +103,24 @@ export interface DashboardSummary {
   complaintTrends: ComplaintTrends
 }
 
+/** A Staff-maintained school event, as the calendar shows it (ADR-019). */
+export interface CalendarDayEvent {
+  id: string
+  title: string
+  startDate: ISODate
+  /** null for a one-day event. */
+  endDate: ISODate | null
+}
+
 export interface CalendarDay {
   date: ISODate
   visits: number
   incidents: number
-  /** Distinct free-text event tags Staff attached to that day's visits/incidents. */
+  /** Calendar events covering this day, earliest start first. */
+  events: CalendarDayEvent[]
+  /**
+   * Distinct free-text event tags Staff attached to that day's visits/incidents, minus any whose
+   * text matches one of the day's events (case-insensitive), so the same label never shows twice.
+   */
   eventTags: string[]
 }

@@ -35,6 +35,7 @@ export const auditTargetTypes = [
   'report',
   'backup',
   'follow-up',
+  'calendar-event',
 ] as const
 
 export type AuditTargetType = (typeof auditTargetTypes)[number]
@@ -107,6 +108,7 @@ const AUDIT_RECORD_KINDS: Record<string, string> = {
   report: 'Report',
   backup: 'Backup',
   'issue-report': 'Issue report',
+  'calendar-event': 'Calendar event',
 }
 
 const REPORT_NAMES: Record<string, string> = {
@@ -138,6 +140,7 @@ function auditTargetIdentifier(state: DbState, target: NonNullable<AuditLogEntry
   }
   if (type === 'inventory') return { label: state.inventoryItems.find((item) => item.id === target.id)?.name ?? '' }
   if (type === 'user') return { label: state.users.find((user) => user.id === target.id)?.name ?? '' }
+  if (type === 'calendar-event') return { label: state.frontendOnly.calendarEvents.find((event) => event.id === target.id)?.title ?? '' }
   if (target.type === 'report') return { label: REPORT_NAMES[target.id] ?? '' }
   if (target.type === 'backup') return { label: /^\d{4}-\d{2}-\d{2}T/.test(target.id) ? formatDateTime(target.id) : '' }
   return { label: '' }

@@ -3,8 +3,8 @@ import type { ISODate } from '../../../types/entities'
 import type { CalendarDay, DashboardQuery, DashboardSummary } from '../../../types/dashboard'
 
 /**
- * Dashboard data access. It's read-only (GET-style) on purpose: this screen never creates, updates,
- * or deletes anything, so no audit-log call is needed here (see `.claude/skills/cliniq-audit-trail/`).
+ * Dashboard data access. Everything here is read-only except calendar events (bottom of the file),
+ * whose writes the data layer audit-logs (see `.claude/skills/cliniq-audit-trail/`).
  *
  * Every count, flag, and trend is computed by the data layer (`lib/mock-db/`) from raw records, so
  * the Dashboard always agrees with the list screens it summarizes. When Phase B9 lands, the layer
@@ -27,3 +27,18 @@ export type BackupIndicator = Pick<BackupStatusView, 'latest' | 'needsVerificati
 export function fetchBackupIndicator(): Promise<BackupIndicator> {
   return getBackupStatus()
 }
+
+/**
+ * Calendar events (Module 9, ADR-019): Staff add, edit, and delete them; each write is audit-logged
+ * by the data layer in the same call.
+ */
+export {
+  CALENDAR_EVENT_TITLE_MAX,
+  CalendarEventValidationError,
+  createCalendarEvent,
+  deleteCalendarEvent,
+  updateCalendarEvent,
+  validateCalendarEvent,
+  type CalendarEventErrors,
+  type CalendarEventInput,
+} from '../../../lib/mock-db'

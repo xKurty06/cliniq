@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useState, type ReactNode } from 'react'
 import {
   Button,
   Card,
@@ -17,11 +17,15 @@ import { formatDate, parseISODate } from '../../../lib/dates'
 import { sortTableRows, toggleTableSort, type TableSortState } from '../../../lib/tableSort'
 import type { ISODate } from '../../../types/entities'
 import { fetchCalendarDays } from '../api/dashboardApi'
+import { DayEventsPanel } from './DayEventsPanel'
 import {
+  dayLabels,
+  eventChipClass,
   heatClasses,
   heatLevel,
   heatScale,
   legendSteps,
+  MAX_DAY_LABELS,
   monthGrid,
   periodFor,
   shiftAnchor,
@@ -33,13 +37,18 @@ import type { CalendarDay } from '../../../types/dashboard'
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEKDAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-function describeDay(day: CalendarDay): string {
-  const parts = [
-    `${day.visits} ${day.visits === 1 ? 'visit' : 'visits'}`,
-    `${day.incidents} ${day.incidents === 1 ? 'incident' : 'incidents'}`,
-  ]
-  if (day.eventTags.length) parts.push(`event: ${day.eventTags.join(', ')}`)
-  return `${formatDate(day.date, { weekday: 'long', month: 'long', day: 'numeric' })}: ${parts.join(', ')}`
+function describeDay(day: CalendarDay, today: ISODate): string {
+  const parts =
+    day.date <= today
+      ? [
+          `${day.visits} ${day.visits === 1 ? 'visit' : 'visits'}`,
+          `${day.incidents} ${day.incidents === 1 ? 'incident' : 'incidents'}`,
+        ]
+      : []
+  const labels = dayLabels(day)
+  if (labels.length) parts.push(`${labels.length === 1 ? 'event' : 'events'}: ${labels.join(', ')}`)
+  const date = formatDate(day.date, { weekday: 'long', month: 'long', day: 'numeric' })
+  return parts.length ? `${date}: ${parts.join(', ')}` : date
 }
 
 function Legend({ scale }: { scale: HeatScale }) {
@@ -64,21 +73,68 @@ function Legend({ scale }: { scale: HeatScale }) {
   )
 }
 
-function EventTags({ tags, className }: { tags: string[]; className?: string }) {
-  if (!tags.length) return null
+/**
+ * A day's yellow chips: calendar events, then visit/incident tags, up to MAX_DAY_LABELS and then
+ * "+N more". Spans, not a list, because Staff's day cells are buttons; the button's accessible name
+ * (describeDay) carries every label, and every cell's `title` does too.
+ */
+function DayLabels({ day, className }: { day: CalendarDay; className?: string }) {
+  const labels = dayLabels(day)
+  if (!labels.length) return null
+  const hidden = labels.length - MAX_DAY_LABELS
   return (
-    <ul className={cn('flex flex-wrap gap-1', className)}>
-      {tags.map((tag) => (
-        <li
-          key={tag}
-          className="max-w-full truncate rounded-sm border border-brand-yellow-dark bg-brand-yellow px-1.5 py-0.5 text-xs leading-tight font-semibold text-text-primary"
-          title={tag}
-        >
+    <span className={cn('flex min-w-0 flex-wrap gap-1', className)}>
+      {labels.slice(0, MAX_DAY_LABELS).map((label) => (
+        <span key={label} className={eventChipClass} title={label}>
           <span className="sr-only">Event: </span>
-          {tag}
-        </li>
+          {label}
+        </span>
       ))}
-    </ul>
+      {hidden > 0 && (
+        <span
+          className="text-xs leading-tight font-semibold text-text-primary"
+          title={labels.slice(MAX_DAY_LABELS).join(', ')}
+        >
+          +{hidden} more
+        </span>
+      )}
+    </span>
+  )
+}
+
+/**
+ * A day's contents. For Staff it's one button that opens the day panel (the single entry point,
+ * ADR-019); for Admin it's static. The hover/focus ring sits inside the cell so it never collides
+ * with today's outline.
+ */
+function DayTarget({
+  day,
+  today,
+  canEdit,
+  onSelectDay,
+  className,
+  children,
+}: {
+  day: CalendarDay | undefined
+  today: ISODate
+  canEdit: boolean
+  onSelectDay: (date: ISODate) => void
+  className: string
+  children: ReactNode
+}) {
+  if (!canEdit || !day) return <div className={className}>{children}</div>
+  return (
+    <button
+      type="button"
+      aria-label={`${describeDay(day, today)}. Open day`}
+      onClick={() => onSelectDay(day.date)}
+      className={cn(
+        className,
+        'w-full cursor-pointer text-left transition-shadow hover:ring-2 hover:ring-brand-green-dark hover:ring-inset focus-visible:ring-2 focus-visible:ring-brand-green-dark focus-visible:ring-inset focus-visible:outline-none motion-reduce:transition-none',
+      )}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -86,55 +142,52 @@ function WeekView({
   days,
   scale,
   today,
-  canNavigate,
+  canEdit,
   onSelectDay,
 }: {
   days: CalendarDay[]
   scale: HeatScale
   today: ISODate
-  canNavigate: boolean
-  onSelectDay: (day: CalendarDay) => void
+  canEdit: boolean
+  onSelectDay: (date: ISODate) => void
 }) {
   return (
     <ol className="grid grid-cols-1 gap-2 sm:grid-cols-7" aria-label="Days of the week">
       {days.map((day) => {
         const future = day.date > today
         const total = day.visits + day.incidents
-        const canSelect = canNavigate && !future && total > 0
         return (
           <li
             key={day.date}
             className={cn(
-              'flex min-h-28 flex-col gap-1 rounded-md p-2.5',
+              'flex rounded-md',
               future ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
               'border-border',
               day.date === today && 'outline-2 outline-offset-1 outline-text-primary',
             )}
           >
-            <span className="text-xs font-semibold">
-              {formatDate(day.date, { month: 'short', day: 'numeric' })}
-              {day.date === today && ' (today)'}
-            </span>
-            {future ? (
-              <span className="text-xs">Not yet</span>
-            ) : (
-              <>
-                <span className="text-xl font-semibold">
-                  {total} {total === 1 ? 'Visit' : 'Visits'}
-                </span>
-              </>
-            )}
-            <EventTags tags={day.eventTags} />
-            {canSelect && (
-              <button
-                type="button"
-                aria-label={`View activity for ${describeDay(day)}`}
-                onClick={() => onSelectDay(day)}
-                className="mt-auto inline-flex w-fit items-center gap-1 text-xs font-semibold text-brand-green-dark underline decoration-brand-green-dark/40 underline-offset-2 cursor-pointer transition-colors hover:text-brand-green hover:decoration-brand-green focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
-              >
-                View activity <Icon name="chevronRight" size={12} />
-              </button>
-            )}
+            <DayTarget
+              day={day}
+              today={today}
+              canEdit={canEdit}
+              onSelectDay={onSelectDay}
+              className="flex min-h-28 flex-col gap-1 rounded-md p-2.5"
+            >
+              <span className="text-xs font-semibold">
+                {formatDate(day.date, { month: 'short', day: 'numeric' })}
+                {day.date === today && ' (today)'}
+              </span>
+              {future ? (
+                <span className="text-xs">Not yet</span>
+              ) : (
+                <>
+                  <span className="text-xl font-semibold">
+                    {total} {total === 1 ? 'Visit' : 'Visits'}
+                  </span>
+                </>
+              )}
+              <DayLabels day={day} />
+            </DayTarget>
           </li>
         )
       })}
@@ -148,7 +201,7 @@ function MonthView({
   scale,
   today,
   label,
-  canNavigate,
+  canEdit,
   onSelectDay,
 }: {
   monthStart: ISODate
@@ -156,8 +209,8 @@ function MonthView({
   scale: HeatScale
   today: ISODate
   label: string
-  canNavigate: boolean
-  onSelectDay: (day: CalendarDay) => void
+  canEdit: boolean
+  onSelectDay: (date: ISODate) => void
 }) {
   return (
     <div className="relative overflow-x-auto">
@@ -182,44 +235,41 @@ function MonthView({
                 const day = byDate.get(date)
                 const future = date > today
                 const total = day ? day.visits + day.incidents : 0
-                const canSelect = Boolean(canNavigate && day && !future && total > 0)
                 return (
                   <td
                     key={date}
-                    title={day && !future ? describeDay(day) : undefined}
+                    title={day ? describeDay(day, today) : undefined}
                     className={cn(
-                      'h-16 rounded-md p-2 align-top',
+                      'h-16 rounded-md p-0 align-top',
                       future || !day ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
                       'border-border',
                       date === today && 'outline-2 outline-offset-1 outline-text-primary',
                     )}
                   >
-                    <div className="flex items-start justify-between gap-1">
-                      <span className="text-xs">
-                        {formatDate(date, { month: 'short', day: 'numeric' })}
-                      </span>
-                      {!future && day && (
-                        <span className="text-sm font-semibold">
-                          {total} {total === 1 ? 'Visit' : 'Visits'}
-                          <span className="sr-only">
-                            {' '}
-                            total: {day.visits} visits, {day.incidents} incidents
-                          </span>
+                    <DayTarget
+                      day={day}
+                      today={today}
+                      canEdit={canEdit}
+                      onSelectDay={onSelectDay}
+                      className="flex h-full min-h-16 flex-col rounded-md p-2"
+                    >
+                      <span className="flex items-start justify-between gap-1">
+                        <span className="text-xs">
+                          {formatDate(date, { month: 'short', day: 'numeric' })}
                         </span>
-                      )}
-                    </div>
-                    {date === today && <span className="sr-only"> (today)</span>}
-                    {day && <EventTags tags={day.eventTags} className="mt-1" />}
-                    {canSelect && day && (
-                      <button
-                        type="button"
-                        aria-label={`View activity for ${describeDay(day)}`}
-                        onClick={() => onSelectDay(day)}
-                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-brand-green-dark underline decoration-brand-green-dark/40 underline-offset-2 cursor-pointer transition-colors hover:text-brand-green hover:decoration-brand-green focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
-                      >
-                        View <Icon name="chevronRight" size={12} />
-                      </button>
-                    )}
+                        {!future && day && (
+                          <span className="text-sm font-semibold">
+                            {total} {total === 1 ? 'Visit' : 'Visits'}
+                            <span className="sr-only">
+                              {' '}
+                              total: {day.visits} visits, {day.incidents} incidents
+                            </span>
+                          </span>
+                        )}
+                      </span>
+                      {date === today && <span className="sr-only"> (today)</span>}
+                      {day && <DayLabels day={day} className="mt-1" />}
+                    </DayTarget>
                   </td>
                 )
               })}
@@ -236,21 +286,21 @@ function YearView({
   byDate,
   scale,
   today,
-  canNavigate,
+  canEdit,
   onSelectDay,
 }: {
   year: string
   byDate: Map<ISODate, CalendarDay>
   scale: HeatScale
   today: ISODate
-  canNavigate: boolean
-  onSelectDay: (day: CalendarDay) => void
+  canEdit: boolean
+  onSelectDay: (date: ISODate) => void
 }) {
   const months = Array.from(
     { length: 12 },
     (_, m) => `${year}-${String(m + 1).padStart(2, '0')}-01`,
   )
-  const activeDays = [...byDate.values()].filter((d) => d.visits + d.incidents > 0)
+  const activeDays = [...byDate.values()].filter((d) => d.visits + d.incidents > 0 || dayLabels(d).length > 0)
   return (
     <div className="flex flex-col gap-4">
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
@@ -282,11 +332,11 @@ function YearView({
                     return (
                       <span
                         key={date}
-                        title={day && !future ? describeDay(day) : undefined}
+                        title={day ? describeDay(day, today) : undefined}
                         className={cn(
                           'size-3 rounded-[2px] border',
                           future ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
-                          day?.eventTags.length ? 'border-text-primary' : 'border-border',
+                          day && dayLabels(day).length ? 'border-text-primary' : 'border-border',
                         )}
                       />
                     )
@@ -297,18 +347,19 @@ function YearView({
         })}
       </ul>
       <div>
-        <p className="text-xs font-semibold text-text-primary">Activity days in {year}</p>
-        <p className="text-xs text-text-secondary">Outlined squares above mark tagged days.</p>
+        <p className="text-xs font-semibold text-text-primary">Activity and event days in {year}</p>
+        <p className="text-xs text-text-secondary">Outlined squares above mark days with an event.</p>
         {activeDays.length === 0 ? (
-          <p className="text-xs text-text-secondary">No clinic activity this year.</p>
+          <p className="text-xs text-text-secondary">No clinic activity or events this year.</p>
         ) : (
           <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-primary">
             {activeDays.map((d) => (
               <li key={d.date}>
-                {canNavigate ? (
+                {canEdit ? (
                   <button
                     type="button"
-                    onClick={() => onSelectDay(d)}
+                    aria-label={`${describeDay(d, today)}. Open day`}
+                    onClick={() => onSelectDay(d.date)}
                     className="inline-flex items-center gap-1 font-semibold text-brand-green-dark underline decoration-brand-green-dark/40 underline-offset-2 cursor-pointer transition-colors hover:text-brand-green hover:decoration-brand-green focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
                   >
                     {formatDate(d.date, { month: 'short', day: 'numeric' })}
@@ -319,32 +370,14 @@ function YearView({
                     {formatDate(d.date, { month: 'short', day: 'numeric' })}
                   </time>
                 )}{' '}
-                {d.visits + d.incidents} total{d.eventTags.length ? ` · ${d.eventTags.join(', ')}` : ''}
+                {d.date <= today ? `${d.visits + d.incidents} total` : 'Upcoming'}
+                {dayLabels(d).length ? ` · ${dayLabels(d).join(', ')}` : ''}
               </li>
             ))}
           </ul>
         )}
       </div>
     </div>
-  )
-}
-
-function DayActivity({ day }: { day: CalendarDay }) {
-  const total = day.visits + day.incidents
-  return (
-    <section
-      aria-label={`Activity on ${formatDate(day.date, { weekday: 'long', month: 'long', day: 'numeric' })}`}
-      className="rounded-md border border-border bg-surface p-3"
-    >
-      <h4 className="text-sm font-semibold text-text-primary">
-        {formatDate(day.date, { weekday: 'long', month: 'long', day: 'numeric' })}
-      </h4>
-      <p className="mt-1 text-sm text-text-secondary">
-        {day.visits} {day.visits === 1 ? 'visit' : 'visits'} · {day.incidents}{' '}
-        {day.incidents === 1 ? 'incident' : 'incidents'} · {total} total
-      </p>
-      {day.eventTags.length > 0 && <EventTags tags={day.eventTags} className="mt-2" />}
-    </section>
   )
 }
 
@@ -373,7 +406,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       const row = byMonth.get(key) ?? { key, visits: 0, incidents: 0, tags: [] }
       row.visits += d.visits
       row.incidents += d.incidents
-      for (const t of d.eventTags) if (!row.tags.includes(t)) row.tags.push(t)
+      for (const t of dayLabels(d)) if (!row.tags.includes(t)) row.tags.push(t)
       byMonth.set(key, row)
     }
     const rows = [...byMonth.values()]
@@ -388,7 +421,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       { key: 'visits', header: 'Visits', align: 'right', sort: sortColumn('visits', 'Visits'), cell: (r) => r.visits },
       { key: 'incidents', header: 'Incidents', align: 'right', sort: sortColumn('incidents', 'Incidents'), cell: (r) => r.incidents },
       { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (r) => r.visits + r.incidents },
-      { key: 'tags', header: 'Event tags', sort: sortColumn('tags', 'Event tags'), cell: (r) => r.tags.join(', ') || '—' },
+      { key: 'tags', header: 'Events', sort: sortColumn('tags', 'Events'), cell: (r) => r.tags.join(', ') || '—' },
     ]
     const sortedRows = sortTableRows(rows, effectiveSort, (row, key) => {
       if (key === 'month') return row.key
@@ -407,7 +440,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       />
     )
   }
-  const rows = days.filter((d) => d.visits + d.incidents > 0 || d.eventTags.length > 0)
+  const rows = days.filter((d) => d.visits + d.incidents > 0 || dayLabels(d).length > 0)
   const columns: Array<DataTableColumn<CalendarDay>> = [
     {
       key: 'date',
@@ -419,25 +452,25 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
     { key: 'visits', header: 'Visits', align: 'right', sort: sortColumn('visits', 'Visits'), cell: (d) => d.visits },
     { key: 'incidents', header: 'Incidents', align: 'right', sort: sortColumn('incidents', 'Incidents'), cell: (d) => d.incidents },
     { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (d) => d.visits + d.incidents },
-    { key: 'tags', header: 'Event tags', sort: sortColumn('tags', 'Event tags'), cell: (d) => d.eventTags.join(', ') || '—' },
+    { key: 'tags', header: 'Events', sort: sortColumn('tags', 'Events'), cell: (d) => dayLabels(d).join(', ') || '—' },
   ]
   const sortedRows = sortTableRows(rows, effectiveSort, (row, key) => {
     if (key === 'date') return row.date
     if (key === 'visits') return row.visits
     if (key === 'incidents') return row.incidents
     if (key === 'total') return row.visits + row.incidents
-    return row.eventTags.join(', ')
+    return dayLabels(row).join(', ')
   })
   return rows.length ? (
     <DataTable
-      caption="Days with clinic activity or an event tag"
+      caption="Days with clinic activity or an event"
       columns={columns}
       rows={sortedRows}
       rowKey={(d) => d.date}
       fixedLayout
     />
   ) : (
-    <p className="text-sm text-text-secondary">No clinic activity recorded in this period.</p>
+    <p className="text-sm text-text-secondary">No clinic activity or events in this period.</p>
   )
 }
 
@@ -557,13 +590,17 @@ export interface VisitCalendarProps {
   today: ISODate
   /** The date the calendar opens on (the end of the dashboard's date range). */
   initialAnchor: ISODate
-  /** Staff can open a day summary; Admin sees the same calendar as a static summary. */
+  /**
+   * Staff open a day to see its counts and add, edit, or delete events, and can page into future
+   * periods. Admin sees the same chips as a static summary (ADR-019).
+   */
   canNavigate: boolean
 }
 
 /**
  * Calendar view (Reference 1, item 5; Module 9): a weekly/monthly/yearly toggle and a heatmap of
- * visits + incidents per day, with Staff's free-text event tags shown as small text on each day.
+ * visits + incidents per day, with Staff's school events and the free-text event tags on visits and
+ * incidents shown as yellow chips on each day.
  * It pages through time on its own (Previous / Next / Today) and loads only the visible period.
  */
 export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalendarProps) {
@@ -571,7 +608,7 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
   const [view, setView] = useState<CalendarView>('month')
   const [display, setDisplay] = useState<'calendar' | 'table'>('calendar')
   const [anchor, setAnchor] = useState<ISODate>(initialAnchor)
-  const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null)
+  const [selectedDate, setSelectedDate] = useState<ISODate | null>(null)
   // When the dashboard date range changes, jump to its end date but keep the chosen view.
   const [lastInitial, setLastInitial] = useState(initialAnchor)
   if (lastInitial !== initialAnchor) {
@@ -588,7 +625,8 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
     () => heatScale((data ?? []).filter((d) => d.date <= today).map((d) => d.visits + d.incidents)),
     [data, today],
   )
-  const nextDisabled = period.to >= today
+  // Admin's calendar stops at today; Staff page ahead to add events on future dates.
+  const nextDisabled = !canNavigate && period.to >= today
 
   return (
     <Card aria-labelledby={headingId}>
@@ -596,7 +634,11 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
         titleId={headingId}
         icon={<Icon name="calendar" />}
         title="Calendar"
-        description="Visits and incidents per day, with event tags Staff added to visits or incidents."
+        description={
+          canNavigate
+            ? 'Visits and incidents per day, with school events and visit or incident tags. Select a day to add or edit its events.'
+            : 'Visits and incidents per day, with school events and visit or incident tags.'
+        }
         actions={
           <>
             <SegmentedControl
@@ -668,7 +710,7 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
             )}
           >
             {display === 'table' ? (
-              <CalendarTable view={view} days={(data ?? []).filter((d) => d.date <= today)} />
+              <CalendarTable view={view} days={data ?? []} />
             ) : (
               <>
                 {view === 'week' && (
@@ -676,8 +718,8 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
                     days={data ?? []}
                     scale={scale}
                     today={today}
-                    canNavigate={canNavigate}
-                    onSelectDay={setSelectedDay}
+                    canEdit={canNavigate}
+                    onSelectDay={setSelectedDate}
                   />
                 )}
                 {view === 'month' && (
@@ -687,8 +729,8 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
                     scale={scale}
                     today={today}
                     label={period.label}
-                    canNavigate={canNavigate}
-                    onSelectDay={setSelectedDay}
+                    canEdit={canNavigate}
+                    onSelectDay={setSelectedDate}
                   />
                 )}
                 {view === 'year' && (
@@ -697,15 +739,11 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
                     byDate={byDate}
                     scale={scale}
                     today={today}
-                    canNavigate={canNavigate}
-                    onSelectDay={setSelectedDay}
+                    canEdit={canNavigate}
+                    onSelectDay={setSelectedDate}
                   />
                 )}
                 <Legend scale={scale} />
-                {canNavigate &&
-                  selectedDay &&
-                  selectedDay.date >= period.from &&
-                  selectedDay.date <= period.to && <DayActivity day={selectedDay} />}
               </>
             )}
             {scale.max === 0 && (
@@ -716,6 +754,16 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
           </div>
         )}
       </CardBody>
+      {canNavigate && selectedDate && (
+        <DayEventsPanel
+          key={selectedDate}
+          date={selectedDate}
+          day={byDate.get(selectedDate)}
+          today={today}
+          onClose={() => setSelectedDate(null)}
+          onChanged={reload}
+        />
+      )}
     </Card>
   )
 }

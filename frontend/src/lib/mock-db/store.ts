@@ -117,6 +117,8 @@ export function db(): DbState {
     const saved = todayOverride ? null : loadSaved()
     if (saved) {
       state = saved.state
+      // A copy saved before calendar events existed has no collection for them.
+      state.frontendOnly.calendarEvents ??= []
       seedAuditLength = saved.seedAuditLength
     } else {
       state = build()

@@ -17,7 +17,7 @@ import {
   type BadgeTone,
   type DataTableColumn,
 } from '../../components'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { formatDateTime } from '../../lib/dates'
 import { describeRange, type DateRange } from '../../lib/dateRange'
@@ -74,7 +74,16 @@ function VisitLogSkeleton() {
 
 export function VisitLogListPage() {
   const defaultRange = defaultVisitLogRange()
-  const [range, setRange] = useState<DateRange>({ preset: 'all', ...defaultRange })
+  const [searchParams] = useSearchParams()
+  // `?from=&to=` (e.g. the Dashboard calendar's "View visits") opens the list on that custom range.
+  const [range, setRange] = useState<DateRange>(() => {
+    const from = searchParams.get('from') ?? ''
+    const to = searchParams.get('to') ?? ''
+    const isDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
+    return isDate(from) && isDate(to) && from <= to
+      ? { preset: 'custom', from, to }
+      : { preset: 'all', ...defaultRange }
+  })
   const [search, setSearch] = useState('')
   const [disposition, setDisposition] = useState<DispositionFilter>('all')
   const [sort, setSort] = useState<TableSortState<VisitLogSortKey>>({ key: 'dateTime', direction: 'descending' })

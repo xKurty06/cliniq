@@ -22,6 +22,8 @@ export const paths = {
   studentProfile: (studentNumber: string) => `/students/${seg(studentNumber)}`,
   studentEdit: (studentNumber: string) => `/students/${seg(studentNumber)}/edit`,
   visits: '/visits',
+  /** The Visits list opened on one day's custom range (the Dashboard calendar's "View visits"). */
+  visitsOnDate: (date: string) => `/visits?from=${date}&to=${date}`,
   /** `?student=` pre-selects the identified student (e.g. from a QR lookup). */
   visitNew: (studentNumber?: string) => withStudent('/visits/new', studentNumber),
   /** `?student=` pre-selects the identified student (the QR quick-action passes it). */

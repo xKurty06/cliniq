@@ -12,6 +12,9 @@ import type { MockDbSeed } from './types'
 
 export const STUDENT_NUMBER = /^\d{4}-\d{5}$/
 
+/** Longest calendar event title, so a chip stays readable (ADR-019). */
+export const CALENDAR_EVENT_TITLE_MAX = 60
+
 const FIELDS = {
   top: ['meta', 'config', 'users', 'students', 'visits', 'incidents', 'followUps', 'inventoryItems', 'reports', 'backupLogs', 'auditLog', 'frontendOnly'],
   config: ['_note', 'frequentVisitorMinVisits', 'frequentVisitorWindowDays', 'upcomingFollowUpDays', 'expiryWarningDays', 'clusterMinCount', 'clusterRatio', 'topComplaints'],
@@ -28,7 +31,7 @@ const FIELDS = {
   reports: ['type', 'dateRange'],
   backupLogs: ['lastRun', 'fileSizeBytes', 'status', 'verifiedByUserId'],
   auditLog: ['userId', 'actionType', 'targetRecord', 'timestamp'],
-  frontendOnly: ['_note', 'devAccounts', 'visitComplaintTypes', 'incidentComplaintTypes', 'inventoryTransactions', 'recordReviews', 'excuseLetterApprovals', 'peReferrals', 'issueReports'],
+  frontendOnly: ['_note', 'devAccounts', 'visitComplaintTypes', 'incidentComplaintTypes', 'inventoryTransactions', 'recordReviews', 'excuseLetterApprovals', 'peReferrals', 'issueReports', 'calendarEvents'],
 } as const
 
 /**
@@ -380,6 +383,25 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
     oneOf(`${w}.role`, r.role, ENUMS.role)
     userRef(`${w}.reportedByUserId`, r.reportedByUserId)
     relDateTime(`${w}.createdAt`, r.createdAt)
+  })
+  const eventIds = new Set<string>()
+  ;((fo.calendarEvents ?? []) as Rec[]).forEach((e, i) => {
+    const w = `frontendOnly.calendarEvents[${i}]`
+    checkFields(w, e, ['id', 'title', 'startDate', 'endDate', 'createdByUserId', 'createdAt', 'updatedAt'])
+    if (!/^calendar-event-\d{4}$/.test(String(e.id))) fail(`${w}.id: "${String(e.id)}" should look like calendar-event-0001`)
+    if (eventIds.has(String(e.id))) fail(`${w}.id: duplicate "${String(e.id)}"`)
+    eventIds.add(String(e.id))
+    const title = String(e.title ?? '').trim()
+    if (!title) fail(`${w}.title: must not be empty`)
+    if (title.length > CALENDAR_EVENT_TITLE_MAX) fail(`${w}.title: longer than ${CALENDAR_EVENT_TITLE_MAX} characters`)
+    relDate(`${w}.startDate`, e.startDate)
+    if (e.endDate !== null) {
+      relDate(`${w}.endDate`, e.endDate)
+      if (relDays(e.endDate) < relDays(e.startDate)) fail(`${w}.endDate: can't be before startDate`)
+    }
+    userRef(`${w}.createdByUserId`, e.createdByUserId)
+    relDateTime(`${w}.createdAt`, e.createdAt)
+    relDateTime(`${w}.updatedAt`, e.updatedAt)
   })
 
   return problems

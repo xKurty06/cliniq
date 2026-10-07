@@ -180,6 +180,20 @@ export interface IssueReport<T = ISODateTime> {
   createdAt: T
 }
 
+/**
+ * A school event Staff keep on the Dashboard calendar (Module 9, ADR-019). PROVISIONAL pending the
+ * ERD. `endDate` is null for a one-day event and never before `startDate`.
+ */
+export interface CalendarEvent<D = ISODate, T = ISODateTime> {
+  id: string
+  title: string
+  startDate: D
+  endDate: D | null
+  createdByUserId: string
+  createdAt: T
+  updatedAt: T
+}
+
 export interface SeedFrontendOnly {
   _note: string
   devAccounts: DevAccount[]
@@ -190,6 +204,7 @@ export interface SeedFrontendOnly {
   excuseLetterApprovals: Array<ExcuseLetterApproval<RelativeDateTime, RelativeDate>>
   peReferrals: Array<PeReferral<RelativeDateTime>>
   issueReports: Array<IssueReport<RelativeDateTime>>
+  calendarEvents: Array<CalendarEvent<RelativeDate, RelativeDateTime>>
 }
 
 export interface MockDbSeed {
@@ -218,6 +233,7 @@ export interface FrontendOnlyState {
   excuseLetterApprovals: ExcuseLetterApproval[]
   peReferrals: PeReferral[]
   issueReports: IssueReport[]
+  calendarEvents: CalendarEvent[]
 }
 
 /** Raw records only. `Student` here never carries `recordComplete`; selectors add it on read. */

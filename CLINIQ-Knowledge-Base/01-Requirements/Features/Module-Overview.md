@@ -239,7 +239,7 @@ Two distinct paths: the **computer system** (Staff's existing desktop flow) and 
 - Track expiration date per item
 - Auto-flag items nearing expiration
 
-### 9. Clinic Overview Dashboard *(expanded from "Health Trends Dashboard")* — *Access: Staff + Admin/Principal (both view-only)*
+### 9. Clinic Overview Dashboard *(expanded from "Health Trends Dashboard")* — *Access: Staff + Admin/Principal (view-only, except that Staff maintain calendar events; ADR-019)*
 Broadened from complaint trends alone into an overall operational snapshot, per the September 19 meeting.
 
 - View total clinic counts (visits, incidents, active students)
@@ -248,7 +248,8 @@ Broadened from complaint trends alone into an overall operational snapshot, per 
 - View symptom-clustering alerts (possible outbreak early warning)
 - View frequent-visitor flags, shown by **Student Number** per the display-privacy rule, not full name — **a warning only**, never a diagnosis or suggested action; it exists to help the nurse decide what to do next, not to decide for her
 - **Due/upcoming follow-ups** (Module 3/4's Follow-Up Handling) — this is the system's internal reminder mechanism, since there's no external SMS/push service; computed fresh on page load by comparing today's date to each follow-up's date, not a background alert
-- **Calendar view** of visit and incident counts, toggleable weekly / monthly / yearly, for spotting patterns at a glance (e.g., a calendar-style heatmap of how many visits happened each day). For now, this also surfaces any free-text event tag Staff applied when logging a visit or incident (e.g., "MCA Dance Program") on the relevant day, so clinic activity can be read in context — a fuller school-events calendar with its own management screen is a decision deferred to a future phase (see "Future Development" below)
+- **Calendar view** of visit and incident counts, toggleable weekly / monthly / yearly, for spotting patterns at a glance (e.g., a calendar-style heatmap of how many visits happened each day). It also surfaces any free-text event tag Staff applied when logging a visit or incident (e.g., "MCA Dance Program") on the relevant day, so clinic activity can be read in context
+- **School events, maintained by Staff** (ADR-019): Staff click any calendar day (past, today, or future) to open that day's panel: its visit and incident counts (past and today only), its events with edit and delete, Add event, and a "View visits" link to the Visit Log filtered to that day. An event has a title (up to 60 characters), a start date, and an optional end date for multi-day events. Each event shows as a yellow chip on every day it covers (up to 2 chips per day, then "+N more"); a visit/incident tag with the same text on the same day shows once. Create, edit, and delete are audit-logged. Admin/Principal sees the same chips but can't open or change anything. Holidays are a separate, later decision
 - Filter any of the above by custom date range
 - Export/print the dashboard view
 
@@ -327,7 +328,9 @@ The current build gives PE/Sports Instructors read-only QR access (Module 6). A 
 - **Auditability:** Same per-view logging pattern as everything else in this document.
 - **Why still deferred:** Unlike PE/Sports Instructor access, this wasn't brought back into scope at the September 19 meeting — it stays a documented future addition, reusing infrastructure already being built now.
 
-### Future Decision: Full School-Events Calendar
+### Future Decision: Full School-Events Calendar — *resolved Wednesday, October 07, 2026 (ADR-019)*
+**Resolved:** Staff maintain school events from the Dashboard calendar's day panel; Admin/Principal views them only (see Module 9). The original note is kept below for history.
+
 The Dashboard's calendar (Module 9) currently supports only a lightweight, free-text event tag on visits/incidents — deliberately kept minimal for this phase. A fuller calendar, where school events (academic, sports, performances, assemblies, field trips) are their own managed entries plotted alongside clinic activity, was discussed but the two real open questions were left for a future decision rather than guessed at:
 - **Who maintains the events** — Staff manually (adds data-entry work to the one role this whole project is trying to reduce workload for), or Admin/Principal (would require giving that role its first write permission, since it's 100% read-only today)?
 - **What the management screens look like** — a full add/edit/delete events interface, versus importing from an existing school calendar source, if one exists digitally.
