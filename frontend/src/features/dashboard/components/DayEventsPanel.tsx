@@ -4,7 +4,7 @@ import { Button, DatePicker, Icon, Input, Modal } from '../../../components'
 import { cn } from '../../../lib/cn'
 import { formatDate, formatDateRange } from '../../../lib/dates'
 import { paths } from '../../../routes/paths'
-import type { CalendarDay, CalendarDayEvent } from '../../../types/dashboard'
+import type { CalendarDay, CalendarDayEvent, Holiday } from '../../../types/dashboard'
 import type { ISODate } from '../../../types/entities'
 import {
   CALENDAR_EVENT_TITLE_MAX,
@@ -15,7 +15,7 @@ import {
   validateCalendarEvent,
   type CalendarEventErrors,
 } from '../api/dashboardApi'
-import { eventChipClass } from '../lib/calendar'
+import { eventChipClass, HOLIDAY_KIND_LABEL, holidayChipClass, holidayName } from '../lib/calendar'
 
 type Mode =
   | { kind: 'view' }
@@ -161,18 +161,22 @@ function ConfirmDelete({
 
 /**
  * Staff's one entry point for a calendar day (ADR-019): the day's visit and incident counts (past
- * and today only), its events with edit and delete, Add Event, and a link to that day's visits. It
- * runs on the shared Modal, so focus returns to the day that opened it.
+ * and today only), its holidays (read-only, ADR-020), its events with edit and delete, Add Event,
+ * and a link to that day's visits. It runs on the shared Modal, so focus returns to the day that
+ * opened it.
  */
 export function DayEventsPanel({
   date,
   day,
+  holidays,
   today,
   onClose,
   onChanged,
 }: {
   date: ISODate
   day: CalendarDay | undefined
+  /** That date's national holidays, shown read-only (ADR-020). */
+  holidays: Holiday[]
   today: ISODate
   onClose: () => void
   onChanged: () => void
@@ -229,6 +233,24 @@ export function DayEventsPanel({
                 {visits} {visits === 1 ? 'visit' : 'visits'} · {incidents}{' '}
                 {incidents === 1 ? 'incident' : 'incidents'}
               </p>
+            )}
+            {holidays.length > 0 && (
+              // Read-only reference data (ADR-020): no edit or delete controls.
+              <section aria-labelledby="day-holidays-heading" className="flex flex-col gap-2">
+                <h3 id="day-holidays-heading" className="text-sm font-semibold text-text-primary">
+                  Holidays
+                </h3>
+                <ul className="flex flex-col gap-2">
+                  {holidays.map((h) => (
+                    <li key={h.name} className="flex flex-col items-start gap-0.5">
+                      <span className={holidayChipClass} title={`Holiday: ${holidayName(h)}`}>
+                        Holiday: {holidayName(h)}
+                      </span>
+                      <span className="text-xs text-text-secondary">{HOLIDAY_KIND_LABEL[h.kind]}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
             <section aria-labelledby="day-events-heading" className="flex flex-col gap-2">
               <h3 id="day-events-heading" className="text-sm font-semibold text-text-primary">

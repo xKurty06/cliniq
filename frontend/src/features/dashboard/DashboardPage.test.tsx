@@ -322,7 +322,7 @@ describe('Clinic Overview Dashboard', () => {
       'true',
     )
     expect(within(group).getByRole('radio', { name: 'Yearly' })).toHaveFocus()
-    await waitFor(() => expect(screen.getByText(/activity and event days in/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/activity, event, and holiday days in/i)).toBeInTheDocument())
   })
 
   it('offers a table fallback for the complaint chart', async () => {

@@ -11,6 +11,7 @@ import {
   startOfYear,
 } from '../../../lib/dates'
 import type { ISODate } from '../../../types/entities'
+import type { Holiday, HolidayKind } from '../../../types/dashboard'
 
 export type CalendarView = 'week' | 'month' | 'year'
 
@@ -113,4 +114,42 @@ export const MAX_DAY_LABELS = 2
 /** A day's labels in display order: its calendar events, then visit/incident tags not already shown. */
 export function dayLabels(day: { events: Array<{ title: string }>; eventTags: string[] }): string[] {
   return [...day.events.map((e) => e.title), ...day.eventTags]
+}
+
+/**
+ * Holidays (ADR-020): a gray chip that always says "Holiday" in text, so it never depends on color
+ * and never reads as one of Staff's yellow events. Dark text on the border gray is 13.2:1.
+ */
+export const holidayChipClass =
+  'max-w-full truncate rounded-sm border border-text-muted bg-border px-1.5 py-0.5 text-xs leading-tight font-semibold text-text-primary'
+
+export const HOLIDAY_KIND_LABEL: Record<HolidayKind, string> = {
+  regular: 'Regular holiday',
+  'special-non-working': 'Special non-working day',
+  'special-working': 'Special working day',
+  islamic: 'Islamic holiday',
+}
+
+/** The holiday's name, marked "(estimated)" until its date is officially confirmed. */
+export function holidayName(holiday: Holiday): string {
+  return holiday.confirmed ? holiday.name : `${holiday.name} (estimated)`
+}
+
+/** A special working day is a normal school day; every other kind means no class. */
+export function isNoClassHoliday(holiday: Holiday): boolean {
+  return holiday.kind !== 'special-working'
+}
+
+/**
+ * Faint diagonal stripes for a no-class holiday with zero visits, so an empty day reads as
+ * "no class", not "no illness". It layers over the cell's background color, so the heat shade and
+ * text contrast are unchanged.
+ */
+export const noClassDayClass =
+  'bg-[image:repeating-linear-gradient(135deg,var(--color-border)_0_2px,transparent_2px_8px)]'
+
+export function holidaysByDate(holidays: Holiday[]): Map<ISODate, Holiday[]> {
+  const map = new Map<ISODate, Holiday[]>()
+  for (const h of holidays) map.set(h.date, [...(map.get(h.date) ?? []), h])
+  return map
 }

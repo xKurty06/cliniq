@@ -22,7 +22,8 @@ import type {
   Visit,
 } from '../../types/entities'
 import { parseISODate, toISODate } from '../dates'
-import type { CalendarDay, DashboardQuery, DashboardSummary } from '../../types/dashboard'
+import type { CalendarDay, DashboardQuery, DashboardSummary, Holiday, HolidayFeed } from '../../types/dashboard'
+import holidayData from './holidays-ph.json'
 import type { FollowUpDueState } from '../../components/status/followUp'
 import { buildCalendarDays, buildDashboardSummary } from './dashboard'
 import { isEmptied, simulateRequest } from './devToggles'
@@ -1274,6 +1275,24 @@ export function getDashboardSummary(query: DashboardQuery): Promise<DashboardSum
 
 export function getCalendarDays(from: ISODate, to: ISODate): Promise<CalendarDay[]> {
   return read('calendar', (s) => buildCalendarDays(s, from, to))
+}
+
+// ---- holidays (Module 9, ADR-020; read-only reference data) --------------------------------
+
+/**
+ * Nationwide holidays from the bundled `holidays-ph.json`. Phase B replaces this with the
+ * backend's synced copy; the shape stays the same, and the frontend never fetches it itself.
+ */
+export function getHolidays(from: ISODate, to: ISODate): Promise<HolidayFeed> {
+  return read('holidays', () => {
+    const all = isEmptied('holidays') ? [] : (holidayData.holidays as Holiday[])
+    return {
+      holidays: all.filter((h) => h.date >= from && h.date <= to),
+      years: [...new Set(all.map((h) => Number(h.date.slice(0, 4))))],
+      lastUpdated: holidayData.meta.lastUpdated,
+      source: holidayData.meta.source,
+    }
+  })
 }
 
 // ---- calendar events (Module 9, ADR-019; PROVISIONAL pending the ERD) ----------------------

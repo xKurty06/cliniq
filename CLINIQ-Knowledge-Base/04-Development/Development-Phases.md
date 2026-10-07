@@ -91,6 +91,8 @@ The stock-flow logic exactly as specified in `Modules-and-Features` §8: dispens
 ### Phase B9 — Dashboard & Reports API
 Aggregation queries for the Clinic Overview Dashboard (counts, trends, frequent-visitor flags by Student Number, due/upcoming follow-ups computed on request — not a background job, since none exists in this architecture). Monthly/Incident/Health Summary report generation.
 
+**Holiday sync job (ADR-020).** A monthly scheduled job fetches this year's and next year's nationwide Philippine holidays when internet is available, stores them for `getHolidays`, keeps the last good data on failure, updates `lastUpdated`, and raises a warning when the last successful sync is stale (about 45 days) or next year's list is still missing in December. This is the one scheduled job in this architecture, and it never blocks a page load. The source is still open (ADR-020 lists two candidates); before choosing, read the source code, call it, compare its current-year output with the official proclamation, check Islamic and special days, test failure cases (site down, empty result, layout change), pin versions, and keep last-good data.
+
 ### Phase B10 — User Management & Backup Verification API
 Account CRUD for all three roles. Backup-status endpoint reading whatever the `mysqldump`-based backup mechanism (Project Plan §5.3) actually produces — this is the same tracked-file-size signal that Modules & Features already names as the future trigger for building retention-purge tooling (`02-Architecture/Database/Data-Retention-Policy.md`).
 

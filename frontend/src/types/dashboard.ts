@@ -112,6 +112,27 @@ export interface CalendarDayEvent {
   endDate: ISODate | null
 }
 
+/** The Philippine holiday categories (ADR-020). Islamic holidays are proclaimed separately each year. */
+export type HolidayKind = 'regular' | 'special-non-working' | 'special-working' | 'islamic'
+
+/** A nationwide holiday: read-only reference data, separate from events and tags (ADR-020). */
+export interface Holiday {
+  date: ISODate
+  name: string
+  kind: HolidayKind
+  /** false = the date is an estimate (mainly Islamic holidays awaiting their proclamation). */
+  confirmed: boolean
+}
+
+export interface HolidayFeed {
+  /** Holidays inside the requested range, by date. */
+  holidays: Holiday[]
+  /** Every year the source has at least one holiday for, so the UI can warn about a missing year. */
+  years: number[]
+  lastUpdated: ISODate
+  source: string
+}
+
 export interface CalendarDay {
   date: ISODate
   visits: number

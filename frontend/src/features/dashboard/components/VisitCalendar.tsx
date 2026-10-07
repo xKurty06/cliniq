@@ -16,28 +16,36 @@ import { cn } from '../../../lib/cn'
 import { formatDate, parseISODate } from '../../../lib/dates'
 import { sortTableRows, toggleTableSort, type TableSortState } from '../../../lib/tableSort'
 import type { ISODate } from '../../../types/entities'
-import { fetchCalendarDays } from '../api/dashboardApi'
+import { fetchCalendarDays, fetchHolidays } from '../api/dashboardApi'
 import { DayEventsPanel } from './DayEventsPanel'
 import {
   dayLabels,
   eventChipClass,
+  HOLIDAY_KIND_LABEL,
+  holidayChipClass,
+  holidayName,
+  holidaysByDate,
   heatClasses,
+  isNoClassHoliday,
   heatLevel,
   heatScale,
   legendSteps,
   MAX_DAY_LABELS,
   monthGrid,
+  noClassDayClass,
   periodFor,
   shiftAnchor,
   type CalendarView,
   type HeatScale,
 } from '../lib/calendar'
-import type { CalendarDay } from '../../../types/dashboard'
+import type { CalendarDay, Holiday, HolidayFeed } from '../../../types/dashboard'
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WEEKDAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-function describeDay(day: CalendarDay, today: ISODate): string {
+const NO_HOLIDAYS: Holiday[] = []
+
+function describeDay(day: CalendarDay, today: ISODate, holidays: Holiday[] = NO_HOLIDAYS): string {
   const parts =
     day.date <= today
       ? [
@@ -45,10 +53,16 @@ function describeDay(day: CalendarDay, today: ISODate): string {
           `${day.incidents} ${day.incidents === 1 ? 'incident' : 'incidents'}`,
         ]
       : []
+  for (const h of holidays) parts.unshift(`holiday: ${holidayName(h)} (${HOLIDAY_KIND_LABEL[h.kind]})`)
   const labels = dayLabels(day)
   if (labels.length) parts.push(`${labels.length === 1 ? 'event' : 'events'}: ${labels.join(', ')}`)
   const date = formatDate(day.date, { weekday: 'long', month: 'long', day: 'numeric' })
   return parts.length ? `${date}: ${parts.join(', ')}` : date
+}
+
+/** A no-class holiday with no visits or incidents gets the faint stripes (ADR-020). */
+function noClassEmpty(holidays: Holiday[], total: number): boolean {
+  return total === 0 && holidays.some(isNoClassHoliday)
 }
 
 function Legend({ scale }: { scale: HeatScale }) {
@@ -74,26 +88,43 @@ function Legend({ scale }: { scale: HeatScale }) {
 }
 
 /**
- * A day's yellow chips: calendar events, then visit/incident tags, up to MAX_DAY_LABELS and then
- * "+N more". Spans, not a list, because Staff's day cells are buttons; the button's accessible name
- * (describeDay) carries every label, and every cell's `title` does too.
+ * A day's chips: gray holidays first, then yellow calendar events and visit/incident tags, up to
+ * MAX_DAY_LABELS and then "+N more". Spans, not a list, because Staff's day cells are buttons; the
+ * button's accessible name (describeDay) carries every label, and every cell's `title` does too.
  */
-function DayLabels({ day, className }: { day: CalendarDay; className?: string }) {
-  const labels = dayLabels(day)
-  if (!labels.length) return null
-  const hidden = labels.length - MAX_DAY_LABELS
+function DayLabels({
+  day,
+  holidays = NO_HOLIDAYS,
+  className,
+}: {
+  day: CalendarDay
+  holidays?: Holiday[]
+  className?: string
+}) {
+  const chips = [
+    ...holidays.map((h) => ({ key: `holiday:${h.name}`, text: `Holiday: ${holidayName(h)}`, holiday: true })),
+    ...dayLabels(day).map((label) => ({ key: label, text: label, holiday: false })),
+  ]
+  if (!chips.length) return null
+  const hidden = chips.length - MAX_DAY_LABELS
   return (
     <span className={cn('flex min-w-0 flex-wrap gap-1', className)}>
-      {labels.slice(0, MAX_DAY_LABELS).map((label) => (
-        <span key={label} className={eventChipClass} title={label}>
-          <span className="sr-only">Event: </span>
-          {label}
-        </span>
-      ))}
+      {chips.slice(0, MAX_DAY_LABELS).map((chip) =>
+        chip.holiday ? (
+          <span key={chip.key} className={holidayChipClass} title={chip.text}>
+            {chip.text}
+          </span>
+        ) : (
+          <span key={chip.key} className={eventChipClass} title={chip.text}>
+            <span className="sr-only">Event: </span>
+            {chip.text}
+          </span>
+        ),
+      )}
       {hidden > 0 && (
         <span
           className="text-xs leading-tight font-semibold text-text-primary"
-          title={labels.slice(MAX_DAY_LABELS).join(', ')}
+          title={chips.slice(MAX_DAY_LABELS).map((c) => c.text).join(', ')}
         >
           +{hidden} more
         </span>
@@ -109,6 +140,7 @@ function DayLabels({ day, className }: { day: CalendarDay; className?: string })
  */
 function DayTarget({
   day,
+  holidays,
   today,
   canEdit,
   onSelectDay,
@@ -116,6 +148,7 @@ function DayTarget({
   children,
 }: {
   day: CalendarDay | undefined
+  holidays: Holiday[]
   today: ISODate
   canEdit: boolean
   onSelectDay: (date: ISODate) => void
@@ -126,7 +159,7 @@ function DayTarget({
   return (
     <button
       type="button"
-      aria-label={`${describeDay(day, today)}. Open day`}
+      aria-label={`${describeDay(day, today, holidays)}. Open day`}
       onClick={() => onSelectDay(day.date)}
       className={cn(
         className,
@@ -140,12 +173,14 @@ function DayTarget({
 
 function WeekView({
   days,
+  holidaysOn,
   scale,
   today,
   canEdit,
   onSelectDay,
 }: {
   days: CalendarDay[]
+  holidaysOn: Map<ISODate, Holiday[]>
   scale: HeatScale
   today: ISODate
   canEdit: boolean
@@ -156,18 +191,21 @@ function WeekView({
       {days.map((day) => {
         const future = day.date > today
         const total = day.visits + day.incidents
+        const holidays = holidaysOn.get(day.date) ?? NO_HOLIDAYS
         return (
           <li
             key={day.date}
             className={cn(
               'flex rounded-md',
               future ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
+              noClassEmpty(holidays, total) && noClassDayClass,
               'border-border',
               day.date === today && 'outline-2 outline-offset-1 outline-text-primary',
             )}
           >
             <DayTarget
               day={day}
+              holidays={holidays}
               today={today}
               canEdit={canEdit}
               onSelectDay={onSelectDay}
@@ -186,7 +224,7 @@ function WeekView({
                   </span>
                 </>
               )}
-              <DayLabels day={day} />
+              <DayLabels day={day} holidays={holidays} />
             </DayTarget>
           </li>
         )
@@ -198,6 +236,7 @@ function WeekView({
 function MonthView({
   monthStart,
   byDate,
+  holidaysOn,
   scale,
   today,
   label,
@@ -206,6 +245,7 @@ function MonthView({
 }: {
   monthStart: ISODate
   byDate: Map<ISODate, CalendarDay>
+  holidaysOn: Map<ISODate, Holiday[]>
   scale: HeatScale
   today: ISODate
   label: string
@@ -235,19 +275,22 @@ function MonthView({
                 const day = byDate.get(date)
                 const future = date > today
                 const total = day ? day.visits + day.incidents : 0
+                const holidays = holidaysOn.get(date) ?? NO_HOLIDAYS
                 return (
                   <td
                     key={date}
-                    title={day ? describeDay(day, today) : undefined}
+                    title={day ? describeDay(day, today, holidays) : undefined}
                     className={cn(
                       'h-16 rounded-md p-0 align-top',
                       future || !day ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
+                      noClassEmpty(holidays, total) && noClassDayClass,
                       'border-border',
                       date === today && 'outline-2 outline-offset-1 outline-text-primary',
                     )}
                   >
                     <DayTarget
                       day={day}
+                      holidays={holidays}
                       today={today}
                       canEdit={canEdit}
                       onSelectDay={onSelectDay}
@@ -268,7 +311,7 @@ function MonthView({
                         )}
                       </span>
                       {date === today && <span className="sr-only"> (today)</span>}
-                      {day && <DayLabels day={day} className="mt-1" />}
+                      {day && <DayLabels day={day} holidays={holidays} className="mt-1" />}
                     </DayTarget>
                   </td>
                 )
@@ -284,6 +327,7 @@ function MonthView({
 function YearView({
   year,
   byDate,
+  holidaysOn,
   scale,
   today,
   canEdit,
@@ -291,6 +335,7 @@ function YearView({
 }: {
   year: string
   byDate: Map<ISODate, CalendarDay>
+  holidaysOn: Map<ISODate, Holiday[]>
   scale: HeatScale
   today: ISODate
   canEdit: boolean
@@ -300,7 +345,10 @@ function YearView({
     { length: 12 },
     (_, m) => `${year}-${String(m + 1).padStart(2, '0')}-01`,
   )
-  const activeDays = [...byDate.values()].filter((d) => d.visits + d.incidents > 0 || dayLabels(d).length > 0)
+  const holidaysFor = (date: ISODate) => holidaysOn.get(date) ?? NO_HOLIDAYS
+  const activeDays = [...byDate.values()].filter(
+    (d) => d.visits + d.incidents > 0 || dayLabels(d).length > 0 || holidaysFor(d.date).length > 0,
+  )
   return (
     <div className="flex flex-col gap-4">
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
@@ -329,13 +377,15 @@ function YearView({
                     const day = byDate.get(date)
                     const total = day ? day.visits + day.incidents : 0
                     const future = date > today
+                    const holidays = holidaysFor(date)
                     return (
                       <span
                         key={date}
-                        title={day ? describeDay(day, today) : undefined}
+                        title={day ? describeDay(day, today, holidays) : undefined}
                         className={cn(
                           'size-3 rounded-[2px] border',
                           future ? heatClasses[0] : heatClasses[heatLevel(total, scale)],
+                          noClassEmpty(holidays, total) && noClassDayClass,
                           day && dayLabels(day).length ? 'border-text-primary' : 'border-border',
                         )}
                       />
@@ -347,10 +397,15 @@ function YearView({
         })}
       </ul>
       <div>
-        <p className="text-xs font-semibold text-text-primary">Activity and event days in {year}</p>
-        <p className="text-xs text-text-secondary">Outlined squares above mark days with an event.</p>
+        <p className="text-xs font-semibold text-text-primary">
+          Activity, event, and holiday days in {year}
+        </p>
+        <p className="text-xs text-text-secondary">
+          Outlined squares above mark days with an event. Striped squares mark no-class holidays
+          with no visits.
+        </p>
         {activeDays.length === 0 ? (
-          <p className="text-xs text-text-secondary">No clinic activity or events this year.</p>
+          <p className="text-xs text-text-secondary">No clinic activity, events, or holidays this year.</p>
         ) : (
           <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-primary">
             {activeDays.map((d) => (
@@ -358,7 +413,7 @@ function YearView({
                 {canEdit ? (
                   <button
                     type="button"
-                    aria-label={`${describeDay(d, today)}. Open day`}
+                    aria-label={`${describeDay(d, today, holidaysFor(d.date))}. Open day`}
                     onClick={() => onSelectDay(d.date)}
                     className="inline-flex items-center gap-1 font-semibold text-brand-green-dark underline decoration-brand-green-dark/40 underline-offset-2 cursor-pointer transition-colors hover:text-brand-green hover:decoration-brand-green focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green motion-reduce:transition-none"
                   >
@@ -371,6 +426,7 @@ function YearView({
                   </time>
                 )}{' '}
                 {d.date <= today ? `${d.visits + d.incidents} total` : 'Upcoming'}
+                {holidaysFor(d.date).map((h) => ` · Holiday: ${holidayName(h)}`).join('')}
                 {dayLabels(d).length ? ` · ${dayLabels(d).join(', ')}` : ''}
               </li>
             ))}
@@ -381,7 +437,17 @@ function YearView({
   )
 }
 
-function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[] }) {
+function CalendarTable({
+  view,
+  days,
+  holidaysOn,
+}: {
+  view: CalendarView
+  days: CalendarDay[]
+  holidaysOn: Map<ISODate, Holiday[]>
+}) {
+  const holidayText = (date: ISODate) =>
+    (holidaysOn.get(date) ?? NO_HOLIDAYS).map(holidayName).join(', ')
   const [sort, setSort] = useState<TableSortState<string>>({
     key: view === 'year' ? 'month' : 'date',
     direction: 'descending',
@@ -399,13 +465,14 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
   if (view === 'year') {
     const byMonth = new Map<
       string,
-      { key: string; visits: number; incidents: number; tags: string[] }
+      { key: string; visits: number; incidents: number; holidays: string[]; tags: string[] }
     >()
     for (const d of days) {
       const key = d.date.slice(0, 7)
-      const row = byMonth.get(key) ?? { key, visits: 0, incidents: 0, tags: [] }
+      const row = byMonth.get(key) ?? { key, visits: 0, incidents: 0, holidays: [], tags: [] }
       row.visits += d.visits
       row.incidents += d.incidents
+      for (const h of holidaysOn.get(d.date) ?? NO_HOLIDAYS) row.holidays.push(holidayName(h))
       for (const t of dayLabels(d)) if (!row.tags.includes(t)) row.tags.push(t)
       byMonth.set(key, row)
     }
@@ -421,6 +488,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       { key: 'visits', header: 'Visits', align: 'right', sort: sortColumn('visits', 'Visits'), cell: (r) => r.visits },
       { key: 'incidents', header: 'Incidents', align: 'right', sort: sortColumn('incidents', 'Incidents'), cell: (r) => r.incidents },
       { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (r) => r.visits + r.incidents },
+      { key: 'holidays', header: 'Holidays', sort: sortColumn('holidays', 'Holidays'), cell: (r) => r.holidays.join(', ') || '—' },
       { key: 'tags', header: 'Events', sort: sortColumn('tags', 'Events'), cell: (r) => r.tags.join(', ') || '—' },
     ]
     const sortedRows = sortTableRows(rows, effectiveSort, (row, key) => {
@@ -428,6 +496,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       if (key === 'visits') return row.visits
       if (key === 'incidents') return row.incidents
       if (key === 'total') return row.visits + row.incidents
+      if (key === 'holidays') return row.holidays.join(', ')
       return row.tags.join(', ')
     })
     return (
@@ -440,7 +509,9 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
       />
     )
   }
-  const rows = days.filter((d) => d.visits + d.incidents > 0 || dayLabels(d).length > 0)
+  const rows = days.filter(
+    (d) => d.visits + d.incidents > 0 || dayLabels(d).length > 0 || holidaysOn.has(d.date),
+  )
   const columns: Array<DataTableColumn<CalendarDay>> = [
     {
       key: 'date',
@@ -452,6 +523,7 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
     { key: 'visits', header: 'Visits', align: 'right', sort: sortColumn('visits', 'Visits'), cell: (d) => d.visits },
     { key: 'incidents', header: 'Incidents', align: 'right', sort: sortColumn('incidents', 'Incidents'), cell: (d) => d.incidents },
     { key: 'total', header: 'Total', align: 'right', sort: sortColumn('total', 'Total'), cell: (d) => d.visits + d.incidents },
+    { key: 'holidays', header: 'Holidays', sort: sortColumn('holidays', 'Holidays'), cell: (d) => holidayText(d.date) || '—' },
     { key: 'tags', header: 'Events', sort: sortColumn('tags', 'Events'), cell: (d) => dayLabels(d).join(', ') || '—' },
   ]
   const sortedRows = sortTableRows(rows, effectiveSort, (row, key) => {
@@ -459,18 +531,19 @@ function CalendarTable({ view, days }: { view: CalendarView; days: CalendarDay[]
     if (key === 'visits') return row.visits
     if (key === 'incidents') return row.incidents
     if (key === 'total') return row.visits + row.incidents
+    if (key === 'holidays') return holidayText(row.date)
     return dayLabels(row).join(', ')
   })
   return rows.length ? (
     <DataTable
-      caption="Days with clinic activity or an event"
+      caption="Days with clinic activity, an event, or a holiday"
       columns={columns}
       rows={sortedRows}
       rowKey={(d) => d.date}
       fixedLayout
     />
   ) : (
-    <p className="text-sm text-text-secondary">No clinic activity or events in this period.</p>
+    <p className="text-sm text-text-secondary">No clinic activity, events, or holidays in this period.</p>
   )
 }
 
@@ -582,6 +655,44 @@ function CalendarSkeleton({ view, periodFrom }: { view: CalendarView; periodFrom
   )
 }
 
+/**
+ * Where the holidays came from (ADR-020), shown to Staff and Admin. The warning variant appears when
+ * the source has nothing for the current year, so a stale list is never silently trusted.
+ */
+function HolidaySourceLine({
+  feed,
+  failed,
+  today,
+}: {
+  feed: HolidayFeed | undefined
+  failed: boolean
+  today: ISODate
+}) {
+  if (!feed && !failed) return null
+  const year = Number(today.slice(0, 4))
+  const missing = failed || !feed?.years.includes(year)
+  return (
+    <p
+      className={cn(
+        'flex flex-wrap items-center gap-1 text-xs',
+        missing ? 'font-semibold text-warning' : 'text-text-secondary',
+      )}
+    >
+      {missing && <Icon name="alertTriangle" size={14} />}
+      {missing && !failed && <span>No holidays loaded for {year}.</span>}
+      {feed && !failed ? (
+        <span>
+          Holidays updated{' '}
+          {formatDate(feed.lastUpdated, { month: 'short', day: 'numeric', year: 'numeric' })} ·
+          Source {feed.source}
+        </span>
+      ) : (
+        <span>Holidays could not be loaded.</span>
+      )}
+    </p>
+  )
+}
+
 const viewNoun: Record<CalendarView, string> = { week: 'week', month: 'month', year: 'year' }
 /** Button labels are Title Case (Design-System.md): "Previous Month", "Next Year". */
 const viewNounTitle: Record<CalendarView, string> = { week: 'Week', month: 'Month', year: 'Year' }
@@ -620,6 +731,14 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
     fetchCalendarDays(period.from, period.to),
   )
 
+  const holidayFeed = useAsyncData(`holidays|${period.from}|${period.to}`, () =>
+    fetchHolidays(period.from, period.to),
+  )
+  const holidaysOn = useMemo(
+    () => holidaysByDate(holidayFeed.data?.holidays ?? []),
+    [holidayFeed.data],
+  )
+
   const byDate = useMemo(() => new Map((data ?? []).map((d) => [d.date, d])), [data])
   const scale = useMemo(
     () => heatScale((data ?? []).filter((d) => d.date <= today).map((d) => d.visits + d.incidents)),
@@ -636,8 +755,8 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
         title="Calendar"
         description={
           canNavigate
-            ? 'Visits and incidents per day, with school events and visit or incident tags. Select a day to add or edit its events.'
-            : 'Visits and incidents per day, with school events and visit or incident tags.'
+            ? 'Visits and incidents per day, with national holidays, school events, and visit or incident tags. Select a day to add or edit its events.'
+            : 'Visits and incidents per day, with national holidays, school events, and visit or incident tags.'
         }
         actions={
           <>
@@ -710,12 +829,13 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
             )}
           >
             {display === 'table' ? (
-              <CalendarTable view={view} days={data ?? []} />
+              <CalendarTable view={view} days={data ?? []} holidaysOn={holidaysOn} />
             ) : (
               <>
                 {view === 'week' && (
                   <WeekView
                     days={data ?? []}
+                    holidaysOn={holidaysOn}
                     scale={scale}
                     today={today}
                     canEdit={canNavigate}
@@ -726,6 +846,7 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
                   <MonthView
                     monthStart={period.from}
                     byDate={byDate}
+                    holidaysOn={holidaysOn}
                     scale={scale}
                     today={today}
                     label={period.label}
@@ -737,6 +858,7 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
                   <YearView
                     year={period.label}
                     byDate={byDate}
+                    holidaysOn={holidaysOn}
                     scale={scale}
                     today={today}
                     canEdit={canNavigate}
@@ -753,12 +875,18 @@ export function VisitCalendar({ today, initialAnchor, canNavigate }: VisitCalend
             )}
           </div>
         )}
+        <HolidaySourceLine
+          feed={holidayFeed.data}
+          failed={holidayFeed.status === 'error'}
+          today={today}
+        />
       </CardBody>
       {canNavigate && selectedDate && (
         <DayEventsPanel
           key={selectedDate}
           date={selectedDate}
           day={byDate.get(selectedDate)}
+          holidays={holidaysOn.get(selectedDate) ?? NO_HOLIDAYS}
           today={today}
           onClose={() => setSelectedDate(null)}
           onChanged={reload}

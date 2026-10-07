@@ -24,7 +24,7 @@ treated as production authentication, API, or database settings.
 Valid `mockEmpty` collection names are:
 
 `users`, `students`, `visits`, `incidents`, `followUps`, `inventoryItems`, `reports`,
-`backupLogs`, and `auditLog`.
+`backupLogs`, `auditLog`, and `holidays` (empties the bundled holiday list, to preview the calendar's "No holidays loaded" warning).
 
 Useful combinations include:
 

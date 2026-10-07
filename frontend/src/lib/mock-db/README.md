@@ -22,6 +22,10 @@ mock-db.json        raw records only (hand-edited, never written at runtime)
 ```
 
 Pages never import this folder's internals, and nothing outside `seed.ts` imports the JSON.
+The one exception is `holidays-ph.json`: real nationwide holidays with fixed proclamation dates
+(not synthetic, not relative), read only by `getHolidays` in `api.ts` (ADR-020). Add each new
+year's proclaimed dates there, with the proclamation references in its `meta`, until the backend
+sync job replaces it; `holidays.test.ts` pins the list to the proclamation texts.
 Feature `api/` modules import from `lib/mock-db` (the index). When the Laravel API lands, `api.ts`
 is the file that becomes HTTP calls. Nothing above it has to change.
 
