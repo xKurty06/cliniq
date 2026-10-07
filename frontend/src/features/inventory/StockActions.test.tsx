@@ -1,0 +1,114 @@
+import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { getInventoryItem, getStudent, resetMockDb } from '../../lib/mock-db'
+import { renderWithRouter } from '../../test/renderWithRouter'
+import { selectOption } from '../../test/selectOption'
+import { InventoryDispensePage } from './InventoryDispensePage'
+import { InventoryFormPage } from './InventoryFormPage'
+import { InventoryListPage } from './InventoryListPage'
+
+/** Adjust Stock, Restock, the locked Edit Item fields, and the standalone Dispense rules (ADR-018). */
+
+const stock = async (id: string) => (await getInventoryItem(id)).currentStock
+
+describe('Adjust Stock', () => {
+  beforeEach(() => resetMockDb())
+
+  async function openAdjust(itemName: string) {
+    const user = userEvent.setup()
+    renderWithRouter(<InventoryListPage />)
+    await user.click(await screen.findByRole('button', { name: `Adjust Stock for ${itemName}` }))
+    return { user, dialog: screen.getByRole('dialog', { name: `Adjust Stock: ${itemName}` }) }
+  }
+
+  it('requires a reason, and a note when the reason is Other', async () => {
+    const { user, dialog } = await openAdjust('Gauze Pads')
+    await user.type(within(dialog).getByLabelText(/change/i), '-2')
+    await user.click(within(dialog).getByRole('button', { name: 'Save Adjustment' }))
+    expect(within(dialog).getByText('Choose a reason.')).toBeInTheDocument()
+    await selectOption(user, within(dialog).getByLabelText(/^reason/i), 'Other')
+    await user.click(within(dialog).getByRole('button', { name: 'Save Adjustment' }))
+    expect(within(dialog).getByText('Add a note explaining the adjustment.')).toBeInTheDocument()
+    expect(await stock('item-0011')).toBe(40)
+  })
+
+  it("can't take stock below 0", async () => {
+    const { user, dialog } = await openAdjust('Gauze Pads')
+    await user.type(within(dialog).getByLabelText(/change/i), '-41')
+    await selectOption(user, within(dialog).getByLabelText(/^reason/i), 'Damaged or spilled')
+    await user.click(within(dialog).getByRole('button', { name: 'Save Adjustment' }))
+    expect(within(dialog).getByText(/Stock can't go below 0/)).toBeInTheDocument()
+    expect(await stock('item-0011')).toBe(40)
+  })
+
+  it('disposes of an expired batch by setting the counted quantity', async () => {
+    const { user, dialog } = await openAdjust('Oral Rehydration Salts')
+    expect(within(dialog).getByText(/The expiration date changes only through Restock/)).toBeInTheDocument()
+    await user.click(within(dialog).getByRole('radio', { name: 'Set to counted quantity' }))
+    await user.type(within(dialog).getByLabelText(/counted quantity/i), '0')
+    await selectOption(user, within(dialog).getByLabelText(/^reason/i), 'Expired - disposed')
+    await user.click(within(dialog).getByRole('button', { name: 'Save Adjustment' }))
+    expect(await screen.findByText(/Oral Rehydration Salts adjusted \(Expired - disposed\)\. Stock is now 0 sachets/)).toBeInTheDocument()
+    expect(await stock('item-0004')).toBe(0)
+  })
+})
+
+describe('Restock and Edit Item', () => {
+  beforeEach(() => resetMockDb())
+
+  it('restocks from the list', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<InventoryListPage />)
+    await user.click(await screen.findByRole('button', { name: 'Restock Gauze Pads' }))
+    const dialog = screen.getByRole('dialog', { name: 'Restock: Gauze Pads' })
+    await user.type(within(dialog).getByLabelText(/quantity received/i), '10')
+    await user.click(within(dialog).getByRole('button', { name: 'Save Restock' }))
+    expect(await screen.findByText(/Gauze Pads restocked with 10 pieces/)).toBeInTheDocument()
+    expect(await stock('item-0011')).toBe(50)
+  })
+
+  it('shows stock and expiry as read-only when editing an existing item', async () => {
+    renderWithRouter(<InventoryFormPage />, { route: '/inventory/new?item=item-0001' })
+    expect(await screen.findByText('Changes only through Restock on the Inventory list.')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/current stock/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('Standalone Dispense', () => {
+  beforeEach(() => resetMockDb())
+
+  it('requires choosing a student or general use', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<InventoryDispensePage />, { route: '/inventory/dispense' })
+    await user.click(await screen.findByRole('button', { name: 'Record Dispensation' }))
+    expect(screen.getByText('Choose who this is for.')).toBeInTheDocument()
+  })
+
+  it('records general use with no student', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<InventoryDispensePage />, { route: '/inventory/dispense' })
+    await selectOption(user, await screen.findByLabelText(/^for/i), 'Not for a student (general use)')
+    await user.type(screen.getByRole('combobox', { name: 'Item' }), 'gloves')
+    await user.click(screen.getByRole('option', { name: /Disposable Gloves/ }))
+    await user.click(screen.getByRole('button', { name: 'Record Dispensation' }))
+    expect(await screen.findByText(/1 pairs of Disposable Gloves recorded for general use/)).toBeInTheDocument()
+    expect(await stock('item-0014')).toBe(89)
+  })
+
+  it("links to the student's visit today instead of recording twice, showing only the Student Number", async () => {
+    const student = await getStudent('2026-00005')
+    renderWithRouter(<InventoryDispensePage />, { route: `/inventory/dispense?student=${student.studentNumber}` })
+    expect(await screen.findByText(/This student already has a visit today/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Open today’s visit/ })).toHaveAttribute('href', '/visits/visit-0159')
+    expect(screen.queryByText(new RegExp(student.fullName))).not.toBeInTheDocument()
+  })
+
+  it('shows expired items as unavailable', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<InventoryDispensePage />, { route: '/inventory/dispense' })
+    await user.type(await screen.findByRole('combobox', { name: 'Item' }), 'oral')
+    await user.click(screen.getByRole('option', { name: /Oral Rehydration Salts/ }))
+    expect(screen.getByRole('combobox', { name: 'Item' })).toBeInTheDocument()
+  })
+})

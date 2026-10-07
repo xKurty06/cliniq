@@ -64,6 +64,26 @@ export interface Visit {
   loggedByUserId: string
   /** Optional free text, e.g. "MCA Dance Program". This isn't a managed entity. */
   eventTag: string | null
+  /**
+   * Medicines and supplies given, each one backed by an inventory transaction. `treatment` stays
+   * the free-text notes for care that isn't stock. PROVISIONAL: §5 gives Visit only `treatment`.
+   */
+  itemsGiven: ItemGivenLine[]
+}
+
+/**
+ * One medicine or supply given during a visit or incident. `itemName` and `unit` are a snapshot taken when the
+ * line was first added, so renaming the item later doesn't rewrite history. PROVISIONAL, pending
+ * the ERD.
+ */
+export interface ItemGivenLine {
+  itemId: string
+  itemName: string
+  unit: string
+  /** Whole number, at least 1. */
+  quantity: number
+  /** Optional, at most 120 characters, e.g. "1 tablet every 6 hours". */
+  instructions: string | null
 }
 
 export type ParentNotificationOutcome = 'reached' | 'not_reached' | 'voicemail' | 'left_message'
@@ -91,6 +111,11 @@ export interface Incident {
   /** 1 = fast-capture (incomplete), 2 = complete. */
   stage: 1 | 2
   eventTag: string | null
+  /**
+   * Medicines and supplies given, recorded at Stage 2 (Stage 1 stays fast and has none). Each line
+   * is backed by a dispense transaction that references the incident. PROVISIONAL, pending the ERD.
+   */
+  itemsGiven: ItemGivenLine[]
 }
 
 export type FollowUpStatus = 'pending' | 'completed' | 'missed' | 'cancelled'

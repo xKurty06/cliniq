@@ -8,13 +8,16 @@ import {
   ErrorState,
   Icon,
   Input,
+  ItemsGivenField,
   SegmentedControl,
   Skeleton,
+  type ItemLineDraft,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { formatDateTime } from '../../lib/dates'
-import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
+import { draftsFrom, formatItemGiven } from '../../lib/itemsGiven'
+import { getMockSessionUser, StockRuleError, type SessionUser } from '../../lib/mock-db'
 import type { Disposition } from '../../types/entities'
 import {
   fetchVisitDetail,
@@ -39,6 +42,7 @@ const dispositionLabel: Record<Disposition, string> = {
 interface Errors {
   complaint?: string
   treatment?: string
+  itemsGiven?: string
 }
 
 function VisitDetailSkeleton() {
@@ -69,25 +73,30 @@ function TextareaField({
   value,
   onChange,
   error,
+  required = true,
+  hint,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   error?: string
+  required?: boolean
+  hint?: string
 }) {
   const id = useId()
   const errorId = error ? `${id}-error` : undefined
+  const hintId = hint ? `${id}-hint` : undefined
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs font-semibold text-text-primary">
-        {label} <span className="text-error">*</span>
+        {label} {required && <span className="text-error">*</span>}
       </label>
       <textarea
         id={id}
         rows={4}
         value={value}
         aria-invalid={error ? true : undefined}
-        aria-describedby={errorId}
+        aria-describedby={cn(hintId, errorId) || undefined}
         onChange={(event) => onChange(event.target.value)}
         className={cn(
           'resize-y rounded-md border bg-background px-3 py-2 text-sm text-text-primary shadow-card',
@@ -95,6 +104,11 @@ function TextareaField({
           error ? 'border-error' : 'border-border',
         )}
       />
+      {hint && !error && (
+        <p id={hintId} className="text-xs text-text-secondary">
+          {hint}
+        </p>
+      )}
       {error && (
         <p id={errorId} role="alert" className="text-xs font-semibold text-error">
           {error}
@@ -108,20 +122,24 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
   const [visit, setVisit] = useState(initialVisit)
   const [editing, setEditing] = useState(false)
   const [values, setValues] = useState<VisitDetailValues>(() => valuesFromVisit(initialVisit))
+  const [lines, setLines] = useState<ItemLineDraft[]>(() => draftsFrom(initialVisit.itemsGiven))
   const [errors, setErrors] = useState<Errors>({})
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  /** Set after a successful save; lists any items the edit took below zero. */
+  const [saved, setSaved] = useState<null | { belowZero: string[] }>(null)
 
   function setField<K extends keyof VisitDetailValues>(field: K, value: VisitDetailValues[K]) {
     setValues((current) => ({ ...current, [field]: value }))
     setErrors((current) => ({ ...current, [field]: undefined }))
-    setSaved(false)
+    setSaved(null)
   }
 
   function validate(): Errors {
     const next: Errors = {}
     if (!values.complaint.trim()) next.complaint = 'Enter the visit complaint.'
-    if (!values.treatment.trim()) next.treatment = 'Enter the treatment or care given.'
+    if (!values.treatment.trim() && !lines.length) next.treatment = 'Enter treatment notes or add a medicine or supply.'
+    if (lines.some((line) => line.quantity < 1)) next.itemsGiven = 'Each quantity must be at least 1.'
     return next
   }
 
@@ -131,12 +149,22 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
     setSaving(true)
+    setSaveError('')
     try {
-      const updated = await updateVisitDetail(visit, values)
+      const { visit: updated, belowZero } = await updateVisitDetail(
+        visit,
+        values,
+        lines.map((line) => ({ itemId: line.itemId, quantity: line.quantity, instructions: line.instructions })),
+      )
       setVisit(updated)
       setValues(valuesFromVisit(updated))
+      setLines(draftsFrom(updated.itemsGiven))
       setEditing(false)
-      setSaved(true)
+      setSaved({ belowZero })
+    } catch (caught) {
+      // The data layer rejected a line; nothing was saved and stock is unchanged.
+      if (!(caught instanceof StockRuleError)) throw caught
+      setSaveError(`${caught.message} Nothing was saved.`)
     } finally {
       setSaving(false)
     }
@@ -144,7 +172,9 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
 
   function cancelEdit() {
     setValues(valuesFromVisit(visit))
+    setLines(draftsFrom(visit.itemsGiven))
     setErrors({})
+    setSaveError('')
     setEditing(false)
   }
 
@@ -179,6 +209,17 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
           className="rounded-md border border-success bg-success/10 px-4 py-3 text-sm font-semibold text-text-primary"
         >
           Visit updated.
+          {saved.belowZero.length > 0 && (
+            <span className="mt-1 block text-warning">
+              Now below zero: {saved.belowZero.join(', ')}. Recount and restock.
+            </span>
+          )}
+        </div>
+      )}
+
+      {saveError && (
+        <div role="alert" className="rounded-md border border-error bg-error/10 px-4 py-3 text-sm font-semibold text-text-primary">
+          {saveError}
         </div>
       )}
 
@@ -237,10 +278,24 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
                   onChange={(value) => setField('complaint', value)}
                 />
                 <TextareaField
-                  label="Treatment"
+                  label="Treatment notes"
+                  required={false}
+                  hint="Care that isn't stock: rest, cold compress, wound cleaning, advice. Needed unless a medicine or supply is listed below."
                   value={values.treatment}
                   error={errors.treatment}
                   onChange={(value) => setField('treatment', value)}
+                />
+                <ItemsGivenField
+                  items={visit.items}
+                  lines={lines}
+                  saved={visit.itemsGiven}
+                  allergies={visit.student.allergies}
+                  error={errors.itemsGiven}
+                  onChange={(next) => {
+                    setLines(next)
+                    setSaved(null)
+                    setErrors((current) => ({ ...current, treatment: undefined, itemsGiven: undefined }))
+                  }}
                 />
                 <div>
                   <p className="mb-1 text-xs font-semibold text-text-primary">Disposition</p>
@@ -274,8 +329,20 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
                   <p className="mt-1 text-sm text-text-primary">{visit.complaint}</p>
                 </section>
                 <section>
-                  <h2 className="text-sm font-bold text-text-primary">Treatment</h2>
-                  <p className="mt-1 text-sm text-text-primary">{visit.treatment}</p>
+                  <h2 className="text-sm font-bold text-text-primary">Treatment notes</h2>
+                  <p className="mt-1 text-sm text-text-primary">{visit.treatment || 'No treatment notes.'}</p>
+                </section>
+                <section>
+                  <h2 className="text-sm font-bold text-text-primary">Medicines &amp; supplies given</h2>
+                  {visit.itemsGiven.length ? (
+                    <ul className="mt-1 flex flex-col gap-1 text-sm text-text-primary">
+                      {visit.itemsGiven.map((line) => (
+                        <li key={line.itemId}>{formatItemGiven(line)}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-sm text-text-secondary">None recorded.</p>
+                  )}
                 </section>
                 <section>
                   <h2 className="text-sm font-bold text-text-primary">Disposition</h2>

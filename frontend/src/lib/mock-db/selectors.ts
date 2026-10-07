@@ -100,6 +100,7 @@ const AUDIT_RECORD_KINDS: Record<string, string> = {
   'inventory-restock': 'Inventory',
   'inventory-dispense': 'Inventory',
   'inventory-dispensation': 'Inventory',
+  'inventory-adjustment': 'Inventory',
   user: 'User',
   'follow-up': 'Follow-up',
   followup: 'Follow-up',

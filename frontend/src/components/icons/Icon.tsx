@@ -161,6 +161,7 @@ const paths = {
     </>
   ),
   minus: <path d="M5 12h14" />,
+  plus: <path d="M12 5v14M5 12h14" />,
   menu: (
     <>
       <path d="M4 7h16M4 12h16M4 17h16" />

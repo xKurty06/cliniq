@@ -10,6 +10,7 @@ import type {
   InventoryItem,
   ISODate,
   ISODateTime,
+  ItemGivenLine,
   ParentNotificationAttempt,
   ParentNotificationOutcome,
   Report,
@@ -43,11 +44,13 @@ import {
   type InventoryStatus,
 } from './selectors'
 import { clearMockSession, getMockSessionUser, type SessionUser } from './session'
-import { commit, db } from './store'
+import { commit, db, restoreDb } from './store'
 import type {
+  AdjustmentReason,
   ComplaintType,
   DbState,
   ExcuseLetterApproval,
+  InventoryTransaction,
   IssueReport,
   PeReferral,
   SeedStudent,
@@ -92,11 +95,22 @@ async function read<T>(label: string, select: (state: DbState) => T): Promise<T>
   return structuredClone(select(view()))
 }
 
+/**
+ * One write is all-or-nothing: if `mutate` throws partway (a rejected medicine line after the visit
+ * was already pushed, say), the store is put back exactly as it was and nothing is persisted.
+ */
 async function write<T>(label: string, mutate: (state: DbState) => T): Promise<T> {
   await simulateRequest(label)
-  const result = mutate(db())
-  commit()
-  return structuredClone(result)
+  const state = db()
+  const before = structuredClone(state)
+  try {
+    const result = mutate(state)
+    commit()
+    return structuredClone(result)
+  } catch (error) {
+    restoreDb(before)
+    throw error
+  }
 }
 
 class NotFoundError extends Error {}
@@ -157,6 +171,8 @@ const FIELD_LABELS: Record<string, string> = {
   lowStockThreshold: 'low-stock threshold',
   dateTime: 'date and time',
   eventTag: 'event tag',
+  treatment: 'treatment notes',
+  itemsGiven: 'medicines and supplies',
 }
 
 /** "Updated allergies and grade level" — names the changed fields for the audit summary, never their values. */
@@ -563,11 +579,16 @@ export type FollowUpInput = Pick<FollowUp, 'followUpDate' | 'reason' | 'notes'>
 export interface RecordVisitInput {
   studentId: string
   complaint: string
+  /** Treatment notes: care that isn't stock (rest, cold compress, advice). */
   treatment: string
   disposition: Disposition
   eventTag?: string | null
   followUp: FollowUpInput | null
+  /** Medicines and supplies given. Optional; each line dispenses from inventory (ADR-018). */
+  itemsGiven?: ItemLineInput[]
 }
+
+const NOTES_OR_LINE = 'Enter treatment notes or add a medicine or supply.'
 
 function createFollowUp(
   s: DbState,
@@ -591,14 +612,20 @@ function createFollowUp(
   return followUp
 }
 
-/** Saves a visit and, if requested, its follow-up together: one flow (Activity Diagram 3). */
+/**
+ * Saves a visit, its medicine lines, and (if requested) its follow-up as one write (Activity
+ * Diagram 3, ADR-018): the visit, one dispense transaction per line, the stock decrements, and every
+ * audit entry. Any invalid line rejects the whole save.
+ */
 export function recordVisit(
   input: RecordVisitInput,
   actor?: SessionUser,
-): Promise<{ visit: Visit; followUp: FollowUp | null }> {
+): Promise<{ visit: Visit; followUp: FollowUp | null; belowZero: string[] }> {
   return write('record visit', (s) => {
     const by = actorOr(actor)
-    studentOf(s, input.studentId)
+    const student = studentOf(s, input.studentId)
+    const itemLines = input.itemsGiven ?? []
+    if (!input.treatment.trim() && !itemLines.length) throw new StockRuleError(NOTES_OR_LINE)
     const visit: Visit = {
       id: nextId('visit', s.visits),
       studentId: input.studentId,
@@ -608,27 +635,46 @@ export function recordVisit(
       disposition: input.disposition,
       loggedByUserId: by.id,
       eventTag: input.eventTag?.trim() || null,
+      itemsGiven: [],
     }
     s.visits.push(visit)
     audit(s, by, 'submit', { type: 'visit', id: visit.id })
+    const given = applyItemLines(s, by, { studentNumber: student.studentNumber, visitId: visit.id }, [], itemLines, 'dispense')
+    visit.itemsGiven = given.lines
     const followUp = input.followUp
       ? createFollowUp(s, by, input.studentId, { type: 'visit', id: visit.id }, input.followUp)
       : null
-    return { visit, followUp }
+    return { visit, followUp, belowZero: given.belowZero }
   })
 }
 
+export type VisitPatch = Pick<Visit, 'complaint' | 'treatment' | 'disposition' | 'eventTag'> & {
+  /** The full new set of lines. Omitted, the lines stay as they are. */
+  itemsGiven?: ItemLineInput[]
+}
+
+/**
+ * Edits a saved visit. Changed medicine lines move stock through `visit_edited` adjustment
+ * transactions (a removed or lowered line returns stock, an added or raised one takes more); the
+ * original dispense transactions are never rewritten (ADR-018).
+ */
 export function updateVisit(
   id: string,
-  patch: Pick<Visit, 'complaint' | 'treatment' | 'disposition' | 'eventTag'>,
+  patch: VisitPatch,
   actor?: SessionUser,
-): Promise<Visit> {
+): Promise<{ visit: Visit; belowZero: string[] }> {
   return write('update visit', (s) => {
+    const by = actorOr(actor)
     const visit = must(s.visits.find((v) => v.id === id), 'Visit')
-    const summary = changedSummary(visit, patch)
-    Object.assign(visit, patch)
-    audit(s, actorOr(actor), 'update', { type: 'visit', id }, summary)
-    return visit
+    const { itemsGiven, ...fields } = patch
+    const given = itemsGiven
+      ? applyItemLines(s, by, { studentNumber: studentOf(s, visit.studentId).studentNumber, visitId: id }, visit.itemsGiven, itemsGiven, 'adjust')
+      : { lines: visit.itemsGiven, belowZero: [] }
+    if (!fields.treatment.trim() && !given.lines.length) throw new StockRuleError(NOTES_OR_LINE)
+    const summary = changedSummary(visit, { ...fields, itemsGiven: given.lines })
+    Object.assign(visit, fields, { itemsGiven: given.lines })
+    audit(s, by, 'update', { type: 'visit', id }, summary)
+    return { visit, belowZero: given.belowZero }
   })
 }
 
@@ -709,6 +755,7 @@ export function saveIncidentStageOne(input: StageOneInput, actor?: SessionUser):
       parentNotifications: [],
       stage: 1,
       eventTag: null,
+      itemsGiven: [],
     }
     s.incidents.push(incident)
     audit(s, by, 'submit', { type: 'incident-stage-1', id: incident.id })
@@ -724,16 +771,33 @@ export interface StageTwoInput {
   /** Attempts logged while completing Stage 2 (appended to the incident's log). */
   newParentNotifications: ParentNotificationAttempt[]
   followUp: FollowUpInput | null
+  /** Medicines and supplies given (ADR-018). Dispensed when Stage 2 is first completed. */
+  itemsGiven?: ItemLineInput[]
 }
 
 /** Stage 2 completion: same record, now complete. Logged separately from Stage 1. */
 export function completeIncidentStageTwo(
   input: StageTwoInput,
   actor?: SessionUser,
-): Promise<{ incident: Incident; followUp: FollowUp | null }> {
+): Promise<{ incident: Incident; followUp: FollowUp | null; belowZero: string[] }> {
   return write('complete incident stage 2', (s) => {
     const by = actorOr(actor)
     const incident = must(s.incidents.find((i) => i.id === input.incidentId), 'Incident')
+    const lines = input.itemsGiven ?? []
+    let belowZero: string[] = []
+    // ponytail: medicines are fixed once Stage 2 is complete; changing them later needs an
+    // incident-edit adjustment rule that hasn't been decided (Issues-and-TODOs).
+    if (incident.stage === 2) {
+      const same = (a: ItemLineInput[], b: ItemGivenLine[]) =>
+        a.length === b.length && a.every((line) => b.some((old) => old.itemId === line.itemId && old.quantity === line.quantity))
+      if (input.itemsGiven && !same(lines, incident.itemsGiven))
+        throw new StockRuleError("Medicines on a completed incident can't be changed.")
+    } else {
+      const studentNumber = studentOf(s, incident.studentId).studentNumber
+      const given = applyItemLines(s, by, { studentNumber, incidentId: incident.id }, [], lines, 'dispense')
+      incident.itemsGiven = given.lines
+      belowZero = given.belowZero
+    }
     Object.assign(incident, {
       complaint: input.complaint,
       vitals: input.vitals,
@@ -751,7 +815,7 @@ export function completeIncidentStageTwo(
     const followUp = input.followUp
       ? createFollowUp(s, by, incident.studentId, { type: 'incident', id: incident.id }, input.followUp)
       : null
-    return { incident, followUp }
+    return { incident, followUp, belowZero }
   })
 }
 
@@ -842,11 +906,17 @@ export function getInventoryItem(id: string): Promise<InventoryItemView> {
 
 export type InventoryInput = Omit<InventoryItem, 'id'>
 
+/**
+ * Adds an item, or edits one's name, category, unit, and threshold. An existing item keeps its stock
+ * and expiration date: stock moves only through dispense, restock, and adjustment transactions, and
+ * the expiration date only through Restock (ADR-018).
+ */
 export function saveInventoryItem(input: InventoryInput, options: { itemId?: string; actor?: SessionUser } = {}): Promise<InventoryItem> {
   return write('save inventory item', (s) => {
     const existing = options.itemId ? must(s.inventoryItems.find((i) => i.id === options.itemId), 'Inventory item') : null
-    const summary = existing ? changedSummary(existing, input) : undefined
-    const item = existing ? Object.assign(existing, input) : { id: nextId('item', s.inventoryItems), ...input }
+    const fields = existing ? { ...input, currentStock: existing.currentStock, expirationDate: existing.expirationDate } : input
+    const summary = existing ? changedSummary(existing, fields) : undefined
+    const item = existing ? Object.assign(existing, fields) : { id: nextId('item', s.inventoryItems), ...fields }
     if (!existing) s.inventoryItems.push(item)
     audit(s, actorOr(options.actor), existing ? 'update' : 'create', { type: 'inventory', id: item.id }, summary)
     return item
@@ -869,6 +939,11 @@ export function dispenseInventoryItem(
   return write('dispense', (s) => {
     const by = actorOr(actor)
     const item = must(s.inventoryItems.find((i) => i.id === itemId), 'Inventory item')
+    if (!Number.isInteger(quantity) || quantity < 1) throw new StockRuleError(QUANTITY_RULE)
+    if (isExpired(s, item)) throw new StockRuleError(expiredMessage(item))
+    if (link.studentNumber && !s.students.some((st) => st.studentNumber === link.studentNumber))
+      throw new StockRuleError('No student has this Student Number.')
+    if (link.visitId && !s.visits.some((v) => v.id === link.visitId)) throw new StockRuleError('That visit no longer exists.')
     item.currentStock -= quantity
     const txn = {
       id: nextId('txn', s.frontendOnly.inventoryTransactions),
@@ -897,6 +972,7 @@ export function restockInventoryItem(
   return write('restock', (s) => {
     const by = actorOr(actor)
     const item = must(s.inventoryItems.find((i) => i.id === itemId), 'Inventory item')
+    if (!Number.isInteger(quantity) || quantity < 1) throw new StockRuleError(QUANTITY_RULE)
     item.currentStock += quantity
     item.expirationDate = expirationDate
     const id = nextId('txn', s.frontendOnly.inventoryTransactions)
@@ -906,6 +982,160 @@ export function restockInventoryItem(
     audit(s, by, 'submit', { type: 'inventory-restock', id })
     return { ...item, ...inventoryStatusFor(s, item) }
   })
+}
+
+export const ADJUSTMENT_REASON_LABELS: Record<AdjustmentReason, string> = {
+  visit_edited: 'Visit edited',
+  expired_disposed: 'Expired - disposed',
+  damaged_spilled: 'Damaged or spilled',
+  miscount_correction: 'Miscount correction',
+  other: 'Other',
+}
+
+/** The reasons Staff can pick on Adjust Stock. `visit_edited` is written only by a visit edit. */
+export type StaffAdjustmentReason = Exclude<AdjustmentReason, 'visit_edited'>
+export const STAFF_ADJUSTMENT_REASONS: StaffAdjustmentReason[] = ['expired_disposed', 'damaged_spilled', 'miscount_correction', 'other']
+
+export interface StockAdjustmentInput {
+  /** Signed change (+/-). Ignored when `countedQuantity` is given. */
+  change?: number
+  /** "Set to counted quantity": the change becomes counted minus current stock. */
+  countedQuantity?: number
+  reason: StaffAdjustmentReason
+  /** Optional, except required when `reason` is `other`. */
+  note?: string
+}
+
+/**
+ * Adjust Stock (Staff, ADR-018): disposal, damage, or a recount. Writes one adjustment transaction
+ * and its audit entry; the result can't go below 0. Low-stock and expiry flags are recomputed on
+ * the next read like every derived value. The expiration date is left alone: to replace an expired
+ * batch, dispose of it here and Restock with the new date.
+ */
+export function adjustInventoryStock(itemId: string, input: StockAdjustmentInput, actor?: SessionUser): Promise<InventoryItemView> {
+  return write('adjust stock', (s) => {
+    const by = actorOr(actor)
+    const item = must(s.inventoryItems.find((i) => i.id === itemId), 'Inventory item')
+    if (!STAFF_ADJUSTMENT_REASONS.includes(input.reason)) throw new StockRuleError('Choose a reason for the adjustment.')
+    const note = input.note?.trim() || null
+    if (input.reason === 'other' && !note) throw new StockRuleError('Add a note explaining the adjustment.')
+    const counted = input.countedQuantity
+    if (counted !== undefined && (!Number.isInteger(counted) || counted < 0))
+      throw new StockRuleError('The counted quantity must be a whole number of 0 or more.')
+    const change = counted !== undefined ? counted - item.currentStock : (input.change ?? 0)
+    if (!Number.isInteger(change) || change === 0) throw new StockRuleError('Enter a whole-number change other than 0.')
+    if (item.currentStock + change < 0)
+      throw new StockRuleError(`Stock can't go below 0. ${item.currentStock} ${item.unit} on hand.`)
+    item.currentStock += change
+    const txn: InventoryTransaction = {
+      id: nextId('txn', s.frontendOnly.inventoryTransactions),
+      itemId,
+      type: 'adjustment',
+      quantity: change,
+      timestamp: now(s),
+      userId: by.id,
+      studentNumber: null,
+      visitId: null,
+      reason: input.reason,
+      note,
+    }
+    s.frontendOnly.inventoryTransactions.push(txn)
+    audit(s, by, 'submit', { type: 'inventory-adjustment', id: txn.id }, ADJUSTMENT_REASON_LABELS[input.reason])
+    return { ...item, ...inventoryStatusFor(s, item) }
+  })
+}
+
+// ---- medicines & supplies given (ADR-018) ---------------------------------------------------
+
+export interface ItemLineInput {
+  itemId: string
+  quantity: number
+  instructions?: string | null
+}
+
+export const INSTRUCTIONS_MAX_LENGTH = 120
+
+/** A stock rule was broken (expired or unknown item, bad quantity). The write is rolled back. */
+export class StockRuleError extends Error {}
+
+const QUANTITY_RULE = 'Quantities must be whole numbers of at least 1.'
+
+function isExpired(s: DbState, item: InventoryItem): boolean {
+  return inventoryStatusFor(s, item).flags.includes('expired')
+}
+
+function expiredMessage(item: InventoryItem): string {
+  return `${item.name} is expired and can't be given. Dispose of it with Adjust Stock.`
+}
+
+/**
+ * Moves a record's medicine lines from `before` to `next`. Every line is validated first; then each
+ * changed item moves stock and gets one transaction and one audit entry, linked by Student Number
+ * and visit. A new record dispenses; an edit writes `visit_edited` adjustments instead of rewriting
+ * history. The expired rule covers only added or increased quantity. New lines snapshot the item's
+ * current name and unit; kept lines keep theirs. Returns the lines and the items now below zero.
+ */
+function applyItemLines(
+  s: DbState,
+  by: SessionUser,
+  link: { studentNumber: StudentNumber; visitId?: string; incidentId?: string },
+  before: ItemGivenLine[],
+  next: ItemLineInput[],
+  mode: 'dispense' | 'adjust',
+): { lines: ItemGivenLine[]; belowZero: string[] } {
+  const seen = new Set<string>()
+  for (const line of next) {
+    if (seen.has(line.itemId)) throw new StockRuleError('Each item can appear on only one line.')
+    seen.add(line.itemId)
+    if (!Number.isInteger(line.quantity) || line.quantity < 1) throw new StockRuleError(QUANTITY_RULE)
+    if ((line.instructions?.trim().length ?? 0) > INSTRUCTIONS_MAX_LENGTH)
+      throw new StockRuleError(`Instructions can be at most ${INSTRUCTIONS_MAX_LENGTH} characters.`)
+  }
+  const oldQuantity = new Map(before.map((line) => [line.itemId, line.quantity]))
+  const newQuantity = new Map(next.map((line) => [line.itemId, line.quantity]))
+  const changes = [...new Set([...oldQuantity.keys(), ...newQuantity.keys()])]
+    .map((itemId) => ({ itemId, delta: (newQuantity.get(itemId) ?? 0) - (oldQuantity.get(itemId) ?? 0) }))
+    .filter((change) => change.delta !== 0)
+    .map((change) => {
+      const item = s.inventoryItems.find((i) => i.id === change.itemId)
+      if (!item) throw new StockRuleError('One of the items no longer exists in inventory.')
+      if (change.delta > 0 && isExpired(s, item)) throw new StockRuleError(expiredMessage(item))
+      return { ...change, item }
+    })
+
+  for (const { itemId, delta, item } of changes) {
+    item.currentStock -= delta
+    const base = {
+      id: nextId('txn', s.frontendOnly.inventoryTransactions),
+      itemId,
+      timestamp: now(s),
+      userId: by.id,
+      studentNumber: link.studentNumber,
+      visitId: link.visitId ?? null,
+      ...(link.incidentId ? { incidentId: link.incidentId } : {}),
+    }
+    const txn: InventoryTransaction =
+      mode === 'dispense'
+        ? { ...base, type: 'dispense', quantity: delta }
+        : { ...base, type: 'adjustment', quantity: -delta, reason: 'visit_edited', note: null }
+    s.frontendOnly.inventoryTransactions.push(txn)
+    if (mode === 'dispense') audit(s, by, 'submit', { type: 'inventory-dispensation', id: txn.id })
+    else audit(s, by, 'submit', { type: 'inventory-adjustment', id: txn.id }, ADJUSTMENT_REASON_LABELS.visit_edited)
+  }
+
+  const kept = new Map(before.map((line) => [line.itemId, line]))
+  const lines = next.map((line): ItemGivenLine => {
+    const old = kept.get(line.itemId)
+    const item = changes.find((change) => change.itemId === line.itemId)?.item
+    return {
+      itemId: line.itemId,
+      itemName: old?.itemName ?? item!.name,
+      unit: old?.unit ?? item!.unit,
+      quantity: line.quantity,
+      instructions: line.instructions?.trim() || null,
+    }
+  })
+  return { lines, belowZero: changes.filter((change) => change.item.currentStock < 0).map((change) => change.item.name) }
 }
 
 // ---- reports ---------------------------------------------------------------------------------

@@ -54,5 +54,30 @@ export function dropdownOptionClassName(selected: boolean): string {
   )
 }
 
+const PANEL_GAP = 6
+const VIEWPORT_MARGIN = 16
+const PANEL_MAX_HEIGHT = 256
+
+/**
+ * Pins an option panel to its trigger in viewport coordinates, so a scrolling table or card can't
+ * clip it. It opens upward when there's more room above, and never runs past the viewport edge.
+ * Used by `Select` and `InventoryItemPicker`.
+ */
+export function placeDropdownPanel(trigger: HTMLElement, panel: HTMLElement) {
+  const rect = trigger.getBoundingClientRect()
+  const viewportWidth = document.documentElement.clientWidth
+  const viewportHeight = document.documentElement.clientHeight
+  const below = viewportHeight - rect.bottom - PANEL_GAP - VIEWPORT_MARGIN
+  const above = rect.top - PANEL_GAP - VIEWPORT_MARGIN
+  panel.style.minWidth = `${rect.width}px`
+  panel.style.maxHeight = `${PANEL_MAX_HEIGHT}px`
+  const openUp = panel.offsetHeight > below && above > below
+  panel.style.maxHeight = `${Math.min(PANEL_MAX_HEIGHT, Math.max(openUp ? above : below, 96))}px`
+  panel.style.top = openUp ? '' : `${rect.bottom + PANEL_GAP}px`
+  panel.style.bottom = openUp ? `${viewportHeight - rect.top + PANEL_GAP}px` : ''
+  const maxLeft = viewportWidth - panel.offsetWidth - VIEWPORT_MARGIN
+  panel.style.left = `${Math.max(VIEWPORT_MARGIN, Math.min(rect.left, maxLeft))}px`
+}
+
 /** One checkbox row of a multi-select panel; the checkbox itself carries the selected state. */
 export const DROPDOWN_CHECK_ROW = cn(OPTION_ROW, 'items-center gap-2 text-text-primary hover:bg-surface')

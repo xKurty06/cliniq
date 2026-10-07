@@ -10,18 +10,21 @@ import {
   ErrorState,
   Icon,
   Input,
+  ItemsGivenField,
   SegmentedControl,
   Select,
   Skeleton,
   StudentNumberField,
+  type ItemLineDraft,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { useIdentifiedStudent } from '../../hooks/useIdentifiedStudent'
 import { cn } from '../../lib/cn'
 import { addDays, todayISO } from '../../lib/dates'
-import { getMockSessionUser, type ComplaintType, type SessionUser } from '../../lib/mock-db'
+import { getMockSessionUser, StockRuleError, type ComplaintType, type InventoryItemView, type SessionUser } from '../../lib/mock-db'
+import { isStudentNumber } from '../../lib/studentNumber'
 import type { Disposition } from '../../types/entities'
-import { fetchNewVisitContext, findVisitStudent, submitNewVisit } from './api/newVisitApi'
+import { fetchNewVisitContext, fetchVisitItems, findVisitStudent, submitNewVisit } from './api/newVisitApi'
 
 
 const dispositionOptions = [
@@ -33,6 +36,7 @@ const dispositionOptions = [
 interface Errors {
   complaint?: string
   treatment?: string
+  itemsGiven?: string
   followUpDate?: string
   followUpReason?: string
 }
@@ -62,6 +66,7 @@ function TextareaField({
   onChange,
   error,
   required,
+  hint,
   rows = 4,
 }: {
   label: string
@@ -69,10 +74,12 @@ function TextareaField({
   onChange: (value: string) => void
   error?: string
   required?: boolean
+  hint?: string
   rows?: number
 }) {
   const id = useId()
   const errorId = error ? `${id}-error` : undefined
+  const hintId = hint ? `${id}-hint` : undefined
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs font-semibold text-text-primary">
@@ -85,7 +92,7 @@ function TextareaField({
         required={required}
         value={value}
         aria-invalid={error ? true : undefined}
-        aria-describedby={errorId}
+        aria-describedby={cn(hintId, errorId) || undefined}
         onChange={(event) => onChange(event.target.value)}
         className={cn(
           'resize-y rounded-md border bg-background px-3 py-2 text-sm text-text-primary shadow-card',
@@ -93,6 +100,11 @@ function TextareaField({
           error ? 'border-error' : 'border-border',
         )}
       />
+      {hint && !error && (
+        <p id={hintId} className="text-xs text-text-secondary">
+          {hint}
+        </p>
+      )}
       {error && (
         <p id={errorId} role="alert" className="text-xs font-semibold text-error">
           {error}
@@ -172,10 +184,20 @@ export function NewVisitEntryPage({
   const [followUpDate, setFollowUpDate] = useState(addDays(today, 1))
   const [followUpReason, setFollowUpReason] = useState('')
   const [followUpNotes, setFollowUpNotes] = useState('')
+  const [lines, setLines] = useState<ItemLineDraft[]>([])
+  /** Stock figures refreshed after a save; until then, the ones loaded with the form. */
+  const [freshItems, setFreshItems] = useState<InventoryItemView[] | null>(null)
   const [errors, setErrors] = useState<Errors>({})
   const [saving, setSaving] = useState(false)
-  /** Set after a successful save; records whether that save created a follow-up. */
-  const [saved, setSaved] = useState<null | { withFollowUp: boolean }>(null)
+  const [saveError, setSaveError] = useState('')
+  /** Set after a successful save: whether it created a follow-up, and what it took from inventory. */
+  const [saved, setSaved] = useState<null | { withFollowUp: boolean; given: number; belowZero: string[] }>(null)
+  // Allergies sit beside the medicine picker, so look the student up as soon as a full number is typed.
+  const typedNumber = identified.needsStudentNumber && isStudentNumber(identified.input) ? identified.input : ''
+  const { data: typedAllergies } = useAsyncData(`visit-allergies|${typedNumber}`, () =>
+    typedNumber ? findVisitStudent(typedNumber).then((student) => student.allergies, () => null) : Promise.resolve(null),
+  )
+  const allergies = identified.student?.allergies ?? (typedNumber ? (typedAllergies ?? null) : null)
   const formRef = useRef<HTMLFormElement>(null)
   const saveAndNewRef = useRef(false)
 
@@ -203,7 +225,8 @@ export function NewVisitEntryPage({
   function validate(): Errors {
     const next: Errors = {}
     if (!complaint) next.complaint = 'Select the complaint for this visit.'
-    if (!treatment.trim()) next.treatment = 'Enter the treatment or care given.'
+    if (!treatment.trim() && !lines.length) next.treatment = 'Enter treatment notes or add a medicine or supply.'
+    if (lines.some((line) => line.quantity < 1)) next.itemsGiven = 'Each quantity must be at least 1.'
     if (needsFollowUp) {
       if (!followUpDate) next.followUpDate = 'Choose a follow-up date.'
       if (!followUpReason.trim()) next.followUpReason = 'Enter the follow-up reason.'
@@ -219,10 +242,11 @@ export function NewVisitEntryPage({
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length || !studentOk) return
     setSaving(true)
+    setSaveError('')
     try {
       const student = await identified.resolve()
       if (!student) return
-      await submitNewVisit(
+      const result = await submitNewVisit(
         {
           studentId: student.id,
           complaint,
@@ -236,12 +260,15 @@ export function NewVisitEntryPage({
                 notes: followUpNotes.trim() || null,
               }
             : null,
+          itemsGiven: lines.map((line) => ({ itemId: line.itemId, quantity: line.quantity, instructions: line.instructions })),
         },
         viewer,
       )
       // Reference 2: a successful save confirms and clears the form, so a second click can't
       // record the same visit twice. The Save-and-new shortcut takes the same path.
-      setSaved({ withFollowUp: needsFollowUp })
+      setSaved({ withFollowUp: needsFollowUp, given: lines.length, belowZero: result.belowZero })
+      setLines([])
+      setFreshItems(await fetchVisitItems())
       setComplaint('')
       setTreatment('')
       setDisposition('returned_to_class')
@@ -253,6 +280,11 @@ export function NewVisitEntryPage({
       setErrors({})
       identified.reset()
       saveAndNewRef.current = false
+    } catch (caught) {
+      // The data layer rejected a line (an item expired since the form loaded, say); nothing was saved.
+      if (!(caught instanceof StockRuleError)) throw caught
+      setSaveError(`${caught.message} Nothing was saved.`)
+      setFreshItems(await fetchVisitItems())
     } finally {
       setSaving(false)
     }
@@ -300,7 +332,20 @@ export function NewVisitEntryPage({
           role="status"
           className="rounded-md border border-success bg-success/10 px-4 py-3 text-sm font-semibold text-text-primary"
         >
-          Visit saved. {saved.withFollowUp ? 'A pending follow-up was created.' : 'No follow-up was created.'}
+          Visit saved.{' '}
+          {saved.given > 0 && `${saved.given} ${saved.given === 1 ? 'item was' : 'items were'} taken from inventory. `}
+          {saved.withFollowUp ? 'A pending follow-up was created.' : 'No follow-up was created.'}
+          {saved.belowZero.length > 0 && (
+            <span className="mt-1 block text-warning">
+              Now below zero: {saved.belowZero.join(', ')}. Recount and restock.
+            </span>
+          )}
+        </div>
+      )}
+
+      {saveError && (
+        <div role="alert" className="rounded-md border border-error bg-error/10 px-4 py-3 text-sm font-semibold text-text-primary">
+          {saveError}
         </div>
       )}
 
@@ -349,14 +394,25 @@ export function NewVisitEntryPage({
               />
             )}
             <TextareaField
-              label="Treatment"
+              label="Treatment notes"
+              hint="Care that isn't stock: rest, cold compress, wound cleaning, advice. Needed unless a medicine or supply is added below."
               value={treatment}
               onChange={(value) => {
                 setTreatment(value)
                 setErrors((current) => ({ ...current, treatment: undefined }))
               }}
               error={errors.treatment}
-              required
+            />
+            <ItemsGivenField
+              items={freshItems ?? data.items}
+              lines={lines}
+              onChange={(next) => {
+                setLines(next)
+                setSaved(null)
+                setErrors((current) => ({ ...current, treatment: undefined, itemsGiven: undefined }))
+              }}
+              allergies={allergies}
+              error={errors.itemsGiven}
             />
             <div>
               <p className="mb-1 text-xs font-semibold text-text-primary">Disposition</p>

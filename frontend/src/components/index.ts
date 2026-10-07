@@ -33,3 +33,5 @@ export {
   type FollowUpErrors,
 } from './forms/FollowUpPrompt'
 export { StudentNumberField } from './forms/StudentNumberField'
+export { InventoryItemPicker, type PickableItem } from './forms/InventoryItemPicker'
+export { ItemsGivenField, INSTRUCTIONS_MAX, type ItemLineDraft } from './forms/ItemsGivenField'

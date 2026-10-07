@@ -9,6 +9,7 @@ import {
   ErrorState,
   Icon,
   Input,
+  ItemsGivenField,
   ListRow,
   RowList,
   SegmentedControl,
@@ -16,12 +17,14 @@ import {
   Skeleton,
   StatusBadge,
   StudentNumberField,
+  type ItemLineDraft,
   type StatusMap,
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { useIdentifiedStudent } from '../../hooks/useIdentifiedStudent'
 import { addDays, todayISO } from '../../lib/dates'
-import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
+import { draftsFrom, formatItemGiven } from '../../lib/itemsGiven'
+import { getMockSessionUser, StockRuleError, type SessionUser } from '../../lib/mock-db'
 import type { HospitalReferral, Incident, ParentNotificationOutcome } from '../../types/entities'
 import {
   completeStageTwoIncident,
@@ -59,6 +62,7 @@ interface Errors {
   bloodPressure?: string
   oxygenSaturation?: string
   treatmentNotes?: string
+  itemsGiven?: string
   referralDestination?: string
   notificationDetail?: string
   followUpReason?: string
@@ -213,6 +217,8 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
   const [followUpDate, setFollowUpDate] = useState(addDays(today, 1))
   const [followUpReason, setFollowUpReason] = useState('')
   const [followUpNotes, setFollowUpNotes] = useState('')
+  const [lines, setLines] = useState<ItemLineDraft[]>(() => draftsFrom(existing?.itemsGiven ?? []))
+  const [stockMessage, setStockMessage] = useState('')
   const [errors, setErrors] = useState<Errors>({})
   const [savingStageOne, setSavingStageOne] = useState(false)
   const [savingStageTwo, setSavingStageTwo] = useState(false)
@@ -271,6 +277,7 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
       next.referralDestination = 'Enter the hospital or clinic destination.'
     }
     if (needsFollowUp && !followUpReason.trim()) next.followUpReason = 'Enter the follow-up reason.'
+    if (lines.some((line) => line.quantity < 1)) next.itemsGiven = 'Each quantity must be at least 1.'
     return next
   }
 
@@ -281,6 +288,7 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
     setSavingStageTwo(true)
+    setStockMessage('')
     try {
       const hospitalReferral: HospitalReferral | null = referToHospital
         ? {
@@ -314,11 +322,17 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                 notes: followUpNotes.trim() || null,
               }
             : null,
+          itemsGiven: lines.map((line) => ({ itemId: line.itemId, quantity: line.quantity, instructions: line.instructions })),
         },
         viewer,
       )
       setIncident(result.incident)
       setCompleted(true)
+      if (result.belowZero.length) setStockMessage(`Now below zero: ${result.belowZero.join(', ')}. Recount and restock.`)
+    } catch (caught) {
+      // The data layer rejected a medicine line; nothing was saved and stock is unchanged.
+      if (!(caught instanceof StockRuleError)) throw caught
+      setStockMessage(`${caught.message} Nothing was saved.`)
     } finally {
       setSavingStageTwo(false)
     }
@@ -350,6 +364,12 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
           {completed
             ? 'Incident completed. Stage 2 details are now saved.'
             : 'Stage 1 saved. This incident still needs completion.'}
+        </div>
+      )}
+
+      {stockMessage && (
+        <div role="alert" className="rounded-md border border-error bg-error/10 px-4 py-3 text-sm font-semibold text-text-primary">
+          {stockMessage}
         </div>
       )}
 
@@ -492,6 +512,30 @@ function IncidentEntryForm({ viewer, data }: { viewer: SessionUser; data: Incide
                     }}
                     error={errors.treatmentNotes}
                   />
+                  {completed && incident ? (
+                    <section aria-labelledby="incident-items-title" className="rounded-md border border-border p-4">
+                      <h2 id="incident-items-title" className="text-sm font-semibold text-text-primary">Medicines &amp; supplies given</h2>
+                      {incident.itemsGiven.length ? (
+                        <ul className="mt-1 flex flex-col gap-1 text-sm text-text-primary">
+                          {incident.itemsGiven.map((line) => <li key={line.itemId}>{formatItemGiven(line)}</li>)}
+                        </ul>
+                      ) : (
+                        <p className="mt-1 text-sm text-text-secondary">None recorded.</p>
+                      )}
+                      <p className="mt-2 text-xs text-text-secondary">Recorded when Stage 2 was completed; these can't be changed here.</p>
+                    </section>
+                  ) : (
+                    <ItemsGivenField
+                      items={data.items}
+                      lines={lines}
+                      onChange={(next) => {
+                        setLines(next)
+                        setErrors((current) => ({ ...current, itemsGiven: undefined }))
+                      }}
+                      allergies={student?.allergies ?? null}
+                      error={errors.itemsGiven}
+                    />
+                  )}
 
                   <fieldset className="rounded-md border border-border p-4">
                     <legend className="px-1 text-sm font-semibold text-text-primary">

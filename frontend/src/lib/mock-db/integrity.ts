@@ -18,8 +18,9 @@ const FIELDS = {
   users: ['id', 'name', 'username', 'role', 'lastLogin'],
   students: ['id', 'studentNumber', 'fullName', 'gradeLevel', 'contactInfo', 'allergies', 'medicalConditions', 'emergencyContact', 'archived'],
   emergencyContact: ['name', 'relationship', 'phone', 'verified'],
-  visits: ['id', 'studentNumber', 'dateTime', 'complaint', 'treatment', 'disposition', 'loggedByUserId', 'eventTag'],
-  incidents: ['id', 'studentNumber', 'time', 'complaint', 'vitals', 'hospitalReferral', 'parentNotifications', 'stage', 'eventTag'],
+  visits: ['id', 'studentNumber', 'dateTime', 'complaint', 'treatment', 'disposition', 'loggedByUserId', 'eventTag', 'itemsGiven'],
+  itemGivenLine: ['itemId', 'itemName', 'unit', 'quantity', 'instructions'],
+  incidents: ['id', 'studentNumber', 'time', 'complaint', 'vitals', 'hospitalReferral', 'parentNotifications', 'stage', 'eventTag', 'itemsGiven'],
   hospitalReferral: ['destination', 'transportMode', 'departureTime'],
   parentNotification: ['outcome', 'timestamp'],
   followUps: ['id', 'studentNumber', 'relatedRecord', 'followUpDate', 'reason', 'status', 'notes', 'createdByUserId'],
@@ -53,7 +54,8 @@ const ENUMS = {
   backupStatus: ['ok', 'failed'],
   actionType: ['login', 'logout', 'scan', 'submit', 'approve', 'create', 'update', 'delete', 'archive'],
   outcome: ['reached', 'not_reached', 'voicemail', 'left_message'],
-  transactionType: ['dispense', 'restock'],
+  transactionType: ['dispense', 'restock', 'adjustment'],
+  adjustmentReason: ['visit_edited', 'expired_disposed', 'damaged_spilled', 'miscount_correction', 'other'],
 } as const
 
 const ID_PATTERNS: Record<string, RegExp> = {
@@ -157,6 +159,31 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
   const visitComplaints = new Set(((fo.visitComplaintTypes ?? []) as Rec[]).map((c) => String(c.label)))
   const incidentComplaints = new Set((fo.incidentComplaintTypes ?? []) as string[])
 
+  /** "recordId|itemId" -> quantity on a visit's or incident's line; checked against the transactions below. */
+  const givenOnRecord = new Map<string, number>()
+  /** Medicine lines (ADR-018), the same rules on visits and incidents. Returns how many there are. */
+  const checkLines = (w: string, record: Rec): number => {
+    if (!Array.isArray(record.itemsGiven)) {
+      fail(`${w}.itemsGiven: must be an array`)
+      return 0
+    }
+    const lines = record.itemsGiven as Rec[]
+    const lineItems = new Set<string>()
+    lines.forEach((line, k) => {
+      const lw = `${w}.itemsGiven[${k}]`
+      checkFields(lw, line, FIELDS.itemGivenLine)
+      if (!ids.inventoryItems?.has(String(line.itemId))) fail(`${lw}.itemId: "${String(line.itemId)}" doesn't exist`)
+      if (lineItems.has(String(line.itemId))) fail(`${lw}.itemId: "${String(line.itemId)}" is already on another line`)
+      lineItems.add(String(line.itemId))
+      if (!Number.isInteger(line.quantity) || (line.quantity as number) < 1) fail(`${lw}.quantity: must be a whole number ≥ 1`)
+      if (!String(line.itemName ?? '').trim() || !String(line.unit ?? '').trim()) fail(`${lw}: itemName and unit snapshots must not be empty`)
+      if (line.instructions !== null && (typeof line.instructions !== 'string' || line.instructions.length > 120))
+        fail(`${lw}.instructions: must be null or text of at most 120 characters`)
+      givenOnRecord.set(`${String(record.id)}|${String(line.itemId)}`, Number(line.quantity))
+    })
+    return lines.length
+  }
+
   // Visits.
   const visitStudent = new Map<string, string>()
   list('visits').forEach((v, i) => {
@@ -170,6 +197,7 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
       fail(`${w}.loggedByUserId: only Staff log visits`)
     if (!visitComplaints.has(String(v.complaint))) fail(`${w}.complaint: "${String(v.complaint)}" isn't in frontendOnly.visitComplaintTypes`)
     visitStudent.set(String(v.id), String(v.studentNumber))
+    if (!checkLines(w, v) && !String(v.treatment).trim()) fail(`${w}: needs treatment notes or at least one item given`)
   })
 
   // Incidents.
@@ -197,6 +225,7 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
       relDateTime(`${w}.parentNotifications[${k}].timestamp`, n.timestamp)
     })
     incidentStudent.set(String(inc.id), String(inc.studentNumber))
+    if (checkLines(w, inc) && inc.stage === 1) fail(`${w}.itemsGiven: Stage 1 stays fast; medicines are recorded at Stage 2`)
   })
 
   // Follow-ups: must point at a real visit/incident belonging to the same student.
@@ -223,6 +252,8 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
     checkFields(w, item, FIELDS.inventoryItems)
     oneOf(`${w}.category`, item.category, ENUMS.category)
     if (!Number.isInteger(item.currentStock)) fail(`${w}.currentStock: must be a whole number`)
+    // Below zero happens only at runtime, through the warn-only dispense path (Module 8).
+    else if ((item.currentStock as number) < 0) fail(`${w}.currentStock: the seed can't start below 0`)
     if (!Number.isInteger(item.lowStockThreshold) || (item.lowStockThreshold as number) < 0)
       fail(`${w}.lowStockThreshold: must be a whole number ≥ 0`)
     relDate(`${w}.expirationDate`, item.expirationDate, true)
@@ -260,15 +291,58 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
     fail('frontendOnly.devAccounts: need one account with mustChangePassword: true (Force Password Change, #2)')
   if (accounts.some((d) => !/^(?:dev-only-|demo-)/i.test(String(d.password))))
     fail('frontendOnly.devAccounts: passwords must be obviously fake (start with "dev-only-" or "demo-")')
+  /** Net amount given per "visitId|itemId": dispensed minus returned by `visit_edited` adjustments. */
+  const netGiven = new Map<string, number>()
+  const txnIds = new Set<string>()
   ;((fo.inventoryTransactions ?? []) as Rec[]).forEach((t, i) => {
-    const w = `frontendOnly.inventoryTransactions[${i}]`
+    const w = `frontendOnly.inventoryTransactions[${i}] (${String(t.id)})`
+    if (!/^txn-\d{4}$/.test(String(t.id))) fail(`${w}.id: doesn't match /^txn-\\d{4}$/`)
+    if (txnIds.has(String(t.id))) fail(`${w}.id: duplicate`)
+    txnIds.add(String(t.id))
     if (!ids.inventoryItems?.has(String(t.itemId))) fail(`${w}.itemId: "${String(t.itemId)}" doesn't exist`)
     oneOf(`${w}.type`, t.type, ENUMS.transactionType)
     userRef(`${w}.userId`, t.userId)
     studentRef(`${w}.studentNumber`, t.studentNumber, true)
-    if (t.visitId !== null && !visitStudent.has(String(t.visitId))) fail(`${w}.visitId: "${String(t.visitId)}" doesn't exist`)
+    const linked: Array<[string, Map<string, string>, unknown]> = [
+      ['visit', visitStudent, t.visitId],
+      ['incident', incidentStudent, t.incidentId ?? null],
+    ]
+    for (const [kind, owners, id] of linked) {
+      if (id === null) continue
+      const owner = owners.get(String(id))
+      if (!owner) fail(`${w}.${kind}Id: "${String(id)}" doesn't exist`)
+      else if (t.studentNumber !== owner) fail(`${w}.studentNumber: must match ${kind} ${String(id)}'s student ${owner}`)
+    }
+    if (t.visitId !== null && t.incidentId != null) fail(`${w}: links both a visit and an incident`)
     relDateTime(`${w}.timestamp`, t.timestamp)
+    const quantity = t.quantity as number
+    if (t.type === 'adjustment') {
+      checkFields(w, t, ['id', 'itemId', 'type', 'quantity', 'timestamp', 'userId', 'studentNumber', 'visitId', 'reason', 'note'])
+      oneOf(`${w}.reason`, t.reason, ENUMS.adjustmentReason)
+      if (!Number.isInteger(quantity) || quantity === 0) fail(`${w}.quantity: an adjustment is a whole number other than 0`)
+      if (t.reason === 'other' && !String(t.note ?? '').trim()) fail(`${w}.note: required when the reason is "other"`)
+      if ((t.reason === 'visit_edited') !== (t.visitId !== null)) fail(`${w}: a "visit_edited" adjustment, and only that, links a visit`)
+    } else {
+      checkFields(w, t, ['id', 'itemId', 'type', 'quantity', 'timestamp', 'userId', 'studentNumber', 'visitId'], ['incidentId'])
+      if (!Number.isInteger(quantity) || quantity < 1) fail(`${w}.quantity: must be a whole number ≥ 1`)
+      if (t.type === 'restock' && (t.studentNumber !== null || t.visitId !== null || t.incidentId != null))
+        fail(`${w}: a restock links no student, visit, or incident`)
+    }
+    const recordId = t.visitId ?? t.incidentId ?? null
+    if (recordId !== null) {
+      const key = `${String(recordId)}|${String(t.itemId)}`
+      const signed = t.type === 'dispense' ? quantity : -quantity
+      netGiven.set(key, (netGiven.get(key) ?? 0) + signed)
+    }
   })
+  // Every line is backed by its transactions, and no transaction moves stock for a line that isn't there.
+  for (const key of new Set([...givenOnRecord.keys(), ...netGiven.keys()])) {
+    const [visitId, itemId] = key.split('|')
+    const onLine = givenOnRecord.get(key) ?? 0
+    const net = netGiven.get(key) ?? 0
+    if (onLine !== net)
+      fail(`${visitId}: ${itemId} shows ${onLine} given, but its transactions net to ${net}`)
+  }
   ;((fo.recordReviews ?? []) as Rec[]).forEach((r, i) => {
     const w = `frontendOnly.recordReviews[${i}]`
     studentRef(`${w}.studentNumber`, r.studentNumber)

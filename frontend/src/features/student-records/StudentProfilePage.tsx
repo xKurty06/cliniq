@@ -20,6 +20,7 @@ import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
 import { formatDateTime } from '../../lib/dates'
+import { visitCareSummary } from '../../lib/itemsGiven'
 import { getMockSessionUser, type SessionUser } from '../../lib/mock-db'
 import type { Disposition, Incident, Student, Visit } from '../../types/entities'
 import { paths } from '../../routes/paths'
@@ -257,7 +258,7 @@ function VisitHistoryCard({ visits }: { visits: Visit[] }) {
             <ListRow
               key={visit.id}
               primary={visit.complaint}
-              secondary={visit.treatment}
+              secondary={visitCareSummary(visit)}
               meta={formatDateTime(visit.dateTime)}
               trailing={
                 <Badge tone="info" variant="soft" icon="checkCircle">

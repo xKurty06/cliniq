@@ -4,7 +4,10 @@ import {
   getIncidentComplaintTypes,
   getStudent,
   getStudentById,
+  listInventory,
   saveIncidentStageOne,
+  type InventoryItemView,
+  type ItemLineInput,
   type SessionUser,
 } from '../../../lib/mock-db'
 import type {
@@ -25,6 +28,8 @@ export interface IncidentEntryContext {
   complaintTypes: string[]
   /** Set when an existing incident is reopened to complete Stage 2 (Screen #16b). */
   incident: Incident | null
+  /** Inventory with computed flags, for Stage 2's Medicines & supplies picker. */
+  items: InventoryItemView[]
 }
 
 export interface StageOneIncidentInput {
@@ -47,6 +52,8 @@ export interface StageTwoIncidentInput {
   /** Attempts logged on this form; appended to the incident's notification log. */
   parentNotifications: ParentNotificationAttempt[]
   followUp: null | Pick<FollowUp, 'followUpDate' | 'reason' | 'notes'>
+  /** Dispensed with the Stage 2 save; each dispense references the incident (ADR-018). */
+  itemsGiven?: ItemLineInput[]
 }
 
 /**
@@ -57,16 +64,17 @@ export async function fetchIncidentEntryContext(
   options: { studentNumber?: string; incidentId?: string } = {},
 ): Promise<IncidentEntryContext> {
   const complaintTypes = getIncidentComplaintTypes()
+  const items = listInventory()
   if (options.incidentId) {
     const incident = await getIncident(options.incidentId)
     const [student, types] = await Promise.all([getStudentById(incident.studentId), complaintTypes])
-    return { student, complaintTypes: types, incident }
+    return { student, complaintTypes: types, incident, items: await items }
   }
   const [student, types] = await Promise.all([
     options.studentNumber ? getStudent(options.studentNumber) : Promise.resolve(null),
     complaintTypes,
   ])
-  return { student, complaintTypes: types, incident: null }
+  return { student, complaintTypes: types, incident: null, items: await items }
 }
 
 /** Resolves the Student Number typed on Stage 1 when the student wasn't identified beforehand. */
@@ -89,7 +97,7 @@ export function saveStageOneIncident(input: StageOneIncidentInput, user: Session
 export function completeStageTwoIncident(
   input: StageTwoIncidentInput,
   user: SessionUser,
-): Promise<{ incident: Incident; followUp: FollowUp | null }> {
+): Promise<{ incident: Incident; followUp: FollowUp | null; belowZero: string[] }> {
   return completeIncidentStageTwo(
     {
       incidentId: input.incidentId,
@@ -104,6 +112,7 @@ export function completeStageTwoIncident(
       hospitalReferral: input.hospitalReferral,
       newParentNotifications: input.parentNotifications,
       followUp: input.followUp,
+      itemsGiven: input.itemsGiven,
     },
     user,
   )

@@ -106,18 +106,37 @@ export interface ComplaintType {
   triageSteps: string[]
 }
 
-export type InventoryTransactionType = 'dispense' | 'restock'
+export type InventoryTransactionType = 'dispense' | 'restock' | 'adjustment'
 
-/** Dispense/restock history (Module 8, stock flow steps 2 and 4). History only: never re-summed. */
+/**
+ * Why an adjustment changed stock. `visit_edited` is written by the data layer when a saved visit's
+ * medicine lines change; the rest are the Adjust Stock reasons Staff choose. PROVISIONAL (ADR-018).
+ */
+export type AdjustmentReason = 'visit_edited' | 'expired_disposed' | 'damaged_spilled' | 'miscount_correction' | 'other'
+
+/**
+ * Dispense/restock/adjustment history (Module 8, stock flow steps 2 and 4; ADR-018). History only:
+ * never re-summed, and never rewritten. A correction is a new `adjustment` row.
+ */
 export interface InventoryTransaction<D = ISODateTime> {
   id: string
   itemId: string
   type: InventoryTransactionType
+  /**
+   * Dispense and restock: the amount moved, always positive. Adjustment: the signed change to stock
+   * (+3 returns three to the shelf, -5 disposes of five).
+   */
   quantity: number
   timestamp: D
   userId: string
   studentNumber: StudentNumber | null
   visitId: string | null
+  /** Set when the dispense was part of an incident's Stage 2. PROVISIONAL (ADR-018). */
+  incidentId?: string
+  /** Adjustment only. PROVISIONAL (ADR-018). */
+  reason?: AdjustmentReason
+  /** Adjustment only: Staff's note; required when `reason` is `other`. PROVISIONAL (ADR-018). */
+  note?: string | null
 }
 
 /** Registrar-import review tracking for the Incomplete Records queue (#9). */

@@ -7,6 +7,7 @@ import {
   dropdownChevronClassName,
   dropdownOptionClassName,
   dropdownTriggerClassName,
+  placeDropdownPanel,
 } from './dropdownClassName'
 
 export interface SelectOption {
@@ -35,30 +36,7 @@ export interface SelectProps {
   size?: 'sm' | 'md'
 }
 
-const PANEL_GAP = 6
-const VIEWPORT_MARGIN = 16
-const PANEL_MAX_HEIGHT = 256
 const TYPEAHEAD_RESET_MS = 500
-
-/**
- * Pins the option panel to its trigger in viewport coordinates, so a scrolling table or card can't
- * clip it. It opens upward when there's more room above, and never runs past the viewport edge.
- */
-function placePanel(trigger: HTMLElement, panel: HTMLElement) {
-  const rect = trigger.getBoundingClientRect()
-  const viewportWidth = document.documentElement.clientWidth
-  const viewportHeight = document.documentElement.clientHeight
-  const below = viewportHeight - rect.bottom - PANEL_GAP - VIEWPORT_MARGIN
-  const above = rect.top - PANEL_GAP - VIEWPORT_MARGIN
-  panel.style.minWidth = `${rect.width}px`
-  panel.style.maxHeight = `${PANEL_MAX_HEIGHT}px`
-  const openUp = panel.offsetHeight > below && above > below
-  panel.style.maxHeight = `${Math.min(PANEL_MAX_HEIGHT, Math.max(openUp ? above : below, 96))}px`
-  panel.style.top = openUp ? '' : `${rect.bottom + PANEL_GAP}px`
-  panel.style.bottom = openUp ? `${viewportHeight - rect.top + PANEL_GAP}px` : ''
-  const maxLeft = viewportWidth - panel.offsetWidth - VIEWPORT_MARGIN
-  panel.style.left = `${Math.max(VIEWPORT_MARGIN, Math.min(rect.left, maxLeft))}px`
-}
 
 /**
  * Single-choice dropdown in the shared dropdown look (cliniq-dropdown-patterns): a themed trigger
@@ -112,7 +90,7 @@ export function Select({
     const trigger = triggerRef.current
     const panel = panelRef.current
     if (!trigger || !panel) return
-    const place = () => placePanel(trigger, panel)
+    const place = () => placeDropdownPanel(trigger, panel)
     place()
     optionRefs.current[focusIndex]?.focus()
     window.addEventListener('resize', place)

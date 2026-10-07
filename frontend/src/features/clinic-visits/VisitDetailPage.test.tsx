@@ -21,7 +21,8 @@ describe('Visit Details', () => {
 
   it('validates required edit fields inline', async () => {
     const user = userEvent.setup()
-    render(<VisitDetailPage />)
+    // A visit with no medicine lines, so its treatment notes are required.
+    render(<VisitDetailPage visitId="visit-0158" />)
 
     await screen.findByRole('heading', { name: 'Visit Details' })
     await user.click(screen.getByRole('button', { name: 'Edit' }))
@@ -30,7 +31,7 @@ describe('Visit Details', () => {
     await user.click(screen.getByRole('button', { name: 'Save Changes' }))
 
     expect(screen.getByText('Enter the visit complaint.')).toBeInTheDocument()
-    expect(screen.getByText('Enter the treatment or care given.')).toBeInTheDocument()
+    expect(screen.getByText('Enter treatment notes or add a medicine or supply.')).toBeInTheDocument()
   })
 
   it('updates the visit and writes an audit entry', async () => {

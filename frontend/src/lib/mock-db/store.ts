@@ -125,6 +125,11 @@ export function db(): DbState {
   return state
 }
 
+/** Puts back a snapshot taken before a write that failed, so a rejected write leaves no trace. */
+export function restoreDb(snapshot: DbState) {
+  state = snapshot
+}
+
 /** Called after every write. Persists only when persistence is on. */
 export function commit() {
   if (!state || !persistenceEnabled()) return

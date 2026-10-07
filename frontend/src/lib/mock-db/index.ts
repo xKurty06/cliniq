@@ -15,6 +15,7 @@ export {
   startMockSession,
 } from './session'
 export type {
+  AdjustmentReason,
   ComplaintType,
   ExcuseLetterApproval,
   InventoryTransaction,

@@ -98,9 +98,14 @@ Ten modules total: five baseline (from the Software Engineering I Technical Docu
 - Record complaint/symptom for the visit
 - View a student's complaint history (also visible to PE/Sports Instructor as part of visit/incident history)
 
-**Treatment Recording**
-- Record treatment given
-- Edit treatment record
+**Treatment Recording** *(two parts — ADR-018, Wednesday, October 07, 2026 — 10:43 PHT)*
+- **Treatment notes** (free text): care that isn't stock — rest, cold compress, wound cleaning, advice
+- **Medicines & supplies given** (repeatable lines): a searchable inventory picker (grouped medicines/supplies, showing current stock and unit), a whole-number quantity (minimum 1), the item's unit, optional instructions (max 120 characters, e.g. "1 tablet every 6 hours"). Picking an item already listed adds to its line. The student's recorded allergies show beside the picker for awareness only (no automatic matching)
+- A visit needs treatment notes **or** at least one medicine/supply line
+- Saving dispenses every line from inventory in the same atomic save (one dispense transaction per line, linked to the student and visit); expired items can't be given, nearing-expiry items warn, quantities above stock warn but are allowed
+- Edit treatment record: changing a saved visit's lines writes stock adjustments linked to the visit (reason "visit edited") — a removed or lowered line returns stock, an added or raised one takes more; past transactions are never rewritten
+- Medicines given show on the visit detail and in the student's visit history, e.g. "Paracetamol 500mg × 2 tablets (1 tablet every 6 hours)"
+- Visits can't be deleted or voided (edit only), so there is no "remove all lines" path
 
 **Excuse Letter Issuance**
 - Generate an excuse letter from a visit record
@@ -220,10 +225,12 @@ Two distinct paths: the **computer system** (Staff's existing desktop flow) and 
 - Search/filter inventory (by name, category, stock level)
 - View item detail
 
-**Stock Operations**
-- Dispense/log usage (decrements stock; links to a visit record if applicable)
-- Restock/add stock (increments stock; logs restock date and quantity)
-- View inventory usage history/log
+**Stock Operations** *(stock-integrity rules: ADR-018, Wednesday, October 07, 2026 — 10:43 PHT)*
+- Dispense/log usage (decrements stock). From a visit or an incident's Stage 2, dispensing happens through that record's "Medicines & supplies given" lines. The standalone Dispense page is for non-visit use: it must name a student or choose "Not for a student (general use)", and if the student already has a visit today it links to that visit so the medicine is added there instead
+- Expired items can't be dispensed (rejected by the data layer, not just the UI); items with no expiration date are always dispensable
+- Restock/add stock (row action: quantity received + the item's expiration date; increments stock; logs the restock). **The expiration date changes only through Restock**; Edit Item no longer edits stock or expiry
+- **Adjust Stock** (Staff, row action): a +/- change or "set to counted quantity", a required reason (Expired - disposed / Damaged or spilled / Miscount correction / Other with a required note), and an optional note. The result can't go below 0. Writes an adjustment transaction and an audit entry. To replace an expired batch, dispose of the old quantity here and Restock with the new expiration date
+- View inventory usage history/log — not built yet; when built, it shows the Student Number, never the name
 
 **Alerts & Thresholds**
 - Set/edit the low-stock threshold per item

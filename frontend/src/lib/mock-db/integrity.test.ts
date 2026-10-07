@@ -60,6 +60,26 @@ describe('mock-db.json integrity', () => {
     expect(problemsAfter((s) => (s.frontendOnly.inventoryTransactions[0].itemId = 'item-9999'))).toMatch(/itemId/)
   })
 
+  it('has visits carrying medicine lines, each backed by its transactions (ADR-018)', () => {
+    expect(seed.visits.filter((v) => v.itemsGiven.length).length).toBeGreaterThanOrEqual(3)
+    expect(seed.frontendOnly.inventoryTransactions.some((t) => t.type === 'adjustment')).toBe(true)
+    const withLine = () => seed.visits.findIndex((v) => v.itemsGiven.length)
+    expect(problemsAfter((s) => (s.visits[withLine()].itemsGiven[0].itemId = 'item-9999'))).toMatch(/itemsGiven\[0\]\.itemId: "item-9999" doesn't exist/)
+    expect(problemsAfter((s) => (s.visits[withLine()].itemsGiven[0].quantity += 1))).toMatch(/transactions net to/)
+    expect(problemsAfter((s) => (s.visits[withLine()].itemsGiven[0].quantity = 0))).toMatch(/quantity: must be a whole number ≥ 1/)
+  })
+
+  it('rejects transactions whose student or visit link is wrong, and an adjustment without a reason', () => {
+    const linked = () => seed.frontendOnly.inventoryTransactions.findIndex((t) => t.visitId)
+    expect(problemsAfter((s) => (s.frontendOnly.inventoryTransactions[linked()].visitId = 'visit-9999'))).toMatch(/visitId: "visit-9999" doesn't exist/)
+    expect(problemsAfter((s) => (s.frontendOnly.inventoryTransactions[linked()].studentNumber = s.students[0].studentNumber))).toMatch(/must match visit/)
+    expect(problemsAfter((s) => delete s.frontendOnly.inventoryTransactions.find((t) => t.type === 'adjustment')!.reason)).toMatch(/reason/)
+  })
+
+  it('rejects a seed item that starts below zero', () => {
+    expect(problemsAfter((s) => (s.inventoryItems[0].currentStock = -1))).toMatch(/can't start below 0/)
+  })
+
   it('rejects invalid stage, status, role, and disposition values', () => {
     const bad = problemsAfter((s) => {
       ;(s.incidents[0] as { stage: number }).stage = 3

@@ -1,20 +1,26 @@
 import {
+  adjustInventoryStock as adjustInLayer,
   dispenseInventoryItem as dispenseInLayer,
   getInventoryItem,
+  getMockToday,
+  getStudent,
   listInventory,
+  listVisits,
+  restockInventoryItem as restockInLayer,
   saveInventoryItem as saveInLayer,
   type DispenseResult,
   type InventoryItemView,
   type SessionUser,
+  type StockAdjustmentInput,
 } from '../../../lib/mock-db'
-import type { InventoryCategory, InventoryItem } from '../../../types/entities'
+import type { InventoryCategory, InventoryItem, Student, Visit } from '../../../types/entities'
 
 /**
  * Inventory (#28–#30). Low-stock, nearing-expiration, expired, and below-zero states are computed
  * by the data layer on every read (`InventoryItemView`), never stored and never recomputed here, so
  * the list, the dispense form, and the Dashboard's alerts always agree.
  */
-export type { InventoryItemView }
+export type { InventoryItemView, StockAdjustmentInput }
 
 export interface InventoryFilters {
   search: string
@@ -67,4 +73,22 @@ export function dispenseInventoryItem(
   actor?: SessionUser,
 ): Promise<DispenseResult> {
   return dispenseInLayer(itemId, quantity, { studentNumber }, actor)
+}
+
+/** Adjust Stock (ADR-018): a signed change or a counted quantity, with a required reason. */
+export function adjustStock(itemId: string, input: StockAdjustmentInput, actor?: SessionUser): Promise<InventoryItemView> {
+  return adjustInLayer(itemId, input, actor)
+}
+
+/** Restock: adds the quantity received and confirms the expiration date (the only way it changes). */
+export function restockItem(itemId: string, quantity: number, expirationDate: string, actor?: SessionUser): Promise<InventoryItemView> {
+  return restockInLayer(itemId, quantity, expirationDate || null, actor)
+}
+
+/** The student a standalone dispense is for, plus any visit they already have today. */
+export async function findDispenseStudent(studentNumber: string): Promise<{ student: Student; todaysVisit: Visit | null }> {
+  const student = await getStudent(studentNumber)
+  const today = getMockToday()
+  const visits = await listVisits({ from: today, to: today })
+  return { student, todaysVisit: visits.find((visit) => visit.studentId === student.id) ?? null }
 }

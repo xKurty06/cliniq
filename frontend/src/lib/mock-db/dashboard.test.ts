@@ -67,6 +67,7 @@ const visit = (
   disposition: 'returned_to_class',
   loggedByUserId: 'u1',
   eventTag,
+  itemsGiven: [],
 })
 
 const item = (id: string, extra: Partial<InventoryItem>): InventoryItem => ({

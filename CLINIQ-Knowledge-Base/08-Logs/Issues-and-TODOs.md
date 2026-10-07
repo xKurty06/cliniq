@@ -230,5 +230,14 @@ Left open by the session that made every dropdown match the Dashboard's date-ran
 - **Config values now in `mock-db.json`, carried over from the Dashboard mock — not requirements, they need a team or nurse decision:** `frequentVisitorMinVisits` (3), `frequentVisitorWindowDays` (30; the Dashboard uses its selected range instead), `upcomingFollowUpDays` (7), `expiryWarningDays` (30), `clusterMinCount` (8), `clusterRatio` (2), `topComplaints` (5). Also open: whether stock *at* the threshold counts as low (currently strictly below).
 - **`frontendOnly` data to review when the ERD is designed:** `devAccounts` (credentials, `mustChangePassword`), `visitComplaintTypes` (incl. Smart Triage steps), `incidentComplaintTypes`, `inventoryTransactions`, `recordReviews`, `excuseLetterApprovals`, `peReferrals`.
 
+## Medicines & supplies given (ADR-018) — Wednesday, October 07, 2026 — 10:43 PHT
+
+- **Provisional fields for the ERD/schema design** (PROVISIONAL / `frontendOnly` convention; none is a schema decision): `Visit.itemsGiven` and `Incident.itemsGiven` (arrays of `ItemGivenLine`: `itemId`, `itemName` and `unit` snapshots, `quantity`, `instructions`); `InventoryTransaction.type` value `adjustment` (signed `quantity`); `InventoryTransaction.reason` (`visit_edited` / `expired_disposed` / `damaged_spilled` / `miscount_correction` / `other`); `InventoryTransaction.note`; `InventoryTransaction.incidentId`.
+- **Open question — editing an incident's medicines after Stage 2 is complete.** Stage 2 dispenses its lines once; re-submitting with different lines is rejected ("Medicines on a completed incident can't be changed"). The visit rule (adjustments with reason "visit edited") wasn't extended to incidents because no incident-edit reason was decided. Needs a product decision; code marker: `ponytail:` comment in `completeIncidentStageTwo` (`frontend/src/lib/mock-db/api.ts`).
+- **No inventory usage history screen exists yet** (Module 8 "View inventory usage history/log"). When built, rows show the Student Number, never the name (ADR-004, ADR-018).
+- **Visits and incidents can't be deleted or voided** anywhere, so no "remove all lines" path exists. If deletion/voiding is ever added, it must return each line's stock through adjustment transactions.
+- **Re-audit needed (Frontend-Loop-Engineering Phase 2):** New Visit Entry, Visit Detail/Edit, Incident Entry (Stage 2), Inventory List, Add/Edit Inventory Item, and Dispense changed after their audits. Their Build/Audit boxes were left as they were; run the Phase 2 Countercheck/Audit on these screens.
+- **Canonical document drift:** the Modules & Features canonical doc (Modules 3, 4, 8) needs the ADR-018 rules (`09-References/Canonical-Documents.md`).
+
 ## Format for new entries
 When you find or resolve something, add it here with a date and enough context that someone with zero memory of the conversation that created it can still act on it.

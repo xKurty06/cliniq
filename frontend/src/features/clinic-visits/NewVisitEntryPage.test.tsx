@@ -26,7 +26,7 @@ describe('New Visit', () => {
     await screen.findByRole('heading', { name: 'New Visit' })
     await user.click(screen.getByRole('button', { name: 'Save Visit' }))
     expect(screen.getByText('Select the complaint for this visit.')).toBeInTheDocument()
-    expect(screen.getByText('Enter the treatment or care given.')).toBeInTheDocument()
+    expect(screen.getByText('Enter treatment notes or add a medicine or supply.')).toBeInTheDocument()
   })
 
   it('creates audit entries for visit submission and follow-up creation', async () => {
