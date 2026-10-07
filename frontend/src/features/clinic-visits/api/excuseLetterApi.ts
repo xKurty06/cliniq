@@ -23,8 +23,10 @@ export interface ExcuseLetterContext {
   checkedBy: string
   recipient: string
   body: string
-  /** Stored period once approved; otherwise the default (the visit date, one day). */
+  /** Stored period once approved; else the visit's draft; else the default (the visit date, one day). */
   period: ExcusedPeriod
+  /** Note for the teacher: the approved one, else the visit draft's, else empty. */
+  note: string
   /** Set once Staff has approved this letter; it's then kept in the student's record. */
   approval: ExcuseLetterApproval | null
 }
@@ -59,9 +61,13 @@ export async function fetchExcuseLetterContext(visitId?: string): Promise<Excuse
     checkedBy,
     recipient: 'Class Adviser',
     body: defaultBody(student, visit),
+    // One source of truth: the approved letter, else the draft saved with the visit (approval clears it).
     period: approval
       ? { excusedFrom: approval.excusedFrom, excusedUntil: approval.excusedUntil }
-      : { excusedFrom: visitDate, excusedUntil: visitDate },
+      : visit.excuseLetterDraft
+        ? { excusedFrom: visit.excuseLetterDraft.excusedFrom, excusedUntil: visit.excuseLetterDraft.excusedUntil }
+        : { excusedFrom: visitDate, excusedUntil: visitDate },
+    note: (approval ? approval.note : visit.excuseLetterDraft?.note) ?? '',
     approval,
   }
 }
@@ -69,7 +75,8 @@ export async function fetchExcuseLetterContext(visitId?: string): Promise<Excuse
 export async function approveExcuseLetter(
   context: ExcuseLetterContext,
   period: ExcusedPeriod,
+  note = '',
   actor?: SessionUser,
 ): Promise<void> {
-  await approveInLayer(context.visit.id, period, actor)
+  await approveInLayer(context.visit.id, { ...period, note: note.trim() || null }, actor)
 }

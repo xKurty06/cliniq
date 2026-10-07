@@ -75,6 +75,19 @@ export interface Visit {
    * the free-text notes for care that isn't stock. PROVISIONAL: §5 gives Visit only `treatment`.
    */
   itemsGiven: ItemGivenLine[]
+  /** Sent home or referred only: the excuse-letter values entered with the visit, until a letter is
+   * approved. Approval moves them onto the letter and clears this. PROVISIONAL, pending the ERD. */
+  excuseLetterDraft: ExcuseLetterDraft | null
+  /** Referred to hospital only: where the student was referred. PROVISIONAL, pending the ERD. */
+  referredTo: string | null
+}
+
+/** Excuse-letter values entered on a visit before approval. PROVISIONAL, pending the ERD. */
+export interface ExcuseLetterDraft<D = ISODate> {
+  excusedFrom: D
+  excusedUntil: D
+  /** Optional note for the teacher, printed on the letter. */
+  note: string | null
 }
 
 /**

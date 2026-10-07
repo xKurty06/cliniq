@@ -282,7 +282,7 @@ function ExcuseLettersCard({ letters }: { letters: StudentExcuseLetter[] }) {
         titleId="excuse-letters"
         title="Excuse Letters"
         icon={<Icon name="fileText" />}
-        description="Approved letters and the dates excused. For cross-checking attendance; not linked to the attendance system."
+        description="Approved letters and drafts awaiting approval, with the dates excused. For cross-checking attendance; not linked to the attendance system."
       />
       {letters.length ? (
         <RowList labelledBy="excuse-letters">
@@ -291,15 +291,26 @@ function ExcuseLettersCard({ letters }: { letters: StudentExcuseLetter[] }) {
               key={letter.id}
               primary={`${formatDateRange(letter.excusedFrom, letter.excusedUntil)} · ${dispositionLabel[letter.disposition]}`}
               trailing={
-                <Link to={paths.visitDetail(letter.visitId)} className={buttonClassName({ size: 'sm' })}>
-                  View visit
-                </Link>
+                letter.status === 'pending' ? (
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <Badge tone="warning" variant="soft">
+                      Pending approval
+                    </Badge>
+                    <Link to={paths.excuseLetter(letter.visitId)} className={buttonClassName({ size: 'sm' })}>
+                      Review letter
+                    </Link>
+                  </div>
+                ) : (
+                  <Link to={paths.visitDetail(letter.visitId)} className={buttonClassName({ size: 'sm' })}>
+                    View visit
+                  </Link>
+                )
               }
             />
           ))}
         </RowList>
       ) : (
-        <EmptyState title="No excuse letters yet" description="No approved excuse letters are stored for this student." />
+        <EmptyState title="No excuse letters yet" description="No excuse letters are stored or awaiting approval for this student." />
       )}
     </Card>
   )

@@ -1,7 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { getLatestVisit, getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
+import { addDays, formatDate, todayISO } from '../../lib/dates'
+import { getExcuseLetterApproval, getLatestVisit, getRecordedAuditEntries, resetMockDb } from '../../lib/mock-db'
+import { pickDate } from '../../test/pickDate'
 import { renderWithRouter } from '../../test/renderWithRouter'
 import { NewVisitEntryPage } from './NewVisitEntryPage'
 
@@ -30,7 +32,21 @@ describe('New Visit', () => {
     await user.type(complaintField(), '   ')
     await user.click(screen.getByRole('button', { name: 'Save Visit' }))
     expect(screen.getByText('Enter the complaint for this visit.')).toBeInTheDocument()
-    expect(screen.getByText('Enter treatment notes or add a medicine or supply.')).toBeInTheDocument()
+    // Treatment notes and items given are optional: a quiet, non-blocking note instead of an error.
+    expect(screen.queryByText(/enter treatment notes/i)).not.toBeInTheDocument()
+    expect(screen.getByText('No treatment recorded. You can still save.')).toBeInTheDocument()
+  })
+
+  it('saves a visit with neither treatment notes nor a medicine', async () => {
+    const user = userEvent.setup()
+    render(<NewVisitEntryPage studentNumber="2026-00001" />)
+
+    await screen.findByRole('heading', { name: 'New Visit' })
+    await user.type(complaintField(), 'Headache')
+    await user.click(screen.getByRole('button', { name: 'Save Visit' }))
+
+    expect(await screen.findByText(/visit saved/i)).toBeInTheDocument()
+    expect(await getLatestVisit()).toMatchObject({ complaint: 'Headache', treatment: '', itemsGiven: [] })
   })
 
   it('creates audit entries for visit submission and follow-up creation', async () => {
@@ -146,5 +162,84 @@ describe('New Visit student lookup', () => {
     await screen.findByRole('combobox', { name: /student/i })
     await user.click(screen.getByRole('button', { name: 'Save Visit' }))
     expect(screen.getByText(/choose the student/i)).toBeInTheDocument()
+  })
+})
+
+describe('New Visit: disposition-specific fields', () => {
+  beforeEach(() => resetMockDb())
+
+  async function openForm() {
+    const user = userEvent.setup()
+    renderWithRouter(<NewVisitEntryPage studentNumber="2026-00001" />)
+    await screen.findByRole('heading', { name: 'New Visit' })
+    await user.type(complaintField(), 'Fever')
+    return user
+  }
+
+  it('shows nothing for Returned to class, the letter for Sent home, and the letter plus "Referred to" for a referral', async () => {
+    const user = await openForm()
+    expect(screen.queryByLabelText(/prepare an excuse letter/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/referred to/i)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Sent home' }))
+    expect(screen.getByLabelText(/prepare an excuse letter/i)).toBeChecked()
+    expect(screen.getByRole('button', { name: /^Excused from/ })).toHaveTextContent(formatDate(todayISO()))
+    expect(screen.getByLabelText('Note for the teacher')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/referred to/i)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Referred to hospital' }))
+    expect(screen.getByLabelText(/prepare an excuse letter/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Referred to (hospital or clinic)')).toBeInTheDocument()
+  })
+
+  it('clears the fields when the disposition changes, and validates them only while shown', async () => {
+    const user = await openForm()
+    await user.click(screen.getByRole('radio', { name: 'Referred to hospital' }))
+    await user.type(screen.getByLabelText(/referred to/i), 'Provincial Hospital')
+    await user.type(screen.getByLabelText('Note for the teacher'), 'Excuse from PE')
+    await user.click(screen.getByRole('button', { name: 'Save Visit' }))
+    expect(screen.getByText('Excused from and Excused until are both required.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Sent home' }))
+    expect(screen.getByLabelText('Note for the teacher')).toHaveValue('')
+    expect(screen.queryByText('Excused from and Excused until are both required.')).not.toBeInTheDocument()
+
+    // Hidden fields aren't validated: back to Returned to class, the visit saves with no letter.
+    await user.click(screen.getByRole('radio', { name: 'Returned to class' }))
+    await user.click(screen.getByRole('button', { name: 'Save Visit' }))
+    expect(await screen.findByText(/visit saved/i)).toBeInTheDocument()
+    expect(await getLatestVisit()).toMatchObject({ excuseLetterDraft: null, referredTo: null })
+  })
+
+  it('saves the letter as a draft, not an approved letter, and offers to review it', async () => {
+    const user = await openForm()
+    const today = todayISO()
+    await user.click(screen.getByRole('radio', { name: 'Referred to hospital' }))
+    await user.type(screen.getByLabelText(/referred to/i), 'Provincial Hospital')
+    await pickDate(user, screen.getByRole('button', { name: /^Excused until/ }), addDays(today, 2))
+    await user.type(screen.getByLabelText('Note for the teacher'), 'Excuse from PE this week')
+    await user.click(screen.getByRole('button', { name: 'Save Visit' }))
+
+    expect(await screen.findByText(/visit saved/i)).toBeInTheDocument()
+    const visit = await getLatestVisit()
+    expect(visit).toMatchObject({
+      disposition: 'referred_to_hospital',
+      referredTo: 'Provincial Hospital',
+      excuseLetterDraft: { excusedFrom: today, excusedUntil: addDays(today, 2), note: 'Excuse from PE this week' },
+    })
+    expect(await getExcuseLetterApproval(visit.id)).toBeNull()
+    expect(screen.getByRole('link', { name: 'Review excuse letter' })).toHaveAttribute('href', `/visits/${visit.id}/excuse-letter`)
+  })
+
+  it('stores no draft when "Prepare an excuse letter" is unticked', async () => {
+    const user = await openForm()
+    await user.click(screen.getByRole('radio', { name: 'Sent home' }))
+    await user.click(screen.getByLabelText(/prepare an excuse letter/i))
+    expect(screen.queryByRole('button', { name: /^Excused until/ })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Save Visit' }))
+
+    expect(await screen.findByText(/visit saved/i)).toBeInTheDocument()
+    expect((await getLatestVisit()).excuseLetterDraft).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Review excuse letter' })).not.toBeInTheDocument()
   })
 })

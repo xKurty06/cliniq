@@ -1,7 +1,9 @@
 import { useId, useState, type FormEvent } from 'react'
+import { Link } from 'react-router'
 import {
   Badge,
   Button,
+  buttonClassName,
   Card,
   CardBody,
   CardHeader,
@@ -15,10 +17,15 @@ import {
 } from '../../components'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { cn } from '../../lib/cn'
-import { formatDateTime } from '../../lib/dates'
+import { cleanComplaint } from '../../lib/complaints'
+import { formatDateRange, formatDateTime } from '../../lib/dates'
 import { draftsFrom, formatItemGiven } from '../../lib/itemsGiven'
 import { getMockSessionUser, StockRuleError, type SessionUser } from '../../lib/mock-db'
+import { paths } from '../../routes/paths'
 import type { Disposition } from '../../types/entities'
+import { ComplaintField } from './ComplaintField'
+import { DispositionFields } from './DispositionFields'
+import { dispositionErrors, emptyDispositionValues, type DispositionErrors } from './dispositionValues'
 import {
   fetchVisitDetail,
   updateVisitDetail,
@@ -39,9 +46,8 @@ const dispositionLabel: Record<Disposition, string> = {
   referred_to_hospital: 'Referred to hospital',
 }
 
-interface Errors {
+interface Errors extends DispositionErrors {
   complaint?: string
-  treatment?: string
   itemsGiven?: string
 }
 
@@ -135,12 +141,18 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
     setSaved(null)
   }
 
+  function setDisposition(disposition: Disposition) {
+    // Disposition-specific fields start fresh whenever the disposition changes.
+    setValues((current) => ({ ...current, ...emptyDispositionValues(visit.dateTime.slice(0, 10)), disposition }))
+    setErrors((current) => ({ ...current, excusedUntil: undefined }))
+    setSaved(null)
+  }
+
   function validate(): Errors {
     const next: Errors = {}
-    if (!values.complaint.trim()) next.complaint = 'Enter the visit complaint.'
-    if (!values.treatment.trim() && !lines.length) next.treatment = 'Enter treatment notes or add a medicine or supply.'
+    if (!cleanComplaint(values.complaint)) next.complaint = 'Enter the visit complaint.'
     if (lines.some((line) => line.quantity < 1)) next.itemsGiven = 'Each quantity must be at least 1.'
-    return next
+    return { ...next, ...dispositionErrors(values.disposition, values, Boolean(visit.approval)) }
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -271,18 +283,17 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
           <CardBody>
             {editing ? (
               <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
-                <TextareaField
-                  label="Complaint"
+                <ComplaintField
                   value={values.complaint}
-                  error={errors.complaint}
                   onChange={(value) => setField('complaint', value)}
+                  suggestions={visit.complaintSuggestions}
+                  error={errors.complaint}
                 />
                 <TextareaField
                   label="Treatment notes"
                   required={false}
-                  hint="Care that isn't stock: rest, cold compress, wound cleaning, advice. Needed unless a medicine or supply is listed below."
+                  hint="Optional. Care that isn't stock: rest, cold compress, wound cleaning, advice."
                   value={values.treatment}
-                  error={errors.treatment}
                   onChange={(value) => setField('treatment', value)}
                 />
                 <ItemsGivenField
@@ -294,7 +305,7 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
                   onChange={(next) => {
                     setLines(next)
                     setSaved(null)
-                    setErrors((current) => ({ ...current, treatment: undefined, itemsGiven: undefined }))
+                    setErrors((current) => ({ ...current, itemsGiven: undefined }))
                   }}
                 />
                 <div>
@@ -302,18 +313,32 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
                   <SegmentedControl
                     label="Disposition"
                     value={values.disposition}
-                    onChange={(value) => setField('disposition', value)}
+                    onChange={setDisposition}
                     options={dispositionOptions}
                     size="md"
                   />
                 </div>
+                <DispositionFields
+                  disposition={values.disposition}
+                  values={values}
+                  onChange={(next) => {
+                    setValues((current) => ({ ...current, ...next }))
+                    setErrors((current) => ({ ...current, excusedUntil: undefined }))
+                    setSaved(null)
+                  }}
+                  errors={errors}
+                  approvedPeriod={visit.approval}
+                />
                 <Input
                   label="Event tag"
                   value={values.eventTag}
                   placeholder="Optional school event"
                   onChange={(event) => setField('eventTag', event.target.value)}
                 />
-                <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-4">
+                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                  {!values.treatment.trim() && !lines.length && (
+                    <p className="mr-auto text-xs text-text-secondary">No treatment recorded. You can still save.</p>
+                  )}
                   <Button variant="neutral" onClick={cancelEdit}>
                     Cancel
                   </Button>
@@ -330,7 +355,13 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
                 </section>
                 <section>
                   <h2 className="text-sm font-bold text-text-primary">Treatment notes</h2>
-                  <p className="mt-1 text-sm text-text-primary">{visit.treatment || 'No treatment notes.'}</p>
+                  {visit.treatment.trim() ? (
+                    <p className="mt-1 text-sm text-text-primary">{visit.treatment}</p>
+                  ) : (
+                    <p className="mt-1 text-sm text-text-secondary">
+                      {visit.itemsGiven.length ? 'No treatment notes.' : 'No treatment recorded.'}
+                    </p>
+                  )}
                 </section>
                 <section>
                   <h2 className="text-sm font-bold text-text-primary">Medicines &amp; supplies given</h2>
@@ -350,12 +381,69 @@ function VisitDetailEditor({ initialVisit }: { initialVisit: VisitDetail }) {
                     {dispositionLabel[visit.disposition]}
                   </Badge>
                 </section>
+                {visit.referredTo && (
+                  <section>
+                    <h2 className="text-sm font-bold text-text-primary">Referred to</h2>
+                    <p className="mt-1 text-sm text-text-primary">{visit.referredTo}</p>
+                  </section>
+                )}
               </div>
             )}
           </CardBody>
         </Card>
+
+        <ExcuseLetterCard visit={visit} />
       </div>
     </div>
+  )
+}
+
+/**
+ * The visit's excuse letter (Staff only, like the whole page and the profile's Excuse Letters card).
+ * An approved letter wins: its stored period and note are shown, the same ones the profile lists.
+ * Before approval the draft saved with the visit is shown; approval clears that draft.
+ */
+function ExcuseLetterCard({ visit }: { visit: VisitDetail }) {
+  const letter = visit.approval ?? visit.excuseLetterDraft
+  const status = visit.approval ? 'Approved' : visit.excuseLetterDraft ? 'Pending approval' : 'Not prepared'
+  return (
+    <Card aria-labelledby="visit-excuse-letter-title">
+      <CardHeader
+        titleId="visit-excuse-letter-title"
+        title="Excuse letter"
+        icon={<Icon name="fileText" />}
+        actions={
+          <Badge tone={visit.approval ? 'success' : visit.excuseLetterDraft ? 'warning' : 'neutral'} variant="soft">
+            {status}
+          </Badge>
+        }
+      />
+      <CardBody className="flex flex-col gap-4">
+        {letter ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold text-text-secondary">Excused period</p>
+              <p className="text-sm font-semibold text-text-primary">
+                {formatDateRange(letter.excusedFrom, letter.excusedUntil)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-text-secondary">Note for the teacher</p>
+              <p className={cn('text-sm', letter.note ? 'text-text-primary' : 'text-text-secondary')}>
+                {letter.note || 'No note.'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-text-secondary">No excuse letter has been prepared for this visit.</p>
+        )}
+        <div>
+          <Link to={paths.excuseLetter(visit.id)} className={buttonClassName({ size: 'sm' })}>
+            {visit.approval ? 'View excuse letter' : visit.excuseLetterDraft ? 'Review excuse letter' : 'Prepare excuse letter'}
+          </Link>
+        </div>
+      </CardBody>
+    </Card>
   )
 }
 

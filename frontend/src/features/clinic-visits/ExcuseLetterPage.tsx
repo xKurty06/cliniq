@@ -49,12 +49,14 @@ function PrintableLetter({
   recipient,
   body,
   period,
+  note,
   approved,
 }: {
   context: ExcuseLetterContext
   recipient: string
   body: string
   period: ExcusedPeriod
+  note: string
   approved: boolean
 }) {
   const periodValid = !excusedPeriodError(period)
@@ -78,6 +80,7 @@ function PrintableLetter({
           {periodValid ? formatDateRange(period.excusedFrom, period.excusedUntil) : 'Not set'}
         </p>
         <div className="whitespace-pre-line">{body}</div>
+        {note.trim() && <p>Note for the teacher: {note.trim()}</p>}
         <div className="mt-6">
           <p className="font-semibold">{context.checkedBy}</p>
           <p className="text-text-secondary">School Clinic Staff</p>
@@ -98,6 +101,7 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
   const [recipient, setRecipient] = useState(context.recipient)
   const [body, setBody] = useState(context.body)
   const [period, setPeriod] = useState(context.period)
+  const [note, setNote] = useState(context.note)
   const [checked, setChecked] = useState(Boolean(context.approval))
   const [approved, setApproved] = useState(Boolean(context.approval))
   const [saving, setSaving] = useState(false)
@@ -106,7 +110,7 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
   async function approve() {
     setSaving(true)
     try {
-      await approveExcuseLetter(context, period)
+      await approveExcuseLetter(context, period, note)
       setApproved(true)
     } finally {
       setSaving(false)
@@ -179,6 +183,14 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
                 disabled={approved}
               />
             </div>
+            <Input
+              label="Note for the teacher"
+              value={note}
+              placeholder="Optional"
+              onChange={(event) => setNote(event.target.value)}
+              hint={approved ? 'Fixed once the letter is approved.' : undefined}
+              disabled={approved}
+            />
             <div className="flex flex-col gap-1">
               <label htmlFor="excuse-body" className="text-xs font-semibold text-text-primary">
                 Letter body
@@ -231,6 +243,7 @@ function ExcuseLetterEditor({ context }: { context: ExcuseLetterContext }) {
               recipient={recipient}
               body={body}
               period={period}
+              note={note}
               approved={approved}
             />
           </CardBody>

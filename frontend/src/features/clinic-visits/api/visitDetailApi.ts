@@ -1,15 +1,24 @@
 import {
+  getExcuseLetterApproval,
   getLatestVisit,
+  getVisitComplaintSuggestions,
   getStudentById,
   getUser,
   getVisit,
   listInventory,
   updateVisit,
+  type ExcuseLetterApproval,
   type InventoryItemView,
   type ItemLineInput,
   type SessionUser,
 } from '../../../lib/mock-db'
-import type { Disposition, ISODateTime, ItemGivenLine, Student } from '../../../types/entities'
+import { normalizeComplaint } from '../../../lib/complaints'
+import type { Disposition, ExcuseLetterDraft, ISODateTime, ItemGivenLine, Student } from '../../../types/entities'
+import {
+  emptyDispositionValues,
+  dispositionPayload,
+  type DispositionValues,
+} from '../dispositionValues'
 
 export interface VisitDetail {
   id: string
@@ -21,11 +30,18 @@ export interface VisitDetail {
   eventTag: string
   loggedBy: string
   itemsGiven: ItemGivenLine[]
+  /** Unapproved letter values saved with the visit. Always null once `approval` is set. */
+  excuseLetterDraft: ExcuseLetterDraft | null
+  referredTo: string | null
+  /** The approved letter, if any. Its period and note win over everything else. */
+  approval: ExcuseLetterApproval | null
   /** Current inventory, for editing the medicine lines. */
   items: InventoryItemView[]
+  /** Complaint suggestions for the edit form's Complaint field. */
+  complaintSuggestions: string[]
 }
 
-export interface VisitDetailValues {
+export interface VisitDetailValues extends DispositionValues {
   complaint: string
   treatment: string
   disposition: Disposition
@@ -33,7 +49,13 @@ export interface VisitDetailValues {
 }
 
 export function valuesFromVisit(visit: VisitDetail): VisitDetailValues {
+  const draft = visit.excuseLetterDraft
   return {
+    ...emptyDispositionValues(visit.dateTime.slice(0, 10)),
+    // A Sent home or referred visit saved without a draft had the box unticked.
+    prepareLetter: Boolean(draft),
+    ...(draft && { excusedFrom: draft.excusedFrom, excusedUntil: draft.excusedUntil, letterNote: draft.note ?? '' }),
+    referredTo: visit.referredTo ?? '',
     complaint: visit.complaint,
     treatment: visit.treatment,
     disposition: visit.disposition,
@@ -44,10 +66,12 @@ export function valuesFromVisit(visit: VisitDetail): VisitDetailValues {
 /** `visitId` comes from the `/visits/:visitId` route; omitted, the latest active visit is used. */
 export async function fetchVisitDetail(visitId?: string): Promise<VisitDetail> {
   const visit = visitId ? await getVisit(visitId) : await getLatestVisit()
-  const [student, loggedBy, items] = await Promise.all([
+  const [student, loggedBy, items, approval, complaintSuggestions] = await Promise.all([
     getStudentById(visit.studentId),
     getUser(visit.loggedByUserId).then((user) => user.name, () => 'Unknown user'),
     listInventory(),
+    getExcuseLetterApproval(visit.id),
+    getVisitComplaintSuggestions(),
   ])
   return {
     id: visit.id,
@@ -59,7 +83,11 @@ export async function fetchVisitDetail(visitId?: string): Promise<VisitDetail> {
     eventTag: visit.eventTag ?? '',
     loggedBy,
     itemsGiven: visit.itemsGiven,
+    excuseLetterDraft: visit.excuseLetterDraft,
+    referredTo: visit.referredTo,
+    approval,
     items,
+    complaintSuggestions,
   }
 }
 
@@ -76,17 +104,22 @@ export async function updateVisitDetail(
   const { visit: updated, belowZero } = await updateVisit(
     visit.id,
     {
-      complaint: values.complaint.trim(),
+      // Same normalization as New Visit, so an edit can't reintroduce a spelling or case variant.
+      complaint: normalizeComplaint(values.complaint, visit.complaintSuggestions),
       treatment: values.treatment.trim(),
       disposition: values.disposition,
       eventTag: values.eventTag.trim() || null,
       itemsGiven,
+      // An approved letter's period is fixed: the edit sends "Referred to" only, never a draft.
+      ...(visit.approval
+        ? { referredTo: dispositionPayload(values.disposition, values).referredTo }
+        : dispositionPayload(values.disposition, values)),
     },
     actor,
   )
-  const items = await listInventory()
+  const [items, complaintSuggestions] = await Promise.all([listInventory(), getVisitComplaintSuggestions()])
   return {
-    visit: { ...visit, ...updated, eventTag: updated.eventTag ?? '', items },
+    visit: { ...visit, ...updated, eventTag: updated.eventTag ?? '', items, complaintSuggestions },
     belowZero,
   }
 }

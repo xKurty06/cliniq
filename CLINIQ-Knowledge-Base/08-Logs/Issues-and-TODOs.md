@@ -43,6 +43,8 @@
 
 ## Resolved since last update
 
+- **Wednesday, October 07, 2026 — 21:48 PHT — Visit Detail's Complaint edit was an unnormalized free textarea.** It now uses the same complaint `Combobox` (shared `ComplaintField`) and the same normalization as New Visit, and `updateVisit` in the data layer normalizes too, so an edit can't reintroduce a spelling or case variant.
+
 - **Wednesday, October 07, 2026 — 01:16 PHT — Report an Issue recipient email.** Replaced the footer modal's `mailto:` fallback recipient `team@example.com` with `zkg.balboa@gmail.com` in `frontend/src/features/issue-reports/reportIssueConfig.ts`, with the modal regression assertion updated to match.
 
 - **Saturday, October 3, 2026 — 14:52 PHT — Dashboard trend table relied on `min-width: max-content` with `table-layout: fixed`.** That pairing worked in Chromium but isn't consistently defined across browsers. The table now keeps `fixedLayout`, which keeps its column widths stable under the zero-activity toggle, and overflows through an explicit `minTableWidth` equal to its column sum.
@@ -235,13 +237,30 @@ Left open by the session that made every dropdown match the Dashboard's date-ran
 ## Free-text complaints and student lookup — Wednesday, October 07, 2026 — 20:03 PHT
 
 - **Free-text complaints split the counts that group by complaint.** Case and spacing are merged on save, but synonyms and typos ("Head ache", "Headache and fever") stay separate. Affected, unchanged: the Dashboard complaint trends (series, the "Other" list, and symptom-cluster detection, which counts each complaint separately), the trend table (its complaint column widens to the longest label, up to 60 characters), and the Health Summary / monthly report complaint counts. The Visit Log search (substring) is unaffected. A long tail of one-off complaints can push real complaints out of the top 5 and hide a cluster. Decide whether Staff should merge complaints, or whether reports group them.
-- **Visit Detail's Complaint edit is still an unnormalized free textarea** (it was free text before this change). An edit can save "headache" next to "Headache", or more than 60 characters. Not changed: the request covered New Visit only.
+- ~~**Visit Detail's Complaint edit is still an unnormalized free textarea.**~~ Resolved Wednesday, October 07, 2026 — 21:48 PHT (see Resolved since last update).
 - **"Grade/section":** students have only `gradeLevel`; no section field exists, so the picker shows the grade only.
 - **Typing a full Student Number and clicking Save without picking** no longer identifies the student (the old field did). Enter, or a click on the result, picks it; Save without a pick asks for one.
 - **Student search isn't audit-logged**, the same as the Student List search. It returns no medical fields.
 - **StudentPicker rollout:** it would also fit Dispense, PE/Sports Referral, and Incident Stage 1, which still use `StudentNumberField`.
 - **Re-audit needed (Frontend-Loop-Engineering Phase 2):** New Visit Entry changed after its audit. Its boxes were left as they were.
 - **Canonical document drift:** the Modules & Features canonical doc (Module 3) needs the free-text complaint and student-lookup wording now in `Module-Overview.md` (`09-References/Canonical-Documents.md`).
+
+## Pending excuse letters on the Dashboard and profile — Wednesday, October 07, 2026 — 23:05 PHT
+
+- **Dashboard overflows at 375px (pre-existing):** the Visit Calendar (weekday headers and the view switcher's "Table" button) makes the page 416px wide on a 375px phone, for Staff and Admin alike. Not caused or fixed by this change.
+- **Re-audit needed (Frontend-Loop-Engineering Phase 2):** Clinic Overview Dashboard (#31) and Student Profile (#7) changed after their audits. Their boxes were left as they were.
+- **Canonical document drift:** Modules & Features (Modules 3 and 9) and Frontend Design Reference (Reference 1) need the Staff-only pending-letters list (ADR-011 amendment).
+
+## Optional visit notes and disposition-specific fields — Wednesday, October 07, 2026 — 21:48 PHT
+
+- **Provisional fields for the ERD/schema design** (PROVISIONAL convention; not a schema decision): `Visit.excuseLetterDraft` (`excusedFrom`, `excusedUntil`, `note`, or null; only on Sent home / Referred to hospital; must be null once the visit's letter is approved), `Visit.referredTo` (text or null; only on Referred to hospital), and `ExcuseLetterApproval.note` (teacher note snapshotted at approval).
+- **Which record wins:** before approval, the visit's draft is the only record of the period and note; after approval, the approved letter is the only record (approval copies the values and clears the draft in the same write, and the data layer rejects a draft on a visit with an approved letter). The integrity check fails if both exist for one visit.
+- **No length limit** was set for "Referred to" or the teacher note; none was asked for.
+- **"Excused from" default in the Visit Detail edit form** is the visit's date (on New Visit it is today, which is the visit date).
+- **Recipient and body edits on the letter are still not stored** (only the period and, now, the note are). Unchanged from before.
+- **A visit with an approved letter can be edited to Returned to class.** The letter stays approved and still lists on the Student Profile with the visit's current disposition (e.g. "· Returned to class"). Decide whether that needs a different label.
+- **Re-audit needed (Frontend-Loop-Engineering Phase 2):** New Visit Entry, Visit Detail/Edit, and Excuse Letter Generator (#13) changed after their audits. Their boxes were left as they were.
+- **Canonical document drift:** the Modules & Features canonical doc (Module 3) needs the optional-notes rule (ADR-018 amendment) and the disposition-specific fields (`09-References/Canonical-Documents.md`).
 
 ## Excuse letter excused period — Wednesday, October 07, 2026 — 13:01 PHT
 

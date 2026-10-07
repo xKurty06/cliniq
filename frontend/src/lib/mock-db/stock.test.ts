@@ -79,8 +79,11 @@ describe('recording a visit with medicines and supplies', () => {
     expect(getRecordedAuditEntries()).toEqual([])
   })
 
-  it('needs treatment notes or a line, but either alone is enough', async () => {
-    await expect(newVisit([], '  ')).rejects.toThrow('Enter treatment notes or add a medicine or supply.')
+  it('saves a visit with neither treatment notes nor a line (both optional)', async () => {
+    const { visit } = await newVisit([], '')
+    expect(visit).toMatchObject({ treatment: '', itemsGiven: [] })
+    const { visit: edited } = await updateVisit(visit.id, { complaint: 'Headache', treatment: '', disposition: 'returned_to_class', eventTag: null, itemsGiven: [] })
+    expect(edited.treatment).toBe('')
     await expect(newVisit([], 'Rested')).resolves.toBeTruthy()
     await expect(newVisit([{ itemId: GAUZE, quantity: 1 }])).resolves.toBeTruthy()
   })

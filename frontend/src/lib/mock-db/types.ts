@@ -2,6 +2,7 @@ import type {
   AuditLogEntry,
   BackupLog,
   Disposition,
+  ExcuseLetterDraft,
   FollowUp,
   HospitalReferral,
   Incident,
@@ -38,7 +39,10 @@ export type SeedUser = Replace<User, { lastLogin: RelativeDateTime | null }>
 
 export type SeedStudent = Omit<Student, 'recordComplete'>
 
-export type SeedVisit = Omit<Replace<Visit, { dateTime: RelativeDateTime }>, 'studentId'> & {
+export type SeedVisit = Omit<
+  Replace<Visit, { dateTime: RelativeDateTime; excuseLetterDraft: ExcuseLetterDraft<RelativeDate> | null }>,
+  'studentId'
+> & {
   studentNumber: StudentNumber
 }
 
@@ -156,6 +160,8 @@ export interface ExcuseLetterApproval<T = ISODateTime, D = ISODate> {
   /** Excused period (provisional pending the ERD). Records dates only; no attendance integration. */
   excusedFrom: D
   excusedUntil: D
+  /** Note for the teacher, snapshotted at approval (provisional pending the ERD). */
+  note: string | null
 }
 
 export interface PeReferral<T = ISODateTime> {

@@ -1,4 +1,12 @@
-import { getBackupStatus, getCalendarDays, getDashboardSummary, getHolidays, type BackupStatusView } from '../../../lib/mock-db'
+import {
+  getBackupStatus,
+  getCalendarDays,
+  getDashboardSummary,
+  getHolidays,
+  listPendingExcuseLetters,
+  type BackupStatusView,
+  type PendingExcuseLetter,
+} from '../../../lib/mock-db'
 import type { ISODate } from '../../../types/entities'
 import type { CalendarDay, DashboardQuery, DashboardSummary, HolidayFeed } from '../../../types/dashboard'
 
@@ -31,6 +39,11 @@ export type BackupIndicator = Pick<BackupStatusView, 'latest' | 'needsVerificati
 
 export function fetchBackupIndicator(): Promise<BackupIndicator> {
   return getBackupStatus()
+}
+
+/** Staff only: excuse-letter drafts saved with visits and still awaiting approval. Not range-filtered. */
+export function fetchPendingExcuseLetters(): Promise<PendingExcuseLetter[]> {
+  return listPendingExcuseLetters()
 }
 
 /**

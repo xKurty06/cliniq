@@ -32,6 +32,26 @@ describe('mock-db.json integrity', () => {
     expect(seed.visits.length).toBeGreaterThan(120)
   })
 
+  it('accepts a visit with neither treatment notes nor items given', () => {
+    expect(
+      problemsAfter((s) => {
+        s.visits[0].treatment = ''
+        s.visits[0].itemsGiven = []
+      }),
+    ).toBe('')
+  })
+
+  it('rejects disposition fields on the wrong disposition, and a draft beside an approved letter', () => {
+    const draft = { excusedFrom: { daysAgo: 2 }, excusedUntil: { daysAgo: 1 }, note: null }
+    const visit = (s: MockDbSeed, id: string) => s.visits.find((v) => v.id === id)!
+    expect(problemsAfter((s) => (visit(s, 'visit-0158').excuseLetterDraft = draft))).toMatch(/only a Sent home or Referred visit/)
+    expect(problemsAfter((s) => (visit(s, 'visit-0151').referredTo = 'Clinic'))).toMatch(/referredTo: only a Referred/)
+    expect(
+      problemsAfter((s) => (visit(s, 'visit-0151').excuseLetterDraft = { ...draft, excusedUntil: { daysAgo: 3 } })),
+    ).toMatch(/excuseLetterDraft\.excusedUntil: can't be before/)
+    expect(problemsAfter((s) => (visit(s, 'visit-0139').excuseLetterDraft = draft))).toMatch(/still has an excuse-letter draft/)
+  })
+
   it('rejects an excuse letter whose period is missing or ends before it starts', () => {
     expect(
       problemsAfter((s) => delete (s.frontendOnly.excuseLetterApprovals[0] as Partial<(typeof s.frontendOnly.excuseLetterApprovals)[0]>).excusedUntil),

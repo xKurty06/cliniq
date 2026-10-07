@@ -61,4 +61,12 @@ describe('Student Profile', () => {
     await screen.findByText(/read-only profile view/i)
     expect(screen.queryByRole('heading', { name: 'Excuse Letters' })).not.toBeInTheDocument()
   })
+
+  it('lists a pending draft with a link to review its letter', async () => {
+    renderWithRouter(<StudentProfilePage studentNumber="2021-00005" />)
+
+    expect(await screen.findByRole('heading', { name: 'Excuse Letters' })).toBeInTheDocument()
+    expect(screen.getByText('Pending approval')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review letter' })).toHaveAttribute('href', '/visits/visit-0151/excuse-letter')
+  })
 })

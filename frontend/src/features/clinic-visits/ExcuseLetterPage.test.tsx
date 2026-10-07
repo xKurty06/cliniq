@@ -90,4 +90,26 @@ describe('Excuse Letter', () => {
     expect(screen.getByRole('button', { name: /^Excused from/ })).toBeDisabled()
     expect(screen.getByRole('button', { name: /^Excused until/ })).toBeDisabled()
   })
+
+  it('prefills the period and teacher note from the visit draft, and snapshots both on approval', async () => {
+    const user = userEvent.setup()
+    const context = await fetchExcuseLetterContext('visit-0151')
+    render(<ExcuseLetterPage visitId="visit-0151" />)
+
+    await screen.findByRole('heading', { name: 'Excuse Letter' })
+    const range = formatDateRange(context.period.excusedFrom, context.period.excusedUntil)
+    expect(screen.getByText(`Excused period: ${range}`)).toBeInTheDocument()
+    expect(screen.getByLabelText('Note for the teacher')).toHaveValue('Please allow the student to take the missed quiz.')
+    expect(screen.getByText('Note for the teacher: Please allow the student to take the missed quiz.')).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText(/I checked the letter/i))
+    await user.click(screen.getByRole('button', { name: 'Approve and Store' }))
+    await screen.findByText('Excuse letter approved and stored in the student record.')
+    expect(await getExcuseLetterApproval('visit-0151')).toMatchObject({
+      ...context.period,
+      note: 'Please allow the student to take the missed quiz.',
+    })
+    expect(screen.getByLabelText('Note for the teacher')).toBeDisabled()
+  })
 })
+

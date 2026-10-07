@@ -21,7 +21,8 @@ const FIELDS = {
   users: ['id', 'name', 'username', 'role', 'lastLogin'],
   students: ['id', 'studentNumber', 'fullName', 'gradeLevel', 'contactInfo', 'allergies', 'medicalConditions', 'emergencyContact', 'archived'],
   emergencyContact: ['name', 'relationship', 'phone', 'verified'],
-  visits: ['id', 'studentNumber', 'dateTime', 'complaint', 'treatment', 'disposition', 'loggedByUserId', 'eventTag', 'itemsGiven'],
+  visits: ['id', 'studentNumber', 'dateTime', 'complaint', 'treatment', 'disposition', 'loggedByUserId', 'eventTag', 'itemsGiven', 'excuseLetterDraft', 'referredTo'],
+  excuseLetterDraft: ['excusedFrom', 'excusedUntil', 'note'],
   itemGivenLine: ['itemId', 'itemName', 'unit', 'quantity', 'instructions'],
   incidents: ['id', 'studentNumber', 'time', 'complaint', 'vitals', 'hospitalReferral', 'parentNotifications', 'stage', 'eventTag', 'itemsGiven'],
   hospitalReferral: ['destination', 'transportMode', 'departureTime'],
@@ -194,6 +195,7 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
 
   // Visits.
   const visitStudent = new Map<string, string>()
+  const draftVisits = new Set<string>()
   list('visits').forEach((v, i) => {
     const w = `visits[${i}] (${String(v.id)})`
     checkFields(w, v, FIELDS.visits)
@@ -205,7 +207,23 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
       fail(`${w}.loggedByUserId: only Staff log visits`)
     if (!visitComplaints.has(String(v.complaint))) fail(`${w}.complaint: "${String(v.complaint)}" isn't in frontendOnly.visitComplaintTypes`)
     visitStudent.set(String(v.id), String(v.studentNumber))
-    if (!checkLines(w, v) && !String(v.treatment).trim()) fail(`${w}: needs treatment notes or at least one item given`)
+    if (v.excuseLetterDraft !== null) draftVisits.add(String(v.id))
+    // Treatment notes and items given are both optional (a visit may record no treatment).
+    checkLines(w, v)
+    if (typeof v.treatment !== 'string') fail(`${w}.treatment: must be text (empty is allowed)`)
+    const draft = v.excuseLetterDraft as Rec | null
+    if (draft !== null) {
+      if (v.disposition === 'returned_to_class') fail(`${w}.excuseLetterDraft: only a Sent home or Referred visit has an excuse-letter draft`)
+      checkFields(`${w}.excuseLetterDraft`, draft, FIELDS.excuseLetterDraft)
+      relDate(`${w}.excuseLetterDraft.excusedFrom`, draft?.excusedFrom)
+      relDate(`${w}.excuseLetterDraft.excusedUntil`, draft?.excusedUntil)
+      if (relDays(draft?.excusedUntil) < relDays(draft?.excusedFrom)) fail(`${w}.excuseLetterDraft.excusedUntil: can't be before excusedFrom`)
+      if (draft?.note !== null && typeof draft?.note !== 'string') fail(`${w}.excuseLetterDraft.note: must be null or text`)
+    }
+    if (v.referredTo !== null) {
+      if (v.disposition !== 'referred_to_hospital') fail(`${w}.referredTo: only a Referred to hospital visit has one`)
+      if (typeof v.referredTo !== 'string' || !v.referredTo.trim()) fail(`${w}.referredTo: must be null or non-empty text`)
+    }
   })
 
   // Incidents.
@@ -366,6 +384,9 @@ export function checkSeedIntegrity(seed: MockDbSeed): string[] {
     relDate(`${w}.excusedFrom`, a.excusedFrom)
     relDate(`${w}.excusedUntil`, a.excusedUntil)
     if (relDays(a.excusedUntil) < relDays(a.excusedFrom)) fail(`${w}.excusedUntil: can't be before excusedFrom`)
+    if (a.note !== null && typeof a.note !== 'string') fail(`${w}.note: must be null or text`)
+    // One source of truth: approval moves the draft onto the letter, so both never exist at once.
+    if (draftVisits.has(String(a.visitId))) fail(`${w}: visit "${String(a.visitId)}" still has an excuse-letter draft; approval clears it`)
   })
   ;((fo.peReferrals ?? []) as Rec[]).forEach((p, i) => {
     const w = `frontendOnly.peReferrals[${i}]`

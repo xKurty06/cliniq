@@ -15,6 +15,7 @@ import {
 } from './components/AlertLists'
 import { ComplaintTrends, ComplaintTrendsSkeleton } from './components/ComplaintTrends'
 import { DashboardHeader } from './components/DashboardHeader'
+import { PendingExcuseLetters } from './components/PendingExcuseLetters'
 import { StaffShortcuts } from './components/StaffShortcuts'
 import { StatCardRow, StatCardRowSkeleton } from './components/StatCardRow'
 import { VisitCalendar } from './components/VisitCalendar'
@@ -95,6 +96,8 @@ export function DashboardPage({ viewer = getMockSessionUser() }: { viewer?: Sess
             <FrequentVisitorsAlert summary={data} range={range} canNavigate={canNavigate} />
             <InventoryAlert summary={data} canNavigate={canNavigate} />
           </section>
+
+          {viewer.role === 'staff' && <PendingExcuseLetters />}
 
           <ComplaintTrends trends={data.complaintTrends} />
         </div>

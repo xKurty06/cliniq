@@ -1,11 +1,12 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { Link } from 'react-router'
 import {
   Badge,
   Button,
+  buttonClassName,
   Card,
   CardBody,
   CardHeader,
-  Combobox,
   DatePicker,
   EmptyState,
   ErrorState,
@@ -20,7 +21,7 @@ import {
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { useIdentifiedStudent } from '../../hooks/useIdentifiedStudent'
 import { cn } from '../../lib/cn'
-import { cleanComplaint, COMPLAINT_MAX_LENGTH, normalizeComplaint } from '../../lib/complaints'
+import { cleanComplaint, normalizeComplaint } from '../../lib/complaints'
 import { addDays, todayISO } from '../../lib/dates'
 import { getMockSessionUser, StockRuleError, type ComplaintType, type InventoryItemView, type SessionUser } from '../../lib/mock-db'
 import { paths } from '../../routes/paths'
@@ -33,9 +34,14 @@ import {
   searchVisitStudents,
   submitNewVisit,
 } from './api/newVisitApi'
-
-/** How many complaint suggestions the list shows at once. */
-const COMPLAINT_SUGGESTION_LIMIT = 8
+import { ComplaintField } from './ComplaintField'
+import { DispositionFields } from './DispositionFields'
+import {
+  dispositionErrors,
+  dispositionPayload,
+  emptyDispositionValues,
+  type DispositionErrors,
+} from './dispositionValues'
 
 /** Smart Triage's complaint type for what was typed: a case-insensitive match, or none. */
 function matchComplaintType(complaint: string, complaintTypes: ComplaintType[]): ComplaintType | undefined {
@@ -50,9 +56,8 @@ const dispositionOptions = [
   { value: 'referred_to_hospital', label: 'Referred to hospital' },
 ] satisfies Array<{ value: Disposition; label: string }>
 
-interface Errors {
+interface Errors extends DispositionErrors {
   complaint?: string
-  treatment?: string
   itemsGiven?: string
   followUpDate?: string
   followUpReason?: string
@@ -196,6 +201,7 @@ export function NewVisitEntryPage({
   const [complaint, setComplaint] = useState('')
   const [treatment, setTreatment] = useState('')
   const [disposition, setDisposition] = useState<Disposition>('returned_to_class')
+  const [dispositionValues, setDispositionValues] = useState(() => emptyDispositionValues(today))
   const [triageSteps, setTriageSteps] = useState<string[]>([])
   const [needsFollowUp, setNeedsFollowUp] = useState(false)
   const [followUpDate, setFollowUpDate] = useState(addDays(today, 1))
@@ -211,15 +217,17 @@ export function NewVisitEntryPage({
   const [errors, setErrors] = useState<Errors>({})
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
-  /** Set after a successful save: whether it created a follow-up, and what it took from inventory. */
-  const [saved, setSaved] = useState<null | { withFollowUp: boolean; given: number; belowZero: string[] }>(null)
+  /** Set after a successful save: whether it created a follow-up, what it took from inventory, and its letter draft. */
+  const [saved, setSaved] = useState<null | {
+    visitId: string
+    withFollowUp: boolean
+    given: number
+    belowZero: string[]
+    letterPrepared: boolean
+  }>(null)
   // Allergies sit beside the medicine picker; picking a student loads them in full.
   const allergies = identified.student?.allergies ?? null
   const suggestions = freshSuggestions ?? data?.complaintSuggestions ?? []
-  const typedComplaint = cleanComplaint(complaint).toLowerCase()
-  const complaintMatches = suggestions
-    .filter((label) => label.toLowerCase().includes(typedComplaint))
-    .slice(0, COMPLAINT_SUGGESTION_LIMIT)
   const formRef = useRef<HTMLFormElement>(null)
   const saveAndNewRef = useRef(false)
 
@@ -249,13 +257,12 @@ export function NewVisitEntryPage({
   function validate(): Errors {
     const next: Errors = {}
     if (!cleanComplaint(complaint)) next.complaint = 'Enter the complaint for this visit.'
-    if (!treatment.trim() && !lines.length) next.treatment = 'Enter treatment notes or add a medicine or supply.'
     if (lines.some((line) => line.quantity < 1)) next.itemsGiven = 'Each quantity must be at least 1.'
     if (needsFollowUp) {
       if (!followUpDate) next.followUpDate = 'Choose a follow-up date.'
       if (!followUpReason.trim()) next.followUpReason = 'Enter the follow-up reason.'
     }
-    return next
+    return { ...next, ...dispositionErrors(disposition, dispositionValues) }
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -285,18 +292,26 @@ export function NewVisitEntryPage({
               }
             : null,
           itemsGiven: lines.map((line) => ({ itemId: line.itemId, quantity: line.quantity, instructions: line.instructions })),
+          ...dispositionPayload(disposition, dispositionValues),
         },
         viewer,
       )
       // Reference 2: a successful save confirms and clears the form, so a second click can't
       // record the same visit twice. The Save-and-new shortcut takes the same path.
-      setSaved({ withFollowUp: needsFollowUp, given: lines.length, belowZero: result.belowZero })
+      setSaved({
+        visitId: result.visit.id,
+        withFollowUp: needsFollowUp,
+        given: lines.length,
+        belowZero: result.belowZero,
+        letterPrepared: result.visit.excuseLetterDraft !== null,
+      })
       setLines([])
       setFreshItems(await fetchVisitItems())
       setFreshSuggestions(await fetchComplaintSuggestions())
       setComplaint('')
       setTreatment('')
       setDisposition('returned_to_class')
+      setDispositionValues(emptyDispositionValues(today))
       setTriageSteps([])
       setNeedsFollowUp(false)
       setFollowUpDate(addDays(today, 1))
@@ -366,6 +381,14 @@ export function NewVisitEntryPage({
               Now below zero: {saved.belowZero.join(', ')}. Recount and restock.
             </span>
           )}
+          {saved.letterPrepared && (
+            <span className="mt-2 flex flex-wrap items-center gap-2 font-normal">
+              An excuse letter draft was saved with the visit. It isn't approved yet.
+              <Link to={paths.excuseLetter(saved.visitId)} className={buttonClassName({ size: 'sm' })}>
+                Review excuse letter
+              </Link>
+            </span>
+          )}
         </div>
       )}
 
@@ -427,19 +450,10 @@ export function NewVisitEntryPage({
                   autoFocus={focusStudentSearch}
                 />
               ))}
-            <Combobox
-              label="Complaint"
-              required
-              allowFreeText
+            <ComplaintField
               value={complaint}
-              onValueChange={updateComplaint}
-              options={complaintMatches}
-              optionKey={(label) => label}
-              optionLabel={(label) => label}
-              noMatchesText="No matching suggestion. What you typed is saved as is."
-              maxLength={COMPLAINT_MAX_LENGTH}
-              placeholder="e.g. Headache"
-              hint="The complaint or symptom only. Don't include names."
+              onChange={updateComplaint}
+              suggestions={suggestions}
               error={errors.complaint}
             />
             {cleanComplaint(complaint) ? (
@@ -459,13 +473,9 @@ export function NewVisitEntryPage({
             )}
             <TextareaField
               label="Treatment notes"
-              hint="Care that isn't stock: rest, cold compress, wound cleaning, advice. Needed unless a medicine or supply is added below."
+              hint="Optional. Care that isn't stock: rest, cold compress, wound cleaning, advice."
               value={treatment}
-              onChange={(value) => {
-                setTreatment(value)
-                setErrors((current) => ({ ...current, treatment: undefined }))
-              }}
-              error={errors.treatment}
+              onChange={setTreatment}
             />
             <ItemsGivenField
               items={freshItems ?? data.items}
@@ -473,7 +483,7 @@ export function NewVisitEntryPage({
               onChange={(next) => {
                 setLines(next)
                 setSaved(null)
-                setErrors((current) => ({ ...current, treatment: undefined, itemsGiven: undefined }))
+                setErrors((current) => ({ ...current, itemsGiven: undefined }))
               }}
               allergies={allergies}
               error={errors.itemsGiven}
@@ -483,11 +493,25 @@ export function NewVisitEntryPage({
               <SegmentedControl
                 label="Disposition"
                 value={disposition}
-                onChange={setDisposition}
+                onChange={(next) => {
+                  // Disposition-specific fields start fresh whenever the disposition changes.
+                  setDisposition(next)
+                  setDispositionValues(emptyDispositionValues(today))
+                  setErrors((current) => ({ ...current, excusedUntil: undefined }))
+                }}
                 options={dispositionOptions}
                 size="md"
               />
             </div>
+            <DispositionFields
+              disposition={disposition}
+              values={dispositionValues}
+              onChange={(next) => {
+                setDispositionValues(next)
+                setErrors((current) => ({ ...current, excusedUntil: undefined }))
+              }}
+              errors={errors}
+            />
 
             <fieldset className="rounded-md border border-border p-4">
               <legend className="px-1 text-sm font-semibold text-text-primary">Follow-up prompt</legend>
@@ -544,7 +568,10 @@ export function NewVisitEntryPage({
               )}
             </fieldset>
 
-            <div className="flex flex-wrap justify-end gap-2 pt-2">
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
+              {!treatment.trim() && !lines.length && (
+                <p className="mr-auto text-xs text-text-secondary">No treatment recorded. You can still save.</p>
+              )}
               <Button type="button" variant="neutral" onClick={() => window.history.back()}>Cancel</Button>
               <Button type="submit" variant="primary" loading={saving}>
                 Save Visit

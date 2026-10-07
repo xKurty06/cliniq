@@ -2,6 +2,7 @@ import type {
   AuditActionType,
   AuditLogEntry,
   Disposition,
+  ExcuseLetterDraft,
   FollowUp,
   FollowUpStatus,
   HospitalReferral,
@@ -608,9 +609,38 @@ export interface RecordVisitInput {
   followUp: FollowUpInput | null
   /** Medicines and supplies given. Optional; each line dispenses from inventory (ADR-018). */
   itemsGiven?: ItemLineInput[]
+  /** Sent home or referred only; omitted means no letter prepared. */
+  excuseLetterDraft?: ExcuseLetterDraft | null
+  /** Referred to hospital only. */
+  referredTo?: string | null
 }
 
-const NOTES_OR_LINE = 'Enter treatment notes or add a medicine or supply.'
+/**
+ * The disposition-specific values, cleaned and checked: an excuse-letter draft only on Sent home or
+ * Referred, "Referred to" only on Referred, and no draft once the visit's letter is approved (the
+ * approved letter then holds the period, so the two can't diverge).
+ */
+function dispositionFields(
+  s: DbState,
+  visitId: string | null,
+  disposition: Disposition,
+  draft: ExcuseLetterDraft | null,
+  referredTo: string | null,
+): Pick<Visit, 'excuseLetterDraft' | 'referredTo'> {
+  if (draft) {
+    if (disposition === 'returned_to_class') throw new Error('Only a Sent home or Referred visit has an excuse letter.')
+    const invalid = excusedPeriodError(draft)
+    if (invalid) throw new Error(invalid)
+    if (visitId && s.frontendOnly.excuseLetterApprovals.some((a) => a.visitId === visitId))
+      throw new Error('This visit already has an approved excuse letter. Its period is fixed.')
+  }
+  const referred = referredTo?.trim() || null
+  if (referred && disposition !== 'referred_to_hospital') throw new Error('Only a Referred to hospital visit has "Referred to".')
+  return {
+    excuseLetterDraft: draft ? { excusedFrom: draft.excusedFrom, excusedUntil: draft.excusedUntil, note: draft.note?.trim() || null } : null,
+    referredTo: referred,
+  }
+}
 
 function createFollowUp(
   s: DbState,
@@ -647,7 +677,8 @@ export function recordVisit(
     const by = actorOr(actor)
     const student = studentOf(s, input.studentId)
     const itemLines = input.itemsGiven ?? []
-    if (!input.treatment.trim() && !itemLines.length) throw new StockRuleError(NOTES_OR_LINE)
+    // Treatment notes and items given are both optional: a visit may record no treatment.
+    const extra = dispositionFields(s, null, input.disposition, input.excuseLetterDraft ?? null, input.referredTo ?? null)
     const visit: Visit = {
       id: nextId('visit', s.visits),
       studentId: input.studentId,
@@ -659,6 +690,7 @@ export function recordVisit(
       loggedByUserId: by.id,
       eventTag: input.eventTag?.trim() || null,
       itemsGiven: [],
+      ...extra,
     }
     s.visits.push(visit)
     audit(s, by, 'submit', { type: 'visit', id: visit.id })
@@ -674,7 +706,7 @@ export function recordVisit(
 export type VisitPatch = Pick<Visit, 'complaint' | 'treatment' | 'disposition' | 'eventTag'> & {
   /** The full new set of lines. Omitted, the lines stay as they are. */
   itemsGiven?: ItemLineInput[]
-}
+} & Partial<Pick<Visit, 'excuseLetterDraft' | 'referredTo'>>
 
 /**
  * Edits a saved visit. Changed medicine lines move stock through `visit_edited` adjustment
@@ -689,11 +721,14 @@ export function updateVisit(
   return write('update visit', (s) => {
     const by = actorOr(actor)
     const visit = must(s.visits.find((v) => v.id === id), 'Visit')
-    const { itemsGiven, ...fields } = patch
+    const { itemsGiven, excuseLetterDraft, referredTo, ...rest } = patch
+    // Omitted disposition fields stay as they are; checked against the (possibly new) disposition.
+    const extra = dispositionFields(s, id, rest.disposition, excuseLetterDraft === undefined ? visit.excuseLetterDraft : excuseLetterDraft, referredTo === undefined ? visit.referredTo : referredTo)
+    // Same normalization as a new visit, so an edit can't reintroduce a spelling or case variant.
+    const fields = { ...rest, complaint: normalizeComplaint(rest.complaint, complaintSuggestions(s)), ...extra }
     const given = itemsGiven
       ? applyItemLines(s, by, { studentNumber: studentOf(s, visit.studentId).studentNumber, visitId: id }, visit.itemsGiven, itemsGiven, 'adjust')
       : { lines: visit.itemsGiven, belowZero: [] }
-    if (!fields.treatment.trim() && !given.lines.length) throw new StockRuleError(NOTES_OR_LINE)
     const summary = changedSummary(visit, { ...fields, itemsGiven: given.lines })
     Object.assign(visit, fields, { itemsGiven: given.lines })
     audit(s, by, 'update', { type: 'visit', id }, summary)
@@ -711,19 +746,47 @@ export interface StudentExcuseLetter extends ExcusedPeriod {
   id: string
   visitId: string
   disposition: Disposition
+  /** `pending`: a draft saved with the visit, not yet approved. */
+  status: 'approved' | 'pending'
 }
 
-/** A student's approved excuse letters, newest period first. */
+/** A student's excuse letters, approved and pending, newest period first. */
 export function getStudentExcuseLetters(studentId: string): Promise<StudentExcuseLetter[]> {
-  return read('student excuse letters', (s) =>
-    s.frontendOnly.excuseLetterApprovals
-      .flatMap((a) => {
-        const visit = s.visits.find((v) => v.id === a.visitId && v.studentId === studentId)
-        return visit
-          ? [{ id: a.id, visitId: a.visitId, disposition: visit.disposition, excusedFrom: a.excusedFrom, excusedUntil: a.excusedUntil }]
+  return read('student excuse letters', (s) => {
+    const approved = s.frontendOnly.excuseLetterApprovals.flatMap((a) => {
+      const visit = s.visits.find((v) => v.id === a.visitId && v.studentId === studentId)
+      return visit
+        ? [{ id: a.id, visitId: a.visitId, disposition: visit.disposition, excusedFrom: a.excusedFrom, excusedUntil: a.excusedUntil, status: 'approved' as const }]
+        : []
+    })
+    // A visit never holds a draft once its letter is approved, so the two lists can't overlap.
+    const pending = s.visits.flatMap((v) =>
+      v.studentId === studentId && v.excuseLetterDraft
+        ? [{ id: `draft-${v.id}`, visitId: v.id, disposition: v.disposition, excusedFrom: v.excuseLetterDraft.excusedFrom, excusedUntil: v.excuseLetterDraft.excusedUntil, status: 'pending' as const }]
+        : [],
+    )
+    return [...approved, ...pending].sort((a, b) => b.excusedFrom.localeCompare(a.excusedFrom))
+  })
+}
+
+export interface PendingExcuseLetter extends ExcusedPeriod {
+  visitId: string
+  visitDateTime: ISODateTime
+  /** Multi-student list: the Student Number only, never the name (ADR-004). */
+  studentNumber: StudentNumber
+}
+
+/** Every excuse-letter draft still awaiting approval, oldest visit first, for active students. */
+export function listPendingExcuseLetters(): Promise<PendingExcuseLetter[]> {
+  return read('pending excuse letters', (s) =>
+    s.visits
+      .flatMap((v) => {
+        const student = s.students.find((st) => st.id === v.studentId)
+        return v.excuseLetterDraft && student && !student.archived
+          ? [{ visitId: v.id, visitDateTime: v.dateTime, studentNumber: student.studentNumber, excusedFrom: v.excuseLetterDraft.excusedFrom, excusedUntil: v.excuseLetterDraft.excusedUntil }]
           : []
       })
-      .sort((a, b) => b.excusedFrom.localeCompare(a.excusedFrom)),
+      .sort((a, b) => a.visitDateTime.localeCompare(b.visitDateTime)),
   )
 }
 
@@ -739,14 +802,18 @@ export function excusedPeriodError({ excusedFrom, excusedUntil }: ExcusedPeriod)
   return null
 }
 
+/**
+ * Approves and stores a visit's letter. The period and note are snapshotted onto the letter and the
+ * visit's draft is cleared in the same write, so from here on the approved letter is the only record.
+ */
 export function approveExcuseLetter(
   visitId: string,
-  period: ExcusedPeriod,
+  period: ExcusedPeriod & { note?: string | null },
   actor?: SessionUser,
 ): Promise<ExcuseLetterApproval> {
   return write('approve excuse letter', (s) => {
     const by = actorOr(actor)
-    must(s.visits.find((v) => v.id === visitId), 'Visit')
+    const visit = must(s.visits.find((v) => v.id === visitId), 'Visit')
     const invalid = excusedPeriodError(period)
     if (invalid) throw new Error(invalid)
     // Approved letters are permanent: the period is fixed once stored.
@@ -759,8 +826,10 @@ export function approveExcuseLetter(
       approvedAt: now(s),
       excusedFrom: period.excusedFrom,
       excusedUntil: period.excusedUntil,
+      note: period.note?.trim() || null,
     }
     s.frontendOnly.excuseLetterApprovals = [...s.frontendOnly.excuseLetterApprovals, approval]
+    visit.excuseLetterDraft = null
     audit(s, by, 'approve', { type: 'excuse-letter', id: approval.id })
     return approval
   })

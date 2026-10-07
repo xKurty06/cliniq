@@ -424,4 +424,19 @@ describe('Clinic Overview Dashboard', () => {
     expect(screen.getByText('No inventory alerts')).toBeInTheDocument()
     expect(screen.getByText('No complaints recorded in this date range')).toBeInTheDocument()
   })
+
+  it('shows Staff the excuse letters awaiting approval, by Student Number, and hides them from Admin', async () => {
+    const { unmount } = renderWithRouter(<DashboardPage />)
+    const card = (await screen.findByRole('heading', { name: /excuse letters awaiting approval/i })).closest('section')!
+    expect(within(card).getByText('2021-00005')).toBeInTheDocument()
+    expect(within(card).getByRole('link', { name: 'Review excuse letter for 2021-00005' })).toHaveAttribute(
+      'href',
+      '/visits/visit-0151/excuse-letter',
+    )
+    unmount()
+
+    renderWithRouter(<DashboardPage viewer={{ id: 'user-admin-01', name: 'Admin', role: 'admin' }} />)
+    await screen.findByRole('heading', { name: /due & upcoming follow-ups/i })
+    expect(screen.queryByRole('heading', { name: /excuse letters awaiting approval/i })).not.toBeInTheDocument()
+  })
 })

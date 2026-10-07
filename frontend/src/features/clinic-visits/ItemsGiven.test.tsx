@@ -94,7 +94,7 @@ describe('Visit Detail: medicines and supplies given', () => {
 
   it('shows the lines, and lowering a quantity returns stock', async () => {
     const user = userEvent.setup()
-    render(<VisitDetailPage visitId="visit-0159" />)
+    renderWithRouter(<VisitDetailPage visitId="visit-0159" />)
     expect(await screen.findByText('Adhesive Bandages × 1 pieces (Change the bandage tomorrow)')).toBeInTheDocument()
     expect(screen.getByText('Gauze Pads × 2 pieces')).toBeInTheDocument()
 

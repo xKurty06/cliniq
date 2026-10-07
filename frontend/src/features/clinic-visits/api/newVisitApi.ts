@@ -10,7 +10,7 @@ import {
   type ItemLineInput,
   type SessionUser,
 } from '../../../lib/mock-db'
-import type { Disposition, FollowUp, Student, StudentSearchResult, Visit } from '../../../types/entities'
+import type { Disposition, ExcuseLetterDraft, FollowUp, Student, StudentSearchResult, Visit } from '../../../types/entities'
 
 export interface NewVisitContext {
   /** `null` when the form was opened without an identified student; it then asks for the Student Number. */
@@ -31,6 +31,9 @@ export interface NewVisitInput {
   triageStepsCompleted: string[]
   followUp: null | Pick<FollowUp, 'followUpDate' | 'reason' | 'notes'>
   itemsGiven?: ItemLineInput[]
+  /** Sent home or referred, letter box ticked: the draft period and note. Not an approved letter. */
+  excuseLetterDraft?: ExcuseLetterDraft | null
+  referredTo?: string | null
 }
 
 export interface NewVisitResult {
@@ -84,6 +87,8 @@ export function submitNewVisit(input: NewVisitInput, user: SessionUser): Promise
       disposition: input.disposition,
       followUp: input.followUp,
       itemsGiven: input.itemsGiven,
+      excuseLetterDraft: input.excuseLetterDraft ?? null,
+      referredTo: input.referredTo ?? null,
     },
     user,
   )

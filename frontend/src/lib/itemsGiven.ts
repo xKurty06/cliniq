@@ -6,10 +6,10 @@ export function formatItemGiven(line: Pick<ItemGivenLine, 'itemName' | 'quantity
   return `${line.itemName} × ${line.quantity} ${line.unit}${line.instructions ? ` (${line.instructions})` : ''}`
 }
 
-/** One line of care for a visit in a history list: the treatment notes, then what was given. */
+/** One line of care for a visit in a history list: the treatment notes, then what was given. Both are optional. */
 export function visitCareSummary(visit: Pick<Visit, 'treatment' | 'itemsGiven'>): string {
   const given = visit.itemsGiven.map(formatItemGiven).join('; ')
-  return [visit.treatment.trim(), given && `Given: ${given}`].filter(Boolean).join(' · ')
+  return [visit.treatment.trim(), given && `Given: ${given}`].filter(Boolean).join(' · ') || 'No treatment recorded'
 }
 
 /** Editable drafts from a saved record's lines, for an edit form. */

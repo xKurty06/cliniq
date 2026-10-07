@@ -54,6 +54,13 @@ export function resolveSeed(source: MockDbSeed, today: ISODate): DbState {
       ...v,
       studentId: studentId(studentNumber),
       dateTime: resolveDateTime(v.dateTime, today),
+      excuseLetterDraft: v.excuseLetterDraft
+        ? {
+            ...v.excuseLetterDraft,
+            excusedFrom: resolveDate(v.excuseLetterDraft.excusedFrom, today),
+            excusedUntil: resolveDate(v.excuseLetterDraft.excusedUntil, today),
+          }
+        : null,
     })),
     incidents: source.incidents.map(({ studentNumber, ...i }) => ({
       ...i,

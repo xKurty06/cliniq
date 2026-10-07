@@ -68,6 +68,8 @@ const visit = (
   loggedByUserId: 'u1',
   eventTag,
   itemsGiven: [],
+  excuseLetterDraft: null,
+  referredTo: null,
 })
 
 const item = (id: string, extra: Partial<InventoryItem>): InventoryItem => ({
