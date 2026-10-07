@@ -212,9 +212,15 @@ export function VisitLogListPage() {
               from the individual record.
             </p>
           </div>
-          <Badge tone="info" variant="soft">
-            {range.preset === 'all' ? 'All visits' : describeRange(range)}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge tone="info" variant="soft">
+              {range.preset === 'all' ? 'All visits' : describeRange(range)}
+            </Badge>
+            <Link className={buttonClassName({ variant: 'primary' })} to={paths.visitNew()}>
+              <Icon name="stethoscope" />
+              New Visit
+            </Link>
+          </div>
         </div>
       </Card>
 

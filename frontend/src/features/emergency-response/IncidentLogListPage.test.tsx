@@ -6,6 +6,11 @@ import { IncidentLogListPage } from './IncidentLogListPage'
 import { defaultIncidentLogRange, fetchIncidentLog } from './api/incidentLogApi'
 
 describe('Incident Log', () => {
+  it('links to New Incident from the page header', async () => {
+    renderWithRouter(<IncidentLogListPage />)
+    expect(await screen.findByRole('link', { name: 'New Incident' })).toHaveAttribute('href', '/incidents/new')
+  })
+
   it('renders a privacy-safe multi-student incident list with completion statuses', async () => {
     renderWithRouter(<IncidentLogListPage />)
 

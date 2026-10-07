@@ -7,6 +7,11 @@ import { VisitLogListPage } from './VisitLogListPage'
 import { defaultVisitLogRange, fetchVisitLog } from './api/visitLogApi'
 
 describe('Visit Log', () => {
+  it('links to New Visit from the page header', async () => {
+    renderWithRouter(<VisitLogListPage />)
+    expect(await screen.findByRole('link', { name: 'New Visit' })).toHaveAttribute('href', '/visits/new')
+  })
+
   it('renders a privacy-safe multi-student visit list with the complaint visible (ADR-010)', async () => {
     renderWithRouter(<VisitLogListPage />)
 
