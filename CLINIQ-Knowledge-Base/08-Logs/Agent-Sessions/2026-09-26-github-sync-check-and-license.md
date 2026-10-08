@@ -2,7 +2,7 @@ Date/Day/Time: Saturday, September 26, 2026 — actual time not available (no sy
 Agent: Claude (chat session)
 Task: Update the Dashboard kickoff prompt; formalize a standing "check GitHub before editing" rule with a logs exception
 Status: Completed
-Prompt/Request: "Update the kickoff prompt now. also I forgot to mention always before editing the knowledge base, always check the github knowledge base first because there could be some changes there, except for those logs and all files that ai agents created since I can just copy the folder with the logs folder empty since it wont replace the current folders" — with the actual GitHub repo URL provided (github.com/xKurty06/cliniq).
+Prompt/Request: "Update the kickoff prompt now. also I forgot to mention always before editing the knowledge base, always check the github knowledge base first because there could be some changes there, except for those logs and all files that ai agents created since I can just copy the folder with the logs folder empty since it wont replace the current folders" — with the actual GitHub repo URL provided (github.com/zekuuu/cliniq).
 Files Modified: LICENSE (new), README.md, AGENTS.md, CLAUDE.md (both kept identical)
 Changes Made:
 - Actually fetched the live GitHub repo (homepage, AGENTS.md, Development-Phases.md, LICENSE) before making any edits, executing the new rule live rather than just documenting it abstractly.

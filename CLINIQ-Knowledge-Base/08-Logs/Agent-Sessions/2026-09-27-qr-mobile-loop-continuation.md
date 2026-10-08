@@ -15,6 +15,6 @@ Testing Performed:
 - Focused QR mobile/shared scanner tests: 2 files, 4 tests passed.
 - Full frontend test suite: 28 files, 89 tests passed.
 - TypeScript/Vite production build passed.
-- Live GitHub page fetch was unavailable from the web cache; repository origin was confirmed locally as `https://github.com/xKurty06/cliniq`.
+- Live GitHub page fetch was unavailable from the web cache; repository origin was confirmed locally as `https://github.com/zekuuu/cliniq`.
 Known Issues: Phase 2 Countercheck, Audit, Simulate, and Confirm remain pending until the remaining F1 screens are built. The inventory destination behind Dispense Medicine belongs to the later Inventory Tracker build.
 Next Steps: Continue Phase 1 with the next unchecked F1 screen, then run the combined Phase 2 audit across all five reference screens after their Build boxes are complete.
