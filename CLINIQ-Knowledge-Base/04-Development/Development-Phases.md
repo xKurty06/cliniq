@@ -67,6 +67,8 @@ Run the actual Laravel scaffold into `backend/` (commands in `Environment-Setup.
 ### Phase B1 — Database Schema — TBA
 **Don't guess a schema.** `02-Architecture/Database/ERD.md` is TBA — database design hasn't been finalized yet, and inferring one from the frontend-facing entity shapes isn't a substitute for the team actually designing it. Once the schema is decided, build migrations from it directly, consistent with the entity shapes already fixed in `CLINIQ_Frontend_Context_Brief.md` §5 (Student, User, Visit, Incident, FollowUp, InventoryItem, Report, BackupLog, AuditLogEntry) — those shapes are real commitments already made; the schema should match them, not reinvent them.
 
+See `04-Development/Backend-Readiness-Checklist.md` for the current pre-migration readiness checklist.
+
 ### Phase B2 — Auth & RBAC
 Sanctum SPA authentication. Three roles (Staff, Admin/Principal, PE/Sports Instructor) with the specific per-module permission matrix already fully documented in `01-Requirements/Features/Module-Overview.md`'s Access Summary table — this is a direct implementation target, not a design task. Consider a Spatie `laravel-permission`-based approach (flagged in `Skills-Setup.md`) given how closely CLINIQ's access model matches that package's shape. Session lifetime is **1 week until the token expires, with no idle timeout** (`06-Decisions/ADR-015`) — set the expiry accordingly (e.g., Sanctum's `expiration` setting for API tokens, or the session lifetime for SPA cookie auth; those are configured separately, so confirm which mechanism applies during this phase).
 

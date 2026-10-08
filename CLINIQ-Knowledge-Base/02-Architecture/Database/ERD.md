@@ -2,6 +2,8 @@
 
 **Status: TBA.** Database design hasn't been finalized and shouldn't be treated as decided yet — this isn't a gap to quietly fill in from inference. When the team is ready to design it, the already-documented data entities are the right starting reference (not a schema to copy from, since these describe frontend-facing shapes, not settled table structure):
 
+See `04-Development/Backend-Readiness-Checklist.md` for the current pre-migration readiness checklist.
+
 - **Student** — id, Student Number (`YYYY-NNNNN`), full name, grade level, contact info, allergies, medical conditions, emergency contact, record-complete flag, archived flag
 - **User** — id, name, username, role (staff/admin/instructor), last login
 - **Visit** — id, student, date/time, complaint, treatment, disposition, staff who logged it, optional event tag
