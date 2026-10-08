@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Bar } from 'react-chartjs-2'
 import { DataTable, EmptyState, SegmentedControl, type DataTableColumn } from '../../../components'
 import { cn } from '../../../lib/cn'
+import { smoothTooltip } from '../../../components/charts/smoothTooltip'
+import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion'
 import { colorToken } from '../../../lib/tokens'
 import { sortTableRows, toggleTableSort, type TableSortState } from '../../../lib/tableSort'
 import type { ComplaintCount } from '../../../lib/mock-db'
@@ -27,6 +29,7 @@ function plural(n: number, word: string) {
 }
 
 function ComplaintBarChart({ rows }: { rows: ComplaintCount[] }) {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const bar = colorToken('brand-green-dark')
   const grid = colorToken('border')
   const tick = colorToken('text-secondary')
@@ -57,6 +60,13 @@ function ComplaintBarChart({ rows }: { rows: ComplaintCount[] }) {
     // Sharper bitmap when the canvas is scaled into a printed page.
     devicePixelRatio: Math.max(2, typeof window === 'undefined' ? 1 : window.devicePixelRatio),
     layout: { padding: { right: 8 } },
+    animation: prefersReducedMotion ? false : { duration: 280, easing: 'easeOutCubic' },
+    animations: prefersReducedMotion
+      ? undefined
+      : { x: { duration: 280, easing: 'easeOutCubic' } },
+    transitions: {
+      active: { animation: { duration: prefersReducedMotion ? 0 : 160, easing: 'easeOutCubic' } },
+    },
     interaction: { mode: 'nearest', axis: 'y', intersect: false },
     scales: {
       x: {
@@ -75,7 +85,9 @@ function ComplaintBarChart({ rows }: { rows: ComplaintCount[] }) {
     plugins: {
       legend: { display: false },
       tooltip: {
+        enabled: false,
         displayColors: false,
+        external: smoothTooltip,
         callbacks: { label: (item) => plural(item.parsed.x ?? 0, 'visit') },
       },
     },

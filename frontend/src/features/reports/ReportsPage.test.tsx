@@ -7,11 +7,19 @@ import { todayISO } from '../../lib/dates'
 import { getMonthlyReport } from '../../lib/mock-db'
 
 // jsdom has no canvas. Replace the chart with a stub that keeps its accessible label.
+const barMock = vi.hoisted(() => ({ props: undefined as unknown }))
+
 vi.mock('react-chartjs-2', () => {
   const Stub = (props: { 'aria-label'?: string }) => (
     <div role="img" aria-label={props['aria-label']} />
   )
-  return { Bar: Stub, Line: Stub }
+  return {
+    Bar: (props: { 'aria-label'?: string; options?: unknown }) => {
+      barMock.props = props
+      return <Stub {...props} />
+    },
+    Line: Stub,
+  }
 })
 
 const STAFF = { id: 'usr-nurse', name: 'Nurse', role: 'staff' } as const
@@ -70,6 +78,28 @@ describe('Reports', () => {
     )
     // Counts run from most to fewest visits.
     expect(rows.map((r) => r.count)).toEqual([...rows.map((r) => r.count)].sort((a, b) => b - a))
+  })
+
+  it('uses the shared smooth white tooltip behavior for the health summary chart', async () => {
+    const user = userEvent.setup()
+    render(<ReportsPage viewer={STAFF} />)
+    await user.click(screen.getByRole('tab', { name: 'Health Summaries' }))
+    await screen.findByRole('img', { name: /clinic visits by complaint/i })
+
+    const options = (barMock.props as {
+      options?: {
+        animation?: { duration?: number; easing?: string } | false
+        transitions?: { active?: { animation?: { duration?: number; easing?: string } } }
+        plugins?: { tooltip?: { enabled?: boolean; external?: unknown } }
+      }
+    }).options
+    expect(options?.animation).toMatchObject({ duration: 280, easing: 'easeOutCubic' })
+    expect(options?.transitions?.active?.animation).toMatchObject({
+      duration: 160,
+      easing: 'easeOutCubic',
+    })
+    expect(options?.plugins?.tooltip).toMatchObject({ enabled: false })
+    expect(options?.plugins?.tooltip?.external).toEqual(expect.any(Function))
   })
 
   it('keeps both the chart and the table in the page so both print', async () => {

@@ -128,7 +128,7 @@ describe('TrendTable', () => {
     const parent = document.createElement('div')
     const canvas = document.createElement('canvas')
     const staleTooltip = document.createElement('div')
-    staleTooltip.dataset.trendTooltip = 'true'
+    staleTooltip.dataset.chartTooltip = 'true'
     staleTooltip.className = 'bg-brand-green-dark text-white'
     parent.append(canvas, staleTooltip)
     const externalTooltip = (lineMock.props as LineProps).options?.plugins?.tooltip?.external
