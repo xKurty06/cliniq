@@ -64,8 +64,8 @@ Some backend work can't wait for frontend to finish (auth, schema, audit trail) 
 ### Phase B0 — Environment & Scaffold
 Run the actual Laravel scaffold into `backend/` (commands in `Environment-Setup.md`). Install Sanctum. Confirm the target XAMPP install's PHP version before picking a Laravel version (Laravel 11+ needs PHP 8.2+ — a check, not an assumption). Set up the modular folder structure (`app/Modules/<Module>/`, `app/Shared/`) and its PSR-4 mapping in `composer.json` before any module code gets written — see `06-Decisions/ADR-009-Modular-Backend-Architecture.md`. Retrofitting this after B4+ have already scattered code into Laravel's default flat structure is real, avoidable rework.
 
-### Phase B1 — Database Schema — TBA
-**Don't guess a schema.** `02-Architecture/Database/ERD.md` is TBA — database design hasn't been finalized yet, and inferring one from the frontend-facing entity shapes isn't a substitute for the team actually designing it. Once the schema is decided, build migrations from it directly, consistent with the entity shapes already fixed in `CLINIQ_Frontend_Context_Brief.md` §5 (Student, User, Visit, Incident, FollowUp, InventoryItem, Report, BackupLog, AuditLogEntry) — those shapes are real commitments already made; the schema should match them, not reinvent them.
+### Phase B1 — Database Schema — Awaiting Design Approval
+**Don't guess or implement a schema.** [`ERD.md`](../02-Architecture/Database/ERD.md) is a proposed draft, not final or approved; it must be reviewed and approved before migrations begin. Inferring or extending it from the frontend-facing entity shapes is not a substitute for that team decision. Once the schema is approved, build migrations from it directly, consistent with the entity shapes already fixed in `CLINIQ_Frontend_Context_Brief.md` §5 (Student, User, Visit, Incident, FollowUp, InventoryItem, Report, BackupLog, AuditLogEntry) — those shapes are real commitments already made; the schema should match them, not reinvent them.
 
 See `04-Development/Backend-Readiness-Checklist.md` for the current pre-migration readiness checklist.
 

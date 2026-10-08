@@ -105,7 +105,7 @@ This category grew the most on the second pass. Three real options, not fully ov
 ```
 30+ Laravel-specific slash commands, actively maintained. The two most relevant to CLINIQ specifically:
 - **`/lc:security-audit`** — scans for SQL injection, XSS, mass-assignment, and exposed secrets, with a `--dry-run` fix preview. Given CLINIQ handles minors' health records under RA 10173, running this before every deploy is cheap insurance, not overkill.
-- **`/lc:consolidate-migrations`** and **`/lc:unused-columns`** — useful once the database is actually designed and migrations exist (`02-Architecture/Database/ERD.md` is TBA), for keeping schema history clean rather than accumulating cruft.
+- **`/lc:consolidate-migrations`** and **`/lc:unused-columns`** — useful once the proposed [`ERD.md`](../02-Architecture/Database/ERD.md) is approved and migrations exist; the draft is not final, so it must not be implemented yet. They keep schema history clean rather than accumulating cruft.
 
 ### Option B — `Foysal50x/skills` (from the first pass, still solid)
 ```

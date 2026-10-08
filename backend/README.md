@@ -27,6 +27,6 @@ A plain PSR-4 mapping in `composer.json` (`"App\\Modules\\": "app/Modules/"`) is
 Mapped to what's already designed:
 - Entity shapes (Student, User, Visit, Incident, FollowUp, InventoryItem, AuditLogEntry, etc.) — Frontend Context Brief, Section 5, has the authoritative shapes to match; land the `Models/` for each in its owning module's folder
 - Controllers — one per feature, inside `app/Modules/<Module>/Controllers/`, mirroring `frontend/src/features/`
-- `database/migrations/` — schema, once the database design is actually finalized (`CLINIQ-Knowledge-Base/02-Architecture/Database/ERD.md` is TBA — don't build against the entity list there directly, it's a frontend-facing reference, not a schema)
+- `database/migrations/` — schema, only after team approval of the [proposed ERD](../CLINIQ-Knowledge-Base/02-Architecture/Database/ERD.md); the draft is not final or approved, so do not build migrations from it yet
 - `routes/api.php` — all API routes, consumed by the frontend's `src/features/*/api/` folders
 - Auth via Sanctum (CLINIQ-Knowledge-Base/06-Decisions/ADR-007-Stack-Finalization.md)

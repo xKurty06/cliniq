@@ -43,7 +43,7 @@ is the file that becomes HTTP calls. Nothing above it has to change.
    `frontendOnly.visitComplaintTypes` / `incidentComplaintTypes`.
 4. **Keep ids readable and unique:** `student-0053`, `visit-0160`, `item-0015`, `user-staff-02`.
 5. **Shapes follow Frontend Context Brief §5** (`src/types/entities.ts`). This isn't a database
-   design; the ERD is TBA. Anything a screen needs that §5 doesn't define lives under
+   design; the [ERD](../../../../CLINIQ-Knowledge-Base/02-Architecture/Database/ERD.md) is a proposed draft, not final or approved. Anything a screen needs that §5 doesn't define lives under
    `frontendOnly` and is labelled mock-only. Don't add new top-level entities.
 6. **Thresholds live in `config`.** They're open product decisions, not requirements (ADR-014).
 7. Run the checks:

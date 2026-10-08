@@ -4,7 +4,7 @@ Verified Friday, October 09, 2026 — 00:11 PHT. Based on `main` at commit `4c3c
 
 ## Summary
 
-The backend is a blank slate, and the database design is still a frontend-facing entity list rather than a finalized schema, so a real ERD is needed. The frontend has already written much of the spec: the mock API, the entity types, the access matrix, and the ADRs.
+The backend is a blank slate. A [proposed ERD and data dictionary](../02-Architecture/Database/ERD.md) now exist, but they are not final or approved and must not be used for migrations. The frontend has already written much of the spec: the mock API, the entity types, the access matrix, and the ADRs.
 
 **Suggested order of work**
 
@@ -21,7 +21,7 @@ The backend is a blank slate, and the database design is still a frontend-facing
 | Area | Current state |
 |---|---|
 | `backend/` | Only a README and `.env.example`. Laravel is not scaffolded, and `Environment-Setup.md` still says "not yet executed". |
-| `ERD.md` | Says "TBA". It and Development-Phases B1 both say not to infer a schema from the frontend types. |
+| `ERD.md` | Proposed draft with a data dictionary and reference schema; it is not final or approved. Development-Phases B1 still prohibits migrations until team approval. |
 | Mock API (`api.ts`) | 64 functions, about 1,500 lines. It holds real business rules: stock integrity, excused-period checks, duplicate-student detection, next Student Number, incident stage rules. It is a working but unwritten API contract. |
 | Auth and roles | The access matrix covers the 11 numbered modules × 3 roles in `Module-Overview.md`, although its introduction and the NFR still say 10 modules. ADR-015 sets a 7-day session lifetime and lockout after 5 failed attempts for 30 minutes. |
 
@@ -29,7 +29,7 @@ The backend is a blank slate, and the database design is still a frontend-facing
 
 ## 2. Blockers: do these before any migration
 
-- [ ] **ERD and data dictionary.** This is the one real design step still missing. For each table, define columns, types, nullability, keys, unique constraints, indexes, and delete/archive behavior. Start from `types/entities.ts`, then settle every provisional field in one pass:
+- [ ] **ERD and data dictionary review/approval.** A proposed draft now exists; do not tick this item or build migrations until the team reviews and approves it. Before approval, settle every provisional field in one pass:
   - excuse-letter draft and approval fields (excused period, teacher note)
   - `Visit.referredTo`
   - `itemsGiven` lines (own table with the name and unit snapshot, not a JSON blob)
@@ -93,10 +93,10 @@ The backend is a blank slate, and the database design is still a frontend-facing
 1. **The plan has slipped.** The phase table says auth (B2) and audit (B3) should land before F2 gets far, but F2 is nearly complete on mocks. The mock auth hides how much the screens assume real login state, so do B2 and B3 first, before any module API.
 2. **Logic lives in two places for now.** `api.ts` has real business rules. The backend must copy them exactly, or the two will drift. Treat `api.ts` as the executable spec and port it function by function.
 3. **Doc drift.** The backend README names 9 feature modules (with AuditLog shared), the NFR says 10, and `Module-Overview` says 10 in its introduction while listing 11 numbered modules (including Audit Log Viewer). Fix this before creating the folder structure.
-4. **Don't build the ERD by hand alone.** Draft it as Mermaid in `ERD.md` (the diagrams are already Mermaid-validated), then review it against the 64 mock functions to catch missing columns.
+4. **Don't approve the ERD by inspection alone.** Review the proposed Mermaid diagrams in `ERD.md` against the 64 mock functions to catch missing columns.
 
 ---
 
 ## Next step
 
-A Claude Code prompt can produce the ERD draft and a full endpoint table from the repo, ready for team review.
+Team review of the proposed ERD and a full endpoint table from the repo are the next documentation steps before migrations.

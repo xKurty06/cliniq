@@ -4,7 +4,7 @@
     "purpose": "Seed data for the CLINIQ frontend mock layer (ADR-006, ADR-014). Hand-edit this file to change what every screen shows; see README.md next to it.",
     "dates": "All dates are relative to the injectable \"today\" in the data layer: {\"daysAgo\": n} or {\"daysFromNow\": n}, plus \"time\": \"HH:MM\" (Philippine time) for timestamps.",
     "derivedValues": "Only raw records live here. Counts, flags, statuses like low-stock / overdue / incomplete, and report contents are computed by selectors in src/lib/mock-db/. The integrity test fails if you store one.",
-    "schema": "Frontend-facing shapes from CLINIQ_Frontend_Context_Brief.md §5. This is NOT a database design; the ERD is TBA."
+    "schema": "Frontend-facing shapes from CLINIQ_Frontend_Context_Brief.md §5. This is NOT a database design; the ERD is a proposed draft, not final or approved."
   },
   "config": {
     "_note": "OPEN PRODUCT DECISIONS: none of these values is defined in the requirements. They are carried over from the Dashboard mock so screens have something to show. See ADR-014.",

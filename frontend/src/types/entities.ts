@@ -1,7 +1,7 @@
 /**
  * Shared data entities, following CLINIQ_Frontend_Context_Brief.md §5 ("Data Entities the Frontend
- * Should Expect"). These are the frontend's contract with the future Laravel API. The ERD is still
- * TBA (see 02-Architecture/Database/ERD.md), so where §5 names a field without giving it a shape,
+ * Should Expect"). These are the frontend's contract with the future Laravel API. The ERD is a
+ * proposed draft, not final or approved (see 02-Architecture/Database/ERD.md), so where §5 names a field without giving it a shape,
  * that field is marked PROVISIONAL below. Don't treat a PROVISIONAL field as a schema decision.
  */
 

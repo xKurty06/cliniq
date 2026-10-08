@@ -115,13 +115,15 @@
 - ~~Laravel Sanctum, Vite, and QR libraries~~ — confirmed September 25, 2026, after researching current maintenance/compatibility status. See `06-Decisions/ADR-007-Stack-Finalization.md` and `02-Architecture/Tech-Stack.md`.
 - ~~XAMPP standardization~~ — confirmed.
 - ~~Chart.js vs. Recharts~~ — Chart.js chosen, for bundle size and Canvas rendering given the 4GB RAM target.
-- ~~No DFD, Use-Case Diagram, or Activity Diagram~~ — built directly from already-documented requirements rather than waiting on an external upload; see `02-Architecture/Database/`. The ERD is separate and remains TBA (see Known gaps below) — those three don't commit to a database schema the way an ERD does, so they weren't reverted with it.
+- ~~No DFD, Use-Case Diagram, or Activity Diagram~~ — built directly from already-documented requirements rather than waiting on an external upload; see `02-Architecture/Database/`. The ERD is separate; a [proposed draft](../02-Architecture/Database/ERD.md) now exists but remains unapproved (see Known gaps below) — those three don't commit to a database schema the way an ERD does, so they were not affected by its review status.
 
 ## Known gaps
 
 - **Canonical Frontend Context Brief §5 needs the optional AuditLogEntry `summary` field** (Friday, October 2, 2026 — 00:28 PHT). ADR-017 added it (field names only, never values). ERD.md is updated; the canonical brief's AuditLogEntry line still lists only user / action / target / timestamp.
 
-- Database design (ERD) is TBA — not yet finalized, and shouldn't be inferred as a substitute for the team actually designing it. `02-Architecture/Database/ERD.md` lists the already-documented data entities as a reference point only.
+- **[Database-design draft](../02-Architecture/Database/ERD.md) exists, but is not final or approved.** It awaits team review; do not build migrations from it until the design is approved.
+- **Open database-design decisions before migrations.** The team must resolve `ERD.md` section 11 (D-01–D-18), including migration blockers: D-01 (audit-role snapshot; would amend ADR-017), D-02 (what QR “invalidate” means), D-03 (allergy/condition completeness), D-04 (Head Nurse), D-08 (freeze letters and reports), and D-17 (vitals as readings).
+- **Database-engine wording needs approval.** XAMPP ships MariaDB, but `Tech-Stack.md`, `Environment-Setup.md`, `System-Architecture.md`, and the canonical Project Plan say “MySQL.” Proposed wording: “MariaDB (XAMPP), MySQL-compatible.” Do not change those documents until approved; then update the canonical Project Plan too, as required by `09-References/Canonical-Documents.md`.
 - Frontend mock implementation is now substantially built through the F2 screen set; Laravel API integration, database schema, and production authentication remain future backend work.
 
 ## Reported UI/UX follow-ups — Monday, September 28, 2026 — 08:17
