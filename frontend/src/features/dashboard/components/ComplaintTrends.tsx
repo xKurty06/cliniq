@@ -1,6 +1,6 @@
 import '../../../components/charts/chartSetup'
 import type { Chart, ChartOptions, Plugin, ScriptableContext } from 'chart.js'
-import { useId, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { Line } from 'react-chartjs-2'
 import {
   Card,
@@ -42,6 +42,24 @@ type ViewMode = 'chart' | 'table'
 const MAX_VISIBLE_TABLE_PERIODS = 12
 const PERIOD_COLUMN_WIDTH = '5rem'
 const TOTAL_COLUMN_WIDTH = '5rem'
+
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+  )
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    if (!mediaQuery) return
+
+    const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches)
+    updatePreference()
+    mediaQuery.addEventListener('change', updatePreference)
+    return () => mediaQuery.removeEventListener('change', updatePreference)
+  }, [])
+
+  return prefersReducedMotion
+}
 
 function bucketName(bucket: TrendBucket, granularity: TrendGranularity): string {
   if (granularity === 'day') return formatDate(bucket.from)
@@ -144,7 +162,9 @@ function bucketTotals(trends: Trends): number[] {
 }
 
 function TrendLineChart({ trends, clusters }: { trends: Trends; clusters: ClusterNote[] }) {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const totals = bucketTotals(trends)
+  const showEveryCountGridline = Math.max(0, ...totals) <= 12
   const clusterIdx = [...new Set(clusters.map((c) => c.bucketIndex))]
   const green = colorToken('brand-green')
   const warning = colorToken('warning')
@@ -173,7 +193,7 @@ function TrendLineChart({ trends, clusters }: { trends: Trends; clusters: Cluste
         fill: 'origin' as const,
         tension: 0.3,
         pointRadius: totals.map((_, i) => (isCluster(i) ? 6 : 3.5)),
-        pointHoverRadius: 7,
+        pointHoverRadius: totals.map((_, i) => (isCluster(i) ? 9 : 7)),
         pointHitRadius: 14,
         pointBackgroundColor: totals.map((_, i) => (isCluster(i) ? warning : green)),
         pointBorderColor: surface,
@@ -186,7 +206,14 @@ function TrendLineChart({ trends, clusters }: { trends: Trends; clusters: Cluste
     responsive: true,
     maintainAspectRatio: false,
     layout: { padding: { top: 28, right: 8 } },
-    interaction: { mode: 'index', intersect: false },
+    animation: prefersReducedMotion ? false : { duration: 280, easing: 'easeOutCubic' },
+    animations: prefersReducedMotion
+      ? undefined
+      : { radius: { duration: 160, easing: 'easeOutCubic' } },
+    transitions: {
+      active: { animation: { duration: prefersReducedMotion ? 0 : 160, easing: 'easeOutCubic' } },
+    },
+    interaction: { mode: 'index', axis: 'x', intersect: false },
     scales: {
       x: {
         grid: { display: false },
@@ -197,13 +224,54 @@ function TrendLineChart({ trends, clusters }: { trends: Trends; clusters: Cluste
         beginAtZero: true,
         grid: { color: grid },
         border: { display: false },
-        ticks: { color: tick, precision: 0, maxTicksLimit: 5 },
+        ticks: {
+          color: tick,
+          precision: 0,
+          ...(showEveryCountGridline ? { stepSize: 1, maxTicksLimit: 13 } : { maxTicksLimit: 5 }),
+        },
       },
     },
     plugins: {
       legend: { display: false },
       tooltip: {
+        enabled: false,
         displayColors: false,
+        external: ({ chart, tooltip }) => {
+          const parent = chart.canvas.parentElement
+          if (!parent) return
+
+          const tooltipClasses =
+            'pointer-events-none absolute top-0 left-0 z-10 max-w-56 rounded-md border border-border bg-background px-3 py-2 text-xs text-text-primary shadow-card transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none'
+          let tooltipElement = parent.querySelector<HTMLDivElement>('[data-trend-tooltip]')
+          if (!tooltipElement) {
+            tooltipElement = document.createElement('div')
+            tooltipElement.dataset.trendTooltip = 'true'
+            tooltipElement.setAttribute('aria-hidden', 'true')
+            parent.append(tooltipElement)
+          }
+          tooltipElement.className = tooltipClasses
+
+          const x = chart.canvas.offsetLeft + tooltip.caretX
+          const y = chart.canvas.offsetTop + tooltip.caretY
+          const transform = (offset: string, scale: string) =>
+            `translate3d(${x}px, ${y}px, 0) translate(-50%, ${offset}) scale(${scale})`
+
+          if (tooltip.opacity === 0) {
+            tooltipElement.style.opacity = '0'
+            tooltipElement.style.transform = transform('calc(-100% - 4px)', '0.96')
+            return
+          }
+
+          const title = document.createElement('p')
+          title.className = 'font-semibold'
+          title.textContent = tooltip.title.join(' ')
+          const body = document.createElement('p')
+          body.className = 'mt-0.5 text-text-secondary'
+          body.textContent = tooltip.body.flatMap((item) => item.lines).join(' · ')
+          tooltipElement.replaceChildren(title, body)
+          tooltipElement.style.opacity = '1'
+          tooltipElement.style.transform = transform('calc(-100% - 10px)', '1')
+        },
         callbacks: {
           title: (items) => bucketName(trends.buckets[items[0].dataIndex], trends.granularity),
           label: (item) => `${item.parsed.y} visits and incidents`,

@@ -4,8 +4,40 @@ import { describe, expect, it, vi } from 'vitest'
 import { ComplaintTrends, TrendTable } from './ComplaintTrends'
 import type { ComplaintTrends as ComplaintTrendsData, TrendBucket } from '../../../types/dashboard'
 
+interface LineProps {
+  'aria-label'?: string
+  data?: { datasets?: Array<{ pointHoverRadius?: number | number[] }> }
+  options?: {
+    animation?: false | { duration?: number; easing?: string }
+    animations?: false | { radius?: { duration?: number; easing?: string } }
+    transitions?: { active?: { animation?: { duration?: number; easing?: string } } }
+    interaction?: { mode?: string; axis?: string; intersect?: boolean }
+    scales?: { y?: { ticks?: { stepSize?: number; maxTicksLimit?: number } } }
+    plugins?: {
+      tooltip?: {
+        enabled?: boolean
+        external?: (context: {
+          chart: { canvas: HTMLCanvasElement }
+          tooltip: {
+            caretX: number
+            caretY: number
+            opacity: number
+            title: string[]
+            body: Array<{ lines: string[] }>
+          }
+        }) => void
+      }
+    }
+  }
+}
+
+const lineMock = vi.hoisted(() => ({ props: undefined as unknown }))
+
 vi.mock('react-chartjs-2', () => ({
-  Line: (props: { 'aria-label'?: string }) => <div role="img" aria-label={props['aria-label']} />,
+  Line: (props: LineProps) => {
+    lineMock.props = props
+    return <div role="img" aria-label={props['aria-label']} />
+  },
 }))
 
 const buckets: TrendBucket[] = Array.from({ length: 14 }, (_, index) => {
@@ -67,6 +99,53 @@ describe('TrendTable', () => {
       expect(screen.queryByRole('radio', { name })).not.toBeInTheDocument()
     }
     expect(screen.getByRole('radiogroup', { name: 'Show trend as' })).toBeInTheDocument()
+  })
+
+  it('uses brief, smooth chart and hover transitions', () => {
+    render(<ComplaintTrends trends={trends} />)
+
+    const lineProps = lineMock.props as LineProps
+    expect(lineProps.options?.animation).toMatchObject({ duration: 280, easing: 'easeOutCubic' })
+    expect(lineProps.options?.animations).toMatchObject({
+      radius: { duration: 160, easing: 'easeOutCubic' },
+    })
+    expect(lineProps.options?.transitions?.active?.animation).toMatchObject({
+      duration: 160,
+      easing: 'easeOutCubic',
+    })
+    expect(lineProps.options?.plugins?.tooltip).toMatchObject({ enabled: false })
+    expect(lineProps.options?.plugins?.tooltip?.external).toEqual(expect.any(Function))
+    expect(lineProps.options?.interaction).toMatchObject({ mode: 'index', axis: 'x', intersect: false })
+    expect(lineProps.options?.scales?.y?.ticks).toMatchObject({ stepSize: 1, maxTicksLimit: 13 })
+    expect(lineProps.data?.datasets?.[0].pointHoverRadius).toEqual(
+      trends.buckets.map(() => 7),
+    )
+  })
+
+  it('refreshes an existing tooltip to the white panel surface', () => {
+    render(<ComplaintTrends trends={trends} />)
+
+    const parent = document.createElement('div')
+    const canvas = document.createElement('canvas')
+    const staleTooltip = document.createElement('div')
+    staleTooltip.dataset.trendTooltip = 'true'
+    staleTooltip.className = 'bg-brand-green-dark text-white'
+    parent.append(canvas, staleTooltip)
+    const externalTooltip = (lineMock.props as LineProps).options?.plugins?.tooltip?.external
+
+    externalTooltip?.({
+      chart: { canvas },
+      tooltip: {
+        caretX: 12,
+        caretY: 24,
+        opacity: 1,
+        title: ['Oct 6, 2026'],
+        body: [{ lines: ['6 visits and incidents'] }],
+      },
+    })
+
+    expect(staleTooltip).toHaveClass('bg-background', 'text-text-primary')
+    expect(staleTooltip).not.toHaveClass('bg-brand-green-dark', 'text-white')
   })
 
   it('does not keep the Visits trend header sticky while the page scrolls', () => {
