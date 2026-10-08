@@ -69,6 +69,13 @@ describe('TrendTable', () => {
     expect(screen.getByRole('radiogroup', { name: 'Show trend as' })).toBeInTheDocument()
   })
 
+  it('does not keep the Visits trend header sticky while the page scrolls', () => {
+    render(<ComplaintTrends trends={trends} />)
+
+    const heading = screen.getByRole('heading', { name: 'Visits trend · 2026' })
+    expect(heading.parentElement?.parentElement).not.toHaveClass('sticky')
+  })
+
   it('keeps Chart selectable when a range has one period', async () => {
     const user = userEvent.setup()
     const singlePeriod: ComplaintTrendsData = {

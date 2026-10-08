@@ -388,7 +388,6 @@ function VisitsTrendCard({
           )
         }
         description={`Visits and incidents per ${trends.granularity}.`}
-        className="sticky top-16 z-[25] rounded-t-lg bg-background"
         actions={
           <SegmentedControl
             label="Show trend as"
