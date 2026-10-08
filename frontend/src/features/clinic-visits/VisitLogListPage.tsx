@@ -17,8 +17,9 @@ import {
   type BadgeTone,
   type DataTableColumn,
 } from '../../components'
-import { Link, useSearchParams } from 'react-router'
+import { Link } from 'react-router'
 import { useAsyncData } from '../../hooks/useAsyncData'
+import { useDateRangeEntryParams } from '../../hooks/useDateRangeEntryParams'
 import { formatDateTime } from '../../lib/dates'
 import { describeRange, type DateRange } from '../../lib/dateRange'
 import { sortTableRows, toggleTableSort, type TableSortState } from '../../lib/tableSort'
@@ -73,17 +74,10 @@ function VisitLogSkeleton() {
 }
 
 export function VisitLogListPage() {
-  const defaultRange = defaultVisitLogRange()
-  const [searchParams] = useSearchParams()
-  // `?from=&to=` (e.g. the Dashboard calendar's "View visits") opens the list on that custom range.
-  const [range, setRange] = useState<DateRange>(() => {
-    const from = searchParams.get('from') ?? ''
-    const to = searchParams.get('to') ?? ''
-    const isDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
-    return isDate(from) && isDate(to) && from <= to
-      ? { preset: 'custom', from, to }
-      : { preset: 'all', ...defaultRange }
-  })
+  const defaultRange: DateRange = { preset: 'all', ...defaultVisitLogRange() }
+  const { initialRange, clearDateParams } = useDateRangeEntryParams(defaultRange)
+  // `?from=&to=` (e.g. the Dashboard calendar's "View visits") applies only on arrival.
+  const [range, setRange] = useState<DateRange>(initialRange)
   const [search, setSearch] = useState('')
   const [disposition, setDisposition] = useState<DispositionFilter>('all')
   const [sort, setSort] = useState<TableSortState<VisitLogSortKey>>({ key: 'dateTime', direction: 'descending' })
@@ -98,6 +92,7 @@ export function VisitLogListPage() {
   // empty later page (cliniq-pagination-patterns).
   function changeRange(next: DateRange) {
     setRange(next)
+    clearDateParams()
     setPage(1)
   }
   function changeSearch(next: string) {

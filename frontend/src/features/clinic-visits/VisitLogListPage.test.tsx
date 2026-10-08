@@ -1,8 +1,9 @@
 import { pickDate } from '../../test/pickDate'
 import { renderWithRouter } from '../../test/renderWithRouter'
-import { screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
+import { createMemoryRouter, RouterProvider } from 'react-router'
 import { VisitLogListPage } from './VisitLogListPage'
 import { defaultVisitLogRange, fetchVisitLog } from './api/visitLogApi'
 
@@ -23,6 +24,61 @@ describe('Visit Log', () => {
     await waitFor(() =>
       expect(screen.getAllByRole('row')).toHaveLength(Math.min(onDay.length, 10) + 1),
     )
+  })
+
+  it.each([
+    ['/visits?from=2026-02-30&to=2026-03-01', 'an invalid date'],
+    ['/visits?from=2026-03-01', 'a partial range'],
+  ])('falls back to All for %s (%s)', async (route) => {
+    renderWithRouter(<VisitLogListPage />, { route })
+
+    expect(await screen.findByRole('button', { name: 'Date range' })).toHaveTextContent('All')
+  })
+
+  it('clears entry date params with replace navigation while preserving other parameters', async () => {
+    const user = userEvent.setup()
+    const router = createMemoryRouter(
+      [{ path: '*', element: <VisitLogListPage /> }],
+      {
+        initialEntries: ['/dashboard', '/visits?from=2026-03-01&to=2026-03-02&mock=slow&source=calendar'],
+        initialIndex: 1,
+      },
+    )
+    render(<RouterProvider router={router} />)
+
+    await screen.findByRole('heading', { name: 'Visit Log' })
+    await user.click(screen.getByRole('button', { name: 'Date range' }))
+    await user.click(screen.getByRole('option', { name: 'Today' }))
+
+    await waitFor(() => {
+      const params = new URLSearchParams(router.state.location.search)
+      expect(params.has('from')).toBe(false)
+      expect(params.has('to')).toBe(false)
+      expect(params.get('mock')).toBe('slow')
+      expect(params.get('source')).toBe('calendar')
+    })
+
+    // If changing the range had pushed a new history entry, Back would reopen the stale deep link.
+    await router.navigate(-1)
+    expect(router.state.location.pathname).toBe('/dashboard')
+  })
+
+  it('uses the default range when remounted at the cleared URL', async () => {
+    const user = userEvent.setup()
+    const router = createMemoryRouter(
+      [{ path: '*', element: <VisitLogListPage /> }],
+      { initialEntries: ['/visits?from=2026-03-01&to=2026-03-02'] },
+    )
+    const view = render(<RouterProvider router={router} />)
+
+    await screen.findByRole('heading', { name: 'Visit Log' })
+    await user.click(screen.getByRole('button', { name: 'Date range' }))
+    await user.click(screen.getByRole('option', { name: 'All' }))
+    await waitFor(() => expect(router.state.location.search).toBe(''))
+
+    view.unmount()
+    renderWithRouter(<VisitLogListPage />, { route: router.state.location.pathname })
+    expect(await screen.findByRole('button', { name: 'Date range' })).toHaveTextContent('All')
   })
 
   it('renders a privacy-safe multi-student visit list with the complaint visible (ADR-010)', async () => {

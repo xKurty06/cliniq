@@ -27,3 +27,12 @@
 - **The production web server must fall back to `index.html`** for unknown non-API paths, or deep links and refreshes will 404. Logged in `08-Logs/Issues-and-TODOs.md`.
 - The mock-session `?role=` preview is kept per browser tab (sessionStorage), so in-app navigation doesn't silently reset the previewed role. It is removed with the mock session when Sanctum lands.
 - **Canonical documents need updating:** the Project Plan's tech-stack section and the Frontend Context Brief don't name a routing library. Add React Router and the path-based convention there so the vault and canonical docs don't drift (see `09-References/Canonical-Documents.md`).
+
+## Clarification — Thursday, October 8, 2026 — 02:15 PHT
+
+`from` and `to` on the Visit Log are the exception to the general query-as-screen-state rule. They
+are one-time **entry filters** produced by the Dashboard calendar's “View visits” link: valid values
+set the initial custom range and remain reloadable until the user changes the range in the Visit Log.
+That in-screen change clears only `from` and `to` with replace navigation, preserving unrelated
+parameters and keeping Back directed to the previous screen. No search, sort, page, or disposition
+state is placed in the URL.
