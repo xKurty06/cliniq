@@ -36,6 +36,9 @@ The architecture area explains how the browser app, clinic service, and database
 - [Plain-language technology summary](./CLINIQ-Knowledge-Base/02-Architecture/Tech-Stack-Summary.md) — a short explanation of the browser app, server, database, local network, QR support, charts, routing, and shared data-loading approach.
 - [Tech Stack](./CLINIQ-Knowledge-Base/02-Architecture/Tech-Stack.md) — the confirmed technology choices and the specific compatibility, maintenance, and low-spec-workstation reasons for each.
 - [System Architecture](./CLINIQ-Knowledge-Base/02-Architecture/System-Architecture.md) — the three-tier React, Laravel, and MySQL arrangement, local deployment path, future cloud path, and matching frontend and backend module organization.
+- [Entity-Relationship Diagram](./CLINIQ-Knowledge-Base/02-Architecture/Database/ERD.md) — the proposed 34-table design for student records, visits, emergency response, inventory, access, and operations; it is a draft, not final or approved, and its 18 open decisions must be settled before migrations can begin.
+- [Data Dictionary](./CLINIQ-Knowledge-Base/02-Architecture/Database/Data-Dictionary.md) — the column-by-column reference for the same proposed database-design draft.
+- [Reference Schema](./CLINIQ-Knowledge-Base/02-Architecture/Database/Reference-Schema.sql) — the review-only reference DDL for the draft, not a migration; migrations stay blocked until the team approves the design.
 - [Development Methodology](./CLINIQ-Knowledge-Base/02-Architecture/Development-Methodology.md) — the iterative, phase-gated approach and the decision to show interface prototypes to the client before completing supporting system work.
 
 ## Key Decisions

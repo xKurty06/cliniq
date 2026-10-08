@@ -167,7 +167,7 @@ Frontend and backend are built as two coordinated tracks — frontend leads (per
 | Track | Phases |
 |---|---|
 | 🎨 **Frontend** | `F0` Setup & design tokens → `F1` 5 reference screens → `F2` every remaining screen, module by module → `F3` polish & accessibility |
-| ⚙️ **Backend** | `B0` Scaffold → `B1` Database schema *(TBA — not yet designed)* → `B2` Auth/RBAC → `B3` Audit trail → `B4`–`B10` one phase per module |
+| ⚙️ **Backend** | `B0` Scaffold → `B1` Database schema *(a [proposed draft](./CLINIQ-Knowledge-Base/02-Architecture/Database/ERD.md), not final or approved — awaiting team approval)* → `B2` Auth/RBAC → `B3` Audit trail → `B4`–`B10` one phase per module |
 
 Full phase-by-phase detail, dependencies, and the two decisions still blocking Phase F0: [`CLINIQ-Knowledge-Base/04-Development/Development-Phases.md`](./CLINIQ-Knowledge-Base/04-Development/Development-Phases.md)
 
