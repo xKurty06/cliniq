@@ -89,7 +89,7 @@ The frontend runs using its mock data. You do not need to start the backend, PHP
 
 ## 7. Run it again on a later day
 
-After the first-time setup, open PowerShell in the `frontend` folder and run:
+After the first-time setup, open VSCode and make sure the cliniq project is opened, then run the following command:
 
 ```powershell
 npm run dev
