@@ -40,7 +40,7 @@ In PowerShell, go to the folder where you want the project stored, then clone it
 
 ```powershell
 cd $HOME\Documents
-git clone https://github.com/xKurty06/cliniq.git
+git clone https://github.com/zekuuu/cliniq.git
 cd cliniq
 ```
 
